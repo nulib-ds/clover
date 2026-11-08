@@ -113,7 +113,8 @@ test("speaks a French visitor's French on an English page, and offers the page's
   const next = page.getByRole("button", { name: "Suivant" });
   await expect(next).toBeVisible();
   await expect(next).toHaveAttribute("lang", "fr");
-  const choice = page.getByRole("group", { name: "Langue de l’interface" });
+  // About's one language toggle (`readingLanguage`), offering the page's English too.
+  const choice = page.getByRole("group", { name: "Langue", exact: true });
   await expect(choice.getByRole("radio")).toHaveCount(2);
   await choice.getByText("EN", { exact: true }).click();
   await expect(page.getByRole("button", { name: "Next" })).toBeVisible();

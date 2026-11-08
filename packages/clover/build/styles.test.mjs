@@ -379,7 +379,7 @@ test("no part sheet reads a custom property only another part's sets", () => {
 
 test("Styling's table lists every part sheet", () => {
   const styling = readFileSync(
-    resolve(root, "../../content/docs/styling.mdx"),
+    resolve(root, "../../content/docs/styling/index.mdx"),
     "utf8",
   );
   const listed = [...styling.matchAll(/^\| `styles\/([\w-]+)\.css`/gm)].map(

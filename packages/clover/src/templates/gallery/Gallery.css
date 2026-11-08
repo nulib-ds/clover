@@ -58,9 +58,10 @@
 }
 
 /*
- * The cells: the inset apart unless `gap` says otherwise (Items sets its gap on its own
- * class, so it is set there). Each label is shown whole (Mat, 2026-10-30: no pop-out over
- * a cut-off one): with nothing cut short, none is needed and nothing is lost to a reader.
+ * The cells: the inset apart unless `gap` says otherwise, set on Items itself, over any
+ * `--clover-items-gap` around the Gallery. Each label is shown whole (Mat, 2026-10-30: no
+ * pop-out over a cut-off one): with nothing cut short, none is needed and nothing is lost
+ * to a reader.
  */
 .clover-template-gallery .clover-items {
   --clover-items-gap: var(--clover-template-gallery-gap, var(--clover-inset));

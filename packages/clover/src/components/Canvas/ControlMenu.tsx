@@ -88,7 +88,7 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
       onClose(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
+      if (event.key !== "Escape" || event.defaultPrevented) return;
       // Escape in the menu, or on its control, hands focus back to the control. From
       // anywhere else it only closes the menu, leaving focus where the reader is.
       const active = document.activeElement;

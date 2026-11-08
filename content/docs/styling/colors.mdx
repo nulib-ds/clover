@@ -1,0 +1,103 @@
+---
+title: Colors
+description: "Set Clover's colors and check each contrast live on a Viewer in your palette, with a checklist, high contrast for light accents, and dos and don'ts."
+---
+
+import { Checklist } from "docs/components/Checklist";
+import { ContrastGuide } from "docs/components/ContrastGuide";
+
+# Colors
+
+<div className="docs-lede">
+  Clover's colors are [custom properties](/docs/styling/variables#colors) your
+  page can set. Try yours below, and watch each contrast pass or fail.
+</div>
+
+## Contrast guide
+
+Pick a palette, change any color, and copy the CSS the guide writes. Text requires 4.5:1
+(WCAG 1.4.3), and so do the round controls' glyphs, since Exit full screen's label shares
+their colors. Rings and the marks of a state require 3:1 (1.4.11).
+
+<ContrastGuide />
+
+## Setting colors
+
+Each color is a custom property named `--clover-color-` plus its name in the guide.
+[Variables](/docs/styling/variables#colors) lists each with its default.
+
+```css
+.my-layout {
+  --clover-color-accent: #4e2a84;
+  --clover-color-secondary: #fafafa;
+}
+```
+
+The round controls keep their dark fill (`control`) and white glyphs (`control-glyph`) in
+a dark mode, since they sit over the picture.
+
+The media player's colors are
+[`--clover-player-*`](/docs/styling/variables#the-media-player), and the Canvas's
+background is [`--clover-canvas-background`](/docs/styling/variables#the-body).
+
+## Checklist
+
+Clover's default colors meet WCAG 2.2 AA (open gaps are in
+[ACCESSIBILITY.md](https://github.com/nulib-ds/clover/blob/main/ACCESSIBILITY.md)). Yours
+are up to you: check them here, and again for a dark mode.
+
+<Checklist
+  items={[
+    "Text is 4.5:1: `primary`, `primary-muted` and `accent-text` on `secondary` and on `secondary-muted`.",
+    "A popover’s quieter words, `secondary-alt` on `primary`, are 4.5:1.",
+    "Search’s placeholder, `primary` 65% into `secondary`, is 4.5:1 on `secondary`.",
+    "Rings and the marks of a state are 3:1: `accent` against `secondary`.",
+    "The round controls’ glyphs are 4.5:1: `control-glyph` on `control`, and on `accent`, their fill under the pointer.",
+    "An accent that can’t carry `control-glyph` at 4.5:1 takes `highContrast`, then needs 3:1 against `secondary`, as a ring.",
+    "Over a picture, `primary` and `secondary` are 9:1 apart, so one of them keeps 3:1 against any picture.",
+    "A dark mode passes every check above with its own colors.",
+  ]}
+/>
+
+## High contrast
+
+An accent too light to carry white text at 4.5:1, such as an orange, a yellow or a light
+blue, can still be yours. Set `highContrast` on the `Viewer`, the `Root`, or a component
+that stands alone:
+
+```jsx
+<Viewer iiifContent={url} highContrast />
+```
+
+The accent then goes only where nothing is read on it: rings, outlines, the line under an
+open heading, the marks of a state. Where it would fill behind a glyph or words, the round
+controls' dark fill stands in: `control-glyph` on `control`. Under the pointer, the accent
+rings the control at half strength, 1px clear, as Items rings an item, and in full once
+it's chosen (the language read, a menu open). Focus keeps its own ring. Text in the
+accent is your [`accent-text`](/docs/styling/variables#colors) if you set one, else the
+text's own color.
+
+Clover turns high contrast on wherever the system asks for more contrast
+(`prefers-contrast: more`), whatever your page sets.
+
+## Do
+
+- Set [`secondary`](/docs/styling/variables#colors) to your page's background: most
+  components paint no ground of their own, so Clover's text sits on your page.
+- Size your page in `rem` or `%`, never pixels on its root, so Clover
+  [follows the browser's text size](/docs/styling/fonts#your-pages-size).
+- Give a dark mode a lighter `accent-text`, and keep `accent` for rings and fills.
+- When you [restyle a state](/docs/styling/classes#classes-and-states), keep a second
+  sign beside the accent, as Clover does: a bold label, an underline, a second ring.
+- Measure what your page shows, and never round a ratio up: 4.49:1 fails.
+
+## Don't
+
+- Don't mark a state with the accent alone (WCAG 1.4.1).
+- Don't swap `control` and `control-glyph` for a dark mode.
+- Don't let a reset take the markers off Clover's lists, or
+  [put them back](/docs/styling/classes#lists-in-markdown-text).
+- Don't bring back [the Body's motion](/docs/styling/variables#the-body) where the system
+  asks for reduced motion.
+- Don't set a `--clover-*` property that [Variables](/docs/styling/variables) doesn't
+  list: Clover sets those itself.

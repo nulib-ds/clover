@@ -5,8 +5,8 @@
  *
  * Space steps down by adjacency: the more closely two things belong together, the
  * smaller the step between them. A container's inset is one step larger than the gap
- * between the things it holds (a region is `l` inside, its parts `m` apart; a cluster
- * sits `m` in from the Body's edge, its buttons `s` apart).
+ * between the things it holds (a region is `l` inside, its parts `m` apart, what is
+ * within a part `s`).
  *
  * Text is the page's 1rem plus or minus a space step: the golden cuts around the page's
  * size, `3xs` and `2xs` either side. These four and the page's own size are the only
@@ -27,15 +27,17 @@
   --clover-text-s: 0.854rem;
   /* 1 + 3xs: a section's heading. */
   --clover-text-m: 1.146rem;
-  /* 1 + 2xs: a layout's title. */
+  /* 1 + 2xs: an error's headline, a sound Canvas's label, captions in a wide Body. */
   --clover-text-l: 1.236rem;
   /* A control: a 1rem icon with `s` around it. */
   --clover-control: calc(1rem + 2 * var(--clover-space-s));
   /*
    * A region's inset, from its edge to its content: a layout's header and thumbnail
-   * strip, the information panel, the picture in the Body at home. Everything inside a
-   * region steps down from it, a step a level: its parts `m` apart, what is within a part
-   * `s`, a label over its value `xs`.
+   * strip, the information panel, the Gallery and its lightbox, Document's picture at
+   * home. The Body's controls sit as far in from its edges (`Canvas.css`). Everything
+   * inside a region steps down from it, a step a level: its parts `m` apart (Default's
+   * header and Document's toolbar `s`), what is within a part `s`, a thumbnail over its
+   * label `xs`.
    */
   --clover-inset: var(--clover-space-l);
   /*
@@ -48,12 +50,13 @@
 /*
  * Every title Clover draws, a resource's or a part's own (`clover-title`, beside its own
  * class: every template's, the Gallery lightbox's, Items' standalone title, the
- * Collection's, About's label), is a heading at the level its `headingLevel` gives it,
- * and takes the page's styling for that level (`DESIGN.md` §1, "Headings are the
- * page's"): its size is never Clover's (Mat, 2026-11-01: "leave size to the page"), and
- * its weight regular (`--clover-title-weight`), its lines closer than running text's and
- * wrapped anywhere a word runs past the line (WCAG 1.4.10, 1.4.12), all with no
- * specificity, so the page's own rule for that level, or for the class, wins.
+ * Collection's, a content state's in the Views section, About's label), is a heading at
+ * the level its `headingLevel` gives it, and takes the page's styling for that level
+ * (`DESIGN.md` §1, "Headings are the page's"): its size is never Clover's (Mat,
+ * 2026-11-01: "leave size to the page"), and its weight regular
+ * (`--clover-title-weight`), its lines closer than running text's and wrapped anywhere
+ * a word runs past the line (WCAG 1.4.10, 1.4.12), all with no specificity, so the
+ * page's own rule for that level, or for the class, wins.
  */
 :where(.clover-title) {
   margin: 0;

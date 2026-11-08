@@ -236,7 +236,7 @@ test("annotations as the content open their first Manifest, and a press another'
 /*
  * Cookbook 0022: the fountain's hotspot links to the Manifest's other Canvas, its
  * close-up. Pressing it goes there, focus moving to the Canvas; so does the entry's
- * "Open the link" in the list.
+ * "Open" in the list (its name since 4.5.6).
  */
 test("a linking hotspot, and its entry's link, go to the Canvas it links to", async ({
   page,
@@ -258,7 +258,7 @@ test("a linking hotspot, and its entry's link, go to the Canvas it links to", as
 
   await page.getByRole("option", { name: /Item 1 of 2/ }).click();
   await page.getByRole("button", { name: "Annotations" }).last().click();
-  await page.getByRole("button", { name: "Open the link" }).click();
+  await page.getByRole("button", { name: "Open", exact: true }).click();
   await expect(second).toHaveAttribute("aria-selected", "true");
   await expect(page.getByTestId("clover-canvas-viewport")).toBeFocused();
 });

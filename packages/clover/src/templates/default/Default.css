@@ -1,12 +1,14 @@
 /*
- * Default, the Viewer's own layout: Clover 3.x's Viewer. Title and actions over the Body;
- * the thumbnail strip under the Body, headed by the view's page titles and the position;
- * the information panel to the right of all three, the layout's full height.
+ * Default, the Viewer's own layout: Clover 3.x's Viewer. The title, its pagers and the
+ * provider's logo over the Body; the thumbnail strip under the Body, headed by the view's
+ * page titles and the position; the information panel to the right of all three, the
+ * layout's full height.
  *
- * On the scale: the header, the strip, the panel and the picture are regions, each
- * `--clover-inset` (`l`) inside all round (their own space, so nothing around them needs
- * a margin); a region's parts `m` apart (the header's title and actions, the strip's
- * header and thumbnails); the strip's titles and position, within its header, `s`.
+ * On the scale: the header, the strip and the panel are regions, each `--clover-inset`
+ * (`l`) inside all round (their own space, so nothing around them needs a margin). The
+ * header's parts, its title, pagers and logo, are `s` apart; the strip's header is `m`
+ * over its thumbnails, and its titles and position, within its header, `s` apart. The
+ * picture fills the Body (`Canvas.css`).
  */
 .clover-template-default {
   --clover-body-height: min(65vh, 40rem);

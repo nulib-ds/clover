@@ -24,6 +24,8 @@
  *   &navigator=1                           (composed) show the Canvas's navigator
  *   &content=<url or content state>        its iiifContent
  *   &css=0                                 leave the stylesheet out (the plain layout)
+ *   &css=base|spacing                      base.css alone, or base.css then spacing.css
+ *                                          (`build/tiers.mjs`), in place of styles.css
  *   &headers=1                             send `X-Clover: e2e` and credentials
  *   &panel=tabs|accordion                  the information panel's sections as tabs or boxes
  *   &debug=1                               a fixed readout of the media element and the
@@ -363,8 +365,21 @@ function DebugReadout() {
 // Which React runs the harness, for the React 19 run to check it really is 19.
 document.documentElement.dataset.react = React.version;
 
+/** A tier of Clover's stylesheet (`build/tiers.mjs`), derived from the source as it is. */
+function addTier(css: string) {
+  const style = document.createElement("style");
+  style.textContent = `@layer clover{${css}}`;
+  document.head.append(style);
+}
+
 async function start() {
-  if (params.get("css") !== "0") {
+  const css = params.get("css");
+  if (css === "base" || css === "spacing") {
+    const tiers = (await import("virtual:clover-tiers")).default;
+    addTier(tiers.base);
+    if (css === "spacing") addTier(tiers.spacing);
+    await import("maplibre-gl/dist/maplibre-gl.css");
+  } else if (css !== "0") {
     await import("../../src/styles/clover.css");
     await import("../../src/templates/templates.css");
     await import("maplibre-gl/dist/maplibre-gl.css");

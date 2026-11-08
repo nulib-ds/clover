@@ -48,7 +48,7 @@ function measureAll() {
 
 /** Escape over or in an item whose full title shows: hidden until the reader comes back. */
 function hideFull(event: KeyboardEvent) {
-  if (event.key !== "Escape") return;
+  if (event.key !== "Escape" || event.defaultPrevented) return;
   const items = new Set<HTMLElement>();
   const focused = (document.activeElement as HTMLElement | null)?.closest?.(
     ITEM,

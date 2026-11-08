@@ -1,0 +1,12 @@
+/*
+ * The frame of the Styling page's stylesheet example (`StylesheetExample`): the page it
+ * holds fills it (`fill`), so the Viewer is as tall as the frame and never scrolls in it.
+ * As tall as the Default template's Body at most (40rem) and its header and thumbnails,
+ * and never taller than most windows.
+ */
+.frame {
+  display: block;
+  width: 100%;
+  height: min(48rem, 85svh);
+  border: 0;
+}

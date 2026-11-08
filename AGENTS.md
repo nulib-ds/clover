@@ -134,16 +134,86 @@ deadline.
     Composing pages opens with its imports, in both flavors (Mat, 2026-11-04: "include
     imports on all examples"; the web components' a module script of
     `@nulib/clover/web-components`), and a layout of your own takes the resource as
-    `iiifContent` (`iiif-content`), never `url` (Mat, same day). How to style one is the page after it,
-    `content/docs/styling.mdx` ("Styling"; Mat, 2026-10-23): the stylesheets and their
-    layer, how every size steps from the page's `1rem` (the scale, text, the control, the
-    inset), colors, classes and states, lists in Markdown text, then colors and contrast
-    told simply for a person (a checklist of native checkboxes, `Checklist.tsx`, its
-    items strings with their code in backticks, as MDX would make children a paragraph a
-    label cannot hold; then "Do" and "Don't") before every pair in full, kept for audits
-    and agents, and last "Variables", a glossary of every custom property a page sets,
+    `iiifContent` (`iiif-content`), never `url` (Mat, same day). How to style one is the section after it,
+    Styling, a folder (Mat, 2026-11-07: "break styling page out into multiple sections
+    like composing is. landing page should feed into these sections. 3-4 sub page is max.
+    preferable 3"; one page from 2026-10-23): its landing page
+    (`content/docs/styling/index.mdx`) opens on its example, then holds the stylesheets
+    and their layer, and base styling (Mat, 2026-11-07: "I'm wondering if base makes sense
+    on the styling homepage. let's move it there. keep the base/base+spacing/styling
+    option and rendered viewer near top. like how we do examples elsewhere"; its own page
+    for an hour before), then Next, link cards to the five pages under it, in the menu's order, Colors, Fonts,
+    Spacing, Classes, Variables (Mat, 2026-11-07: "new order should be Color, Fonts,
+    Spacing, Classes, Variables"), as Composing's
+    does; a link to an old section goes on to its page (`MovedSections`,
+    `page="styling"`). Base styling: base.css and spacing.css, whose example (Mat, 2026-11-07:
+    "show me this in a rendered example") is a page of its own in a frame, under a
+    Stylesheet switch stepping up from base.css to base.css and spacing.css to styles.css
+    (`StylesheetExample.tsx`), as the docs' pages carry Clover's whole
+    stylesheet and Nextra's reset: three pages (`app/examples/stylesheets/[page]`), each
+    taking the docs page around it as it opens (Mat, 2026-11-07: "send in the consuming
+    page font family and accent color"): its font with its `@font-face` rules, its
+    headings as the docs set them (their family, weight and tracking, and a title's size
+    and lines for its level in an example; "maybe we are not passing down some other font
+    treatments from the docs?"), its accent's light steps and its higher-contrast mode
+    (`HOST`), its Viewer's title at the level the frame asks (`?level=`: 3 under the
+    contrast guide's `h2`); each
+    drawn by the elements from the package's build, which the site publishes at
+    `/examples/clover/…` (`app/examples/clover/[...file]`, as `custom-elements.json` is),
+    no preview host, so the page still has no frame for an agent's preview. Fonts
+    (`styling/fonts.mdx`; Mat, 2026-11-07: "Move fonts and typography to its own page",
+    then "let's be plain Just say Fonts"): opening on its font example (`FontExample.tsx`;
+    "like on colors, add a viewer with homepage font options above it. document in a
+    codeblock html tag change and inheritance"), the framed Viewer in each of the
+    homepage's fonts on a switch, starting on the one the site wears, and under it the
+    CSS on `html` that Clover's text inherits; then the page's size, the four text sizes
+    over the scale calculator's Text, and headings. Spacing (`styling/spacing.mdx`; "break Fonts
+    from Spacing give spacing its own page. consider how the calculator of rem can work
+    on both pages"): the golden scale over the calculator's Spaces and Controls and
+    components (`ScaleCalculator`'s `groups`, "Your page" in each, its framed Viewer
+    following), which space goes where (a region's inset, and the smaller spaces inside
+    it), and the Body. Colors
+    (`styling/colors.mdx`, "Colors and contrast" before): the contrast guide first (Mat, 2026-11-07:
+    "make the section more interactive. show color pallettes … make table less text";
+    "Every pair" before), `ContrastGuide.tsx`: at its card's top the Default Viewer in
+    `styles.css`, framed (the stylesheet example's `styles.html`), dressed in the palette
+    as it changes, its page's ground the palette's `secondary` ("show an iframed version
+    of default viewer with the styles.css along with injected colors"); Clover's nine
+    colors, each to change by a picker or its hex, from a palette on the switch over the
+    card (Clover defaults, this site's dark grays, then the homepage's colors by name, as
+    the site wears each: "add homepage color options here. spell them out"); and a table,
+    Colors, Contrast (never rounded up), Requires and Result, each row drawn small in its
+    two colors; a row `highContrast` would pass gets a row under it while it fails (Mat,
+    2026-11-07: "add a high contrast exception here as a sub row below. make it clear that
+    it would pass if `highContrast` is set"): "With `highContrast`", its elbow from the
+    row it answers (`unless` in `PAIRS`): a round control's glyph on `control`, ringed in
+    the accent, failing too where the accent cannot ring at 3:1 against `secondary`; or
+    text in the accent in the text's color, while no `accent-text` is set (`following`).
+    The status says which pass with it. A result is a pill, its mark and word beside its tone: green, lighter as
+    the ratio nears what it requires; amber, Just passes, within a tenth of it; red, Fails
+    ("make results in this column GREEN or RED … a warning track"), each tone Radix's
+    step 9 mixed into the ground under its step 12 (`--green-*`, `--amber-*`, `--red-*`,
+    `tokens.css`). Its words never say "pair" (Mat, 2026-11-07: "don't say pair"). Drawn
+    on the server with Clover's own colors, so the Markdown keeps every row for audits
+    and agents. A new combination Clover draws, or a new color, gets its row in `PAIRS`
+    or `TOKENS` there. After the guide, setting colors, the checklist (native checkboxes, `Checklist.tsx`, its items
+    strings with their code in backticks, as MDX would make children a paragraph a label
+    cannot hold), high contrast, and "Do" and "Don't". Classes
+    (`styling/classes.mdx`; Mat, 2026-11-07: "Break out classes from variables. give
+    Variables its own page. Fonts, Colors, Classes, Variables"): every public component's
+    root class, then the `data-*` states to select by, two tables under "Classes and
+    states" (the heading other pages link), read from the package's source (a shared class
+    said so: PanelToggle is `clover-canvas-button` with `data-button="panel"`); a new
+    component or state a page may select gets its row; then lists in Markdown text. Variables (`styling/variables.mdx`), a glossary of every custom property a page sets,
     with its default and where to set it (never those Clover sets as it runs). A new
-    property a page may set gets its row there. Composing's pages keep no Styles section of their own (Mat, 2026-11-05).
+    property a page may set gets its row there, and a default Clover sets closer in (a
+    template's, a small screen's) goes in parentheses beside its own. Styling's words
+    (Mat, 2026-11-07: "less words. less fluff. get to the point … be concise and let
+    examples speak for themselves"): each page says that you can change what it covers,
+    without an example for every case; Classes and Variables list theirs objectively;
+    a page links where another holds the detail (Colors to Variables' colors, say); and
+    nothing Clover does is "drawn", nor its scale's sizes "steps" ("I don't like usage of
+    word `draw`… don't say step. say smaller the space between them"). Composing's pages keep no Styles section of their own (Mat, 2026-11-05).
   - Every docs page reads as the Components pages do (Mat, 2026-10-23: "remove breadcrumbs
     EVERYWHERE", "remove sidebars everywhere. style like the Components pages"): no
     breadcrumb and no table of contents (the `docs` folder's `theme` in
@@ -165,7 +235,13 @@ deadline.
     which keeps the width Nextra pins on it. Its Collapse button is drawn as Clover's
     `PanelToggle` (round, the controls' fill and glyph, the accent under the pointer or
     focused, its glyph mirrored for a panel on the left, a mask that forced colors paint;
-    Mat, 2026-10-23).
+    Mat, 2026-10-23). One of its folders is open at a time (Mat, 2026-11-07: "when a
+    section is opened, others should close"): one opened by a press, or holding the page
+    gone to, closes the open folders beside it, each through its own chevron so Nextra's
+    state knows, and never as focus moves (`docs/components/SiteEffects.tsx`; Nextra's
+    `autoCollapse` stays off, as it hid what had focus); and a folder opens and closes
+    at once, with no animation ("don't animate the collapse/expand of sections. just do
+    it.", `layout.css`).
   - Every part the homepage shows has a page under "Components" (Mat, 2026-10-20; the
     group named "Root components" on 2026-10-26, "Components" again on 2026-11-01), led
     by Root's own (`content/docs/root.mdx`; Mat, 2026-11-01), light: what it is, one

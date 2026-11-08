@@ -22,6 +22,7 @@ import { playFrom } from "../../lib/time";
 import { Chevron } from "../../ui/Chevron";
 import { EntryThumbnail } from "../../ui/EntryThumbnail";
 import { Steps } from "../../ui/Steps";
+import { Tip } from "../../ui/Tip";
 import { CueTime } from "../../ui/Cue";
 import { useClover, useCloverSelector } from "../../react/context";
 import { useContainerName } from "../../i18n/useContainerName";
@@ -265,6 +266,11 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                       {t("contentsSectionsIn")}
                     </span>
                     <Chevron open={open} className="clover-contents-chevron" />
+                    {/* Its chevron alone shows, so its popover names it (DESIGN.md §7). */}
+                    <Tip
+                      label={t("contentsSectionsTip")}
+                      lang={langOf("contentsSectionsTip")}
+                    />
                   </button>
                 )}
               </div>

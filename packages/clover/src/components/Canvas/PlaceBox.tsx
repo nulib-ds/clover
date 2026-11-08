@@ -58,7 +58,7 @@ export default function PlaceBox({
       aria-labelledby={heading.text ? `${id}-name` : undefined}
       {...fallback.props}
       onKeyDown={(event) => {
-        if (event.key !== "Escape") return;
+        if (event.key !== "Escape" || event.defaultPrevented) return;
         event.preventDefault();
         event.stopPropagation();
         onClose(true);

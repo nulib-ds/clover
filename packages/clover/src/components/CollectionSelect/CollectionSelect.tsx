@@ -114,7 +114,7 @@ export const CollectionSelect = forwardRef<HTMLElement, CollectionSelectProps>(
             const { key } = event;
             // What the menu shows: a step, or the member asked for (one that failed, again).
             if (key === "Enter") choose(pending ?? shown);
-            else if (key === "Escape") {
+            else if (key === "Escape" && !event.defaultPrevented) {
               // Only the step is taken back: nothing around it (a dialog, a floating
               // panel) closes as well.
               if (stepBack()) event.preventDefault();

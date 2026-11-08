@@ -11,7 +11,7 @@ const CUSTOMIZING = "/docs/composing/customizing";
  * anchor kept. The site is a static export, so a hash cannot be forwarded on the server
  * (`Moved.tsx` forwards whole pages from the 404 page).
  */
-const MOVED: Record<string, string> = {
+const COMPOSING: Record<string, string> = {
   components: "/docs/composing/glossary",
   "core-components": "/docs/composing/glossary",
   "helper-components": "/docs/composing/glossary",
@@ -30,22 +30,88 @@ const MOVED: Record<string, string> = {
   styles: CUSTOMIZING,
 };
 
-/** The new anchor where the section's id changed. */
-const RENAMED: Record<string, string> = {
-  "parts-of-your-own": "creating-custom-components",
-  "helper-components": "ui-components",
-  "the-information-panel": "panel",
-  "panes-side-by-side": "splitting-panes",
-  "value-summary-and-readmore": "long-values",
+const FONTS = "/docs/styling/fonts";
+const COLORS = "/docs/styling/colors";
+const CLASSES = "/docs/styling/classes";
+const VARIABLES = "/docs/styling/variables";
+
+/**
+ * Styling's sections that moved to pages of their own (Mat, 2026-11-07: "break styling
+ * page out into multiple sections like composing is"), by their old anchors, the
+ * Variables' groups among them. The stylesheets stay on the page.
+ */
+const STYLING: Record<string, string> = {
+  "font-sizes-and-spacing": FONTS,
+  headings: FONTS,
+  colors: COLORS,
+  "colors-and-contrast": COLORS,
+  "high-contrast": COLORS,
+  do: COLORS,
+  dont: COLORS,
+  "every-pair": COLORS,
+  "contrast-guide": COLORS,
+  "classes-and-states": CLASSES,
+  "lists-in-markdown-text": CLASSES,
+  variables: VARIABLES,
+  "colors-1": VARIABLES,
+  "the-media-player": VARIABLES,
+  "sizes-and-spaces": VARIABLES,
+  "shape-and-motion": VARIABLES,
+  "the-body": VARIABLES,
+  "items-summary-logo-map-and-search": VARIABLES,
+  templates: VARIABLES,
 };
 
-export function MovedSections() {
+/** Each page's moved sections, and the new anchor where a section's id changed ("" for the page's top). */
+const PAGES = {
+  composing: {
+    moved: COMPOSING,
+    renamed: {
+      "parts-of-your-own": "creating-custom-components",
+      "helper-components": "ui-components",
+      "the-information-panel": "panel",
+      "panes-side-by-side": "splitting-panes",
+      "value-summary-and-readmore": "long-values",
+    } as Record<string, string>,
+  },
+  styling: {
+    moved: STYLING,
+    renamed: {
+      colors: "setting-colors",
+      "colors-and-contrast": "",
+      "font-sizes-and-spacing": "",
+      variables: "",
+      "every-pair": "contrast-guide",
+      // The Variables' Colors, second to the page's own Colors before.
+      "colors-1": "colors",
+    } as Record<string, string>,
+  },
+};
+
+/**
+ * On a page whose sections moved (`page`: Composing's, Styling's), a link to an old
+ * section goes on to its new page, at its anchor, or at the page's top where the section
+ * became the page.
+ */
+export function MovedSections({
+  page = "composing",
+}: {
+  page?: keyof typeof PAGES;
+}) {
   const { basePath } = useRouter();
   useEffect(() => {
-    const id = decodeURIComponent(location.hash.slice(1));
-    const page = MOVED[id];
-    if (!page) return;
-    location.replace(`${basePath}${page}#${RENAMED[id] ?? id}`);
-  }, [basePath]);
+    const forward = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const { moved, renamed } = PAGES[page];
+      const to = moved[id];
+      if (!to) return;
+      const anchor = renamed[id] ?? id;
+      location.replace(`${basePath}${to}${anchor ? `#${anchor}` : ""}`);
+    };
+    forward();
+    // An old section's link followed on the page itself changes only its hash.
+    window.addEventListener("hashchange", forward);
+    return () => window.removeEventListener("hashchange", forward);
+  }, [basePath, page]);
   return null;
 }

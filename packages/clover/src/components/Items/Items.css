@@ -258,7 +258,7 @@
   position: relative;
   display: block;
   overflow: hidden;
-  background-color: var(--clover-color-secondary-muted, #f1f1f1);
+  background-color: var(--clover-color-secondary-muted, #e6e8eb);
 }
 
 .clover-items-picture img {

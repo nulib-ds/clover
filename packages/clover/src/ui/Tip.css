@@ -1,9 +1,9 @@
 /*
  * The popover a control shows (`ui/Tip.tsx`): its name, and its key when it has one, in
  * `text-s` on the page's dark color, `xs` from the control. Above it by default; below a
- * control along the top of what it sits on; beside the cluster when the cluster is a
- * column; at either end of a row, lined up with the control's outer edge so it stays
- * inside the Body; and toward the middle of the Body from a hotspot.
+ * control along the top of what it sits on; beside a split's handle, at its grip; at
+ * either end of a row, lined up with the control's outer edge so it stays inside the
+ * Body; and toward the middle of the Body from a hotspot.
  *
  * Then, each time it shows, `ui/Tip.tsx` measures it against what clips it (the Body, a
  * scrolling panel, the window): where it would pass an edge, it wraps to the room there
@@ -334,9 +334,13 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   height: auto;
 }
 
+/*
+ * No fade where less motion is asked for, but the same pause under the pointer: a wait
+ * is not motion, and without it passing over a row flashes every popover in it.
+ */
 @media (prefers-reduced-motion: reduce) {
   .clover-tip {
-    transition: none;
+    transition-duration: 0s;
   }
 }
 

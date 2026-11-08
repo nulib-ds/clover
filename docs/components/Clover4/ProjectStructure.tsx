@@ -112,6 +112,21 @@ const PACKAGE: Entry = {
       ),
     },
     { name: "templates.css", note: "The other templates' styles." },
+    {
+      name: "base.css",
+      note: (
+        <>
+          For a look of your own, in place of Clover&apos;s styles: the
+          structure of every component and template (
+          <Link href="/docs/styling#base-styling">Base styling</Link>
+          ).
+        </>
+      ),
+    },
+    {
+      name: "spacing.css",
+      note: "Margins, paddings and gaps, after base.css.",
+    },
   ],
 };
 

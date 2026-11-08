@@ -3,6 +3,8 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
+import { cloverTiers } from "./clover-tiers.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 
 /**
@@ -20,6 +22,7 @@ export function harness(react, port) {
     );
   return defineConfig({
     root: resolve(here, "app"),
+    plugins: [cloverTiers()],
     esbuild: { jsx: "automatic" },
     json: { stringify: true },
     resolve: {

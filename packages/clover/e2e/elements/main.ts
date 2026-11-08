@@ -1,3 +1,5 @@
+// base.css's tiers, where the page asks for them (`?css=base`), before any element connects.
+import "./tiers";
 // Every element, as `@nulib/clover/web-components` defines them.
 import "../../src/web-components/index";
 import book from "../../src/fixtures/iiif-cookbook/0009-book-1.json";

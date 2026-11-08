@@ -64,6 +64,7 @@ const SAME_AS_ENGLISH: Record<string, string[]> = {
     "canvasImage",
     "annotationsImage",
     "collectionLabel",
+    "contentsSectionsTip",
     "informationPanelTabsAnnotations",
     "informationPanelTabsCollection",
     "playerPause",

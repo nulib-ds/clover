@@ -23,6 +23,55 @@ function markCurrent(pathname: string) {
     });
 }
 
+/** A folder in a sidebar: its `li` holds its link or button, then its list (`Collapse`). */
+function folderOf(element: Element | null) {
+  const item = element?.closest<HTMLLIElement>(`:is(${SIDEBARS}) li`);
+  return item?.querySelector(":scope > div") ? item : null;
+}
+
+/*
+ * One folder open at a time in a sidebar (Mat, 2026-11-07: "when a section is opened,
+ * others should close"). A folder closes as Nextra's own chevron closes it, a press on
+ * it, so Nextra's state of what is open (`TreeState`) knows; the press goes no further,
+ * as Nextra's chevron stops it. Never on focus: Nextra's `autoCollapse` closed a folder
+ * as focus moved into it, hiding what had focus (`app/layout.tsx`), so this follows only
+ * what is pressed and where a page goes.
+ */
+function press(folder: Element) {
+  folder
+    .querySelector(":scope > :is(a, button) > svg")
+    ?.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
+}
+
+function closeBeside(folder: HTMLLIElement) {
+  for (const item of folder.parentElement?.children ?? [])
+    if (item !== folder && item.classList.contains("open") && folderOf(item))
+      press(item);
+}
+
+/**
+ * Opens each folder that holds the current page, where a press had closed it, and closes
+ * the open folders beside it.
+ */
+function closeAroundCurrent() {
+  document
+    .querySelectorAll(`:is(${SIDEBARS}) a[aria-current="page"]`)
+    .forEach((link) => {
+      for (
+        let item = link.closest("li");
+        item;
+        item = item.parentElement?.closest("li") ?? null
+      ) {
+        const folder = folderOf(item);
+        if (!folder) continue;
+        if (!folder.classList.contains("open")) press(folder);
+        closeBeside(folder);
+      }
+    });
+}
+
 /**
  * What every page does once it is in the browser, from the root layout.
  */
@@ -35,14 +84,39 @@ export default function SiteEffects() {
    */
   useEffect(() => {
     markCurrent(pathname);
+    // Once Nextra has opened the new page's folder, the others beside it close.
+    const frame = requestAnimationFrame(closeAroundCurrent);
     const observer = new MutationObserver(() => markCurrent(pathname));
     document
       .querySelectorAll(SIDEBARS)
       .forEach((sidebar) =>
         observer.observe(sidebar, { childList: true, subtree: true }),
       );
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [pathname]);
+
+  // A folder opened by a press (a pointer's, or Enter on it) closes the others beside it.
+  useEffect(() => {
+    const opened = (event: MouseEvent) => {
+      // Not the presses this sends to close a folder.
+      if (!event.isTrusted) return;
+      const folder = folderOf(
+        (event.target as Element | null)?.closest?.(
+          `:is(${SIDEBARS}) li > :is(a, button)`,
+        ) ?? null,
+      );
+      if (!folder) return;
+      // Once Nextra has drawn the press.
+      requestAnimationFrame(() => {
+        if (folder.classList.contains("open")) closeBeside(folder);
+      });
+    };
+    document.addEventListener("click", opened);
+    return () => document.removeEventListener("click", opened);
+  }, []);
 
   /*
    * Reapply the reader's accent and font on every cold load.

@@ -7,9 +7,9 @@
  * keeps server rendering free of a flash of unstyled content, works under a strict CSP,
  * and suits frameworks (Next's Pages Router) that only allow global CSS in one place.
  * Every part still lays out plainly without it. Only the part sheets of what loads as it
- * draws (a recording, a Scene, a map) come with their code instead, adopted by the
- * document as it loads (`lazySheets`, `src/ui/adoptSheet.ts`), which a strict CSP allows
- * and no framework sees.
+ * draws (a recording, a Scene, a map, a vertical slider) come with their code instead,
+ * adopted by the document as it loads (`lazySheets`, `src/ui/adoptSheet.ts`), which a
+ * strict CSP allows and no framework sees.
  */
 import { build } from "esbuild";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -17,6 +17,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { lazyParts, partSheets, rulesOf } from "./clover-sheets.mjs";
+import { tierSheets } from "./tiers.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -49,8 +50,9 @@ async function bundle(source, output) {
 
 /*
  * styles.css is the list's sheets but the part sheets that load with their parts' code
- * (`lazyParts`: a recording's, a Scene's, a map's), which the package's build hands to the
- * page as those parts load (`lazySheets`). The docs, from source, take the list whole.
+ * (`lazyParts`: a recording's, a Scene's, a map's, a vertical slider's), which the
+ * package's build hands to the page as those parts load (`lazySheets`). The docs, from
+ * source, take the list whole.
  */
 const groups = partSheets();
 const lazy = new Set(lazyParts(groups).flatMap((name) => groups[name]));
@@ -64,6 +66,18 @@ writeFileSync(
       .sort((a, b) => a.index - b.index),
   )}}\n`,
 );
+
+/*
+ * The stylesheet in tiers (`build/tiers.mjs`): base.css, the structure of every part and
+ * template, and spacing.css, their margins, paddings and gaps, which a page that brings
+ * its own look imports in place of styles.css and templates.css, base.css first.
+ */
+const tiers = await tierSheets();
+for (const name of ["base", "spacing"])
+  writeFileSync(
+    resolve(root, `dist/${name}.css`),
+    `@layer clover{${tiers[name]}}\n`,
+  );
 
 /*
  * The same sheets a part at a time, each in the one `clover` layer, its sheets in

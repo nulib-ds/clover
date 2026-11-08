@@ -1040,6 +1040,9 @@ describe("templates", () => {
     expect(last).toHaveFocus();
     fireEvent.keyDown(last, { key: "Tab" });
     expect(back).toHaveFocus();
+    // The focused control's popover first, alone (WCAG 1.4.13), then the lightbox.
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
     fireEvent.keyDown(dialog, { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(gallery.querySelector(".clover-items")).toHaveProperty(
@@ -1607,6 +1610,9 @@ describe("templates", () => {
       // Tabbing back from the panel reaches the thumbnails' toggle it covers.
       const under = screen.getByRole("button", { name: /^Show items/ });
       under.focus();
+      // Its popover first, alone (WCAG 1.4.13), then the panel.
+      fireEvent.keyDown(under, { key: "Escape" });
+      expect(panel).toHaveAttribute("data-open", "true");
       fireEvent.keyDown(under, { key: "Escape" });
       expect(panel).toHaveAttribute("data-open", "false");
       expect(under).toHaveFocus();
@@ -1671,6 +1677,9 @@ describe("templates", () => {
         name: "More information",
       });
       under.focus();
+      // Its popover first, alone (WCAG 1.4.13), then the thumbnails.
+      fireEvent.keyDown(under, { key: "Escape" });
+      expect(sidebar).not.toHaveAttribute("hidden");
       fireEvent.keyDown(under, { key: "Escape" });
       expect(sidebar).toHaveAttribute("hidden");
       expect(under).toHaveFocus();

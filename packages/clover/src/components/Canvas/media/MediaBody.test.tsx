@@ -514,7 +514,9 @@ describe("Canvas media", () => {
     expect(fireEvent.keyDown(lunch, { key: "Escape" })).toBe(false);
     expect(button).toHaveAttribute("aria-expanded", "false");
     expect(button).toHaveFocus();
-    // With the menu closed, Escape passes on.
+    // With the menu closed, its button's popover takes the next Escape (WCAG 1.4.13), and
+    // the one after passes on.
+    expect(fireEvent.keyDown(button, { key: "Escape" })).toBe(false);
     expect(fireEvent.keyDown(button, { key: "Escape" })).toBe(true);
 
     // Enter picks the focused option and closes it the same way.

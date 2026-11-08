@@ -14,19 +14,19 @@ import { ScrollTable } from "docs/components/ScrollTable";
 const GROUPS = [
   {
     name: "Your page",
-    rows: [["HTML page", 1, "Defined `font-size` for HTML document"]],
+    rows: [["HTML page", 1, "Your page’s root `font-size`"]],
   },
   {
     name: "Spaces",
     rows: [
-      ["--clover-space-3xs", 0.146, ""],
-      ["--clover-space-2xs", 0.236, ""],
-      ["--clover-space-xs", 0.382, "φ⁻²: a label over its value"],
-      ["--clover-space-s", 0.618, "φ⁻¹: what is within a part"],
-      ["--clover-space-m", 1, "Your 1rem: parts within a region"],
+      ["--clover-space-3xs", 0.146, "φ⁻⁴"],
+      ["--clover-space-2xs", 0.236, "φ⁻³"],
+      ["--clover-space-xs", 0.382, "φ⁻²: a thumbnail over its label"],
+      ["--clover-space-s", 0.618, "φ⁻¹: within a component"],
+      ["--clover-space-m", 1, "Your `1rem`: between components in a region"],
       ["--clover-space-l", 1.618, "φ: a region’s inset"],
-      ["--clover-space-xl", 2.618, ""],
-      ["--clover-space-2xl", 4.236, ""],
+      ["--clover-space-xl", 2.618, "φ²"],
+      ["--clover-space-2xl", 4.236, "φ³"],
     ],
   },
   {
@@ -36,21 +36,29 @@ const GROUPS = [
       ["--clover-text-s", 0.854, "Secondary text: times, formats, legends"],
       ["Automatically inherited", 1, "Baseline text content"],
       ["--clover-text-m", 1.146, "A section’s heading"],
-      ["--clover-text-l", 1.236, "A title: a layout’s, Items’, an error’s"],
+      [
+        "--clover-text-l",
+        1.236,
+        "An error’s headline, a sound Canvas’s label beside others, captions in a wide Body",
+      ],
     ],
   },
   {
-    name: "Controls and parts",
+    name: "Controls and components",
     rows: [
       ["--clover-control", 2.236, "Every round control, wide and high"],
       [
         "--clover-inset",
         1.618,
-        "A region’s inset, from its edge to its content",
+        "A region’s inset, from its edge to its components",
       ],
-      ["--clover-radius-pill", 2, "The corners of round controls and pills"],
-      ["--clover-items-height", 8, "A slider’s pictures"],
-      ["--clover-items-size", 10, "A grid’s cell"],
+      [
+        "--clover-radius-pill",
+        2,
+        "Fully rounded corners, as on the round controls and Search’s field",
+      ],
+      ["--clover-items-height", 8, "The pictures in Items’ slider"],
+      ["--clover-items-size", 10, "A cell of Items’ grid"],
       ["--clover-map-height", 24, "The Map"],
     ],
   },
@@ -72,7 +80,16 @@ const VIEWER = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/test/viewer?r=catalog
  * `1rem` (Mat, 2026-10-23: "gate rem change to that one viewer"): framed, so its root is its own and the page's stays as it is, and told each
  * new size by a message, so it never reloads.
  */
-export function ScaleCalculator() {
+export function ScaleCalculator({
+  groups,
+}: {
+  /**
+   * The groups shown, by name, beside "Your page", whose `1rem` they follow: Fonts shows
+   * the Text, Spacing the Spaces and the Controls and components (Mat, 2026-11-07: "consider
+   * how the calculator of rem can work on both pages"). Every group where none is named.
+   */
+  groups?: string[];
+} = {}) {
   const [base, setBase] = useState(BROWSER);
   const px = (rem: number) => `${+(rem * base).toFixed(1)}px`;
   const frame = useRef<HTMLIFrameElement>(null);
@@ -101,7 +118,12 @@ export function ScaleCalculator() {
             <Table.Th>What it sizes</Table.Th>
           </Table.Tr>
         </thead>
-        {GROUPS.map((group) => (
+        {GROUPS.filter(
+          (group) =>
+            group.name === "Your page" ||
+            !groups ||
+            groups.includes(group.name),
+        ).map((group) => (
           <tbody key={group.name}>
             <Table.Tr>
               <th colSpan={4} scope="rowgroup">
