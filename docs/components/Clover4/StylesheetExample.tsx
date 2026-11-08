@@ -24,10 +24,10 @@ const SHOWN = [
     label: "styles.css (fully styled)",
     name: "in Clover's look",
   },
-];
+] as const;
 
 /**
- * The Styling page's example, near its top (`content/docs/styling/index.mdx`; Mat,
+ * Styling's Base page's example, near its top (`content/docs/styling/base.mdx`; Mat,
  * 2026-11-07: "show me this in a rendered example"): the Viewer on the catalog on base.css
  * alone, on base.css then spacing.css, or in Clover's look, chosen on the switch over its
  * card as every example's is (`ExampleSwitch`). Each is a page of its own in a frame
@@ -38,34 +38,49 @@ const SHOWN = [
  * preview host: an agent's preview would draw with the docs' stylesheet, not the page's
  * own (the scale calculator's frame on the same page is none either). Under it, the chosen
  * stylesheet's code, which the page gives as children marked `data-option` by `SHOWN`'s
- * keys, as `ContentStateExample` takes them.
+ * keys, as `ContentStateExample` takes them. `layout="compose"` shows a layout composed of
+ * parts in a Root in its place (`compose-…` pages; Mat, 2026-11-08: "show how base.css can
+ * affect sub components if used alone in composing"). `sheets` names the stylesheets
+ * offered, all three by default; given one, no switch shows, as on Styling's landing page,
+ * which keeps styles.css's example alone (Mat, 2026-11-08: "keep examples for importing of
+ * styles.css on main page").
  */
 export function StylesheetExample({
   children,
+  layout = "viewer",
+  sheets,
 }: {
   children?: React.ReactNode;
+  layout?: "viewer" | "compose";
+  sheets?: (typeof SHOWN)[number]["key"][];
 }) {
   const id = useId();
   const { basePath } = useRouter();
+  const offered = sheets
+    ? SHOWN.filter(({ key }) => sheets.includes(key))
+    : SHOWN;
   const [chosen, setChosen] = useState(0);
-  const shown = SHOWN[chosen];
+  const shown = offered[chosen] ?? offered[0];
+  const compose = layout === "compose";
   return (
     <>
-      <ExampleSwitch
-        id={`${id}-sheet`}
-        label="Stylesheet"
-        options={SHOWN.map(({ key, label }) => ({ key, label }))}
-        chosen={chosen}
-        onChoose={setChosen}
-      />
+      {offered.length > 1 && (
+        <ExampleSwitch
+          id={`${id}-sheet`}
+          label="Stylesheet"
+          options={offered.map(({ key, label }) => ({ key, label }))}
+          chosen={chosen}
+          onChoose={setChosen}
+        />
+      )}
       <figure className={frame.example}>
         {/* A template, to the card's edges; the frame names it, as an example. */}
         <div className={frame.preview} data-bleed="" {...example()}>
           <iframe
             key={shown.key}
             className={styles.frame}
-            src={`${basePath}/examples/stylesheets/${shown.key}.html`}
-            title={`Example: the Viewer ${shown.name}`}
+            src={`${basePath}/examples/stylesheets/${compose ? "compose-" : ""}${shown.key}.html`}
+            title={`Example: ${compose ? "a composed layout" : "the Viewer"} ${shown.name}`}
           />
         </div>
         <div className={frame.code}>

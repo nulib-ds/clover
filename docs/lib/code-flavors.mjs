@@ -286,10 +286,12 @@ export async function withCodeFlavors(source) {
     }
     const end = (twin ?? node).position.end.offset;
     const react = source.slice(start, node.position.end.offset);
-    // The lines the React fence marks, marked in its twin too, but in one written by hand.
+    // The lines the React fence marks, marked in its twin too; one written by hand marks
+    // its own (```html twin {1-4}), as its lines are not React's.
     const marked = markedLines(node.meta);
-    const twinMarked =
-      !twin && marked.length
+    const twinMarked = twin
+      ? (twin.meta?.match(/\{[\d,\s-]+\}/)?.[0] ?? "")
+      : marked.length
         ? twinLines(node.value, html, marked, context.names)
         : "";
     edits.push({ start, end, text: flavors(react, html, indent, twinMarked) });

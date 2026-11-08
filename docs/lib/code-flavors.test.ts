@@ -79,6 +79,26 @@ describe("A page's examples in both flavors", () => {
     expect(out).toContain("\n```jsx\nconst t = Clover.useT();\n```\n");
   });
 
+  it("keeps the lines a twin written by hand marks itself", async () => {
+    const page = [
+      "```jsx {2}",
+      'import * as Clover from "@nulib/clover";',
+      'import "@nulib/clover/base.css";',
+      "```",
+      "",
+      "```html twin {1-4}",
+      "<link",
+      '  rel="stylesheet"',
+      '  href="base.css"',
+      "/>",
+      "```",
+      "",
+    ].join("\n");
+    const out = await withCodeFlavors(page);
+    expect(out).toContain("```jsx {2}\n");
+    expect(out).toContain("```html {1-4}\n<link");
+  });
+
   it("shows Clover's names in the prose as each flavor writes them, but in a heading", async () => {
     const page =
       "## `Root`\n\nEach part reads from the nearest `Root`, and `Default` stays.\n";

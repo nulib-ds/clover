@@ -466,6 +466,18 @@ html:not(.dark) .nextra-callout :not(pre) > code {
   margin-top: 0;
 }
 
+/*
+ * A name the first column gives alone, in code (a custom property, a class, a prop), whole
+ * on its line where there is room for it (Mat, 2026-11-08: "make tables show whole variable
+ * without wrapping. for sure on desktop views"); on a narrow screen it may still wrap, so
+ * the table never runs past the page there.
+ */
+@media (min-width: 48rem) {
+  .docs-table td:first-child > code:only-child {
+    white-space: nowrap;
+  }
+}
+
 .docs-table:focus-visible {
   box-shadow: var(--focus-ring), var(--code-lift);
   outline: none;

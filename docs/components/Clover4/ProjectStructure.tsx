@@ -118,7 +118,7 @@ const PACKAGE: Entry = {
         <>
           For a look of your own, in place of Clover&apos;s styles: the
           structure of every component and template (
-          <Link href="/docs/styling#base-styling">Base styling</Link>
+          <Link href="/docs/styling/base">Base</Link>
           ).
         </>
       ),

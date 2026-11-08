@@ -1,25 +1,34 @@
 /*
- * The Styling page's example (`content/docs/styling/index.mdx`,
+ * The Styling page's examples (`content/docs/styling/index.mdx`,
  * `StylesheetExample`): a page as a site writes one, with none of the docs' styles, its
- * Viewer drawn by the elements from the package's build (`/examples/clover/…`): on
- * base.css alone, on base.css then spacing.css, or in Clover's look, each linked before
- * the elements' script. It
- * opens the catalog from the site's own mocks, and takes the docs page around it as its
- * own page's CSS would (`HOST`). Files of the static export, kept out of search
- * (`noindex`, and no canonical link, so `scripts/check-site.mjs` passes them by).
+ * Viewer, or a layout it composes of parts (`compose-…`; Mat, 2026-11-08: "show how
+ * base.css can affect sub components if used alone in composing"), from the elements in
+ * the package's build (`/examples/clover/…`): on base.css alone, on base.css then
+ * spacing.css, or in Clover's look, each linked before the elements' script. It opens the
+ * catalog from the site's own mocks, and takes the docs page around it as its own page's
+ * CSS would (`HOST`). Files of the static export, kept out of search (`noindex`, and no
+ * canonical link, so `scripts/check-site.mjs` passes them by).
  */
 export const dynamic = "force-static";
 export const dynamicParams = false;
 
-/** Each page, by its file, and the stylesheets it links. */
-const PAGES: Record<string, { title: string; sheets: string[] }> = {
-  "base.html": { title: "base.css", sheets: ["base.css"] },
-  "spacing.html": {
+/** Each stylesheet the examples offer, and what its pages link. */
+const SHEETS: Record<string, { title: string; sheets: string[] }> = {
+  base: { title: "base.css", sheets: ["base.css"] },
+  spacing: {
     title: "base.css and spacing.css",
     sheets: ["base.css", "spacing.css"],
   },
-  "styles.html": { title: "Clover's look", sheets: [] },
+  styles: { title: "Clover's look", sheets: [] },
 };
+
+/** Each page, by its file: the Viewer (`base.html`), or a composed layout (`compose-base.html`). */
+const PAGES = Object.fromEntries(
+  Object.entries(SHEETS).flatMap(([key, sheet]) => [
+    [`${key}.html`, { ...sheet, compose: false }],
+    [`compose-${key}.html`, { ...sheet, compose: true }],
+  ]),
+);
 
 /*
  * The docs page around the frame, read as the frame's page opens (Mat, 2026-11-07: "send
@@ -34,7 +43,7 @@ const PAGES: Record<string, { title: string; sheets: string[] }> = {
  * `docs/styles/tokens.css`; Mat, 2026-11-07: "maybe we are not passing down some other
  * font treatments from the docs?"); and its higher-contrast mode (`data-high-contrast`),
  * which an accent that cannot carry white text turns on (WCAG 1.4.3). Opened alone, the
- * page keeps its own. `?level=` sets its Viewer's title level.
+ * page keeps its own. `?level=` sets its title's level.
  */
 const HOST = `(function () {
   var host;
@@ -137,6 +146,38 @@ const HOST = `(function () {
   );
 })();`;
 
+/** The catalog, from the site's own mocks, wherever the site is served. */
+const CATALOG = `new URL("../../mocks/paged/manifest.json", location.href).href`;
+
+/** The Viewer, its title at the level the frame asks for, one below the heading over it. */
+const VIEWER = `<clover-viewer fill></clover-viewer>
+    <script>
+      var viewer = document.querySelector("clover-viewer");
+      var level = new URLSearchParams(location.search).get("level");
+      if (/^[2-6]$/.test(level || "")) viewer.setAttribute("heading-level", level);
+      viewer.setAttribute("iiif-content", ${CATALOG});
+    </script>`;
+
+/*
+ * A layout composed of parts in a Root, as Get started composes one, with the record's
+ * Metadata under it: its title an \`h3\`, under the \`h2\` the frame sits under, or at the
+ * level the frame asks for.
+ */
+const COMPOSED = `<clover-root>
+      <clover-label as="h3"></clover-label>
+      <clover-summary></clover-summary>
+      <clover-body></clover-body>
+      <clover-items></clover-items>
+      <clover-metadata></clover-metadata>
+    </clover-root>
+    <script>
+      var root = document.querySelector("clover-root");
+      var level = new URLSearchParams(location.search).get("level");
+      if (/^[2-6]$/.test(level || ""))
+        root.querySelector("clover-label").setAttribute("as", "h" + level);
+      root.setAttribute("iiif-content", ${CATALOG});
+    </script>`;
+
 export function generateStaticParams() {
   return Object.keys(PAGES).map((page) => ({ page }));
 }
@@ -158,11 +199,12 @@ export async function GET(
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <title>The Viewer in ${shown.title}</title>
+    <title>${shown.compose ? "A composed layout" : "The Viewer"} in ${shown.title}</title>
 ${links}    <style>
       /*
        * The page's own: light, its type, which Clover reads, and the Viewer the frame's
-       * height (\`fill\`).
+       * height (\`fill\`), or room around the layout it composes, and nothing between its
+       * parts, so the stylesheet alone sets that.
        */
       :root {
         color-scheme: light;
@@ -176,6 +218,10 @@ ${links}    <style>
         margin: 0;
         font-family: system-ui, sans-serif;
       }
+      body:has(> clover-root) {
+        box-sizing: border-box;
+        padding: 1rem;
+      }
     </style>
     <script>
       ${HOST}
@@ -183,19 +229,7 @@ ${links}    <style>
     <script src="../clover/web-components/index.umd.js"></script>
   </head>
   <body>
-    <clover-viewer fill></clover-viewer>
-    <script>
-      // The catalog, from the site's own mocks, wherever the site is served.
-      var viewer = document.querySelector("clover-viewer");
-      // Its title at the level the frame asks for, one below the heading it sits under.
-      var level = new URLSearchParams(location.search).get("level");
-      if (/^[2-6]$/.test(level || "")) viewer.setAttribute("heading-level", level);
-      viewer
-        .setAttribute(
-          "iiif-content",
-          new URL("../../mocks/paged/manifest.json", location.href).href,
-        );
-    </script>
+    ${shown.compose ? COMPOSED : VIEWER}
   </body>
 </html>
 `,
