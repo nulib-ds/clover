@@ -90,8 +90,17 @@ beforeEach(() => {
   document.body.appendChild(overlays);
 });
 
-/** The image opens; the hotspots and the Canvas's menus, which load on demand, arrive. */
-const open = async () => {
+/**
+ * The image opens; the hotspots and the Canvas's menus, which load on demand, arrive.
+ * Only once the Canvas has handed the renderer its images: a Canvas that loads itself
+ * mounts outside `act`, so on React 18 its effects may run after the test moves on, and
+ * the images set after the image opened would mark it loading again, for good, as the
+ * mock never opens twice (a busy CI run, 2026-11-09). Behind a placeholder, which holds
+ * the images back, it opens at once (`{ images: false }`).
+ */
+const open = async ({ images = true } = {}) => {
+  if (images)
+    await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
   act(() => listeners.open());
   await loaded();
 };
@@ -2199,7 +2208,7 @@ describe("Canvas", () => {
           ]}
         />,
       );
-      await open();
+      await open({ images: false });
       expect(screen.queryByRole("button", { name: "Choice" })).toBeNull();
       // The menu is to hand; a pick from it opens the Canvas (tested above).
       expect(screen.getByRole("button", { name: "Annotations" })).toBeVisible();
