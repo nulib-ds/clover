@@ -109,25 +109,84 @@
  * A picked annotation's place (`Canvas/PlaceBox.tsx`): a map of it, the whole box to its
  * inner padding, no wider than the information, as tall as its name and map were; its
  * name is out of sight (Mat, 2026-10-29: "don't show the label of manifest/canvas. extend
- * map to the top"). Close is in the map's top corner, the map's controls' inset in from
- * it, as the map's own are from theirs; the credits' words keep `s` clear of it.
+ * map to the top"). Its Expand map button and Close end the map's zoom row, in its top corner.
  */
 .clover-canvas-place {
   width: min(22rem, 100%);
 }
 
+/*
+ * It never scrolls (its map is as tall as it is), so the wheel and a swipe over its map go
+ * on to the page, as over the Canvas (Mat, 2026-11-08: "it's currently getting caught"),
+ * rather than stopping at it as the popups' text does (`ControlMenu.css`, after this file:
+ * hence the box's own two classes).
+ */
+.clover-canvas-caption.clover-canvas-place {
+  overscroll-behavior: auto;
+}
+
+/*
+ * Its Expand map button and Close at the end of the map's zoom row (Mat, 2026-11-08: "move
+ * these to the left of the layer button"), one row `xs` apart, in the map's top corner.
+ */
 .clover-canvas-place .clover-geomap {
   --clover-map-height: 16rem;
-  --clover-map-controls-top: calc(
-    var(--clover-control) + var(--clover-space-s)
+  --clover-map-controls-end: calc(
+    2 * var(--clover-control) + 2 * var(--clover-space-xs)
   );
 }
 
-.clover-canvas-place > button.clover-canvas-caption-close {
+.clover-canvas-place > .clover-canvas-place-actions {
   position: absolute;
   z-index: 3;
   top: calc(var(--clover-space-m) + var(--clover-inset));
   right: calc(var(--clover-space-m) + var(--clover-inset));
-  float: none;
-  margin: 0;
+  display: flex;
+  gap: var(--clover-space-xs);
+}
+
+/*
+ * Swapped (Mat, 2026-11-08: "flip the map and the canvas", "this should close on swap in.
+ * come back on swap out"): the map fills the Body, under the controls, its swap and Close
+ * in its top corner on the start side, clear of them; the Canvas is put away as it is,
+ * hidden (out of the tab order and the accessibility tree), never resized or reloaded,
+ * and comes back as it was.
+ */
+.clover-canvas[data-place="swapped"] > .clover-canvas-place {
+  inset: 0;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  z-index: 1;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/*
+ * The same row, zoom then layers and Close, at the Body's top start, as the Canvas's own
+ * controls hold its top end.
+ */
+.clover-canvas[data-place="swapped"] > .clover-canvas-place .clover-geomap {
+  --clover-map-height: 100%;
+  --clover-map-controls-inset: var(--clover-canvas-controls-inset);
+  --clover-map-controls-right: auto;
+  --clover-map-controls-left: var(--clover-canvas-controls-inset);
+  height: 100%;
+}
+
+.clover-canvas[data-place="swapped"]
+  > .clover-canvas-place
+  > .clover-canvas-place-actions {
+  top: var(--clover-canvas-controls-inset);
+  right: auto;
+  left: calc(
+    var(--clover-canvas-controls-inset) + 2 * var(--clover-control) + 2 *
+      var(--clover-space-xs)
+  );
+}
+
+.clover-canvas[data-place="swapped"] > .clover-canvas-viewport {
+  visibility: hidden;
 }

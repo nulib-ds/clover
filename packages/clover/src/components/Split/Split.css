@@ -76,7 +76,14 @@
   transition: background-color 150ms;
 }
 
+/*
+ * Pointed at, focused or held, it rises over both panes, so its Tip, which hangs over the
+ * pane after it, is over everything there: the Panel's stuck headings and its Close (Mat,
+ * 2026-11-08: "the resize panels tooltip should be over everything"). Under what floats
+ * over the panes (a floating Panel, its wash), as it is at rest.
+ */
 .clover-split-handle:is(:hover, :focus-visible, [data-dragging]) {
+  z-index: 3;
   background-color: color-mix(
     in srgb,
     var(--clover-color-accent, #0065c3) 80%,

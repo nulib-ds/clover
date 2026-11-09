@@ -30,6 +30,7 @@ export const label: ElementSpec = {
     of: { prop: "of", type: ["manifest", "canvas"] },
     as: { prop: "as", type: TAGS },
     label: { prop: "label", type: "data" },
+    keep: { prop: "keep", type: "boolean" },
   },
   properties: ["label"],
 };
@@ -51,6 +52,11 @@ export const labelDocs: ElementDocs = {
     label: {
       description:
         "A label to show instead: text, or a IIIF language map as JSON. Outside a root, the label to show.",
+    },
+    keep: {
+      description:
+        "Keep its place while there is no label, as the next Manifest loads: the element stays, holding a non-breaking space hidden from assistive technology, so what follows holds still.",
+      default: "false",
     },
   },
   properties: {

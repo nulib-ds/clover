@@ -18,12 +18,10 @@ export function hasMapData(
   }
   for (const canvas of selectSequence(manifest).canvases as Json[]) {
     if (canvas.navPlace) return true;
+    if (isGeoreferenced(canvas)) return true;
     for (const page of asArray(canvas.annotations) as Json[]) {
       for (const annotation of asArray(page?.items) as Json[]) {
         if (annotation?.navPlace) return true;
-        if (asArray(annotation?.motivation).includes("georeferencing")) {
-          return true;
-        }
         const bodies = asArray(annotation?.body) as Json[];
         if (
           bodies.some(
@@ -37,6 +35,19 @@ export function hasMapData(
     }
   }
   return false;
+}
+
+/**
+ * Whether a Canvas's loaded annotation pages georeference it (a `georeferencing`
+ * annotation): a look, as `hasMapData`'s, for the Canvas's map control.
+ */
+export function isGeoreferenced(canvas: unknown): boolean {
+  return (asArray((canvas as Json | null)?.annotations) as Json[]).some(
+    (page) =>
+      (asArray(page?.items) as Json[]).some((annotation) =>
+        asArray(annotation?.motivation).includes("georeferencing"),
+      ),
+  );
 }
 
 type Json = Record<string, any>;

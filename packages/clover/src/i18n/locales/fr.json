@@ -95,6 +95,8 @@
   "informationPanelTabsTargets": "Vues",
   "mapUnavailable": "La carte n’a pas pu être affichée.",
   "mapLabel": "Carte",
+  "mapExpand": "Agrandir la carte",
+  "mapCollapse": "Réduire la carte",
   "mapAttribution": "Crédits de la carte",
   "mapPlaceUntitled": "Lieu {{number}}",
   "mapOverlay": "Image géoréférencée",

@@ -19,7 +19,7 @@
 
 /*
  * One place for those the Canvas's controls open: `s` below the controls, lined up with
- * their end, no wider or taller than the Canvas leaves room for. Each is the Canvas's own
+ * their end (`--clover-canvas-controls-end`, where a template moves it), no wider or taller than the Canvas leaves room for. Each is the Canvas's own
  * child, under the controls in the stacking order (`Canvas.css`), so a control's Tip
  * always shows over it, and the controls stay usable while it is open. Below all of
  * them: a narrow Body wraps the cluster onto more rows, which it measures
@@ -32,7 +32,7 @@
       var(--clover-space-s)
   );
   top: var(--top);
-  right: var(--clover-canvas-controls-inset);
+  right: var(--clover-canvas-controls-end, var(--clover-canvas-controls-inset));
   max-width: min(22rem, calc(100% - 2 * var(--clover-canvas-controls-inset)));
   max-height: calc(100% - var(--top) - var(--clover-canvas-controls-inset));
 }
@@ -63,7 +63,7 @@
   > :is(.clover-canvas-caption, .clover-canvas-menu) {
   --top: var(--clover-canvas-controls-inset);
   right: calc(
-    var(--clover-canvas-controls-inset) +
+    var(--clover-canvas-controls-end, var(--clover-canvas-controls-inset)) +
       var(--clover-canvas-controls-width, var(--clover-control)) +
       var(--clover-space-s)
   );

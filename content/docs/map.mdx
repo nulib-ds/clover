@@ -48,7 +48,8 @@ Draws a resource's [navPlace](https://iiif.io/api/extension/navplace/) places an
 [MapLibre GL](https://maplibre.org/) map, and lists them under it. MapLibre loads when a
 map is first shown. Inside a `Root`, it maps the Root's resource and follows the view: a
 Collection's members too, each opening its Manifest as it is pressed. A place is named with the
-date of what it locates (its `navDate`), in its list and on the map. Its other props, and
+date of what it locates (its `navDate`), in its list and on the map, and on the map with
+its picture: its Manifest's, Canvas's or member's `thumbnail`, else its first image. Its other props, and
 its `ref`, go to its element.
 
 <ApiReference elements="clover-map">
@@ -59,7 +60,7 @@ its `ref`, go to its element.
 | `navPlace`       | `object`                          | —                                 | GeoJSON to draw: a FeatureCollection, Feature or geometry.                                                                                                                                 |
 | `georeferences`  | `object[]`                        | —                                 | Georeference Extension annotations to lay over the map.                                                                                                                                    |
 | `overlay`        | `boolean`                         | `true`                            | Draw the georeferenced images.                                                                                                                                                             |
-| `overlayOpacity` | `number`                          | `0.75`                            | Their opacity, from 0 to 1.                                                                                                                                                                |
+| `overlayOpacity` | `number`                          | `1`                               | Their opacity, from 0 to 1.                                                                                                                                                                |
 | `styleUrl`       | `string`                          | Clover's basemap                  | A MapLibre style, used as it is.                                                                                                                                                           |
 | `workerUrl`      | `string`                          | Clover's own                      | Where MapLibre's worker is served from, to serve your own.                                                                                                                                 |
 | `scrollZoom`     | `boolean`                         | `false`                           | Zoom with the wheel or trackpad.                                                                                                                                                           |
@@ -82,7 +83,11 @@ you can call too: `navPlaceOf`, `georeferencesOf` and the rest.
 ### Georeferenced images
 
 A Georeference Extension annotation lays its image over the map by an affine fit of its
-control points, clipped to its mask. The image server must allow CORS.
+control points, clipped to its mask, opaque unless `overlayOpacity` says otherwise. The
+image server must allow CORS.
+
+In the [Canvas](/docs/canvas), a georeferenced Canvas has a Map control even without a
+`navPlace`: it opens a map with the image laid over it, and its Expand map button puts the map in the Canvas's place until it is pressed again or closed.
 
 <Example>
 <MapDemo mock="georeference/manifest.json" />

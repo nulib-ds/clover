@@ -11,6 +11,59 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **The Canvas's map shows its georeferenced images.** The box the Map control opens lays
+  each georeferenced Canvas in view over the map, by its Georeference Extension
+  annotation, and a Canvas with one gets the Map control even without a `navPlace`.
+- **`Label`'s `keep` (`keep` on `<clover-label>`)** keeps its place while there is no
+  label, as the next Manifest loads: the element stays, holding a non-breaking space
+  hidden from assistive technology. The Default template's title uses it, so its header
+  no longer jumps as a Collection's members are stepped through.
+- **A place's picture over its name on a map.** Pointed at, pressed or chosen from the
+  list, a place shows its Manifest's, Canvas's or Collection member's picture over its
+  name, as the seek bar shows a chapter's: its own `thumbnail`, else its first image,
+  asked of its image service only as its `info.json` allows. A place's feature carries
+  where it comes from as `properties.thumbnail`. A member not yet loaded shows its
+  entry's `thumbnail` alone.
+- **Expand map.** A button beside the box's Close puts the map in the Canvas's place,
+  filling the Body, with full screen and the Map control left in the Canvas's controls.
+  It becomes Collapse map, which brings the Canvas back as it was, as do Close and
+  Escape. Its labels, `mapExpand` and `mapCollapse`, are in every locale.
+
+### Changed
+
+- **Georeferenced images are opaque by default.** `overlayOpacity` (`overlay-opacity`)
+  defaults to `1`, from `0.75`. For the earlier look, set it:
+
+  ```jsx
+  <Clover.Map overlayOpacity={0.75} />
+  ```
+
+- **A map's zoom controls are at its top right**, in every map (the `Map` component, the
+  Panel's Map and the Canvas's place box), `xs` apart as the Canvas's controls are (`s`
+  before). In the place box, its Expand map button and Close end the same row. The credits'
+  ⓘ stays at the lower right.
+- **Full screen's glyph is a little bolder**, and its exit's with it, wherever they show
+  (the Canvas's controls, the media transport), to hold beside the other controls.
+- **In the Default template, the Canvas's popups line up with its controls.** Beside the
+  Panel's handle, the information box, the menus and the place box now end where the
+  controls do, read from a new custom property, `--clover-canvas-controls-end`.
+
+### Fixed
+
+- **Stepping through a Collection's members keeps the place box's map.** While the next
+  member loads, the open box stays, the old place put away, and its map eases to the
+  next place rather than being made again. A map given another place eases there
+  wherever it is shown, at once where motion is reduced.
+- **A map's place no longer flickers under the pointer.** The place named stays while it
+  is under the pointer, across a point's larger area to press and across places that
+  overlap, and while the same places are handed to the map again; its name goes only
+  when no place is. Its popover never takes the pointer, even moved over its place to
+  stay inside the map.
+- **The page scrolls over the place box's map**, as it does over the Canvas, rather than
+  stopping at it.
+
 ## [4.7.0] - 2026-11-08
 
 ### Added

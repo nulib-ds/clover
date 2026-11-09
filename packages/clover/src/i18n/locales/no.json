@@ -95,6 +95,8 @@
   "informationPanelTabsTargets": "Visninger",
   "mapUnavailable": "Kartet kunne ikke vises.",
   "mapLabel": "Kart",
+  "mapExpand": "Utvid kartet",
+  "mapCollapse": "Forminsk kartet",
   "mapAttribution": "Kartkreditering",
   "mapPlaceUntitled": "Sted {{number}}",
   "mapOverlay": "Georeferert bilde",

@@ -126,7 +126,8 @@ label:has(> input:focus-visible):not([data-tip-hidden]) > .clover-tip {
 
 /*
  * Below a control along the top of what it sits on. The Canvas's information box
- * scrolls, so above its close button the box would cut the name off.
+ * scrolls, so above its close button the box would cut the name off; the place box's
+ * Expand map button and Close, in its top corner, likewise.
  */
 :is(
     .clover-canvas-controls,
@@ -137,6 +138,7 @@ label:has(> input:focus-visible):not([data-tip-hidden]) > .clover-tip {
   .clover-tip,
 button.clover-canvas-placeholder-toggle > .clover-tip,
 button.clover-canvas-caption-close > .clover-tip,
+.clover-canvas-place-actions > button > .clover-tip,
 button.clover-template-document-sidebar-toggle > .clover-tip,
 :is(.clover-template-spine, .clover-template-document-spine) .clover-tip {
   top: calc(100% + var(--clover-space-xs));
@@ -152,6 +154,7 @@ button.clover-template-document-sidebar-toggle > .clover-tip,
   .clover-tip::before,
 button.clover-canvas-placeholder-toggle > .clover-tip::before,
 button.clover-canvas-caption-close > .clover-tip::before,
+.clover-canvas-place-actions > button > .clover-tip::before,
 button.clover-template-document-sidebar-toggle > .clover-tip::before,
 :is(.clover-template-spine, .clover-template-document-spine)
   .clover-tip::before {

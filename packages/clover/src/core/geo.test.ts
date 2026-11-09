@@ -16,6 +16,7 @@ import { p4 } from "../fixtures/presentation4";
 import {
   affineTransform,
   boundsOf,
+  canvasGeoreferences,
   cornersOf,
   georeferencesOf,
   hasMapData,
@@ -175,6 +176,15 @@ describe("georeferences", () => {
       DC_IMAGE_SERVICE_V3_ID,
     );
     expect(hasMapData(evanston())).toBe(true);
+  });
+
+  it("reads one Canvas's, for its place box, the same as the Manifest's", () => {
+    const manifest = evanston();
+    const canvas = manifest.items[0] as any;
+    expect(canvasGeoreferences(canvas)).toEqual(georeferencesOf(manifest));
+    expect(canvasGeoreferences(canvas)).toBe(canvasGeoreferences(canvas));
+    expect(canvasGeoreferences({ id: "c", type: "Canvas" } as any)).toEqual([]);
+    expect(canvasGeoreferences(undefined)).toEqual([]);
   });
 
   it("is named by the annotation's label, or else its Canvas's", () => {

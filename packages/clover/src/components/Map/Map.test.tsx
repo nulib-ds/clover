@@ -38,6 +38,10 @@ class FakeMap {
   canvas = document.createElement("canvas");
   fitBounds = vi.fn();
   jumpTo = vi.fn();
+  easeTo = vi.fn();
+  /** The places under the pointer, as `queryRenderedFeatures` reports them. */
+  under: any[] = [];
+  queryRenderedFeatures = vi.fn(() => this.under);
   setPaintProperty = vi.fn();
   setFeatureState = vi.fn();
   removeFeatureState = vi.fn();
@@ -154,11 +158,22 @@ beforeAll(() => {
     clip() {},
     drawImage() {},
   })) as never;
+  const sources = new WeakMap<HTMLImageElement, string>();
   Object.defineProperty(HTMLImageElement.prototype, "src", {
     configurable: true,
-    set(this: HTMLImageElement) {
-      Object.defineProperty(this, "naturalWidth", { value: 1528 });
-      Object.defineProperty(this, "naturalHeight", { value: 2048 });
+    get(this: HTMLImageElement) {
+      return sources.get(this) ?? "";
+    },
+    set(this: HTMLImageElement, value: string) {
+      sources.set(this, value);
+      Object.defineProperty(this, "naturalWidth", {
+        value: 1528,
+        configurable: true,
+      });
+      Object.defineProperty(this, "naturalHeight", {
+        value: 2048,
+        configurable: true,
+      });
       queueMicrotask(() => this.onload?.(new Event("load")));
     },
   });
@@ -307,6 +322,43 @@ describe("Map", () => {
     expect(map.getLayer("road-primary")).toBeUndefined();
   });
 
+  // Mat, 2026-11-08: "it's okay to rerender but can we smooth it out?"
+  it("eases to another place it is given, and at once where motion is reduced", async () => {
+    const point = (lng: number) => ({
+      type: "Feature",
+      properties: {},
+      geometry: { type: "Point", coordinates: [lng, 42.04] },
+    });
+    const { rerender } = render(<CloverMap navPlace={point(-87.69)} />);
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    await waitFor(() => expect(map.jumpTo).toHaveBeenCalledTimes(1));
+    rerender(<CloverMap navPlace={point(-87.6)} />);
+    await waitFor(() =>
+      expect(map.easeTo).toHaveBeenCalledWith({
+        center: [-87.6, 42.04],
+        zoom: 8,
+        duration: 600,
+      }),
+    );
+    const matchMedia = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes("reduce"),
+    })) as never;
+    try {
+      rerender(<CloverMap navPlace={point(-87.5)} />);
+      await waitFor(() =>
+        expect(map.jumpTo).toHaveBeenLastCalledWith({
+          center: [-87.5, 42.04],
+          zoom: 8,
+        }),
+      );
+      expect(map.easeTo).toHaveBeenCalledTimes(1);
+    } finally {
+      window.matchMedia = matchMedia;
+    }
+  });
+
   it("maps a Root's places; pressing one names it and opens its Canvas", async () => {
     render(
       <Clover.Root iiifContent={canvasesJson}>
@@ -337,6 +389,161 @@ describe("Map", () => {
   });
 
   // Cookbook 0318: a Collection of Manifests, each with its place.
+  // Mat, 2026-11-08: "for navPlace items, show a thumbnail for the respective item".
+  it("shows a place's picture over its name: its Canvas's image, sized from its info.json", async () => {
+    const manifest = evanston() as any;
+    manifest.items[0].navPlace = {
+      type: "Feature",
+      properties: { label: { en: ["Evanston"] } },
+      geometry: { type: "Point", coordinates: [-87.69, 42.04] },
+    };
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    await waitFor(() => expect(placeData(maps[0])?.features).toHaveLength(1));
+    const list = await screen.findByRole("list");
+    fireEvent.click(within(list).getByRole("button", { name: /Evanston/ }));
+    const named = popups.at(-1)!.node!;
+    expect(named).toHaveTextContent("Evanston");
+    // Decorative, as its name says what it is; shown once it has loaded.
+    const picture = await waitFor(() => {
+      const image = named.querySelector("img.clover-tip-image");
+      expect(image).not.toBeNull();
+      return image as HTMLImageElement;
+    });
+    expect(picture).toHaveAttribute("alt", "");
+    expect(picture.src).toMatch(
+      new RegExp(`^${DC_IMAGE_SERVICE_V3_ID}/full/\\d+,\\d+/0/default\\.jpg$`),
+    );
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      `${DC_IMAGE_SERVICE_V3_ID}/info.json`,
+      expect.anything(),
+    );
+    await waitFor(() => expect(picture.hidden).toBe(false));
+  });
+
+  // Mat, 2026-11-08: "as if hover turns off/on/off/on over and over".
+  it("keeps the place it names while it is under the pointer, across layers and places that overlap", async () => {
+    render(
+      <Clover.Root iiifContent={canvasesJson}>
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    await waitFor(() => expect(placeData(map)?.features).toHaveLength(2));
+    const [first, second] = placeData(map).features;
+    const move = (...under: unknown[]) => {
+      map.under = under;
+      act(() => map.fire("mousemove", { point: { x: 0, y: 0 } }));
+    };
+    move(first);
+    expect(popups).toHaveLength(1);
+    // The other place under it too, first: the one named stays, never named again.
+    move(second, first);
+    move(first, first);
+    expect(popups).toHaveLength(1);
+    expect(popups[0].removed).toBe(false);
+    // Off every place, the name goes; onto the other, it is named.
+    move();
+    expect(popups[0].removed).toBe(true);
+    move(second);
+    expect(popups).toHaveLength(2);
+  });
+
+  // Mat, 2026-11-08: "blinking is still regularly occurring", as a Collection's members
+  // load beside the map and the same places are handed in again.
+  it("keeps a place named under the pointer when the same places are handed in again", async () => {
+    const place = (lng: number, name: string) => ({
+      type: "Feature",
+      properties: { label: { en: [name] } },
+      geometry: { type: "Point", coordinates: [lng, 41.89] },
+    });
+    const collection = () => ({
+      type: "FeatureCollection",
+      features: [place(12.48, "Arch of Titus"), place(12.49, "Trajan's Forum")],
+    });
+    const { rerender } = render(<CloverMap navPlace={collection()} />);
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    await waitFor(() => expect(placeData(map)?.features).toHaveLength(2));
+    map.under = [placeData(map).features[0]];
+    act(() => map.fire("mousemove", { point: { x: 0, y: 0 } }));
+    expect(popups).toHaveLength(1);
+    // The same places, as new objects: the name stays, never put away and made again.
+    rerender(<CloverMap navPlace={collection()} />);
+    await waitFor(() =>
+      expect(map.sources["geomap-navplace"].setData).toHaveBeenCalledTimes(2),
+    );
+    expect(popups).toHaveLength(1);
+    expect(popups[0].removed).toBe(false);
+    act(() => map.fire("mousemove", { point: { x: 0, y: 0 } }));
+    expect(popups).toHaveLength(1);
+    // Another set without it: its name goes.
+    rerender(
+      <CloverMap
+        navPlace={{
+          type: "FeatureCollection",
+          features: [place(12.5, "Elsewhere")],
+        }}
+      />,
+    );
+    await waitFor(() => expect(popups[0].removed).toBe(true));
+  });
+
+  // Mat, 2026-11-08: "I see image services on the manifest" (Cookbook 0318, whose
+  // members carry no thumbnail).
+  it("loads a member's Manifest for its picture only as its place is named", async () => {
+    const service =
+      "https://iiif.io/api/image/3.0/example/reference/71b9228e087f15c75b628214cd9f647d-The_Colosseum";
+    const table: Record<string, unknown> = {
+      [castelJson.id]: castelJson,
+      [colosseumJson.id]: colosseumJson,
+      [`${service}/info.json`]: {
+        "@context": "http://iiif.io/api/image/3/context.json",
+        id: service,
+        type: "ImageService3",
+        profile: "level1",
+        width: 3000,
+        height: 2000,
+      },
+    };
+    const fetch = vi.fn(async (url: string) =>
+      table[url] === undefined
+        ? new Response("missing", { status: 404 })
+        : new Response(JSON.stringify(table[url]), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+    );
+    render(
+      <Clover.Root iiifContent={romeJson} request={{ fetch }}>
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    await waitFor(() => expect(placeData(maps[0])?.features).toHaveLength(5));
+    // Not asked for until its place is named.
+    expect(fetch).not.toHaveBeenCalledWith(colosseumJson.id, expect.anything());
+    const colosseum = placeData(maps[0]).features[1];
+    maps[0].under = [colosseum];
+    act(() => maps[0].fire("mousemove", { point: { x: 0, y: 0 } }));
+    const named = popups.at(-1)!.node!;
+    expect(named).toHaveTextContent("The Colosseum");
+    const picture = await waitFor(() => {
+      const image = named.querySelector("img.clover-tip-image");
+      expect(image).not.toBeNull();
+      return image as HTMLImageElement;
+    });
+    expect(picture.src).toMatch(
+      new RegExp(`^${service}/full/\\d+,\\d*/0/default\\.jpg$`),
+    );
+    expect(fetch).toHaveBeenCalledWith(colosseumJson.id, expect.anything());
+  });
+
   it("maps a Collection's members; pressing another's place opens that member", async () => {
     const table: Record<string, unknown> = {
       [castelJson.id]: castelJson,

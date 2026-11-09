@@ -44,6 +44,12 @@ export interface MapFeature {
     manifestId?: string;
     /** Its owner's `navDate`, as written, shown with its name (Cookbook 0318). */
     navDate?: string;
+    /**
+     * What its owner's picture is made from (`pictureOf`, as JSON, MapLibre's properties
+     * being flat), shown over its name: the Manifest's, Canvas's or Collection member's
+     * own `thumbnail`, else its first image (Mat, 2026-11-08).
+     */
+    thumbnail?: string;
   };
 }
 
@@ -131,15 +137,51 @@ function closed(geometry: GeoGeometry): GeoGeometry {
   return geometry;
 }
 
+/** What a place belongs to, for its name, its date, what a press opens, and its picture. */
+interface Owner {
+  label?: unknown;
+  canvasId?: string;
+  annotationId?: string;
+  manifestId?: string;
+  navDate?: unknown;
+  /** The Manifest, Canvas, Collection or member whose picture it shows. */
+  resource?: unknown;
+}
+
+/**
+ * What a place's picture is made from, as little of its owner as that needs, read only as
+ * the place is named (`components/Map/placePicture.ts`), so a map carries nothing of it
+ * up front: its `thumbnail`; else, for a Canvas, what it paints (and its placeholder's or
+ * accompanying Canvas's); for a loaded Manifest, its first Canvas's; for a member not yet
+ * loaded, its id, to be loaded then. None for an annotation's place, which names a part
+ * of its Canvas.
+ */
+export function pictureOf(resource: unknown): Json | null {
+  const value = resource as Json | undefined;
+  if (!value) return null;
+  if (asArray(value.thumbnail).length) return { thumbnail: value.thumbnail };
+  if (value.type === "Canvas") {
+    const { items, placeholderContainer, accompanyingContainer } = value;
+    return {
+      type: "Canvas",
+      items,
+      placeholderContainer,
+      accompanyingContainer,
+    };
+  }
+  if (value.type === "Manifest") {
+    const first = asArray(value.items)[0];
+    if (first) return pictureOf(first);
+    // Only an address it can be loaded from, never a made-up id.
+    if (typeof value.id === "string" && /^https?:\/\//.test(value.id))
+      return { type: "Manifest", id: value.id };
+  }
+  return null;
+}
+
 function flatten(
   feature: Json,
-  owner: {
-    label?: unknown;
-    canvasId?: string;
-    annotationId?: string;
-    manifestId?: string;
-    navDate?: unknown;
-  },
+  owner: Owner,
   language: string | undefined,
 ): MapFeature {
   const own = (feature.properties ?? {}) as Json;
@@ -164,6 +206,8 @@ function flatten(
   if (owner.annotationId) properties.annotationId = owner.annotationId;
   if (owner.manifestId) properties.manifestId = owner.manifestId;
   if (typeof owner.navDate === "string") properties.navDate = owner.navDate;
+  const picture = pictureOf(owner.resource);
+  if (picture) properties.thumbnail = JSON.stringify(picture);
   return {
     type: "Feature",
     ...(feature.id != null ? { id: feature.id } : {}),
@@ -210,20 +254,12 @@ export function navPlaceOf(
   if (cached) return cached;
 
   const features: MapFeature[] = [];
-  const add = (
-    geo: unknown,
-    owner: {
-      label?: unknown;
-      canvasId?: string;
-      annotationId?: string;
-      manifestId?: string;
-      navDate?: unknown;
-    },
-  ) =>
+  const add = (geo: unknown, owner: Owner) =>
     features.push(...featuresOf(geo).map((f) => flatten(f, owner, language)));
 
   const c = collection as Json | null;
-  if (c?.navPlace) add(c.navPlace, { label: c.label, navDate: c.navDate });
+  if (c?.navPlace)
+    add(c.navPlace, { label: c.label, navDate: c.navDate, resource: c });
   const m = (manifest ?? {}) as Json;
   let own = false;
   for (const member of asArray(c?.items) as Json[]) {
@@ -236,16 +272,20 @@ export function navPlaceOf(
       label: open ? m.label : member.label,
       manifestId: member.id,
       navDate: open ? (m.navDate ?? member.navDate) : member.navDate,
+      // The open member's own Manifest, unless its entry has a thumbnail it lacks;
+      // another member's entry, its Manifest loaded once its place is named.
+      resource: open && (m.thumbnail || !member.thumbnail) ? m : member,
     });
   }
   if (m.navPlace && !own)
-    add(m.navPlace, { label: m.label, navDate: m.navDate });
+    add(m.navPlace, { label: m.label, navDate: m.navDate, resource: m });
   for (const canvas of selectSequence(manifest).canvases as Json[]) {
     if (canvas.navPlace) {
       add(canvas.navPlace, {
         label: canvas.label,
         canvasId: canvas.id,
         navDate: canvas.navDate,
+        resource: canvas,
       });
     }
     for (const annotation of annotationsOf(canvas)) {
@@ -388,6 +428,24 @@ export function readGeoreference(
 const georeferences = new WeakMap<object, Georeference[]>();
 
 /**
+ * The georeferenced images of one Canvas, from its loaded annotation pages: what the
+ * Canvas's place box warps onto its map (`Canvas/PlaceBox`). Memoized on the Canvas.
+ */
+export function canvasGeoreferences(canvas: Json | undefined): Georeference[] {
+  if (!canvas) return NO_GEOREFERENCES;
+  const cached = georeferences.get(canvas);
+  if (cached) return cached;
+  const found = annotationsOf(canvas)
+    .map((annotation) => readGeoreference(annotation, canvas))
+    .filter((georeference): georeference is Georeference =>
+      Boolean(georeference),
+    );
+  const result = found.length ? found : NO_GEOREFERENCES;
+  georeferences.set(canvas, result);
+  return result;
+}
+
+/**
  * The georeferenced images of the Manifest's Canvases, from their loaded annotation pages.
  * Memoized on the Manifest: embedding a fetched page makes a new one.
  */
@@ -395,13 +453,9 @@ export function georeferencesOf(manifest: Manifest | null): Georeference[] {
   if (!manifest) return NO_GEOREFERENCES;
   const cached = georeferences.get(manifest);
   if (cached) return cached;
-  const found: Georeference[] = [];
-  for (const canvas of selectSequence(manifest).canvases as Json[]) {
-    for (const annotation of annotationsOf(canvas)) {
-      const georeference = readGeoreference(annotation, canvas);
-      if (georeference) found.push(georeference);
-    }
-  }
+  const found = (selectSequence(manifest).canvases as Json[]).flatMap(
+    canvasGeoreferences,
+  );
   const result = found.length ? found : NO_GEOREFERENCES;
   georeferences.set(manifest, result);
   return result;

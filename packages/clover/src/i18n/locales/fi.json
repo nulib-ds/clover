@@ -95,6 +95,8 @@
   "informationPanelTabsTargets": "Näkymät",
   "mapUnavailable": "Karttaa ei voitu näyttää.",
   "mapLabel": "Kartta",
+  "mapExpand": "Laajenna kartta",
+  "mapCollapse": "Pienennä kartta",
   "mapAttribution": "Kartan tekijätiedot",
   "mapPlaceUntitled": "Paikka {{number}}",
   "mapOverlay": "Georeferoitu kuva",

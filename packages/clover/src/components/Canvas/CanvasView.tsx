@@ -51,6 +51,7 @@ import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { join } from "../../lib/classnames";
 import { type LanguageMapLike, localize } from "../../core/value";
+import { isGeoreferenced } from "../../core/geo-detect";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { BodyNote, BodyUnloadable } from "../../ui/BodyUnloadable";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
@@ -107,6 +108,13 @@ const NO_MODEL: AnnotationModel = {
 };
 // Few Canvases are animations: their clock and bar load when one is shown.
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
+/** No place, while the next Manifest loads: the box's map kept, with nothing on it. */
+const NO_PLACES = {
+  feature: { type: "FeatureCollection", features: [] },
+  canvases: undefined,
+  name: undefined,
+};
+
 // A picked annotation's place, on its map (Cookbook 0139): MapLibre with it, on demand.
 const PlaceBox = lazy(() => import("./PlaceBox"));
 /*
@@ -413,16 +421,16 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const [closedPick, setClosedPick] = useState<string | null>(null);
   const pickOpen = pickKey !== null && closedPick !== pickKey;
   /*
-   * Where the shown Canvases are, else their Manifest (`navPlace`, Cookbook 0154 and 0240):
-   * a map control opens a box of it, as the information control does. Its box is made the
-   * first time it opens, MapLibre with it.
+   * Where the shown Canvases are, else their Manifest (`navPlace`, Cookbook 0154 and 0240),
+   * and the shown Canvases that are georeferenced maps: a map control opens a box of them,
+   * as the information control does, the maps warped onto it. Its box is made the first
+   * time it opens, MapLibre and the georeferences' reader with it; here, only a look.
    */
   const places = useMemo(() => {
     const own = (canvases ?? [])
       .map((canvas) => (canvas as { navPlace?: any }).navPlace)
       .filter(Boolean);
     const source = own.length ? own : props.navPlace ? [props.navPlace] : [];
-    if (!source.length) return null;
     const features = source.flatMap((place: any) =>
       place?.type === "FeatureCollection"
         ? (place.features ?? [])
@@ -430,17 +438,40 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
           ? [place]
           : [],
     );
-    if (!features.length) return null;
+    const georeferenced = (canvases ?? []).filter(isGeoreferenced);
+    if (!features.length && !georeferenced.length) return null;
     const named =
       features.length === 1 ? features[0]?.properties?.label : undefined;
     return {
       feature: { type: "FeatureCollection", features },
+      canvases: georeferenced.length ? georeferenced : undefined,
       name: (named ?? props.label) as LanguageMapLike | undefined,
     };
   }, [canvases, props.navPlace, props.label]);
   const placeId = `place-box-${instance}`;
   const [placeOpen, setPlaceOpen] = useState(false);
   const [placeShown, setPlaceShown] = useState(false);
+  /*
+   * While the next Manifest loads (a Collection's member, Cookbook 0318), its box stays
+   * open, as the Canvas does (`manifestId="loading"`), with the old place put away and its
+   * map kept, so the map is not made again and glides to the next place (Mat, 2026-11-08:
+   * "the map shakes/rerenders abruptly"); its control stays, focus with it.
+   */
+  const shownPlaces =
+    places ?? (placeOpen && props.manifestId === "loading" ? NO_PLACES : null);
+  /*
+   * The box whose map has taken the Canvas's place (Mat, 2026-11-08: "a toggle … that can
+   * flip the map and the canvas"; "this should close on swap in. come back on swap out"):
+   * its map fills the Body, and the Canvas is put away, kept as it was, out of sight and
+   * of the tab order, with its view's controls. Only while that box is open; closing it
+   * brings the Canvas back.
+   */
+  const [swappedBox, setSwappedBox] = useState<string | null>(null);
+  const placeSwapped =
+    (swappedBox === placeId && placeOpen) ||
+    (swappedBox === `place-of-${instance}` && pickOpen);
+  const swapPlace = (box: string) =>
+    setSwappedBox((swapped) => (swapped === box ? null : box));
   const modelRef = useRef(model);
   modelRef.current = model;
   const releaseAnnotation = useCallback(() => modelRef.current.release(), []);
@@ -1105,6 +1136,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         data-player={player ? "" : undefined}
         data-animated={animated ? "" : undefined}
         data-navigable={navigable}
+        data-place={placeSwapped ? "swapped" : undefined}
         data-placeholder={
           stills.length && !player ? showPlaceholder : undefined
         }
@@ -1224,8 +1256,9 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             captionId={hasCaption ? captionId : undefined}
             captionOpen={isCaptionOpen}
             onCaptionToggle={() => setCaptionOpen((open) => !open)}
-            placeId={places ? placeId : undefined}
+            placeId={shownPlaces ? placeId : undefined}
             placeOpen={placeOpen}
+            away={placeSwapped}
             onPlaceToggle={() => {
               setPlaceShown(true);
               setPlaceOpen((open) => !open);
@@ -1425,7 +1458,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             <PlaceBox
               id={`place-of-${instance}`}
               open={pickOpen}
+              swapped={placeSwapped}
+              onSwap={() => swapPlace(`place-of-${instance}`)}
               onClose={(restoreFocus) => {
+                setSwappedBox(null);
                 setClosedPick(pickKey);
                 if (restoreFocus)
                   document.getElementById(pickedPlace.id)?.focus();
@@ -1436,18 +1472,23 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             />
           </Suspense>
         )}
-        {places && placeShown && (
+        {shownPlaces && placeShown && (
           <Suspense fallback={null}>
             <PlaceBox
               id={placeId}
               open={placeOpen}
+              swapped={placeSwapped}
+              onSwap={() => swapPlace(placeId)}
               onClose={(restoreFocus) => {
+                setSwappedBox(null);
                 setPlaceOpen(false);
                 if (restoreFocus)
                   document.getElementById(`place-${instance}`)?.focus();
               }}
-              feature={places.feature}
-              name={places.name}
+              feature={shownPlaces.feature}
+              canvases={shownPlaces.canvases}
+              owner={canvases?.[0]}
+              name={shownPlaces.name}
               language={language}
             />
           </Suspense>
