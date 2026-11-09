@@ -412,18 +412,42 @@
   margin: calc(-1 * var(--tray));
   padding: var(--tray);
   /*
-   * The controls' own dark fill, clear enough that the picture shows through, blurred
-   * (Mat, 2026-11-01: "going back to a transparent black. we can keep the blur, but get
-   * rid of the outline"; "blur bg behind the control toggle deck"), so its controls stand
-   * on a calm ground, whatever is under them. No edge of its own.
+   * Blurred a little (Mat, 2026-11-01: "blur bg behind the control toggle deck"; `xs`
+   * until 2026-11-09: "make blur much less strong. we may do away with it altogether"),
+   * so its controls stand on a calmer ground. No edge of its own ("get rid of the
+   * outline"). Its ground is below, in the stacking context it isolates, which holds
+   * without the blur.
    */
-  background-color: color-mix(
-    in srgb,
-    var(--clover-color-control, #1a1d1e) 40%,
-    transparent
+  isolation: isolate;
+  -webkit-backdrop-filter: blur(var(--clover-space-3xs));
+  backdrop-filter: blur(var(--clover-space-3xs));
+}
+
+/*
+ * Its ground, the Canvas's own, clear enough that the picture shows through (Mat,
+ * 2026-11-09: "instead of black, let's try a translucent variant of the defined bg color
+ * for the canvas"; the controls' dark fill at 40% from 2026-11-01): the Canvas's
+ * background over the page's ground, as full screen lays them (above), so it follows a
+ * page's `--clover-canvas-background`, light behind an image and black behind a video.
+ * A layer of its own, so its opacity is the ground's alone, never its controls'; inside
+ * the tray's stacking context (its `isolation`), so behind them, and clipped as the tray
+ * opens.
+ */
+.clover-canvas
+  > .clover-canvas-controls
+  > .clover-canvas-more[data-open]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: linear-gradient(
+    var(--clover-canvas-background),
+    var(--clover-canvas-background)
   );
-  -webkit-backdrop-filter: blur(var(--clover-space-xs));
-  backdrop-filter: blur(var(--clover-space-xs));
+  background-color: var(--clover-color-secondary, #fff);
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .clover-canvas-more > button,

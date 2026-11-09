@@ -11,6 +11,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **The expanded viewer controls sit on the Canvas's own ground.** Opened, the tray of
+  zoom, rotation, reset and full screen was a translucent black; it is now the Canvas's
+  background, `--clover-canvas-background` over the page's `secondary` color, made
+  translucent, and blurred far less. It follows a background a page sets, with nothing to
+  change.
+
 ## [4.8.1] - 2026-11-09
 
 ### Fixed
