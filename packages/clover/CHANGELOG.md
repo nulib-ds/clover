@@ -11,6 +11,20 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **A closed section's list no longer scrolls the Panel.** While a recording played, a
+  closed Transcript following its cues scrolled the Panel to its top at each new cue,
+  taking the open section (About, say) with it. A list in a closed section or a hidden
+  tab now leaves the Panel alone; the Transcript, Annotations and Search follow only while
+  shown, in every Panel.
+- **A Transcript opens at the current cue.** Opened again, or its tab chosen, while a
+  recording is at a cue, the Transcript shows that cue at the top at once, under its
+  search field, rather than catching up at the next cue.
+- **A cue followed or found lands clear of the Transcript's search field.** The playing
+  cue and a match stepped to once scrolled to just under the stuck headings, where the
+  held search field could cover their first line.
+
 ## [4.8.0] - 2026-11-08
 
 ### Added

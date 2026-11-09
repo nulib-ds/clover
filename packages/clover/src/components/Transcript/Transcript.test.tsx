@@ -415,6 +415,49 @@ describe("Transcript", () => {
     );
   });
 
+  it("leaves the Panel alone while closed, and opens again at the current cue", async () => {
+    render(
+      <div data-testid="box" style={{ overflowY: "auto" }}>
+        <Clover.Root iiifContent={captionsJson} request={{ fetch }}>
+          <Spy />
+          <Clover.Panel layout="accordion" />
+        </Clover.Root>
+      </div>,
+    );
+    const box = screen.getByTestId("box");
+    box.scrollBy = vi.fn();
+    vi.spyOn(box, "getBoundingClientRect").mockReturnValue({
+      top: 0,
+      bottom: 100,
+    } as DOMRect);
+    fireEvent.click(await screen.findByRole("button", { name: "Transcript" }));
+    const cue = await screen.findByRole("button", { name: /at lunch/ });
+    vi.spyOn(cue, "getBoundingClientRect").mockReturnValue({
+      top: 300,
+      bottom: 320,
+    } as DOMRect);
+    const video = document.createElement("video");
+    Object.defineProperty(video, "paused", { value: false });
+    act(() => clover.media.emit(video));
+    fireEvent.click(screen.getByRole("button", { name: "About" }));
+    vi.mocked(box.scrollBy).mockClear();
+
+    // Closed, the cue it follows changes and nothing scrolls.
+    act(() => {
+      Object.defineProperty(video, "currentTime", {
+        configurable: true,
+        value: 4.5,
+      });
+      video.dispatchEvent(new Event("timeupdate"));
+    });
+    expect(cue.parentElement).toHaveAttribute("aria-current", "true");
+    expect(box.scrollBy).not.toHaveBeenCalled();
+
+    // Opened again, it is at that cue at once.
+    fireEvent.click(screen.getByRole("button", { name: "Transcript" }));
+    expect(box.scrollBy).toHaveBeenCalledWith({ top: 300, behavior: "auto" });
+  });
+
   it("joins the information panel when the view has captions", async () => {
     render(
       <Clover.Root iiifContent={captionsJson} request={{ fetch }}>

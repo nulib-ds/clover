@@ -33,6 +33,27 @@ describe("bringIntoView", () => {
     expect(page).not.toHaveBeenCalled();
   });
 
+  it("leaves the box alone while the element is in a closed section", () => {
+    const box = document.createElement("div");
+    box.style.overflowY = "auto";
+    const open = document.createElement("section");
+    const closed = document.createElement("section");
+    closed.hidden = true;
+    const item = document.createElement("p");
+    closed.append(item);
+    box.append(open, closed);
+    document.body.append(box);
+    box.scrollBy = vi.fn();
+    vi.spyOn(box, "getBoundingClientRect").mockReturnValue(at(500, 400));
+    // Laid out nowhere, as a hidden element is.
+    vi.spyOn(item, "getBoundingClientRect").mockReturnValue(at(0, 0));
+
+    bringIntoView(item, "nearest");
+    bringIntoView(item, "start");
+
+    expect(box.scrollBy).not.toHaveBeenCalled();
+  });
+
   it("leaves the page alone when nothing but the page scrolls the element", () => {
     const item = document.createElement("p");
     document.body.append(item);

@@ -169,7 +169,7 @@ export const transcriptDocs: ElementDocs = {
   attributes: {
     follow: {
       description:
-        '"false" stops the current cue being kept in view as it plays.',
+        '"false" stops the current cue being kept in view as it plays, and opened at as its section opens.',
       default: "true",
     },
     find: {
