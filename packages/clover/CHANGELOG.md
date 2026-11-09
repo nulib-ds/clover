@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.8.0] - 2026-11-08
+
 ### Added
 
 - **The Canvas's map shows its georeferenced images.** The box the Map control opens lays
@@ -61,6 +63,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   overlap, and while the same places are handed to the map again; its name goes only
   when no place is. Its popover never takes the pointer, even moved over its place to
   stay inside the map.
+- **The Resize panels Tip shows over the Panel.** Pointed at, focused or dragged, the
+  split's handle rises over both panes, so its Tip is never under the Panel's headings.
 - **The page scrolls over the place box's map**, as it does over the Canvas, rather than
   stopping at it.
 
