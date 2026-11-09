@@ -812,9 +812,14 @@ deadline.
     Items' caret (the site's round buttons agree; Mat, 2026-10-25), named "Open", for the address or content state of the reader's own, with ours listed under it,
     the list as wide as the whole select (its label, the field and Open; Mat, 2026-10-22) (`resources`
     in `playground-config.ts`, in this order (Mat, 2026-10-26): a catalog, the footage, a
-    Collection (the masks), a model in 3D, a manuscript in Arabic (Maktaba's), a
-    recording, a postcard, a photo, a film, a map…), each by its thumbnail, its own label, and a few words on one thing it has
-    that the others do not (`description`: concise, only what the resource has). The
+    Collection (the masks), a model in 3D, etu.wiki's calligraphy in four
+    languages (Mat, 2026-11-08), a recording, a manuscript in Arabic (Maktaba's), a
+    postcard, a photo, a film, a map…), each by its thumbnail, its own label, and a few words of IIIF,
+    never of the material (`description`; Mat, 2026-11-08): its type, then the features it
+    has, in lowercase but for the first word and proper names (Mat, 2026-11-08: "lower
+    case subtitles unless truly proper", so not IIIF's types), "Manifest with paged
+    canvases, annotations, structures and ranges, and content search", only what the
+    resource has. The Cookbook's recipes keep their folders' names. The
     list's first item, always, is "View your own" (a dashed slot with a plus, as the old
     "Your own" tile was), which empties the field for an address. Each of the reader's
     own joins the list as they open it, after that, by its root `label` and
@@ -885,9 +890,11 @@ deadline.
     pill, scrolling within, its options fading out as they pass under the pill and in at
     the surface's foot (a mask over the list's room at its ends, where nothing rests;
     Mat, 2026-10-30: "as if it is moving under and disappearing", never a shade). A press
-    never selects the label, which a highlight made hard to read (Mat, 2026-10-30): the
-    first thing typed, pasted, dropped or dictated into it takes its place all the same,
-    and a deletion empties it (`beforeinput`).
+    selects the label, in the browser's own highlight, so it is plain that typing
+    replaces it (Mat, 2026-11-08: unselected "it's confusing", reversing 2026-10-30, when
+    a highlight was found hard to read): the first thing typed, pasted, dropped or
+    dictated into it takes its place, even with the caret moved off the selection, and a
+    deletion empties it (`beforeinput`).
     On a touch screen a press lists ours and brings no keyboard (`inputMode="none"` while
     it shows one of ours; Mat, 2026-10-21); "View your own" brings the keyboard, for an address, by focusing the field again
     within the press.

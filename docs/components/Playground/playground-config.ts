@@ -15,8 +15,11 @@ export interface PlaygroundResource {
    */
   title: string;
   /**
-   * A few words under its label in the picker: one thing it has that the others do not,
-   * so the list shows the range. Only what the resource has.
+   * A few words under its label in the picker, of IIIF and never of the material (Mat,
+   * 2026-11-08): its type, then the features it has, in lowercase but for the first word and
+   * proper names (Arabic, Presentation 4, `navPlace` as written), "Manifest with paged
+   * canvases, annotations, structures and ranges, and content search". Only what the
+   * resource has.
    */
   description: string;
   /** Its address, a content state, or a path under the docs' published `/mocks/`. */
@@ -56,8 +59,9 @@ const MASKS =
 /**
  * One of each kind of thing a page might show, in the select's order (Mat, 2026-10-26):
  * the catalog of pages first (the templates' default), the footage second, the
- * Collection of masks third, the model in 3D, a manuscript, the recording sixth, then a
- * postcard, a photo, the film after it, a map and an animation.
+ * Collection of masks third, the model in 3D, etu.wiki's calligraphy in four languages
+ * (Mat, 2026-11-08), the recording sixth, a manuscript, then a postcard, a photo, the
+ * film after it, a map and an animation.
  * Every template opens each.
  */
 export const resources: PlaygroundResource[] = [
@@ -70,7 +74,8 @@ export const resources: PlaygroundResource[] = [
     name: "Catalog",
     title:
       "Portfolio of illustrations showing the White bicycles : then and now",
-    description: "Catalog with annotations and chapters",
+    description:
+      "Manifest with paged canvases, annotations, structures and ranges, and content search",
     resource: "paged/manifest.json",
     mock: true,
     thumbnail: `${works}/386ff30f-1975-4d9c-9905-ec76381d6992/thumbnail`,
@@ -82,7 +87,8 @@ export const resources: PlaygroundResource[] = [
     key: "footage",
     name: "Footage",
     title: "Rudolf Hess at Nuremberg Sentencing",
-    description: "Film with spatial annotations through time",
+    description:
+      "Manifest with video, annotations in space and time, captions, ranges and a transcript",
     resource: "rudolf-hess-nuremberg/manifest.json",
     mock: true,
     thumbnail:
@@ -92,7 +98,7 @@ export const resources: PlaygroundResource[] = [
     key: "collection",
     name: "Collection",
     title: "Commedia dell'Arte: The Masks of Antonio Fava",
-    description: "Collection of masks",
+    description: "Collection of manifests, opened by a content state",
     // The Collection, opened on Zagna "lunga": a content state naming the Manifest, part
     // of the Collection, so the reader arrives on it among the other masks.
     resource: contentState({
@@ -109,12 +115,37 @@ export const resources: PlaygroundResource[] = [
     key: "model",
     name: "Model",
     title: "Esu Shrine",
-    description: "Sculpture in 3D",
+    description: "Presentation 4 manifest with a scene and a glTF model",
     resource: "esu-shrine/manifest.json",
     mock: true,
     // The Lab's own square of its first photograph of the shrine, as its page shows it.
     thumbnail:
       "https://sites.northwestern.edu/materialhistorylab/files/2025/10/DSC_4700-265x265.jpg",
+  },
+  // Wang Xizhi's calligraphy (王羲之), as etu.wiki publishes it (nulib-ds/clover#321),
+  // every value in Traditional and Simplified Chinese, English and Japanese. Its server
+  // sends CORS headers.
+  {
+    key: "calligraphy",
+    name: "Calligraphy",
+    title: "Eastern Jin Dynasty Wang Yizhi Reminiscence Post",
+    description:
+      "Manifest with language maps in Chinese, both scripts, English and Japanese",
+    resource:
+      "https://gsh.etu.wiki/3/manifest/9f823420-8966-11e8-bdaa-13fa45aa92ea",
+    // Its first Canvas's, as the Manifest gives none of its own.
+    thumbnail:
+      "https://gsh.etu.wiki/3/image/bafybeifv2i562mhfkqek5c6ic5ocj77ih3xubkonvrxgupi3wdtg5ufxl4/full/!300,300/0/default.jpg",
+  },
+  {
+    key: "recording",
+    name: "Recording",
+    title: "Hindenburg broadcast",
+    description:
+      "Manifest with audio, an accompanying canvas, captions, annotations and ranges",
+    resource: "hindenburg/manifest.json",
+    mock: true,
+    thumbnail: `${works}/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254/thumbnail`,
   },
   // An Arabic manuscript of about 1800 in the University of Illinois Archives, as
   // Northwestern's Maktaba publishes it: two pages, `paged` (Mat, 2026-10-25, for the
@@ -124,21 +155,13 @@ export const resources: PlaygroundResource[] = [
     name: "Manuscript",
     title:
       "The Rushd al-Ghāfil / Guide for the Heedless (ʿAbd Allāh b. al-Ḥājj Ibrāhīm al-ʿAlawī, d. 1818)",
-    description: "Manuscript in Arabic",
+    description:
+      "Manifest with paged canvases and annotations in Arabic and English",
     resource:
       "https://iiif-maktaba.dc.library.northwestern.edu/dc8ff749-adad-42a7-81e0-0eb473ef88a5.json",
     // The Manifest's own thumbnail, as it gives it.
     thumbnail:
       "https://images.digital.library.illinois.edu/iiif/2/19870760-96bc-013c-4aba-02d0d7bfd6e4-d/full/!256,256/0/default.jpg",
-  },
-  {
-    key: "recording",
-    name: "Recording",
-    title: "Hindenburg broadcast",
-    description: "Audio with its box as artwork",
-    resource: "hindenburg/manifest.json",
-    mock: true,
-    thumbnail: `${works}/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254/thumbnail`,
   },
   // A 1951 postcard of Deering Library, as Northwestern publishes it, part of its
   // University Archives' postcards (Mat, 2026-10-26: in place of the Curtis print).
@@ -146,7 +169,7 @@ export const resources: PlaygroundResource[] = [
     key: "postcard",
     name: "Postcard",
     title: "Deering Library, Northwestern University, Evanston, Ill.",
-    description: "Postcard from a Collection of postcards",
+    description: "Manifest with one image canvas, part of a collection",
     resource: nul("0e66d6d8-5dc5-4686-b056-d18682c79ebf"),
     thumbnail: `${works}/0e66d6d8-5dc5-4686-b056-d18682c79ebf/thumbnail`,
   },
@@ -156,7 +179,7 @@ export const resources: PlaygroundResource[] = [
     key: "photo",
     name: "Photo",
     title: "516; 151, Michigan & Washington, 1948, GM/TDH5502",
-    description: "Photo with its place on a map",
+    description: "Manifest with a navPlace",
     resource: "navplace/manifest.json",
     mock: true,
     map: true,
@@ -166,7 +189,7 @@ export const resources: PlaygroundResource[] = [
     key: "film",
     name: "Film",
     title: "Northwestern Football scrimmages, 1959",
-    description: "Film in seven reels",
+    description: "Manifest with video and image canvases",
     resource: nul("d8fb6329-f7fb-48bf-8bb7-70a64ded5a15"),
     thumbnail: `${works}/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15/thumbnail`,
   },
@@ -175,7 +198,7 @@ export const resources: PlaygroundResource[] = [
     key: "map",
     name: "Map",
     title: "Map of the Township of Evanston, Cook County, Illinois",
-    description: "Georeferenced map",
+    description: "Manifest with a georeference annotation and a navPlace",
     resource: "georeference/manifest.json",
     mock: true,
     map: true,
@@ -186,7 +209,7 @@ export const resources: PlaygroundResource[] = [
     key: "animation",
     name: "Animation",
     title: "Plate Number 700. Buffalo galloping",
-    description: "Animation from a plate's frames",
+    description: "Manifest with images in time, auto-advance and repeat",
     resource:
       "https://nulib-ds.github.io/muybridge/iiif/plate-number-700-buffalo-galloping.json",
     // The first frame, not the plate's own animated GIF, which is over a megabyte.

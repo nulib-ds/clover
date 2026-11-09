@@ -692,11 +692,23 @@
   font-weight: var(--weight-bold);
 }
 
-/* What it holds, under its label, in the muted text. */
+/*
+ * What it holds, under its label, in the muted text, on one line, cut with an ellipsis
+ * (Mat, 2026-11-08). Whole on the option the arrow keys reach or the pointer is on, so
+ * nothing is lost on a narrow screen (WCAG 1.4.10); its name holds all of it.
+ */
 .optionAbout {
   color: var(--gray-11);
   font-size: var(--clover-text-s, 0.854rem);
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option:hover .optionAbout,
+.option[data-active] .optionAbout {
+  white-space: normal;
 }
 
 .check {

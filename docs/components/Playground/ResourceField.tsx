@@ -422,8 +422,8 @@ export default function ResourceField({
 
   /*
    * Untouched, the field's label is ours, not the reader's to edit: what is typed, pasted,
-   * dropped or dictated takes the place of all of it, and a deletion empties it, as if it
-   * were selected (Mat, 2026-10-30: never selected, so it stays legible). Each way of
+   * dropped or dictated takes the place of all of it, and a deletion empties it, even
+   * where the caret was moved off its selection (Mat, 2026-10-30). Each way of
    * entering text says so before it lands (`beforeinput`), a key or not. An IME's
    * composing, which cannot be stopped, goes in as typed.
    */
@@ -517,9 +517,10 @@ export default function ResourceField({
    * A press anywhere on the pill but its buttons (Mat, 2026-10-30: the thumbnail, the
    * label, the field and the room between them) lists ours, as a select's does; the
    * chevron toggles the list itself, and Open opens. Focus goes to the field, the one
-   * control: a keyboard opens the list there with Down. The label is left as it is, never
-   * selected, so it stays legible (Mat, 2026-10-30); what is typed or pasted takes its
-   * place all the same (below). Typed over, the list opens as narrowed.
+   * control: a keyboard opens the list there with Down. The label is selected, in the
+   * browser's own highlight, so it is plain that what is typed or pasted takes its place
+   * (Mat, 2026-11-08: "it's confusing", reversing 2026-10-30's unselected label). Typed
+   * over, the list opens as narrowed.
    */
   const onPress = (event: React.MouseEvent) => {
     const input = inputRef.current;
@@ -532,6 +533,8 @@ export default function ResourceField({
       input.focus({ preventScroll: true });
     }
     if (draft !== null) return setOpen(true);
+    // After the press's own caret, so the whole label stays selected.
+    input.select();
     if (!expanded) show(null);
   };
 
@@ -653,7 +656,7 @@ export default function ResourceField({
             data-typing={draft !== null || undefined}
             onClick={onPress}
             onMouseDown={(event) => {
-              // Focus stays in the field, and no words are selected, but the field's own.
+              // Focus stays in the field, and no words are selected but the field's own.
               const target = event.target as Element;
               if (target !== inputRef.current && !target.closest("button"))
                 event.preventDefault();
