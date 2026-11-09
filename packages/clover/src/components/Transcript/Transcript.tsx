@@ -38,7 +38,7 @@ import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { CueTime } from "../../ui/Cue";
 import { FieldPill } from "../../ui/FieldPill";
 import { languageCode } from "../../i18n/languageCode";
-import { useSectionActions } from "../../ui/Sections";
+import { useSectionActions, useSectionShown } from "../../ui/Sections";
 import type { StepsModel } from "../../ui/Steps";
 import { Tip } from "../../ui/Tip";
 import { useContainerName } from "../../i18n/useContainerName";
@@ -46,7 +46,7 @@ import { visuallyHidden } from "../../ui/visuallyHidden";
 
 export interface TranscriptProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;
-  /** Keep the current cue in view as it plays. Default true. */
+  /** Keep the current cue in view as it plays, and open at it as its section opens. Default true. */
   follow?: boolean;
   /**
    * A field over the captions' cues to find words in, and steps through the cues that
@@ -251,9 +251,15 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
      * never the page, which the reader may have scrolled elsewhere.
      */
     const list = useRef<HTMLOListElement>(null);
+    /*
+     * A cue's button, which keeps clear of the stuck headings and the held field
+     * (`scroll-margin-top`, `Transcript.css`), as its row does not.
+     */
+    const cueButton = (index: number) =>
+      list.current?.children[index]?.firstElementChild as HTMLElement | null;
     useEffect(() => {
       if (!follow || active < 0 || !element || element.paused) return;
-      const item = list.current?.children[active] as HTMLElement | undefined;
+      const item = cueButton(active);
       if (item) bringIntoView(item, "nearest");
     }, [active, follow, element]);
 
@@ -324,16 +330,16 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     const currentMatch = matches[at];
     useEffect(() => {
       if (currentMatch === undefined) return;
-      const item = list.current?.children[currentMatch] as
-        | HTMLElement
-        | undefined;
+      const item = cueButton(currentMatch);
       if (item) bringIntoView(item, "nearest");
       stepped.current = false;
     }, [currentMatch, query]);
 
     /*
      * Held in view, the field's height is written to the part (`--clover-transcript-
-     * find`), so a cue scrolled to or followed lands clear of it (WCAG 2.4.11).
+     * find`), so a cue scrolled to or followed lands clear of it (WCAG 2.4.11): at once,
+     * then as it changes, and kept while its section is closed, where it measures nothing,
+     * so the cue it opens at (below) lands clear of it too.
      */
     const hasCues = cues.length > 0;
     useEffect(() => {
@@ -343,18 +349,35 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
       const part = held?.parentElement;
       if (!sticky || !held || !part || typeof ResizeObserver === "undefined")
         return;
-      const observer = new ResizeObserver(() =>
-        part.style.setProperty(
-          "--clover-transcript-find",
-          `${held.offsetHeight}px`,
-        ),
-      );
+      const write = () => {
+        if (held.offsetHeight)
+          part.style.setProperty(
+            "--clover-transcript-find",
+            `${held.offsetHeight}px`,
+          );
+      };
+      write();
+      const observer = new ResizeObserver(write);
       observer.observe(held);
       return () => {
         observer.disconnect();
         part.style.removeProperty("--clover-transcript-find");
       };
     }, [sticky, hasCues, find]);
+
+    /*
+     * Shown again (its section opened, its tab chosen), it opens at the current cue, at
+     * the top of what scrolls, at once (Mat, 2026-11-09: "jump on open"): hidden, it
+     * followed nothing, as a list laid out nowhere has nowhere to scroll to.
+     */
+    const inView = useSectionShown();
+    useEffect(() => {
+      if (!inView || !follow || active < 0) return;
+      const item = cueButton(active);
+      if (item) bringIntoView(item, "start", true);
+      // Only as it is shown: while shown, the effect following the cue does.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [inView]);
 
     const id = useUniqueId();
     const actions = useSectionActions();

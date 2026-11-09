@@ -45,6 +45,18 @@ export function useSectionOpened() {
   return useContext(SectionOpenedContext);
 }
 
+/**
+ * Whether this section is open (its box, or its tab, chosen), however it came to be: a
+ * press, a `value`, a search started elsewhere. True where no `Sections` is around it. A
+ * closed section's content stays mounted, so a list that follows the recording can bring
+ * its current entry into view as it is shown again (Transcript; Mat, 2026-11-09).
+ */
+const SectionShownContext = createContext(true);
+
+export function useSectionShown() {
+  return useContext(SectionShownContext);
+}
+
 /** One section: what its button says, and what its panel shows. */
 export interface SectionSpec {
   value: string;
@@ -135,12 +147,14 @@ export function Sections({
    * A box opened by a press starts in sight: when the box it replaces had been scrolled
    * through, the new one's start can be left above its heading, under the headings stuck
    * at the top. Then the scrolling container is moved just enough to bring it back.
+   * Before paint, and before any effect of its content's, which may then bring an entry
+   * of its own into view (`useSectionShown`) without this moving it back.
    */
   const pressed = useRef<string | null>(null);
   const [opened, setOpened] = useState<{ value: string | null; count: number }>(
     { value: null, count: 0 },
   );
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (tabs || !open || pressed.current !== open) return;
     pressed.current = null;
     const index = items.findIndex((item) => item.value === open);
@@ -564,15 +578,17 @@ export function Sections({
             <SectionOpenedContext.Provider
               value={opened.value === item.value ? opened.count : 0}
             >
-              <Panel
-                id={`${id}-panel-${index}`}
-                tabs={tabs}
-                labelledBy={`${id}-button-${index}`}
-                hidden={!isOpen}
-                actions={item.actions}
-              >
-                {mounted.current.has(item.value) ? item.content : null}
-              </Panel>
+              <SectionShownContext.Provider value={isOpen}>
+                <Panel
+                  id={`${id}-panel-${index}`}
+                  tabs={tabs}
+                  labelledBy={`${id}-button-${index}`}
+                  hidden={!isOpen}
+                  actions={item.actions}
+                >
+                  {mounted.current.has(item.value) ? item.content : null}
+                </Panel>
+              </SectionShownContext.Provider>
             </SectionOpenedContext.Provider>
           </section>
         );
