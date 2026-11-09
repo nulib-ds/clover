@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.8.2] - 2026-11-09
+
 ### Changed
 
 - **The expanded viewer controls sit on the Canvas's own ground.** Opened, the tray of
