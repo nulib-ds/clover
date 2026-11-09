@@ -583,11 +583,18 @@
  */
 .clover-template-panes:has(> .clover-template-spine)
   > :first-child
-  .clover-canvas
-  > .clover-canvas-controls[data-fit] {
-  inset-inline-end: calc(
+  .clover-canvas {
+  /* Its popups line up with it there too (`ControlMenu.css`; Mat, 2026-11-08). */
+  --clover-canvas-controls-end: calc(
     var(--clover-control) / 2 - 1.5px + var(--clover-space-xs)
   );
+}
+
+.clover-template-panes:has(> .clover-template-spine)
+  > :first-child
+  .clover-canvas
+  > .clover-canvas-controls[data-fit] {
+  inset-inline-end: var(--clover-canvas-controls-end);
 }
 
 /*

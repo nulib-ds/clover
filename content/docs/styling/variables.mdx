@@ -93,15 +93,16 @@ Canvas declares their defaults, which win over any it would inherit. Where the s
 the controls' durations to `0s`, so set yours inside
 `@media (prefers-reduced-motion: no-preference)`.
 
-| Variable                         | Purpose                                           |
-| -------------------------------- | ------------------------------------------------- |
-| `--clover-body-height`           | The Body's height                                 |
-| `--clover-canvas-background`     | The Canvas's background, kept in full screen      |
-| `--clover-canvas-inset`          | A margin around the picture at home               |
-| `--clover-canvas-controls-inset` | How far the controls sit in from the Body's edges |
-| `--clover-controls-leave`        | How the controls leave when idle                  |
-| `--clover-controls-enter`        | How they come back                                |
-| `--clover-controls-tuck`         | How far they tuck toward their edge as they leave |
+| Variable                         | Purpose                                                                                                                 |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `--clover-body-height`           | The Body's height                                                                                                       |
+| `--clover-canvas-background`     | The Canvas's background, kept in full screen                                                                            |
+| `--clover-canvas-inset`          | A margin around the picture at home                                                                                     |
+| `--clover-canvas-controls-inset` | How far the controls sit in from the Body's edges                                                                       |
+| `--clover-canvas-controls-end`   | Where the controls end and their popups line up, from the Body's end (set it on `.clover-canvas`); the inset by default |
+| `--clover-controls-leave`        | How the controls leave when idle                                                                                        |
+| `--clover-controls-enter`        | How they come back                                                                                                      |
+| `--clover-controls-tuck`         | How far they tuck toward their edge as they leave                                                                       |
 
 Set `--clover-canvas-background` for each
 [`data-media`](/docs/styling/classes#classes-and-states):

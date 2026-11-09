@@ -334,7 +334,7 @@ export const mapDocs: ElementDocs = {
     },
     "overlay-opacity": {
       description: "The georeferenced images' opacity, 0 to 1.",
-      default: "0.75",
+      default: "1",
     },
     "style-url": {
       description: "A MapLibre style URL. Clover's relief basemap by default.",

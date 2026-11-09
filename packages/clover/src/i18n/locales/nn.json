@@ -95,6 +95,8 @@
   "informationPanelTabsTargets": "Visingar",
   "mapUnavailable": "Kartet kunne ikkje visast.",
   "mapLabel": "Kart",
+  "mapExpand": "Utvid kartet",
+  "mapCollapse": "Forminsk kartet",
   "mapAttribution": "Kartkreditering",
   "mapPlaceUntitled": "Stad {{number}}",
   "mapOverlay": "Georeferert bilete",

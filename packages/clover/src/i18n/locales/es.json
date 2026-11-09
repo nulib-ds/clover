@@ -95,6 +95,8 @@
   "informationPanelTabsTargets": "Vistas",
   "mapUnavailable": "No se pudo mostrar el mapa.",
   "mapLabel": "Mapa",
+  "mapExpand": "Ampliar el mapa",
+  "mapCollapse": "Reducir el mapa",
   "mapAttribution": "Créditos del mapa",
   "mapPlaceUntitled": "Lugar {{number}}",
   "mapOverlay": "Imagen georreferenciada",

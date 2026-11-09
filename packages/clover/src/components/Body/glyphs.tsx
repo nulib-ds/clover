@@ -57,6 +57,53 @@ export const Place = () => (
   />
 );
 
+/**
+ * A frame open at its upper right, a box inside it at the lower left, and Full screen's own
+ * arrow (`ui/controlGlyphs.tsx`: its shaft, head and stroke) in the opening, clear of the
+ * frame's ends (Mat, 2026-11-08: "give a gap between the arrow end points"), turned in
+ * toward the box: expands the place box's map into the Body. `CollapseMap` turns it out.
+ */
+export const ExpandMap = () => (
+  <>
+    <path
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="40"
+      d="M232 72H72V440H440V280"
+    />
+    <rect stroke="none" x="144" y="244" width="124" height="124" rx="16" />
+    <path
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="40"
+      d="M429.77 82.2L312 200M424 200H312V88"
+    />
+  </>
+);
+
+/** `ExpandMap` with Full screen's arrow turned out, as it is there: puts the map back. */
+export const CollapseMap = () => (
+  <>
+    <path
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="40"
+      d="M232 72H72V440H440V280"
+    />
+    <rect stroke="none" x="144" y="244" width="124" height="124" rx="16" />
+    <path
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="40"
+      d="M328 72h112v112M429.77 82.2L312 200"
+    />
+  </>
+);
+
 /** A rounded triangle: plays a video or sound from its placeholder. */
 export const Play = () => (
   <path strokeLinejoin="round" strokeWidth="40" d="M184 128V384L392 256Z" />

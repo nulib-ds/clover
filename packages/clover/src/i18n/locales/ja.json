@@ -95,6 +95,8 @@
   "informationPanelTabsTargets": "ビュー",
   "mapUnavailable": "地図を表示できませんでした。",
   "mapLabel": "地図",
+  "mapExpand": "地図を広げる",
+  "mapCollapse": "地図をたたむ",
   "mapAttribution": "地図のクレジット",
   "mapPlaceUntitled": "場所 {{number}}",
   "mapOverlay": "ジオリファレンス画像",

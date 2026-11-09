@@ -27,4 +27,19 @@ describe("Label", () => {
       screen.getByRole("heading", { name: "Manuscript" }),
     ).not.toHaveAttribute("dir");
   });
+
+  // Mat, 2026-11-08: "expect there to be a string here at all times, even if an empty space".
+  it("keeps its place while there is none, where asked, never an empty heading to assistive technology", () => {
+    const { container, rerender } = render(<Clover.Label as="h2" />);
+    expect(container.querySelector("h2")).toBeNull();
+    rerender(<Clover.Label as="h2" keep />);
+    const kept = container.querySelector("h2")!;
+    expect(kept.textContent).toBe("\u00a0");
+    expect(kept).toHaveAttribute("aria-hidden", "true");
+    expect(screen.queryByRole("heading")).toBeNull();
+    rerender(<Clover.Label as="h2" keep label={{ en: ["Manuscript"] }} />);
+    expect(
+      screen.getByRole("heading", { name: "Manuscript" }),
+    ).not.toHaveAttribute("aria-hidden");
+  });
 });

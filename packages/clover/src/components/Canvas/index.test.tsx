@@ -20,6 +20,7 @@ import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
 import fullCanvasJson from "../../fixtures/iiif-cookbook/0266-full-canvas-annotation.json";
 import navPlaceJson from "../../fixtures/iiif-cookbook/0154-geo-extension.json";
+import { evanston } from "../../fixtures/georef";
 import missingImageJson from "../../fixtures/iiif-cookbook/0283-missing-image.json";
 import { initCloverI18n } from "../../i18n";
 import { IdPrefixContext } from "../../ui/useUniqueId";
@@ -486,6 +487,61 @@ describe("Canvas", () => {
     expect(control).toHaveFocus();
     fireEvent.click(control);
     expect(box).toHaveAttribute("data-open", "true");
+  });
+
+  // A georeferenced map with no navPlace: its Map control opens the map it is warped onto.
+  it("offers a Map control for a georeferenced Canvas, and expands its map in the Canvas's place", async () => {
+    const manifest = evanston();
+    expect((manifest as any).navPlace).toBeUndefined();
+    render(<Canvas iiifContent={manifest as any} />);
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    await open();
+    const control = await screen.findByRole("button", { name: "Map" });
+    fireEvent.click(control);
+    await loaded();
+    const figure = screen.getByTestId("clover-canvas");
+    const box = await screen.findByTestId("clover-canvas-place");
+    await waitFor(() => expect(box).toHaveAttribute("data-open", "true"));
+    const expand = () =>
+      within(box).getByRole("button", { name: "Expand map" });
+    await waitFor(() => expect(expand()).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Zoom in" })).toBeInTheDocument();
+
+    // Expanded: the map takes the Canvas's place, and the view's controls go with it. The
+    // same button, named for what it does now, keeps focus.
+    const toggle = expand();
+    toggle.focus();
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAccessibleName("Collapse map");
+    expect(toggle).not.toHaveAttribute("aria-pressed");
+    expect(toggle).toHaveFocus();
+    expect(figure).toHaveAttribute("data-place", "swapped");
+    expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Full screen" }),
+    ).toBeInTheDocument();
+    expect(control).toHaveAttribute("aria-expanded", "true");
+
+    // Collapsed: the Canvas and its controls come back.
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAccessibleName("Expand map");
+    expect(figure).not.toHaveAttribute("data-place");
+    expect(screen.getByRole("button", { name: "Zoom in" })).toBeInTheDocument();
+
+    // Escape, expanded: the first puts its Tip away (WCAG 1.4.13), the next closes the box
+    // and brings the Canvas back, focus on the control.
+    fireEvent.click(toggle);
+    fireEvent.keyDown(toggle, { key: "Escape" });
+    fireEvent.keyDown(toggle, { key: "Escape" });
+    expect(box).toHaveAttribute("data-open", "false");
+    expect(figure).not.toHaveAttribute("data-place");
+    expect(control).toHaveFocus();
   });
 
   it("renders an accessible, focusable viewport", () => {
@@ -1456,6 +1512,47 @@ describe("Canvas", () => {
         />,
       );
       expect(renderer.clear).not.toHaveBeenCalled();
+    });
+
+    // Cookbook 0318 (Mat, 2026-11-08: "the map shakes/rerenders abruptly"): stepping
+    // through a Collection's members keeps the open place box, and its map, while the
+    // next Manifest loads, rather than making them again.
+    it("keeps its open place box, and its map, while the next Manifest loads", async () => {
+      const place = (lng: number) => ({
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {},
+            geometry: { type: "Point", coordinates: [lng, 41.9] },
+          },
+        ],
+      });
+      const { rerender } = render(
+        <Canvas
+          canvases={[pages[0]]}
+          manifestId="https://example.org/a"
+          navPlace={place(12.49)}
+        />,
+      );
+      await open();
+      fireEvent.click(await screen.findByRole("button", { name: "Map" }));
+      await loaded();
+      const box = await screen.findByTestId("clover-canvas-place");
+      await waitFor(() => expect(box).toHaveAttribute("data-open", "true"));
+      rerender(<Canvas canvases={[]} manifestId="loading" />);
+      expect(screen.getByTestId("clover-canvas-place")).toBe(box);
+      expect(box).toHaveAttribute("data-open", "true");
+      expect(screen.getByRole("button", { name: "Map" })).toBeInTheDocument();
+      rerender(
+        <Canvas
+          canvases={[pages[1]]}
+          manifestId="https://example.org/b"
+          navPlace={place(12.48)}
+        />,
+      );
+      expect(screen.getByTestId("clover-canvas-place")).toBe(box);
+      expect(box).toHaveAttribute("data-open", "true");
     });
 
     // Cookbook 0230: two Manifests whose Canvases share one id, at two sizes.

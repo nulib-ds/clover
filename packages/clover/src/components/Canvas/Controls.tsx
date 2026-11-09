@@ -128,6 +128,11 @@ interface CanvasControlsProps {
   placeId?: string;
   placeOpen?: boolean;
   onPlaceToggle?: () => void;
+  /**
+   * The Canvas is put away, its place box's map filling the Body (`PlaceBox`'s swap): only
+   * what still means something stays, full screen, the place and the `i`.
+   */
+  away?: boolean;
   /** The language to read the Choices' labels in. The reader's, by default. */
   language?: string;
   /** One row, the rest behind More: a Canvas's. A Timeline's wraps onto rows, as yet. */
@@ -173,6 +178,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
   captionId,
   captionOpen = false,
   onCaptionToggle,
+  away = false,
   placeId,
   placeOpen = false,
   onPlaceToggle,
@@ -389,7 +395,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
    * Full screen ends the view's controls, over every picture alike, whichever of them a
    * Canvas offers (Mat, 2026-10-29), before the Canvas's own (below).
    */
-  const specs = controls();
+  const specs = controls().filter((spec) => !away || spec.key === "fullPage");
   const view = [
     ...specs.filter((spec) => spec.key !== "fullPage"),
     ...specs.filter((spec) => spec.key === "fullPage"),
@@ -466,7 +472,10 @@ const Controls: React.FC<CanvasControlsProps> = ({
     },
   ].filter(
     (item): item is { id: string; view: boolean; node: React.ReactElement } =>
-      Boolean(item),
+      Boolean(item) &&
+      (!away ||
+        (item as { id: string }).id === `place-${instance}` ||
+        (item as { id: string }).id === `information-${instance}`),
   );
   /*
    * The view's first, full screen last, then a placeholder's toggle: what waits behind

@@ -12,7 +12,11 @@
   position: absolute;
   z-index: 1;
   top: var(--top);
-  right: var(--clover-canvas-controls-inset);
+  /*
+   * Its end, which the popups it opens line up with (`ControlMenu.css`): the inset, unless
+   * a template moves it (`Default.css`, beside the Panel's handle).
+   */
+  right: var(--clover-canvas-controls-end, var(--clover-canvas-controls-inset));
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;

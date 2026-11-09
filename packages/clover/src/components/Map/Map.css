@@ -68,25 +68,33 @@
 .clover-geomap {
   /*
    * How far its controls sit in from the map's edges, as the Canvas's are from the Body's
-   * (`--clover-canvas-controls-inset`): the region's inset, the controls `s` apart. Zoom
-   * in and out are a row at its lower left, the credits' ⓘ at its lower right (Mat,
-   * 2026-10-29: "move these controls to bottom left. align them horizontally").
+   * (`--clover-canvas-controls-inset`): the region's inset, the controls `xs` apart. Zoom
+   * in and out are a row at its top right, the credits' ⓘ at its lower right (Mat,
+   * 2026-11-08: "they should be top right in all cases"; at its lower left from
+   * 2026-10-29). What holds the map may put controls of its own beside the row
+   * (`--clover-map-controls-end`: the place box's layers and Close), or move the row
+   * (`--clover-map-controls-left`, `-right`).
    */
   --clover-map-controls-inset: var(--clover-inset);
-  /* The room its controls take: at the top (none, but what holds it puts there), and the
-   * zoom row's at the lower left, with its `s` beside it. */
-  --clover-map-controls-top: 0px;
-  --clover-map-controls-start: calc(
-    2 * var(--clover-control) + 2 * var(--clover-space-s)
+  /* The room its controls take: the zoom row's at the top, with its `s` under it, and
+   * none at the lower left. */
+  --clover-map-controls-top: calc(
+    var(--clover-control) + var(--clover-space-s)
   );
+  --clover-map-controls-start: 0px;
 }
 
-.clover-geomap :is(.maplibregl-ctrl-top-right, .maplibregl-ctrl-bottom-right) {
+.clover-geomap .maplibregl-ctrl-bottom-right {
   right: var(--clover-map-controls-inset) !important;
 }
 
 .clover-geomap .maplibregl-ctrl-top-right {
   top: var(--clover-map-controls-inset) !important;
+  right: var(
+    --clover-map-controls-right,
+    calc(var(--clover-map-controls-inset) + var(--clover-map-controls-end, 0px))
+  ) !important;
+  left: var(--clover-map-controls-left, auto) !important;
 }
 
 .clover-geomap
@@ -109,9 +117,10 @@
   margin: 0 !important;
 }
 
+/* `xs` apart, as the Canvas's controls are (`Canvas.css`; Mat, 2026-11-08). */
 .clover-geomap .maplibregl-ctrl-group {
   display: flex;
-  gap: var(--clover-space-s);
+  gap: var(--clover-space-xs);
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
@@ -369,9 +378,16 @@
   font-size: var(--clover-text-s);
 }
 
-/* No arrow, as a hotspot's has none; never under the pointer, which reads the map. */
-.clover-geomap-popup {
-  pointer-events: none;
+/*
+ * No arrow, as a hotspot's has none; never under the pointer, which reads the map: its
+ * content too, which MapLibre's sheet gives the pointer (outranking Clover's, hence
+ * `!important`). Moved inside the map over its place, it would take the pointer, and the
+ * map, its pointer gone, put the name away and back (Mat, 2026-11-08: "blinking is still
+ * regularly occurring").
+ */
+.clover-geomap-popup,
+.clover-geomap-popup .maplibregl-popup-content {
+  pointer-events: none !important;
 }
 
 .clover-geomap-popup .maplibregl-popup-tip {
@@ -380,6 +396,23 @@
 
 .clover-geomap-popup .maplibregl-popup-content {
   max-width: min(18rem, 100cqi - 2 * var(--clover-space-xs));
+}
+
+/*
+ * A place's picture over its name (its Manifest's, Canvas's or member's), as a chapter's
+ * shows in the seek bar's popover (`Transport.css`): as wide as `--clover-picture`, its
+ * own height at that width, `xs` over the words, with `s` of room around them (Mat,
+ * 2026-11-08).
+ */
+.clover-geomap-popup[data-picture] .maplibregl-popup-content {
+  padding: var(--clover-space-s);
+}
+
+.clover-geomap-popup .clover-tip-image {
+  width: var(--clover-picture);
+  max-width: 100%;
+  max-height: none;
+  margin-block-end: var(--clover-space-xs);
 }
 
 /*

@@ -29,6 +29,7 @@ export const ZoomOut = () => {
   );
 };
 
+/** Four corners, arrows turned outward, a little bolder than drawn (Mat, 2026-11-08). */
 export const ZoomFullScreen = () => {
   return (
     <path
@@ -36,7 +37,7 @@ export const ZoomFullScreen = () => {
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth="32"
+      strokeWidth="40"
       d="M432 320v112H320M421.8 421.77L304 304M80 192V80h112M90.2 90.23L208 208M320 80h112v112M421.77 90.2L304 208M192 432H80V320M90.23 421.8L208 304"
     />
   );
@@ -55,7 +56,7 @@ export const ZoomExitFullScreen = () => {
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth="32"
+      strokeWidth="40"
       d="M304 416v-112h112M405.77 405.77L304 304M208 96v112H96M106.23 106.23L208 208M416 208H304V96M405.77 106.23L304 208M96 304h112v112M106.23 405.77L208 304"
     />
   );

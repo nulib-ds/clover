@@ -15,6 +15,7 @@ import {
   cornersOf,
   georeferencesOf,
   navPlaceOf,
+  pictureOf,
   type Position,
   readGeoreference,
 } from "../../core/geo";
@@ -36,6 +37,7 @@ import { directionOf, languageProps } from "../../i18n/direction";
 import { Tip } from "../../ui/Tip";
 import { ZoomIn, ZoomOut } from "../../ui/controlGlyphs";
 import { Information } from "../Body/glyphs";
+import { PICTURE_SIZE } from "../../ui/EntryThumbnail";
 import { NavDate } from "../../ui/NavDate";
 import { readDate } from "../../core/dates";
 import { dateTimeOf, formatDate } from "../../core/dates-format";
@@ -54,7 +56,7 @@ export interface MapProps
   georeferences?: unknown[];
   /** Draw georeferenced images over the basemap. Default true. */
   overlay?: boolean;
-  /** The overlays' opacity, 0 to 1. Default 0.75. */
+  /** The overlays' opacity, 0 to 1. Default 1: a georeferenced map shows whole. */
   overlayOpacity?: number;
   /** A MapLibre style URL, used as it is. Default: Clover's relief basemap (OpenFreeMap). */
   styleUrl?: string;
@@ -215,6 +217,8 @@ const NO_IDS: ReadonlySet<string> = new Set();
 export function GivenMap({
   navPlace,
   georeferences,
+  overlays: read,
+  owner,
   ...rest
 }: Omit<MapProps, "iiifContent" | "request" | "language"> &
   Forwarded & {
@@ -223,8 +227,16 @@ export function GivenMap({
     language?: string;
     /** Its places listed under it; false where what holds it names its one place. */
     list?: boolean;
+    /** Overlays already read, with their Canvases (`Canvas/PlaceBox`), over `georeferences`. */
+    overlays?: Georeference[];
+    reframe?: unknown;
+    /**
+     * What the places given belong to (`Canvas/PlaceBox`: its Canvas), whose picture each
+     * shows over its name where it has none of its own.
+     */
+    owner?: unknown;
   }) {
-  const features = useGiven(navPlace, (value) =>
+  const given = useGiven(navPlace, (value) =>
     navPlaceOf(
       {
         id: "geomap:given",
@@ -235,12 +247,26 @@ export function GivenMap({
       null,
     ),
   );
+  // Each place given its owner's picture, where it names none of its own.
+  const features = useMemo(() => {
+    const picture = pictureOf(owner);
+    if (!picture) return given;
+    const thumbnail = JSON.stringify(picture);
+    return {
+      ...given,
+      features: given.features.map((feature) =>
+        feature.properties.thumbnail
+          ? feature
+          : { ...feature, properties: { ...feature.properties, thumbnail } },
+      ),
+    };
+  }, [given, owner]);
   const overlays = useGiven(georeferences, (value) =>
     ((value as unknown[]) ?? [])
       .map((annotation) => readGeoreference(annotation as never))
       .filter((overlay): overlay is Georeference => Boolean(overlay)),
   );
-  return <MapView {...rest} features={features} overlays={overlays} />;
+  return <MapView {...rest} features={features} overlays={read ?? overlays} />;
 }
 
 /** A value read from a prop, recomputed only when the prop's identity changes. */
@@ -291,6 +317,11 @@ interface ViewProps
   list?: boolean;
   /** The place pointed at on the map, and null as the pointer leaves the places. */
   onHighlight?: (feature: MapFeature | null) => void;
+  /**
+   * A value whose change frames what there is again, once the map has its new size: the
+   * place box's swap, as its map fills the Body and goes back (`Canvas/PlaceBox`).
+   */
+  reframe?: unknown;
 }
 
 function MapView({
@@ -299,13 +330,14 @@ function MapView({
   current,
   activeAnnotations,
   onHighlight,
+  reframe,
   list = true,
   credits = true,
   language,
   highContrast,
   landmark = true,
   overlay = true,
-  overlayOpacity = 0.75,
+  overlayOpacity = 1,
   styleUrl,
   workerUrl,
   scrollZoom = false,
@@ -344,6 +376,7 @@ function MapView({
     t,
     features,
     host: root.hostLanguage,
+    request,
   });
   latest.current = {
     onSelect,
@@ -351,6 +384,7 @@ function MapView({
     t,
     features,
     host: root.hostLanguage,
+    request,
   };
   // Names a place in a popup at a point, once MapLibre is up.
   const name = useRef<((feature: MapFeature, at: unknown) => void) | null>(
@@ -360,6 +394,9 @@ function MapView({
   const reread = useRef<((next: MapFeatureCollection) => void) | null>(null);
   // The extent last framed.
   const framed = useRef("");
+  // Frames what there is: kept current, for a `reframe` to call once the map is resized.
+  const frameAll = useRef<(() => void) | null>(null);
+  const reframeWanted = useRef(false);
 
   // MapLibre, loaded and started once, near the window.
   useEffect(() => {
@@ -421,12 +458,12 @@ function MapView({
           },
         });
         if (!landmark) instance.getCanvas().setAttribute("role", "group");
-        // Zoom in and out in a row at its lower left, the credits' ⓘ at its lower right
-        // (Mat, 2026-10-29: "move these controls to bottom left. align them
-        // horizontally").
+        // Zoom in and out in a row at its top right, the credits' ⓘ at its lower right
+        // (Mat, 2026-11-08: "they should be top right in all cases"; at its lower left
+        // from 2026-10-29).
         instance.addControl(
           new maplibre.NavigationControl({ showCompass: false }),
-          "bottom-left",
+          "top-right",
         );
         /*
          * A map of places keeps north up: a two-finger twist or Shift+arrows would turn
@@ -457,8 +494,12 @@ function MapView({
            * the places, or Escape (WCAG 1.4.13).
            */
           let popup: any = null;
+          // Each picture's URL, by its source, resolved once for the map's life.
+          const pictures: Record<string, Promise<string | undefined>> = {};
           let picked: MapFeature | null = null;
           let shown = "";
+          // The place named, as the places last handed in hold it.
+          let named: MapFeature | null = null;
           // The name Escape put away, kept away until the pointer leaves its place.
           let dismissed = "";
           // Which place is pointed at, and which picked, by its place in the data.
@@ -490,6 +531,7 @@ function MapView({
             popup?.remove();
             popup = null;
             shown = "";
+            named = null;
           };
           const show = (feature: MapFeature) => {
             if (shown === keyOf(feature) && popup) return;
@@ -532,6 +574,9 @@ function MapView({
             const below = room - foot >= top;
             const away = gap();
             hangs = below ? away : -away;
+            // Its picture over its words, as the seek bar's popover shows a chapter's: in
+            // the same element, which keeps its language.
+            const content = text;
             popup = new maplibre.Popup({
               closeButton: false,
               closeOnClick: false,
@@ -541,10 +586,54 @@ function MapView({
               className: "clover-geomap-popup",
             })
               .setLngLat(below ? [middle, south] : [middle, north])
-              .setDOMContent(text)
+              .setDOMContent(content)
               .addTo(instance);
-            shown = keyOf(feature);
+            const key = keyOf(feature);
+            shown = key;
+            named = feature;
             keepInside();
+            picture(feature, content, key);
+          };
+          /*
+           * A place's picture (its owner's, `core/geo.ts`, `placePicture.ts`): sized from
+           * its own `info.json` as Items' are, a member's Manifest loaded first where it is
+           * not yet, all only as a place is named, the code with it. Decorative, as the name under it says what it is. Laid in once
+           * it has loaded, while that place is still named, the popover kept inside the map.
+           */
+          const picture = (
+            feature: MapFeature,
+            content: HTMLElement,
+            key: string,
+          ) => {
+            const source = feature.properties?.thumbnail;
+            if (typeof source !== "string") return;
+            void (pictures[source] ??= import("./placePicture")
+              .then(({ placePicture }) =>
+                placePicture(
+                  JSON.parse(source),
+                  PICTURE_SIZE,
+                  latest.current.request,
+                ),
+              )
+              .catch(() => undefined)).then((url) => {
+              if (!url || shown !== key) return;
+              // Hidden until it has loaded, so the popover never shows an empty box;
+              // one that cannot load goes.
+              const image = document.createElement("img");
+              image.className = "clover-tip-image";
+              image.alt = "";
+              image.decoding = "async";
+              image.hidden = true;
+              image.onload = () => {
+                if (shown !== key) return;
+                image.hidden = false;
+                popup?.getElement?.()?.setAttribute("data-picture", "");
+                keepInside();
+              };
+              image.onerror = () => image.remove();
+              image.src = url;
+              content.prepend(image);
+            });
           };
           /*
            * `xs` inside the map, wherever the place is moved to: across, and down, where
@@ -584,16 +673,34 @@ function MapView({
            */
           reread.current = (next) => {
             instance.removeFeatureState?.({ source: NAVPLACE });
-            hovered = undefined;
             const placeOf = (feature: MapFeature) =>
               JSON.stringify([feature.properties, feature.geometry]);
-            const kept = picked
-              ? next.features.find((f) => placeOf(f) === placeOf(picked!))
-              : undefined;
+            const find = (feature: MapFeature | null) =>
+              feature
+                ? next.features.find((f) => placeOf(f) === placeOf(feature))
+                : undefined;
+            const kept = find(picked);
+            /*
+             * The place named stays named while the new places hold it, the pointer still
+             * over it or not, so the same places handed in again (a Collection's members
+             * loading beside the map) never put its name away and back (Mat, 2026-11-08:
+             * "blinking is still regularly occurring").
+             */
+            const still = find(named);
+            const pointed = hovered !== undefined ? still : undefined;
             picked = kept ?? null;
             pickedId = undefined;
+            hovered = undefined;
+            if (kept) pick(kept);
+            if (pointed) {
+              hovered = idOf(pointed);
+              mark(hovered, "hover", true);
+            }
+            if (still) {
+              named = still;
+              return;
+            }
             if (!kept) return unname();
-            pick(kept);
             show(kept);
           };
           name.current = (feature) => {
@@ -609,28 +716,47 @@ function MapView({
               name.current?.(feature, event.lngLat);
               latest.current.onSelect?.(feature);
             });
-            instance.on("mousemove", layer, (event: any) => {
-              instance.getCanvas().style.cursor = "pointer";
-              const feature = event.features?.[0] as MapFeature | undefined;
-              if (!feature) return;
-              if (keyOf(feature) !== dismissed) show(feature);
-              const id = idOf(feature);
-              if (id === hovered) return;
-              mark(hovered, "hover", false);
-              hovered = id;
-              mark(hovered, "hover", true);
-              latest.current.onHighlight?.(feature);
-            });
-            instance.on("mouseleave", layer, () => {
-              instance.getCanvas().style.cursor = "";
-              dismissed = "";
-              mark(hovered, "hover", false);
-              hovered = undefined;
-              latest.current.onHighlight?.(null);
-              if (picked) show(picked);
-              else unname();
-            });
           }
+          /*
+           * The place under the pointer, read across every layer of places at once, so
+           * moving between a point and its larger area to press, or across places that
+           * overlap, never names it, puts it away and names it again (Mat, 2026-11-08:
+           * "as if hover turns off/on/off/on over and over"): the place already named
+           * stays while it is still under the pointer, and the name goes only when no
+           * place is.
+           */
+          const leave = () => {
+            if (hovered === undefined && !shown) return;
+            instance.getCanvas().style.cursor = "";
+            dismissed = "";
+            mark(hovered, "hover", false);
+            hovered = undefined;
+            latest.current.onHighlight?.(null);
+            if (picked) show(picked);
+            else unname();
+          };
+          instance.on("mousemove", (event: any) => {
+            const under = (instance.queryRenderedFeatures?.(event.point, {
+              layers: CLICKABLE.filter((layer) => instance.getLayer?.(layer)),
+            }) ?? []) as MapFeature[];
+            if (!under.length) {
+              if (hovered !== undefined) leave();
+              return;
+            }
+            instance.getCanvas().style.cursor = "pointer";
+            const feature =
+              under.find((each) => idOf(each) === hovered) ?? under[0];
+            if (keyOf(feature) !== dismissed) show(feature);
+            const id = idOf(feature);
+            if (id === hovered) return;
+            mark(hovered, "hover", false);
+            hovered = id;
+            mark(hovered, "hover", true);
+            latest.current.onHighlight?.(feature);
+          });
+          instance.on("mouseout", () => {
+            if (hovered !== undefined) leave();
+          });
           // A press off the places lets go of the one picked.
           instance.on("click", (event: any) => {
             const under = instance.queryRenderedFeatures?.(event.point, {
@@ -664,7 +790,12 @@ function MapView({
         });
         // A map in a tab or panel is sized late: keep MapLibre's canvas in step.
         if (typeof ResizeObserver !== "undefined") {
-          observer = new ResizeObserver(() => instance?.resize());
+          observer = new ResizeObserver(() => {
+            instance?.resize();
+            if (!reframeWanted.current) return;
+            reframeWanted.current = false;
+            frameAll.current?.();
+          });
           observer.observe(container.current);
         }
       })
@@ -825,16 +956,28 @@ function MapView({
   }, [map, overlayOpacity]);
 
   // Frame what there is, once for each extent: a place chosen stays framed when the
-  // view it opens draws nothing new.
+  // view it opens draws nothing new, and a map given another place (a Collection's next
+  // member) eases to it (Mat, 2026-11-08).
   useEffect(() => {
     if (!map) return;
     const bounds = boundsOf(features.features, overlay ? overlays : []);
     if (!bounds) return;
+    frameAll.current = () => frame(map, bounds, zoom ?? POINT_ZOOM, zoom);
     const extent = bounds.flat().join();
     if (extent === framed.current) return;
+    // The first framing is at once; each one after glides there from where it was.
+    const glide = framed.current !== "";
     framed.current = extent;
-    frame(map, bounds, zoom ?? POINT_ZOOM, zoom);
+    frame(map, bounds, zoom ?? POINT_ZOOM, zoom, glide);
   }, [map, features, overlays, overlay, zoom]);
+
+  // Asked to frame again: once the map has its new size, which its observer reports.
+  const reframed = useRef(reframe);
+  useEffect(() => {
+    if (Object.is(reframed.current, reframe)) return;
+    reframed.current = reframe;
+    reframeWanted.current = true;
+  }, [reframe]);
 
   // A place from the list: framed and named as on the map, then chosen.
   const choose = (feature: MapFeature) => {
@@ -969,14 +1112,26 @@ function frame(
   bounds: [Position, Position],
   zoom: number,
   most = 12,
+  glide = false,
 ) {
+  // A map moving from one place to the next eases there, never where motion is reduced.
+  const duration = glide && !reducedMotion() ? GLIDE : 0;
   const [[west, south], [east, north]] = bounds;
   if (west === east && south === north) {
-    map.jumpTo({ center: [west, south], zoom });
+    const view = { center: [west, south], zoom };
+    if (duration) map.easeTo({ ...view, duration });
+    else map.jumpTo(view);
   } else {
-    map.fitBounds(bounds, { padding: 32, maxZoom: most, duration: 0 });
+    map.fitBounds(bounds, { padding: 32, maxZoom: most, duration });
   }
 }
+
+/** How long a map takes to ease from one place to the next, in ms. */
+const GLIDE = 600;
+
+const reducedMotion = () =>
+  typeof window !== "undefined" &&
+  Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 
 /** The middle of a box. */
 function center([[west, south], [east, north]]: [Position, Position]) {

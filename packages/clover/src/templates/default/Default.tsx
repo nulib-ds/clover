@@ -252,9 +252,11 @@ function HeaderTitle({ title }: { title: ReturnType<typeof Clover.titled> }) {
   usePickFirst(annotations?.entries[0]);
   return (
     <>
+      {/* Its line kept while the next member loads, so the header holds still. */}
       <Clover.Label
         as={title.as}
         className="clover-template-default-title clover-template-title clover-title"
+        keep
         {...title.title}
       />
       {collection && (

@@ -95,6 +95,8 @@
   "informationPanelTabsTargets": "Views",
   "mapUnavailable": "The map could not be shown.",
   "mapLabel": "Map",
+  "mapExpand": "Expand map",
+  "mapCollapse": "Collapse map",
   "mapAttribution": "Map credits",
   "mapPlaceUntitled": "Place {{number}}",
   "mapOverlay": "Georeferenced image",

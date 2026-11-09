@@ -95,6 +95,8 @@
   "informationPanelTabsTargets": "檢視",
   "mapUnavailable": "無法顯示地圖。",
   "mapLabel": "地圖",
+  "mapExpand": "展開地圖",
+  "mapCollapse": "收起地圖",
   "mapAttribution": "地圖來源",
   "mapPlaceUntitled": "地點 {{number}}",
   "mapOverlay": "地理對位影像",
