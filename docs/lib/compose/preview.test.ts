@@ -21,6 +21,9 @@ describe("pageSubject", () => {
     expect(pageSubject("/docs/panel")).toBe("Panel");
     expect(pageSubject("/docs/items")).toBe("Items");
     expect(pageSubject("/docs/viewer")).toBe("Viewer");
+    expect(pageSubject("/docs/viewer/gallery")).toBe("Viewer");
+    expect(pageSubject("/docs/viewer/progress")).toBeUndefined();
+    expect(pageSubject("/docs/root")).toBe("Root");
     expect(pageSubject("/docs/composing")).toBeUndefined();
   });
 });
@@ -78,6 +81,18 @@ describe("planPreview", () => {
       page: "Viewer",
       layout: { viewer: {} },
       shows: "the Viewer",
+    });
+  });
+
+  it("shows a template on its own page, and a Root on Root's", () => {
+    expect(planned({}, "/docs/viewer/document")).toMatchObject({
+      page: "Viewer",
+      layout: { viewer: { template: "Document" } },
+      shows: "the Viewer (Document)",
+    });
+    expect(planned({}, "/docs/root")).toMatchObject({
+      page: "Root",
+      shows: "Label, Body and Items",
     });
   });
 

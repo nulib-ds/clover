@@ -1075,7 +1075,10 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     system in React or as web components. Use a template or compose your own."); its structured data gives them as
     `headline` and `alternativeHeadline`; `llms.txt` (and so `llms-full.txt`) and the
     README carry both. A page takes its `title` (front matter, else its first `h1`,
-    Nextra's rule) and its `description`. Give every page a `description`: agents read it
+    Nextra's rule) and its `description`. A page whose menu name alone is too short to
+    tell in a tab or a search result takes a fuller `title` ("Default template", "Colors
+    and contrast", "CSS classes", "Upgrading from 3.x"), while its menu name (`_meta.ts`)
+    and its heading stay short (Mat, 2026-11-08). Give every page a `description`: agents read it
     in `llms.txt`, the parts' list and the Markdown, and a search result shows it under the
     title, so it is the page's own and at most 155 characters, a 3.x page's with what it
     documents added (Mat, 2026-10-30: `DESCRIPTION_MOST`, held by `docs/lib/site.test.ts`;

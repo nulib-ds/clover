@@ -89,7 +89,7 @@ export function agentTools(): ToolDefinition[] {
     {
       name: "clover_preview_layout",
       title: "Preview a Clover layout",
-      description: `Draws a Clover layout live on the docs page the user has open, in its first example, in place of the page's own, with its code under it, until the user brings the page's example back. Give a layout, as clover_compose_layout takes it, or a capability ("3d", "captions", "rights") to show it over one of the docs' samples that has it; on a component's page, or the Viewer's, given neither, it shows the page's own. A layout without a resource is drawn over a sample. It changes this page only, and moves neither focus nor the page unless asked. ${CLOVER}`,
+      description: `Draws a Clover layout live on the docs page the user has open, in its first example, in place of the page's own, with its code under it, until the user brings the page's example back. Give a layout, as clover_compose_layout takes it, or a capability ("3d", "captions", "rights") to show it over one of the docs' samples that has it; on a component's page, the Viewer's or a template's, given neither, it shows the page's own. A layout without a resource is drawn over a sample. It changes this page only, and moves neither focus nor the page unless asked. ${CLOVER}`,
       inputSchema: {
         type: "object",
         properties: {

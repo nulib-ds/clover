@@ -51,7 +51,7 @@ export const DESCRIPTION_MOST = 155;
  * homepage's structured data (`docs/lib/agents.ts`).
  */
 export const aboutClover =
-  "Clover builds interfaces for IIIF content in React or as web components: a Manifest, a Collection, a Canvas or a content state, read through the IIIF Presentation API, versions 2, 3 and 4. Use the ready-made Viewer with one of its templates, or compose a layout of your own from the parts it is built from; on a page without React, the Viewer and its parts are web components. It is accessible, composable and light, and it draws images, video and sound with a renderer of its own.";
+  "Clover builds interfaces for IIIF content in React or as web components: a Manifest, a Collection, a Canvas or a content state, read through the IIIF Presentation API, versions 2, 3 and 4. Use the ready-made Viewer with one of its templates, or compose a layout of your own from the parts it is built from; on a page without React, the Viewer and its parts are web components. It is accessible, composable and light, and it draws images, video, sound and 3D models with renderers of its own.";
 
 /*
  * Every page's share card picture: the cover of the White Sewing Machine Company's 1896

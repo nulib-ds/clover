@@ -1,4 +1,9 @@
-import { capabilities, catalog, findPart } from "docs/lib/compose/catalog";
+import {
+  capabilities,
+  catalog,
+  findPart,
+  findTemplate,
+} from "docs/lib/compose/catalog";
 import {
   type Issue,
   type Layout,
@@ -41,9 +46,27 @@ export type Planned =
   | { ok: true; plan: PreviewPlan }
   | { ok: false; says: string; issues?: Issue[] };
 
-/** What a docs page is about: its part, or the Viewer; nothing for the rest. */
+/** A template's own page under the Viewer's (`/docs/viewer/document`): its template. */
+export const pageTemplate = (route: string) => {
+  const word = route.match(/^\/docs\/viewer\/([a-z]+)$/)?.[1];
+  return word ? findTemplate(word)?.name : undefined;
+};
+
+/*
+ * What Root's page shows of it (`content/docs/root.mdx`): a Root around a Label, its
+ * Body and Items, the parts every view has.
+ */
+const ROOT_LAYOUT: Layout = {
+  parts: [{ part: "Label" }, { part: "Body" }, { part: "Items" }],
+};
+
+/**
+ * What a docs page is about: its part, Root, or the Viewer (a template's page too);
+ * nothing for the rest.
+ */
 export function pageSubject(route: string) {
-  if (route === "/docs/viewer") return "Viewer";
+  if (route === "/docs/viewer" || pageTemplate(route)) return "Viewer";
+  if (route === "/docs/root") return "Root";
   return catalog().parts.find((part) => part.ownPage && part.docs === route)
     ?.name;
 }
@@ -182,9 +205,12 @@ export function planPreview(input: unknown, route: string, level = 2): Planned {
     if (!page)
       return {
         ok: false,
-        says: "Give a layout or a capability. On a component's page, or the Viewer's, given neither, it shows the page's own.",
+        says: "Give a layout or a capability. On a component's page, the Viewer's or a template's, given neither, it shows the page's own.",
       };
-    if (page === "Viewer") layout = { viewer: {} };
+    if (page === "Viewer") {
+      const template = pageTemplate(route);
+      layout = { viewer: template ? { template } : {} };
+    } else if (page === "Root") layout = ROOT_LAYOUT;
     else {
       const own = suggest({ needs: [page] });
       if (!own.ok || !("handled" in own) || !own.layout)
