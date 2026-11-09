@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.8.1] - 2026-11-09
+
 ### Fixed
 
 - **A closed section's list no longer scrolls the Panel.** While a recording played, a
