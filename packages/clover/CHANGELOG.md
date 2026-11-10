@@ -11,6 +11,89 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **`Language`, the language toggle as a part of its own** (`<clover-language>`): the
+  choice of languages About offers, for a layout to place where it likes, inside a
+  `Root`. `menu` folds it into the globe and the code in use however few languages there
+  are; `interfaceLanguages={false}` offers the resource's alone.
+
+### Changed
+
+- **Choice's control shows three stacked layers.** Its glyph was a bulleted list, as
+  a recording's Chapters control's is; the two now differ wherever a Choice is offered.
+- **An annotation on a recording plays it from its time, on any Canvas.** Pressed in
+  Annotations, one on the recording playing already played from its time, and one on
+  another Canvas was only gone to; it now opens there at its time and plays, as a
+  Transcript's cue does.
+- **Document's title and place line are a line each.** Cut short with an ellipsis where
+  they run longer, the count never; the title is whole in About, each Canvas's label
+  under its thumbnail, and both for assistive technology.
+- **Document holds its thumbnails' room while it loads.** Beside the page, where they will
+  open, so the page does not move as they arrive (a layout shift of 0.11 on a book, now
+  0.01); a single page, its thumbnail put away, gives the room back.
+- **Document's pages step by keyboard.** Tab reaches the page in view, its Canvas or its
+  Play, and Up and Down go to the previous page and the next, Home and End to the first
+  and last, focus going with them and each page's place said, and Enter opens it (plays
+  it, on a page that plays); the column is a region named by the resource's title.
+- **Document opens what an annotation points to.** An annotation chosen in its aside (or
+  a search's hit, a region in Contents, a place on the map, a hotspot), or a Transcript's
+  cue, opens the full viewer on its page, its thumbnail chosen, framed or playing from its
+  time; on a phone, the aside goes as it opens.
+- **Document is a continuous reader.** Its pages scroll freely, each a still, the one in
+  view live; a press on a page, or a zoom, opens it as the full viewer, the Canvas's own
+  view controls at its top end, as in Default, and over its top left an arrow back to the
+  pages, then Previous and Next; the arrow or Escape closes it. Where the page is in the Manifest, and its Canvases' labels, show under the
+  title.
+- **Document's sections are buttons in its toolbar.** Together on one capsule in the
+  controls' dark fill, the open one in the accent and ringed white (in the higher-contrast
+  mode, the dark fill ringed white), of
+  Clover's smaller round buttons, each opens its section alone in Document's own aside, its close
+  on the aside's edge, the provider's logo at its foot; Search's field, at the capsule's end inside one
+  edge with it, is open where the toolbar has room, else opens from a magnifier, its hits in the aside; the downloads are behind a Download button. The
+  aside's map expands over the pages.
+- **Document reads `languages` and `interfaceLanguages`.** Where the resource comes in
+  several languages, a globe first on the toolbar's capsule offers them, with Clover's
+  interface languages; About in the aside offers none.
+- **Document shows its thumbnails for a single page too.** `singleItem` defaults to
+  `true` in Document; a single page's thumbnail starts put away, its toggle over the page,
+  unless `defaultSidebarOpen` is given.
+- **Document's pages open from themselves.** A press on a page opens it, the pointer a
+  magnifier over it, and a keyboard opens it with a zoom on its Canvas; no button over the
+  pages opens it.
+- **Document's videos, sounds and moving images wait for a press.** A video's, a sound's
+  or a moving image's (pictures on a Canvas with a `duration`, its frames played in time)
+  page is its
+  still on black, a sound's small in the middle as its player shows its artwork, a play
+  button over it, a real one on the page in view, which a keyboard reaches too; opened, the video or the moving image fills the column on its black
+  ground, its player's full screen at its lower right as in every layout.
+- **Document's pages wait on Clover's ground for their pictures.** Until a page's still
+  has loaded, its box is the Canvas's ground behind an image (`--clover-canvas-background`). The
+  loading mark runs along the top of the page's picture, at its width.
+- **Document's pages lift under the pointer, and ring their pictures when focused.** A
+  page under the pointer takes a soft shadow; keyboard focus on the active
+  page's Canvas rings its pictures in the accent, in place of the Canvas's ring round its
+  whole box.
+- **Budgets.** Document's continuous reader, its toolbar, aside and video handling bring
+  the Viewer with Document to 85.15 kB up front (from 77.0) and 107.55 kB to first view
+  (from 97.0), and `<clover-viewer>` in Document to 151.05 kB (from 140.65); the toolbar's
+  Download loads beside the first view, and its search field with it where the toolbar
+  has room to show it open, else as the page idles. Document's styles bring
+  `templates.css`, which every template loads, to 5.0 kB (from 2.5), `base.css` to
+  15.0 kB (from 13.55) and `spacing.css` to 3.9 kB (from 3.85), so
+  Gallery to first view to 57.6 kB, and `<clover-viewer>` in Gallery to 137.55 kB; `Language`'s element and the language menu add about
+  0.05 to 0.4 kB to the other elements' pages. Each budget crossed is raised to the next 50 bytes.
+
+### Fixed
+
+- **A Canvas moved to another view frames it, however often it is asked for meanwhile.**
+  From a video to a picture of another size (a reel's films, then photographs of its
+  can), the picture could open half again too large, cut off at the Body's edges: its
+  scene was asked for a second time before the first was placed (the video's element let
+  go, or a Choice picked), and that ask kept the video's view. It now opens home, fitted.
+  The fix adds a few bytes to every Canvas: the Default template to first view crosses
+  its budget by 50 bytes, raised to 101.05 kB.
+
 ## [4.8.2] - 2026-11-09
 
 ### Changed

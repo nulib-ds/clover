@@ -13,6 +13,7 @@ import React from "react";
 import audioJson from "../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import placeholderVideoJson from "../fixtures/iiif-cookbook/0013-placeholderCanvas.json";
 import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
+import tocJson from "../fixtures/iiif-cookbook/0024-book-4-toc.json";
 import modelJson from "../fixtures/iiif-cookbook/0608-mvm-3d-v4.json";
 import singleJson from "../fixtures/iiif-cookbook/0004-canvas-size.json";
 import renderingJson from "../fixtures/iiif-cookbook/0046-rendering.json";
@@ -800,7 +801,7 @@ describe("templates", () => {
     });
   });
 
-  it("Document: narrowing under the panel and thumbnails closes them, focus to its toggle; widening brings them back", async () => {
+  it("Document: narrowing under the aside and thumbnails closes them, focus to its section's button; widening brings them back", async () => {
     // jsdom lays nothing out: the layout measures wide, then phone-wide (zoomed in, say).
     const panes: Array<() => void> = [];
     vi.stubGlobal(
@@ -823,33 +824,38 @@ describe("templates", () => {
         level: 2,
         name: "Simple Manifest - Book",
       });
-      const panel = document.querySelector<HTMLElement>(
-        ".clover-template-document-panel",
+      const aside = document.querySelector<HTMLElement>(
+        ".clover-template-document-aside",
       )!;
       const sidebar = document.querySelector<HTMLElement>(
         ".clover-template-document-sidebar",
       )!;
-      expect(panel).not.toHaveAttribute("hidden");
+      const about = () =>
+        within(
+          document.querySelector<HTMLElement>(
+            ".clover-template-document-toolbar",
+          )!,
+        ).getByRole("button", { name: "About" });
+      expect(aside).not.toHaveAttribute("hidden");
       expect(sidebar).not.toHaveAttribute("hidden");
-      // Open on arrival, its code loads first.
-      (await within(panel).findByRole("button", { name: "About" })).focus();
+      expect(about()).toHaveAttribute("aria-expanded", "true");
+      // Open on arrival, its content loads first.
+      await within(aside).findByText("IIIF Manifest");
+      within(aside).getAllByRole("link")[0].focus();
       width.mockReturnValue(390);
       act(() => panes.forEach((measure) => measure()));
-      expect(panel).toHaveAttribute("hidden");
+      expect(aside).toHaveAttribute("hidden");
       expect(sidebar).toHaveAttribute("hidden");
+      expect(about()).toHaveAttribute("aria-expanded", "false");
       expect(
         document.querySelector(".clover-template-document-panes"),
       ).toHaveAttribute("data-narrow");
-      // Its toggle has moved, from the spine to the Canvas's controls.
-      await waitFor(() =>
-        expect(
-          screen.getByRole("button", { name: "More information" }),
-        ).toHaveFocus(),
-      );
+      // Focus in it goes to the button for its section, in the toolbar.
+      await waitFor(() => expect(about()).toHaveFocus());
       // Room again: both back beside the page, as they were.
       width.mockReturnValue(1280);
       act(() => panes.forEach((measure) => measure()));
-      expect(panel).not.toHaveAttribute("hidden");
+      expect(aside).not.toHaveAttribute("hidden");
       expect(sidebar).not.toHaveAttribute("hidden");
       // Focus on the thumbnails' toggle, on their spine, follows it over the page's top
       // left as they go.
@@ -869,8 +875,8 @@ describe("templates", () => {
     }
   });
 
-  it("Document: no thumbnails, bar or their toggle for a single page", async () => {
-    render(<Templates.Document iiifContent={singleJson} />);
+  it("Document: singleItem={false} leaves out the thumbnails, bar and their toggle for a single page", async () => {
+    render(<Templates.Document iiifContent={singleJson} singleItem={false} />);
     await screen.findByRole("heading", {
       name: "Still image from an opera performance at Indiana University",
     });
@@ -882,16 +888,31 @@ describe("templates", () => {
     ).toHaveAttribute("data-sidebar", "closed");
   });
 
-  it("Document: singleItem shows the thumbnails and their toggle for a single page", async () => {
-    render(<Templates.Document iiifContent={singleJson} singleItem />);
+  it("Document: a single page's thumbnail and its toggle, put away to start, with no place under the title", async () => {
+    const plain = render(<Templates.Document iiifContent={singleJson} />);
+    const toggle = await screen.findByRole("button", { name: /^Show items/ });
+    await waitFor(() =>
+      expect(
+        document.querySelector(".clover-template-document-panes"),
+      ).not.toHaveAttribute("data-sidebar", "open"),
+    );
+    expect(screen.queryByRole("listbox", { name: "Items" })).toBeNull();
+    // Put away on its own, focus is left where it was.
+    expect(toggle).not.toHaveFocus();
+    // "1 / 1" would say nothing.
+    expect(
+      document.querySelector(".clover-template-document-place"),
+    ).toBeNull();
+    // Opened, its one thumbnail.
+    fireEvent.click(toggle);
     const listbox = await screen.findByRole("listbox", { name: "Items" });
     expect(within(listbox).getAllByRole("option")).toHaveLength(1);
+    plain.unmount();
+    // Where the host says, the thumbnails start shown.
+    render(<Templates.Document iiifContent={singleJson} defaultSidebarOpen />);
     expect(
-      screen.getByRole("button", { name: /^Show items/ }),
+      await screen.findByRole("listbox", { name: "Items" }),
     ).toBeInTheDocument();
-    expect(
-      document.querySelector(".clover-template-document-panes"),
-    ).toHaveAttribute("data-sidebar", "open");
   });
 
   it("Default: no thumbnails for a single view, unless singleItem asks", async () => {
@@ -923,6 +944,19 @@ describe("templates", () => {
     unmount();
     const document = render(
       <Templates.Document iiifContent={bookJson} collapseControls="always" />,
+    );
+    // Document's are the full viewer's: a press on a page opens it.
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    });
+    await waitFor(() =>
+      expect(
+        window.document.querySelector(".clover-template-document-sheet"),
+      ).not.toBeNull(),
+    );
+    fireEvent.click(
+      window.document.querySelector(".clover-template-document-sheet")!,
     );
     expect(await more()).toBeNull();
     document.unmount();
@@ -1295,7 +1329,7 @@ describe("templates", () => {
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
   });
 
-  it("Document: toolbar, thumbnails, a sheet for each view, PageDown, and a sliding panel", async () => {
+  it("Document: toolbar, thumbnails, a sheet for each view, PageDown, and its aside", async () => {
     render(<Templates.Document iiifContent={bookJson} />);
     expect(
       await screen.findByRole("heading", {
@@ -1321,7 +1355,9 @@ describe("templates", () => {
     const sheets = column.querySelectorAll(".clover-template-document-sheet");
     expect(sheets).toHaveLength(3);
     expect(sheets[1]).toHaveAttribute("aria-hidden", "true");
-    expect(sheets[1].querySelectorAll("img, span")).toHaveLength(2);
+    expect(
+      sheets[1].querySelectorAll(".clover-template-document-frame > *"),
+    ).toHaveLength(2);
     const canvas = column.querySelector('[data-testid="clover-canvas"]');
     fireEvent.keyDown(column, { key: "PageDown" });
     // The second view current, its thumbnail selected.
@@ -1334,32 +1370,54 @@ describe("templates", () => {
     // The one Canvas shows the next view: nothing remounted.
     expect(column.querySelector('[data-testid="clover-canvas"]')).toBe(canvas);
 
-    // With room for both, the panel sits beside the page, a bar between them.
-    const panel = document.querySelector<HTMLElement>(
-      ".clover-template-document-panel",
+    // With room for both, the aside sits beside the page, a bar between them.
+    const toolbar = document.querySelector<HTMLElement>(
+      ".clover-template-document-toolbar",
     )!;
-    const info = () => screen.getByRole("button", { name: "More information" });
-    expect(panel).toHaveAttribute("hidden");
+    const aside = document.querySelector<HTMLElement>(
+      ".clover-template-document-aside",
+    )!;
+    // A button in the toolbar for each section the resource has, each a disclosure of
+    // the aside.
+    const group = within(toolbar).getByRole("group", {
+      name: "Information panel",
+    });
+    const about = within(group).getByRole("button", { name: "About" });
+    expect(about).toHaveAttribute("aria-expanded", "false");
+    expect(about).toHaveAttribute("aria-controls", aside.id);
+    expect(aside).toHaveAttribute("hidden");
     expect(screen.getAllByRole("separator")).toHaveLength(1);
-    // Shut, its code has not loaded: nothing in its pane until it first opens.
-    expect(panel).toBeEmptyDOMElement();
-    fireEvent.click(info());
-    // The first press loads it, then opens it whole.
-    await waitFor(() => expect(panel).not.toHaveAttribute("hidden"));
-    // Its sections are stacked boxes, as Default's, About open.
+    // Shut, its content has not loaded: its name alone, until it first opens.
     expect(
-      within(panel).getByRole("button", { name: "About" }),
-    ).toHaveAttribute("aria-expanded", "true");
+      aside.querySelector(".clover-template-document-aside-scroll")!.children,
+    ).toHaveLength(1);
+    fireEvent.click(about);
+    await waitFor(() => expect(aside).not.toHaveAttribute("hidden"));
+    expect(about).toHaveAttribute("aria-expanded", "true");
+    // Its section alone, named by its heading: no accordion's boxes, no tabs.
+    expect(screen.getByRole("complementary", { name: "About" })).toBe(aside);
+    expect(
+      within(aside).getByRole("heading", { level: 3, name: "About" }),
+    ).toBeInTheDocument();
+    await within(aside).findByText("IIIF Manifest");
+    expect(within(aside).queryByRole("tab")).toBeNull();
+    expect(within(aside).queryByRole("button", { name: "About" })).toBeNull();
     const bars = screen.getAllByRole("separator");
     expect(bars).toHaveLength(2);
-    expect(bars[1]).toHaveAttribute("aria-controls", panel.id);
-    // Beside the page, the toggle puts it away: it has no close button of its own.
-    expect(
-      within(panel).queryByRole("button", { name: "Close information panel" }),
-    ).toBeNull();
-    fireEvent.click(info());
-    expect(panel).toHaveAttribute("hidden");
+    expect(bars[1]).toHaveAttribute("aria-controls", aside.id);
+    // Beside the page, its button puts it away, and so does its close, on its edge.
+    fireEvent.click(about);
+    expect(aside).toHaveAttribute("hidden");
     expect(screen.getAllByRole("separator")).toHaveLength(1);
+    fireEvent.click(about);
+    await waitFor(() => expect(aside).not.toHaveAttribute("hidden"));
+    const close = within(aside).getByRole("button", {
+      name: "Close information panel",
+    });
+    close.focus();
+    fireEvent.click(close);
+    expect(aside).toHaveAttribute("hidden");
+    await waitFor(() => expect(about).toHaveFocus());
 
     // Put away, it waits over the page's top left, and focus goes with it.
     toggle().focus();
@@ -1399,23 +1457,16 @@ describe("templates", () => {
       column.querySelector<HTMLElement>(
         ".clover-template-document-sheet[data-active]",
       );
-    // Its placeholder showing, the still stays: the two are the same picture.
+    // Open at once (the sheet's still is its placeholder), the still stays meanwhile.
     await waitFor(() =>
       expect(
-        column.querySelector(".clover-canvas[data-placeholder='true']"),
+        column.querySelector(
+          ".clover-template-document-live .clover-canvas:not([data-placeholder='true'])",
+        ),
       ).not.toBeNull(),
     );
     await waitFor(() => expect(sheet()).not.toBeNull());
     expect(column).not.toHaveAttribute("data-covered");
-    const [play] = await within(
-      column.querySelector<HTMLElement>(".clover-template-document-live")!,
-    ).findAllByRole("button", { name: /^Play/ });
-    fireEvent.click(play);
-    await waitFor(() =>
-      expect(
-        column.querySelector(".clover-canvas[data-placeholder='false']"),
-      ).not.toBeNull(),
-    );
     // jsdom has no WebGL, so the renderer places no element: one stands in for it.
     const video = document.createElement("video");
     column.querySelector(".clover-canvas")!.append(video);
@@ -1433,7 +1484,7 @@ describe("templates", () => {
     await waitFor(() => expect(column).not.toHaveAttribute("data-covered"));
   });
 
-  it("Document: the title at headingLevel, the panel's sections a level under it", async () => {
+  it("Document: the title at headingLevel, the aside's name a level under it, its section's headings under that", async () => {
     render(
       <Templates.Document
         iiifContent={bookJson}
@@ -1447,32 +1498,113 @@ describe("templates", () => {
         name: "Simple Manifest - Book",
       }),
     ).toBeInTheDocument();
-    const panel = document.querySelector<HTMLElement>(
-      ".clover-template-document-panel",
+    const aside = document.querySelector<HTMLElement>(
+      ".clover-template-document-aside",
     )!;
     expect(
-      within(panel).getByRole("heading", { level: 4, name: "About" }),
+      within(aside).getByRole("heading", { level: 4, name: "About" }),
+    ).toBeInTheDocument();
+    // About's own, the Manifest's label and its titles, under the aside's name.
+    expect(
+      await within(aside).findByRole("heading", {
+        level: 5,
+        name: "IIIF Manifest",
+      }),
     ).toBeInTheDocument();
   });
 
-  it("Document: the downloads in the toolbar, as links, their groups a level under the title", async () => {
+  it("Document: the languages as a globe among the toolbar's controls, always, About offering none", async () => {
+    const twoLanguages = {
+      ...bookJson,
+      id: "https://example.org/manifest/document-languages",
+      label: { de: ["Ein Buch"], en: ["A book"] },
+    };
+    render(<Templates.Document iiifContent={twoLanguages} />);
+    const toolbar = await waitFor(() => {
+      const found = document.querySelector<HTMLElement>(
+        ".clover-template-document-toolbar",
+      );
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    const globe = await within(toolbar).findByRole("button", {
+      name: /Language/,
+    });
+    expect(globe).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(globe);
+    expect(within(toolbar).getAllByRole("radio")).toHaveLength(2);
+    // About, opened, offers no row of its own: the page has one choice.
+    fireEvent.click(within(toolbar).getByRole("button", { name: "About" }));
+    const aside = document.querySelector<HTMLElement>(
+      ".clover-template-document-aside",
+    )!;
+    await within(aside).findByText("IIIF Manifest");
+    expect(within(aside).queryByRole("radio")).toBeNull();
+  });
+
+  it("Document: a section's button opens it alone, another's replaces it, its own again puts it away", async () => {
+    render(<Templates.Document iiifContent={tocJson} />);
+    const toolbar = await waitFor(() => {
+      const found = document.querySelector<HTMLElement>(
+        ".clover-template-document-toolbar",
+      );
+      expect(
+        within(found!).getByRole("button", { name: "Contents" }),
+      ).toBeInTheDocument();
+      return found!;
+    });
+    const aside = document.querySelector<HTMLElement>(
+      ".clover-template-document-aside",
+    )!;
+    const button = (name: string) =>
+      within(toolbar).getByRole("button", { name });
+    fireEvent.click(button("Contents"));
+    await waitFor(() => expect(aside).not.toHaveAttribute("hidden"));
+    expect(screen.getByRole("complementary", { name: "Contents" })).toBe(aside);
+    expect(button("Contents")).toHaveAttribute("aria-expanded", "true");
+    expect(button("About")).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(button("About"));
+    expect(screen.getByRole("complementary", { name: "About" })).toBe(aside);
+    expect(button("About")).toHaveAttribute("aria-expanded", "true");
+    expect(button("Contents")).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(button("About"));
+    expect(aside).toHaveAttribute("hidden");
+    expect(button("About")).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("Document: the downloads behind the toolbar's Download button, their groups a level under the title", async () => {
     render(<Templates.Document iiifContent={renderingJson} headingLevel={4} />);
     await screen.findByRole("heading", { level: 4 });
     const toolbar = document.querySelector<HTMLElement>(
       ".clover-template-document-toolbar",
     )!;
+    const button = await within(toolbar).findByRole("button", {
+      name: "Download",
+    });
+    expect(button).toHaveAttribute("aria-expanded", "false");
     expect(
-      within(toolbar).getByRole("heading", { level: 5, name: "All pages" }),
-    ).toBeInTheDocument();
-    expect(
-      within(toolbar).getByRole("link", { name: /PDF version/ }),
-    ).toBeInTheDocument();
-    expect(
-      within(toolbar).queryByRole("button", { name: "Download" }),
+      within(toolbar).queryByRole("link", { name: /PDF version/ }),
     ).toBeNull();
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    const menu = document.getElementById(
+      button.getAttribute("aria-controls")!,
+    )!;
+    expect(
+      within(menu).getByRole("heading", { level: 5, name: "All pages" }),
+    ).toBeInTheDocument();
+    expect(
+      within(menu).getByRole("link", { name: /PDF version/ }),
+    ).toBeInTheDocument();
+    // Escape closes it, focus back on its button.
+    fireEvent.keyDown(within(menu).getByRole("link", { name: /PDF version/ }), {
+      key: "Escape",
+    });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveFocus();
   });
 
-  it("Document: the downloads in its toolbar only, never again in its panel's About", async () => {
+  it("Document: the downloads in its toolbar only, never again in its aside's About", async () => {
     render(
       <Templates.Document
         iiifContent={renderingJson}
@@ -1481,16 +1613,19 @@ describe("templates", () => {
       />,
     );
     await screen.findByRole("heading", { level: 4 });
-    const panel = document.querySelector<HTMLElement>(
-      ".clover-template-document-panel",
+    const aside = document.querySelector<HTMLElement>(
+      ".clover-template-document-aside",
     )!;
-    await within(panel).findByRole("heading", { level: 5, name: "About" });
     expect(
-      within(panel).queryByRole("heading", { name: "Download" }),
+      within(aside).getByRole("heading", { level: 5, name: "About" }),
+    ).toBeInTheDocument();
+    await within(aside).findByText("IIIF Manifest");
+    expect(
+      within(aside).queryByRole("heading", { name: "Download" }),
     ).toBeNull();
-    expect(screen.getAllByRole("link", { name: /PDF version/ })).toHaveLength(
-      1,
-    );
+    expect(
+      screen.getAllByRole("link", { name: /PDF version/, hidden: true }),
+    ).toHaveLength(1);
   });
 
   it("Default: About's titles a level under it, its downloads behind its heading's button", async () => {
@@ -1520,7 +1655,7 @@ describe("templates", () => {
     ).not.toBeInTheDocument();
   });
 
-  describe("Document, with no room for the panel beside the page", () => {
+  describe("Document, with no room for the aside beside the page", () => {
     // jsdom lays nothing out: a phone-wide layout, as the template measures it.
     let width: ReturnType<typeof vi.spyOn>;
     beforeEach(() => {
@@ -1530,7 +1665,14 @@ describe("templates", () => {
     });
     afterEach(() => width.mockRestore());
 
-    it("starts with the panel and thumbnails closed, even when the host asks them open", async () => {
+    const toolbar = () =>
+      document.querySelector<HTMLElement>(".clover-template-document-toolbar")!;
+    const button = (name: string) =>
+      within(toolbar()).getByRole("button", { name });
+    const aside = () =>
+      document.querySelector<HTMLElement>(".clover-template-document-aside")!;
+
+    it("starts with the aside and thumbnails closed, even when the host asks them open", async () => {
       render(
         <Templates.Document
           iiifContent={bookJson}
@@ -1542,10 +1684,8 @@ describe("templates", () => {
         level: 2,
         name: "Simple Manifest - Book",
       });
-      const panel = document.querySelector<HTMLElement>(
-        ".clover-template-document-panel",
-      )!;
-      expect(panel).toHaveAttribute("hidden");
+      expect(aside()).toHaveAttribute("hidden");
+      expect(button("About")).toHaveAttribute("aria-expanded", "false");
       expect(
         document.querySelector(".clover-template-document-sidebar"),
       ).toHaveAttribute("hidden");
@@ -1554,68 +1694,64 @@ describe("templates", () => {
       ).toHaveAttribute("aria-expanded", "false");
       expect(document.querySelector(".clover-template-scrim")).toBeNull();
       await act(() => new Promise((done) => setTimeout(done, SLIDE_MS + 60)));
-      expect(panel).toHaveAttribute("hidden");
+      expect(aside()).toHaveAttribute("hidden");
       expect(document.body).toHaveFocus();
     });
 
-    it("slides the panel over the page, focused, closing on Escape or its button", async () => {
-      render(<Templates.Document iiifContent={bookJson} />);
-      await screen.findByRole("heading", {
-        level: 2,
-        name: "Simple Manifest - Book",
-      });
-      const panel = document.querySelector<HTMLElement>(
-        ".clover-template-document-panel",
-      )!;
-      const info = () =>
-        screen.getByRole("button", { name: "More information" });
-      // The title can appear before the Canvas has mounted its controls.
-      fireEvent.click(
-        await screen.findByRole("button", { name: "More information" }),
-      );
-      await waitFor(() => expect(panel).toHaveAttribute("data-open", "true"));
+    it("slides the aside over the page, focused, closing on Escape or its button, focus back to its section's button", async () => {
+      render(<Templates.Document iiifContent={tocJson} />);
+      await waitFor(() => expect(button("Contents")).toBeInTheDocument());
+      fireEvent.click(button("Contents"));
+      await waitFor(() => expect(aside()).toHaveAttribute("data-open", "true"));
       // Over the page there is no bar for it, nor for the thumbnails.
       expect(screen.queryAllByRole("separator")).toHaveLength(0);
 
-      // Opening takes focus into the panel, at the open box's heading; Escape there
-      // hands it back to the toggle.
-      const about = within(panel).getByRole("button", { name: "About" });
-      await waitFor(() => expect(about).toHaveFocus());
-      fireEvent.keyDown(about, { key: "Escape" });
-      expect(panel).toHaveAttribute("data-open", "false");
-      expect(info()).toHaveFocus();
-      await waitFor(() => expect(panel).toHaveAttribute("hidden"));
+      // Opening takes focus into it, at its close button; Escape there, its popover
+      // first, alone (WCAG 1.4.13), hands it back to the button for its section, not
+      // the first of them.
+      const close = within(aside()).getByRole("button", {
+        name: "Close information panel",
+      });
+      await waitFor(() => expect(close).toHaveFocus());
+      fireEvent.keyDown(close, { key: "Escape" });
+      expect(aside()).toHaveAttribute("data-open", "true");
+      fireEvent.keyDown(close, { key: "Escape" });
+      expect(aside()).toHaveAttribute("data-open", "false");
+      expect(button("Contents")).toHaveFocus();
+      await waitFor(() => expect(aside()).toHaveAttribute("hidden"));
 
       // And its close button.
-      fireEvent.click(info());
-      fireEvent.click(
-        within(panel).getByRole("button", { name: "Close information panel" }),
+      fireEvent.click(button("About"));
+      await waitFor(() =>
+        expect(
+          within(aside()).getByRole("button", {
+            name: "Close information panel",
+          }),
+        ).toHaveFocus(),
       );
-      expect(panel).toHaveAttribute("data-open", "false");
+      fireEvent.click(
+        within(aside()).getByRole("button", {
+          name: "Close information panel",
+        }),
+      );
+      expect(aside()).toHaveAttribute("data-open", "false");
+      expect(button("About")).toHaveFocus();
     });
 
-    it("puts the panel away on Escape from under it, leaving focus there", async () => {
-      render(<Templates.Document iiifContent={bookJson} />);
-      await screen.findByRole("heading", {
-        level: 2,
-        name: "Simple Manifest - Book",
-      });
-      const panel = document.querySelector<HTMLElement>(
-        ".clover-template-document-panel",
-      )!;
-      fireEvent.click(
-        await screen.findByRole("button", { name: "More information" }),
-      );
-      await waitFor(() => expect(panel).toHaveAttribute("data-open", "true"));
-      // Tabbing back from the panel reaches the thumbnails' toggle it covers.
-      const under = screen.getByRole("button", { name: /^Show items/ });
-      under.focus();
-      // Its popover first, alone (WCAG 1.4.13), then the panel.
-      fireEvent.keyDown(under, { key: "Escape" });
-      expect(panel).toHaveAttribute("data-open", "true");
-      fireEvent.keyDown(under, { key: "Escape" });
-      expect(panel).toHaveAttribute("data-open", "false");
-      expect(under).toHaveFocus();
+    it("puts the aside away on Escape from the toolbar, leaving focus there", async () => {
+      render(<Templates.Document iiifContent={tocJson} />);
+      await waitFor(() => expect(button("Contents")).toBeInTheDocument());
+      fireEvent.click(button("Contents"));
+      await waitFor(() => expect(aside()).toHaveAttribute("data-open", "true"));
+      // Tabbing back from the aside reaches the toolbar, which it does not cover.
+      const about = button("About");
+      about.focus();
+      // Its popover first, alone (WCAG 1.4.13), then the aside.
+      fireEvent.keyDown(about, { key: "Escape" });
+      expect(aside()).toHaveAttribute("data-open", "true");
+      fireEvent.keyDown(about, { key: "Escape" });
+      expect(aside()).toHaveAttribute("data-open", "false");
+      expect(about).toHaveFocus();
     });
 
     const items = () => screen.getByRole("button", { name: /^Show items/ });
@@ -1672,14 +1808,15 @@ describe("templates", () => {
         name: "Simple Manifest - Book",
       });
       const sidebar = await openThumbnails();
-      // Tabbing on from the thumbnails reaches the page they cover.
-      const under = await screen.findByRole("button", {
-        name: "More information",
+      // Focus under them, on the page's Canvas.
+      const under = await waitFor(() => {
+        const viewport = document.querySelector<HTMLElement>(
+          ".clover-template-document-live [data-testid='clover-canvas-viewport']",
+        );
+        expect(viewport).not.toBeNull();
+        return viewport!;
       });
       under.focus();
-      // Its popover first, alone (WCAG 1.4.13), then the thumbnails.
-      fireEvent.keyDown(under, { key: "Escape" });
-      expect(sidebar).not.toHaveAttribute("hidden");
       fireEvent.keyDown(under, { key: "Escape" });
       expect(sidebar).toHaveAttribute("hidden");
       expect(under).toHaveFocus();

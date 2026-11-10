@@ -40,11 +40,6 @@ import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
     Document: [
       { prop: "defaultSidebarOpen", value: true, remount: true },
       { prop: "defaultPanelOpen", value: false, remount: true },
-      {
-        prop: "panelLayout",
-        value: "accordion",
-        options: ["accordion", "tabs"],
-      },
     ],
     Gallery: [
       { prop: "items", value: "grid", options: ["grid", "masonry"] },
@@ -133,25 +128,26 @@ on [its own page](/docs/viewer/default).
 
 ### Document
 
-Reads like a PDF viewer: a toolbar with the title and Download, page thumbnails down the
-left, the pages down one column, and the information panel sliding out on the right.
+Reads like a PDF viewer: a toolbar with the title, a button for each section, Download
+and Search, page thumbnails down the left, the pages down one column, and each section
+alone in an aside on the right.
 More on [its own page](/docs/viewer/document).
 
-| Prop                 | Type                    | Default                      | Description                                                                                                                                                                                                                           |
-| -------------------- | ----------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.                                                                                                                                                                          |
-| `singleItem`         | `boolean`               | `false`                      | The page thumbnails and their toggle even where the resource has one page.                                                                                                                                                            |
-| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed.                                                                                                                                                                       |
-| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                                                                                                                                                                                    |
-| `panelSections`      | `PanelSection[]`        | All                          | Which of the panel's sections it may have; each still shows only where the resource has data for it, and no panel at all where it has none of them.                                                                                   |
-| `panelLabels`        | `PanelSectionLabels`    | —                            | What a panel section says, in place of its word in Clover's interface language: text, or text by language tag.                                                                                                                        |
-| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.                                                                                                                                                                        |
-| `languages`          | `boolean`               | `true`                       | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out.                                                                                                    |
-| `interfaceLanguages` | `boolean`               | `true`                       | The panel's language toggle also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of, the visitor's and your site's, where they differ; `false` leaves them out. |
-| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.                                                                                                                                                                            |
-| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.                                                                                                                                                                        |
-| `collapseControls`   | `"auto" \| "always"`    | `"auto"`                     | When the Body's view controls (zoom, rotation, reset, full screen) collapse behind one button: only where its row cannot hold them all, or always, leaving the media more room.                                                       |
-| `canvasOptions`      | `CloverCanvasOptions`   | —                            | The Body's Canvas `options`: its [gestures, zoom limits and motion](/docs/canvas#interaction).                                                                                                                                        |
+| Prop                 | Type                    | Default                      | Description                                                                                                                                                                                                         |
+| -------------------- | ----------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultSidebarOpen` | `boolean`               | Several pages                | Whether the page thumbnails start shown: by default where the resource has several pages, a single page's put away; over the page, not.                                                                             |
+| `singleItem`         | `boolean`               | `true`                       | The page thumbnails and their toggle where the resource has one page too.                                                                                                                                           |
+| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the aside starts open on About beside the page; over it, closed.                                                                                                                                            |
+| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | Not read by Document: each section opens alone in its aside.                                                                                                                                                        |
+| `panelSections`      | `PanelSection[]`        | All                          | Which sections the toolbar offers; each still only where the resource has data for it.                                                                                                                              |
+| `panelLabels`        | `PanelSectionLabels`    | —                            | What a section's button and the aside call it, in place of its word in Clover's interface language: text, or text by language tag.                                                                                  |
+| `download`           | `boolean`               | `true`                       | The Download button, its links in a menu under it, where there is a `rendering`.                                                                                                                                    |
+| `languages`          | `boolean`               | `true`                       | A globe among the toolbar's controls, where the resource comes in several languages, that sets the one it reads in; `false` leaves it out.                                                                          |
+| `interfaceLanguages` | `boolean`               | `true`                       | The globe also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of, the visitor's and your site's, where they differ; `false` leaves them out. |
+| `headingLevel`       | `number`                | `2`                          | The title's level; the aside's name a level below, and its section's headings a level below that.                                                                                                                   |
+| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the bars' widths are remembered; `false` forgets them.                                                                                                                                                        |
+| `collapseControls`   | `"auto" \| "always"`    | `"auto"`                     | For the Body's own controls (Choice, a Canvas's information, and in the full viewer the view's): only where their row cannot hold them all, or always.                                                              |
+| `canvasOptions`      | `CloverCanvasOptions`   | —                            | The Body's Canvas `options`: its [gestures, zoom limits and motion](/docs/canvas#interaction).                                                                                                                      |
 
 ### Gallery
 

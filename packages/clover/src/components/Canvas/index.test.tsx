@@ -1673,6 +1673,30 @@ describe("Canvas", () => {
       expect(renderer.clear).not.toHaveBeenCalled();
     });
 
+    /*
+     * A move frames the next view afresh until its scene is placed, however often it is
+     * asked for meanwhile (a Choice picked, or, from a video, its media element let go):
+     * a later ask never keeps the last view's camera (Document's first picture after its
+     * videos was drawn half again too large).
+     */
+    it("frames a move afresh until its scene is placed, a pick before then too", async () => {
+      const { rerender } = render(
+        <Canvas canvases={book.items.slice(0, 1) as any} />,
+      );
+      renderer.isOpen = true;
+      // The next view's scene still preparing: never placed in this test.
+      renderer.setImages.mockImplementation(() => new Promise(() => {}));
+      renderer.setImages.mockClear();
+      rerender(<Canvas canvases={xrayCanvas} />);
+      expect(renderer.setImages.mock.lastCall[1].fit).toBe(true);
+      await loaded();
+      fireEvent.click(screen.getByRole("button", { name: "Choice" }));
+      fireEvent.click(await screen.findByRole("radio", { name: "X-Ray" }));
+      const [images, { fit }] = renderer.setImages.mock.lastCall;
+      expect(images[0].url).toMatch(/xray/i);
+      expect(fit).toBe(true);
+    });
+
     it("shows an unlabeled item's number beside its radio button", () => {
       const unlabeled = JSON.parse(JSON.stringify(xrayCanvas));
       const strip = (node: any): void => {

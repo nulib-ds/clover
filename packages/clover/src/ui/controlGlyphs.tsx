@@ -88,23 +88,20 @@ export const Rotate = () => {
  * in an svg it can drop straight in. Decorative, since the button carries the
  * name.
  */
-/** A bulleted list: three dots and three lines. Stands for "choose from these". */
+/**
+ * Three layers, stacked: a diamond over the edges of two more. Stands for "one of these,
+ * over the others", what a Choice is (Mat, 2026-11-10: "Make Choice the three layers
+ * icon"; a bulleted list before, which a recording's Chapters also wore).
+ */
 export const Choice = () => {
   return (
-    <>
-      <path
-        fill="none"
-        strokeLinecap="round"
-        strokeWidth="64"
-        d="M112 144h0M112 256h0M112 368h0"
-      />
-      <path
-        fill="none"
-        strokeLinecap="round"
-        strokeWidth="40"
-        d="M208 144h208M208 256h208M208 368h208"
-      />
-    </>
+    <path
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="36"
+      d="M256 72L448 168L256 264L64 168ZM64 256L256 352L448 256M64 344L256 440L448 344"
+    />
   );
 };
 

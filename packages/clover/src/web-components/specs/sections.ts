@@ -97,6 +97,33 @@ export const previousDocs: ElementDocs = {
   attributes: ofStepsDocs,
 };
 
+export const language: ElementSpec = {
+  tag: "clover-language",
+  kind: "part",
+  needsRoot: true,
+  attributes: {
+    "interface-languages": { prop: "interfaceLanguages", type: "boolean" },
+    menu: { prop: "menu", type: "boolean" },
+  },
+};
+export const languageDocs: ElementDocs = {
+  name: "CloverLanguageElement",
+  description:
+    "The languages to read the resource in, as About offers them, for a layout to place where it likes: the languages its values come in, then Clover's interface languages it has none of, the one in use chosen, which sets the root's reading. A row of their codes after a globe, folded past five into the globe and the code in use, which opens them. Nothing under two languages.",
+  attributes: {
+    "interface-languages": {
+      description:
+        '"false" offers the languages the resource comes in alone, without Clover\'s interface languages it has none of.',
+      default: "true",
+    },
+    menu: {
+      description:
+        "Folded into the globe and the code in use, which opens the rest as a menu, however few there are.",
+      default: "false",
+    },
+  },
+};
+
 export const download: ElementSpec = {
   tag: "clover-download",
   kind: "part",

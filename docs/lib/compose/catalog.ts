@@ -114,6 +114,7 @@ export const BODY_DRAWS: readonly string[] = ["Canvas", "Timeline", "Scene"];
 const DOCUMENTED_ON: Record<string, string> = {
   About: "/docs/panel#sections",
   CollectionSelect: "/docs/collection",
+  Language: "/docs/i18n#placing-the-toggle",
   Next: "/docs/items#one-at-a-time",
   PanelToggle: "/docs/panel#showing-and-hiding-it",
   Position: "/docs/items#one-at-a-time",

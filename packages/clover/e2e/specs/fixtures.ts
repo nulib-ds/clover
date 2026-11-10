@@ -16,12 +16,19 @@ const PNG = Buffer.from(
   "base64",
 );
 
-/** A Manifest of `count` image Canvases, each with its own (routed) image service. */
-export function manifestOf(count: number) {
+/**
+ * A Manifest of `count` image Canvases, each with its own (routed) image service; and on
+ * the pages `commented` names (from 1), a comment on a region, for what follows an
+ * annotation across pages. Test data only: its words say what they are.
+ */
+export function manifestOf(count: number, commented: number[] = []) {
   const base = `https://fixtures.test/generated/${count}`;
+  const id = commented.length
+    ? `${base}-commented-${commented.join(",")}.json`
+    : `${base}.json`;
   return {
     "@context": "http://iiif.io/api/presentation/3/context.json",
-    id: `${base}.json`,
+    id,
     type: "Manifest",
     label: { en: [`${count} Canvases`] },
     items: Array.from({ length: count }, (_, index) => {
@@ -57,6 +64,28 @@ export function manifestOf(count: number) {
             ],
           },
         ],
+        ...(commented.includes(index + 1) && {
+          annotations: [
+            {
+              id: `${canvas}/comments`,
+              type: "AnnotationPage",
+              items: [
+                {
+                  id: `${canvas}/comments/1`,
+                  type: "Annotation",
+                  motivation: "commenting",
+                  body: {
+                    type: "TextualBody",
+                    value: `A comment on Page ${index + 1}`,
+                    language: "en",
+                    format: "text/plain",
+                  },
+                  target: `${canvas}#xywh=200,300,400,500`,
+                },
+              ],
+            },
+          ],
+        }),
       };
     }),
   };
@@ -73,7 +102,9 @@ export async function serveIIIF(page: Page): Promise<Request[]> {
   await page.route("https://fixtures.test/**", async (route) => {
     requests.push(route.request());
     const name = new URL(route.request().url()).pathname.slice(1);
-    const generated = /^generated\/(\d+)\.json$/.exec(name);
+    const generated = /^generated\/(\d+)(?:-commented-([\d,]+))?\.json$/.exec(
+      name,
+    );
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -85,7 +116,12 @@ export async function serveIIIF(page: Page): Promise<Request[]> {
         "Access-Control-Allow-Headers": "x-clover",
       },
       body: generated
-        ? JSON.stringify(manifestOf(Number(generated[1])))
+        ? JSON.stringify(
+            manifestOf(
+              Number(generated[1]),
+              generated[2]?.split(",").map(Number) ?? [],
+            ),
+          )
         : readFileSync(resolve(FIXTURES, name), "utf8"),
     });
   });

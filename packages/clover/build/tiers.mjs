@@ -149,6 +149,11 @@ export const SURFACES = [
   "clover-template-panel",
   "clover-template-document-sidebar",
   "clover-template-lightbox-content",
+  // Document's downloads under their button, its map expanded over the pages, and the
+  // map's places shown over its foot while focus is in them.
+  "clover-template-document-download-menu",
+  "clover-template-document-map",
+  "clover-geomap-places",
 ];
 
 /**
@@ -170,6 +175,10 @@ export const UNDERLAID = [
   "clover-canvas-navigator",
   "clover-scene-rotate-disc",
   "clover-template-scrim",
+  // The play button over a video's or a sound's still in Document: a mark with no words.
+  "clover-template-document-play",
+  // Document's live Canvas over its page's still, the page's own ground under its picture.
+  "clover-template-document-live",
   // The lightbox's layer, see-through unless a page gives it a backdrop; its panel is a
   // surface.
   "clover-template-lightbox",

@@ -288,6 +288,7 @@ const PARTS = [
   "Search",
   "Transcript",
   "Download",
+  "Language",
   "RequiredStatement",
   "Rights",
   "Homepage",

@@ -106,6 +106,7 @@ export function LanguageChoice({
   nameKey,
   part,
   fit,
+  menu = false,
 }: {
   languages: string[];
   chosen: string;
@@ -120,6 +121,8 @@ export function LanguageChoice({
    * past five languages.
    */
   fit?: (place: HTMLElement) => LanguageRowFit | null | undefined;
+  /** Folded into the globe and the code in use however few there are (`Language`'s `menu`). */
+  menu?: boolean;
 }) {
   const { t, langOf } = useCloverTranslation();
   const id = useUniqueId();
@@ -129,7 +132,7 @@ export function LanguageChoice({
     languages.length,
     languages.join(" "),
   );
-  if (folded)
+  if (menu || folded)
     return (
       <Suspense fallback={null}>
         <LanguageMenu

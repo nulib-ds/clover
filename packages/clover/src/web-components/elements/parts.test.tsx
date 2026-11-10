@@ -277,6 +277,38 @@ describe("The parts that read a root's state, as elements", () => {
     );
   });
 
+  it("offers the languages to read in, folded into the globe with menu", async () => {
+    const languages = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/manifest/element-languages",
+      type: "Manifest",
+      label: { de: ["Ein Brief"], en: ["A letter"] },
+      items: [
+        {
+          id: "https://example.org/canvas/element-languages/1",
+          type: "Canvas",
+          width: 100,
+          height: 100,
+          items: [],
+        },
+      ],
+    };
+    const row = root(`<clover-language></clover-language>`, languages);
+    await waitFor(() =>
+      expect(within(row).getAllByRole("radio")).toHaveLength(2),
+    );
+    document.body.innerHTML = "";
+    const menu = root(`<clover-language menu></clover-language>`, languages);
+    const button = await waitFor(() =>
+      within(menu).getByRole("button", { name: /Language/ }),
+    );
+    expect(within(menu).queryByRole("radio")).toBeNull();
+    fireEvent.click(button);
+    await waitFor(() =>
+      expect(within(menu).getAllByRole("radio")).toHaveLength(2),
+    );
+  });
+
   it("shows the Collection and its menu, and tells the page what was chosen", async () => {
     const LETTER = "https://example.org/letter";
     const letter = {

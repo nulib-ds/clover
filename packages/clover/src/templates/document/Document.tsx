@@ -1,4 +1,11 @@
-import React, { useRef } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import * as Clover from "../../parts";
 import type {
@@ -8,22 +15,43 @@ import type {
   PanelSectionLabels,
   RootProps,
 } from "../../parts";
-import { PanelPane, usePanelPane } from "../shared/PanelPane";
 import { preloadDrag } from "../shared/useDragToClose";
 import { useDrawer } from "../shared/useDrawer";
 import { useFollowFocus } from "../shared/useFollowFocus";
-import { BESIDE_REM, PAGE_MIN, useWideEnough } from "../shared/useSlide";
+import {
+  BESIDE_REM,
+  PAGE_MIN,
+  PANEL_MIN,
+  useWideEnough,
+} from "../shared/useSlide";
 import { Sheets } from "./Sheets";
+import { SectionControls } from "./SectionControls";
+import { ViewControls } from "./ViewControls";
+import { mediaOf } from "./media";
+
+/* A section's content, loaded as the aside first opens (`SectionContent.tsx`). */
+const SectionContent = lazy(() => import("./SectionContent"));
+const ExpandedMap = lazy(() =>
+  import("./SectionContent").then((module) => ({
+    default: module.ExpandedMap,
+  })),
+);
+
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export type DocumentProps = Omit<RootProps, "children"> & {
   /**
-   * Whether the page thumbnails start shown beside the page. Default `true`. On a phone,
-   * where they would float over the page, they start put away.
+   * Whether the page thumbnails start shown beside the page. By default, where the
+   * resource has several pages, and put away for a single one (Mat, 2026-11-10: "if only
+   * one item, automatically close this sidebar by default at open"). On a phone, where
+   * they would float over the page, they start put away.
    */
   defaultSidebarOpen?: boolean;
   /**
-   * The page thumbnails, and their toggle, even where the resource has one page, which
-   * has nothing to choose between. Default `false`.
+   * The page thumbnails, and their toggle, where the resource has one page too. Default
+   * `true` (Mat, 2026-11-09: "on single canvas items, still show the left bar"); `false`
+   * leaves them out for a single page, which has nothing to choose between.
    */
   singleItem?: boolean;
   /**
@@ -32,35 +60,36 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    */
   defaultPanelOpen?: boolean;
   /**
-   * How the information panel lays out its sections: `"accordion"` (the default, as
-   * Default's), stacked boxes each opened by its heading, or `"tabs"`.
+   * Not read by Document, whose aside shows one section at a time, chosen by its toolbar
+   * button: kept so a page that gives it keeps working. Default's and Gallery's panels
+   * read it.
    */
   panelLayout?: PanelLayout;
   /**
-   * The panel's sections, from Clover's own: with
-   * `["contents", "search", "transcript", "annotations"]` it has those four, each still
-   * only where the resource has data for it, and no panel at all where it has none of
-   * them. Default: every section.
+   * The sections the toolbar offers, each a button opening it alone in the aside, from
+   * Clover's own: with `["contents", "search", "transcript", "annotations"]` those four,
+   * each still only where the resource has data for it. Default: every section.
    */
   panelSections?: readonly PanelSection[];
   /**
-   * What a panel section's tab or heading says, in place of its word in Clover's interface language:
-   * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
-   * Panel's `labels`).
+   * What a section's button and the aside's heading say, in place of its word in Clover's
+   * interface language: `{ annotations: "Chapters" }`, or a word by language tag to say
+   * it in several (the Panel's `labels`).
    */
   panelLabels?: PanelSectionLabels;
-  /** The downloads in the toolbar, as links: the page's and the Manifest's `rendering`. Default `true`. */
+  /**
+   * The downloads behind the toolbar's Download button: the page's and the Manifest's
+   * `rendering`. Default `true`.
+   */
   download?: boolean;
   /**
-   * The languages to read the resource in, beside the panel's About heading, where what
-   * it says of itself comes in several (the Panel's `languages`). Default `true`.
+   * Where what the resource says of itself comes in several languages, a globe first
+   * among the toolbar's controls, which offers them (`Clover.Language`). Default `true`.
    */
   languages?: boolean;
   /**
-   * Default, Document and Gallery: whether the panel's language toggle, beside its About
-   * heading, also offers Clover's interface languages (its control labels, section
-   * titles and announcements) that the resource has none of, the visitor's and the
-   * site's, where they differ (the Panel's `interfaceLanguages`). Default `true`.
+   * Whether the globe also offers Clover's interface languages that the resource has none
+   * of. Default `true`.
    */
   interfaceLanguages?: boolean;
   /**
@@ -96,20 +125,20 @@ export type DocumentProps = Omit<RootProps, "children"> & {
 export function Document({
   className,
   defaultSidebarOpen,
-  singleItem = false,
+  singleItem = true,
   defaultPanelOpen = false,
-  panelLayout = "accordion",
   panelSections,
   panelLabels,
   download = true,
-  languages = true,
-  interfaceLanguages = true,
   headingLevel = 2,
   storageKey = "clover-template-document",
   collapseControls,
   canvasOptions,
-  ...root
+  ...given
 }: DocumentProps) {
+  // The Panel's own prop, which Document does not read, left out of the Root's.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { panelLayout, languages, interfaceLanguages, ...root } = given;
   // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
   const title = Clover.titled(
     headingLevel,
@@ -128,7 +157,6 @@ export function Document({
         defaultSidebarOpen={defaultSidebarOpen}
         singleItem={singleItem}
         defaultPanelOpen={defaultPanelOpen}
-        panelLayout={panelLayout}
         panelSections={panelSections}
         panelLabels={panelLabels}
         download={download}
@@ -143,6 +171,18 @@ export function Document({
   );
 }
 
+/** Each section's name, in Clover's interface language, as the Panel names it. */
+const SECTION_KEYS: Record<PanelSection, string> = {
+  about: "informationPanelTabsAbout",
+  targets: "informationPanelTabsTargets",
+  collection: "informationPanelTabsCollection",
+  contents: "informationPanelTabsContents",
+  search: "informationPanelTabsSearch",
+  map: "informationPanelTabsMap",
+  transcript: "transcriptLabel",
+  annotations: "informationPanelTabsAnnotations",
+};
+
 /** The heading level under another. Past 6, the parts' titles name what they head. */
 const below = (level: number) => level + 1;
 
@@ -156,17 +196,18 @@ const SIDEBAR_REM = 8 + 1;
  * its own width), the thumbnails float over the page instead.
  */
 const SIDEBAR_BESIDE_REM = 40;
+/** A toolbar this wide holds Search's field open beside the title and the controls. */
+const SEARCH_OPEN_REM = 56;
 
 function DocumentLayout({
   defaultSidebarOpen,
   singleItem,
   defaultPanelOpen,
   download,
-  languages,
-  interfaceLanguages,
+  languages = true,
+  interfaceLanguages = true,
   headingLevel = 2,
   storageKey,
-  panelLayout,
   panelSections,
   panelLabels,
   collapseControls,
@@ -182,7 +223,6 @@ function DocumentLayout({
   | "interfaceLanguages"
   | "headingLevel"
   | "storageKey"
-  | "panelLayout"
   | "panelSections"
   | "panelLabels"
   | "collapseControls"
@@ -209,6 +249,8 @@ function DocumentLayout({
    */
   const sidebarSpine = useRef<HTMLDivElement>(null);
   const followFocus = useFollowFocus();
+  // Put away on its own as a resource opens (below), focus stays where it is.
+  const quiet = useRef(false);
   const sidebar = useDrawer({
     id: `${id}-sidebar`,
     beside: useWideEnough(panes, SIDEBAR_BESIDE_REM),
@@ -218,32 +260,165 @@ function DocumentLayout({
       pane.querySelector<HTMLElement>('[role="option"][aria-selected="true"]'),
     slides: false,
     alongside: sidebarSpine,
-    followFocus,
+    followFocus: (find) => {
+      if (quiet.current) quiet.current = false;
+      else followFocus(find);
+    },
   });
   /*
-   * Thumbnails only when there is more than one page to choose, or one where the host
-   * asks (`singleItem`). Until the content has loaded there are none, so a one-page
-   * document never shows an empty sidebar first. The pane stays in the tree, hidden, so
+   * Thumbnails for every page, one too, unless the host leaves one out (`singleItem`).
+   * Until the content has loaded there are none, so the sidebar never shows empty first. The pane stays in the tree, hidden, so
    * the page beside it is never remounted.
    */
+  /*
+   * Unless the host says (`defaultSidebarOpen`), a single page's thumbnail starts put
+   * away, as each resource opens, before it is drawn; a resource of several pages after
+   * one brings them back, unless the reader put them away.
+   */
+  const manifest = Clover.useManifest();
+  const manifestId = manifest?.id;
+  // Its Canvases, once they are there: what it is made of, never a count on its way.
+  const canvases = (manifest?.items as unknown[] | undefined)?.length ?? 0;
+  const startedFor = useRef<string | undefined>(undefined);
+  const putAway = useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    if (defaultSidebarOpen !== undefined || !manifestId || !canvases) return;
+    if (startedFor.current === manifestId) return;
+    startedFor.current = manifestId;
+    if (canvases === 1) {
+      if (!sidebar.open) return;
+      putAway.current = true;
+      quiet.current = true;
+      sidebar.setOpen(false);
+    } else if (putAway.current) {
+      putAway.current = false;
+      if (sidebar.open) return;
+      quiet.current = true;
+      sidebar.setOpen(true);
+    }
+  });
   const pages = navigation.total > (singleItem ? 0 : 1);
   const showSidebar = pages && sidebar.open;
   /*
-   * The panel sits beside the page, its own pane with a bar to share the width, where
-   * there is room for both, as Default's does; where there is not, it slides over the
-   * page, takes focus, and closes on its own button, Escape, a press on the page beside
-   * it, or a drag back off to the end. Its toggle sits on the spine, the bar between the
-   * pages and the panel, while the panel is open beside them, and among the Canvas's
-   * controls otherwise; a press moves it, and focus follows it there.
+   * While the resource loads, the thumbnails' room is held where they will open beside
+   * the page, empty, so the page beside them does not move as they arrive (a layout
+   * shift of a fifth of the window); a single page, its thumbnail put away, gives it back.
    */
-  // Its code loads as the reader reaches for it, as it starts shut (`PanelPart`).
-  const panel = usePanelPane({
-    id: `${id}-panel`,
-    beside: useWideEnough(panes, BESIDE_REM + (showSidebar ? SIDEBAR_REM : 0)),
+  const holdRoom = navigation.total === 0 && sidebar.open && !sidebar.over;
+  const sidebarRoom = showSidebar || holdRoom;
+  /*
+   * The aside, Document's own (Mat, 2026-11-09: "each button should control a specific
+   * panel section. sections should not stack as accordions or act as tabs for the Panel
+   * component. they should be their own custom aside with content. handle all active
+   * sections for this resource"): one section at a time, the one its toolbar button
+   * chose (`SectionControls`), beside the page with a bar to share the width where there
+   * is room for both, and where there is not, over the page, taking focus, put away by
+   * its close button, Escape, or a press on the page beside it (`useDrawer`). Its
+   * sections are those the resource has data for (`usePanelSections`), narrowed to
+   * `panelSections`; its content loads as it first opens (`SectionContent`).
+   */
+  const { clover, language } = Clover.useClover("Document");
+  const offered = Clover.usePanelSections(panelSections);
+  const [section, setSection] = useState<PanelSection>("about");
+  const asideId = `${id}-aside`;
+  /*
+   * Put away, focus goes back to the button for the section it showed, not the first of
+   * them (WCAG 2.4.3): Search's field, or its magnifier, for the search's hits.
+   */
+  const showing = useRef(section);
+  showing.current = section;
+  const aside = useDrawer({
+    id: asideId,
+    beside: useWideEnough(panes, BESIDE_REM + (sidebarRoom ? SIDEBAR_REM : 0)),
     defaultOpen: Boolean(defaultPanelOpen),
+    side: "end",
+    focus: (pane) =>
+      pane.querySelector<HTMLElement>(".clover-template-document-aside-close"),
+    toggle: () => {
+      const root = panes.current?.closest(".clover-template-document");
+      return showing.current === "search"
+        ? root?.querySelector<HTMLElement>(
+            ".clover-template-document-search input, .clover-template-document-search-toggle",
+          )
+        : root?.querySelector<HTMLElement>(
+            `button[aria-controls~="${asideId}"][data-section="${showing.current}"]`,
+          );
+    },
     followFocus,
-    sections: panelSections,
   });
+  const asideOpen = aside.open && offered.includes(section);
+  // Its section gone (another resource, another view without it): put away.
+  useEffect(() => {
+    if (aside.open && offered.length && !offered.includes(section))
+      aside.close();
+    // `aside.close` is new each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offered.join(" "), section, aside.open]);
+  // A button's section, or the same one again to put it away.
+  const chooseSection = (next: PanelSection) => {
+    // The map, expanded over the pages, goes back into the aside for its button.
+    if (next === "map" && mapShown) return collapseMap();
+    if (asideOpen && section === next) return aside.close();
+    setSection(next);
+    aside.setOpen(true);
+  };
+  /*
+   * The aside's map, expanded over the pages, as the Canvas's map box expands into its
+   * Body (Mat, 2026-11-09: "someone should be able to do this from the sidebar panel
+   * map"): out of the aside, which it leaves, over the pages' column, which goes out of
+   * sight and out of reach meanwhile, with the view's controls; Collapse map puts it back
+   * in the aside, Close and Escape put it away. Focus goes with it each way (WCAG 2.4.3).
+   */
+  const [mapExpanded, setMapExpanded] = useState(false);
+  const mapShown = mapExpanded && offered.includes("map");
+  useEffect(() => {
+    if (!offered.includes("map")) setMapExpanded(false);
+    // The sections, by their names: a new array each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offered.join(" ")]);
+  const expandMap = () => {
+    setMapExpanded(true);
+    aside.setOpen(false);
+    followFocus(() => document.getElementById(`${id}-map-collapse`));
+  };
+  const collapseMap = () => {
+    setMapExpanded(false);
+    setSection("map");
+    aside.setOpen(true);
+    followFocus(() => document.getElementById(`${id}-map-expand`));
+  };
+  const closeMap = () => {
+    setMapExpanded(false);
+    followFocus(() =>
+      panes.current
+        ?.closest(".clover-template-document")
+        ?.querySelector<HTMLElement>(
+          `button[aria-controls~="${asideId}"][data-section="map"]`,
+        ),
+    );
+  };
+  const labelOf = (key: PanelSection) => {
+    const own = panelLabels?.[key];
+    if (typeof own === "string") return { text: own };
+    if (own) {
+      const value = Clover.localize(own as never, language);
+      return { text: value.text, lang: value.lang };
+    }
+    return { text: t(SECTION_KEYS[key]), lang: langOf(SECTION_KEYS[key]) };
+  };
+  // A search made in the toolbar's field opens the aside on its hits.
+  const searched = () => {
+    setSection("search");
+    aside.setOpen(true);
+  };
+  // Its query cleared (the field's X), the aside's hits go with it.
+  const query = Clover.useCloverSelector((state) => state.search.query);
+  useEffect(() => {
+    if (!query && section === "search" && aside.open) aside.close();
+    // `aside.close` is new each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
   // Over the page, reaching for the thumbnails' toggle loads the drag's code too.
   const reach = (event: React.SyntheticEvent) => {
     if (
@@ -258,8 +433,126 @@ function DocumentLayout({
     if (sidebar.over) sidebar.close();
   };
 
-  const docked = panel.docked;
-  const panelToggle = panel.toggle;
+  const several = navigation.total > 1;
+  /*
+   * Where the template's controls over the page end, `xs` on, which the Canvas's own (its
+   * map, its information) start from, and their boxes hang from (`Document.css`; Mat,
+   * 2026-11-09: "put this on the left"): measured from the page's start as they change
+   * (the thumbnails' toggle comes and goes, the magnifier's tray opens), on the page's
+   * pane, which the Canvas inherits it from. None while the template has none there.
+   */
+  const lead = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = lead.current;
+    const main = element?.parentElement;
+    if (!element || !main || typeof ResizeObserver === "undefined") return;
+    const measure = () => {
+      if (!element.firstElementChild) {
+        main.style.removeProperty("--clover-template-document-lead-end");
+        return;
+      }
+      const box = element.getBoundingClientRect();
+      const room = main.getBoundingClientRect();
+      const end =
+        getComputedStyle(main).direction === "rtl"
+          ? room.right - box.left
+          : box.right - room.left;
+      const gap = parseFloat(getComputedStyle(element).columnGap) || 0;
+      main.style.setProperty(
+        "--clover-template-document-lead-end",
+        `${Math.round(end + gap)}px`,
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  const docked = !aside.over && asideOpen;
+  /*
+   * Where the toolbar has room (a wide page), Search's field is open, its magnifier gone
+   * (Mat, 2026-11-09: "on larger viewports, have it automatically be open").
+   */
+  const toolbar = useRef<HTMLElement>(null);
+  const roomy = useWideEnough(toolbar, SEARCH_OPEN_REM) === true;
+  /*
+   * The full viewer: a press into a page, a zoom, or the template's magnifier (+ and −,
+   * `ViewControls`) opens it over the whole of the pages' column, and the magnifier or
+   * Escape closes it (Mat, 2026-11-09: "clicking into an item should expand the canvas
+   * to fit the whole wrapping container"; "it should just be zoom in and zoom out like
+   * the placeholder toggle"), a single page too, whose view's controls are the full
+   * viewer's (Mat, 2026-11-09: "don't treat video differently across number of items").
+   */
+  const [expanded, setExpanded] = useState(false);
+  /*
+   * An annotation asked for, from the aside's lists (Annotations, a search's hits, a
+   * region in Contents, a place on the map) or a hotspot, on whichever page it is: the
+   * full viewer opens on it (Mat, 2026-11-10: "clicking an annotation from sidebar should
+   * automatically expand the targeted resource. this should apply to all resource
+   * types"). The Root goes to its Canvas, so its thumbnail is chosen and its page comes
+   * under the viewer at once, not scrolled to through the pages between, and the Canvas
+   * frames it, or plays from its time. A Transcript's cue pressed in the aside, which
+   * plays from its time, opens it too ("the same should work for transcripts"). Chosen in
+   * the aside where it lies over the page (a phone), the aside goes, as the thumbnails go
+   * there once one is chosen, so the viewer shows; focus to the section's button. A
+   * search's first hit, chosen as its answer arrives, keeps the hits in sight.
+   */
+  const asideNow = useRef(aside);
+  asideNow.current = aside;
+  const choseInAside = useRef(false);
+  const openOnIt = () => {
+    setExpanded(true);
+    const drawer = asideNow.current;
+    if (drawer.over && drawer.open && choseInAside.current) drawer.close();
+  };
+  const openNow = useRef(openOnIt);
+  openNow.current = openOnIt;
+  useEffect(
+    () =>
+      clover.found.subscribe((id) => {
+        if (id) openNow.current();
+      }),
+    [clover],
+  );
+  // The active page's Canvas, once it is there: the magnifier waits for it.
+  const [handle, setHandle] = useState<Clover.CanvasHandle | null>(null);
+
+  /*
+   * Where the reader is, under the title, muted (Mat, 2026-11-09: "remove the numbers
+   * here. put it under the manifest title. along with labels for canvases. muted it"):
+   * the view's place ("11 / 17", heard as "Item 11 of 17", `Clover.Position`), then the
+   * labels of its Canvases, a spread's both ("Page 18, Page 19"), each in its own
+   * language (`Clover.Value`). Nothing for a document of one page.
+   */
+  const sequence = Clover.useSequence();
+  // What the active page plays, if anything: its toggle is then Play.
+  const viewCanvases = (
+    sequence.views[Math.max(0, navigation.position)] ?? []
+  ).map((index) => sequence.canvases[index]);
+  const media = mediaOf(viewCanvases);
+  const full = expanded;
+  const shown = (sequence.views[Math.max(0, navigation.position)] ?? [])
+    .map((index) => sequence.canvases[index])
+    .filter((canvas) => canvas?.label);
+  const place = navigation.total > 1 && (
+    <p className="clover-template-document-place">
+      <Clover.Position className="clover-template-document-position" />
+      {shown.length > 0 && (
+        <>
+          <span aria-hidden="true">·</span>
+          <span className="clover-template-document-labels">
+            {shown.map((canvas, index) => (
+              <React.Fragment key={canvas.id}>
+                {index > 0 && ", "}
+                <Clover.Value value={canvas.label} />
+              </React.Fragment>
+            ))}
+          </span>
+        </>
+      )}
+    </p>
+  );
 
   const toggle = pages && (
     <button
@@ -271,48 +564,89 @@ function DocumentLayout({
       onClick={() => sidebar.setOpen(!sidebar.open)}
     >
       {/*
-       * A toggle, plainly: a list of thumbnails, each a small picture beside a line,
-       * the pictures filled while the list shows; and where the reader is. Its name
-       * is what it does, then the place in words ("Item 3 of 17").
+       * The panel toggle's glyph, mirrored (Mat, 2026-11-09: "make the icon for the info
+       * toggle instead"): a page with its pane at the start, the pane filled while the
+       * thumbnails show, so open and closed differ by more than color. Its name is what
+       * it does; where the reader is, under the title (`place`).
        */}
       <svg
         aria-hidden="true"
         focusable="false"
         width="16"
         height="16"
-        viewBox="0 0 16 16"
-        fill={sidebar.open ? "currentColor" : "none"}
+        viewBox="0 0 512 512"
+        fill="currentColor"
         stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       >
-        <rect x="1.5" y="2" width="5.5" height="4.5" rx="1" />
-        <rect x="1.5" y="9.5" width="5.5" height="4.5" rx="1" />
-        <path d="M9.5 4.25h5M9.5 11.75h5" fill="none" />
+        <rect
+          x="64"
+          y="96"
+          width="384"
+          height="320"
+          rx="40"
+          fill="none"
+          strokeWidth="36"
+        />
+        <path d="M192 96v320" fill="none" strokeWidth="36" />
+        {sidebar.open && (
+          <path d="M192 96h-88a40 40 0 0 0-40 40v240a40 40 0 0 0 40 40h88z" />
+        )}
       </svg>
       <span style={Clover.visuallyHidden}>{t("templateSidebarToggle")}</span>
-      <Clover.Position className="clover-template-document-position" />
       <Clover.Tip label={t("templateSidebarToggle")} />
     </button>
   );
 
   return (
     <>
-      <header className="clover-template-document-toolbar">
-        <Clover.Label
-          as={title.as}
-          className="clover-template-document-title clover-template-title clover-title"
-          {...title.title}
-        />
-        {download && <Clover.Download headingLevel={below(headingLevel)} />}
+      <header
+        ref={toolbar}
+        className="clover-template-document-toolbar"
+        // Escape here too puts the aside away over the page, its buttons being here.
+        onKeyDown={aside.onKeyDown}
+      >
+        <div className="clover-template-document-heading">
+          <Clover.Label
+            id={`${id}-title`}
+            as={title.as}
+            className="clover-template-document-title clover-template-title clover-title"
+            {...title.title}
+          />
+          {place}
+        </div>
         {/*
-         * Who provided it: each provider's logo at the toolbar's end, linked to its
-         * homepage and named by the provider (Mat, 2026-10-24).
+         * Its controls once the resource has loaded, with its title and pages, never a
+         * section offered before its data is in (Mat, 2026-11-10: "don't show the `i`
+         * until things are loaded in").
          */}
-        <Clover.Provider className="clover-template-document-provider">
-          <Clover.Logo />
-        </Clover.Provider>
+        {canvases > 0 && (
+          <SectionControls
+            aside={asideId}
+            sections={offered.filter((each) => each !== "search")}
+            open={asideOpen ? section : null}
+            onChoose={chooseSection}
+            labelOf={labelOf}
+            groupLabel={{
+              text: t("informationPanelTabs"),
+              lang: langOf("informationPanelTabs"),
+            }}
+            search={offered.includes("search")}
+            searchOpen={roomy}
+            onSearched={searched}
+            download={download !== false}
+            downloadHeadingLevel={below(headingLevel)}
+            language={
+              /*
+               * The languages to read in, as a globe first among the toolbar's controls,
+               * always in sight (Mat, 2026-11-09: "move this to a globe icon in the top
+               * right", "I wanted it up top. always visible"); About offers none of its own.
+               */
+              languages && (
+                <Clover.Language menu interfaceLanguages={interfaceLanguages} />
+              )
+            }
+          />
+        )}
       </header>
       {/* The Body shows the loading; announced here, nothing moves. */}
       <Clover.Status loading={false} />
@@ -321,23 +655,17 @@ function DocumentLayout({
         className="clover-template-document-panes clover-template-panes"
         data-sidebar={showSidebar ? "open" : "closed"}
         data-narrow={sidebar.over || undefined}
-        data-panel={panel.splitProps["data-panel"]}
+        // Where the aside is: beside the page, or over it (`Default.css`'s drawer).
+        data-panel={aside.over ? "over" : "beside"}
         storageKey={storageKey || undefined}
         onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
-          // Escape anywhere puts what floats over the page away, the panel first,
-          // uncovering a control focus reached under it, and leaves focus there (the
-          // panel's own Escape, handled first, hands focus to its toggle).
-          panel.onKeyDown(event);
+          // Escape anywhere puts what floats over the page away, the aside first,
+          // uncovering a control focus reached under it, and leaves focus there.
+          aside.onKeyDown(event);
           sidebar.onKeyDown(event);
         }}
-        onPointerOver={(event) => {
-          panel.splitProps.onPointerOver(event);
-          reach(event);
-        }}
-        onFocus={(event) => {
-          panel.splitProps.onFocus(event);
-          reach(event);
-        }}
+        onPointerOver={reach}
+        onFocus={reach}
       >
         <Clover.SplitPane
           ref={sidebar.pane}
@@ -357,23 +685,29 @@ function DocumentLayout({
           // On a phone Items slides over the Canvas, so it takes no room from it.
           min={sidebar.over ? undefined : "8rem"}
           max="24rem"
-          hidden={!showSidebar}
+          hidden={!sidebarRoom}
         >
           {sidebarLang && (
             <span hidden id={`${id}-sidebar-name`} lang={sidebarLang}>
               {t("templateSidebar")}
             </span>
           )}
-          <Clover.Items
-            layout="list"
-            singleItem={singleItem}
-            aria-label={sidebarLang ? undefined : t("templateSidebar")}
-            thumbnailSize={320}
-            onSelect={choose}
-          />
+          {/*
+           * What scrolls: inside the pane's inset, so a thumbnail Items brings into view
+           * (to the scrolling box's edge) stands as far from the top as from the sides.
+           */}
+          <div className="clover-template-document-thumbnails">
+            <Clover.Items
+              layout="list"
+              singleItem={singleItem}
+              aria-label={sidebarLang ? undefined : t("templateSidebar")}
+              thumbnailSize={320}
+              onSelect={choose}
+            />
+          </div>
         </Clover.SplitPane>
         {/* The bar between the thumbnails and the page; none where they cover it. */}
-        {showSidebar && !sidebar.over && (
+        {sidebarRoom && !sidebar.over && (
           <Clover.SplitHandle aria-controls={`${id}-sidebar`} />
         )}
         {/* Open, their toggle on its spine, right after the bar (on a phone, the edge). */}
@@ -387,41 +721,159 @@ function DocumentLayout({
           </div>
         )}
         <Clover.SplitPane
-          ref={panel.main}
+          ref={aside.main}
           className="clover-template-document-main"
+          data-map={mapShown || undefined}
           // A minimum only beside another pane: Items, or the Panel docked.
           min={(showSidebar && !sidebar.over) || docked ? PAGE_MIN : undefined}
         >
-          {/* Put away, their toggle waits over the page's top left. */}
-          {pages && !sidebar.open && (
-            <div className="clover-template-document-sidebar-closed">
-              {toggle}
-            </div>
-          )}
-          {/* The pages, and the one Canvas, which holds the panel's toggle. */}
+          {/*
+           * Over the page's top left, the template's own controls there: the thumbnails'
+           * toggle while they are put away, then the view's (`ViewControls`), steering
+           * the active page, before the page in reading order as on the screen.
+           */}
+          <div ref={lead} className="clover-template-document-lead">
+            {pages && !sidebar.open && (
+              <div className="clover-template-document-sidebar-closed">
+                {toggle}
+              </div>
+            )}
+            {(handle || several || media) && !mapShown && (
+              <ViewControls
+                id={`${id}-view`}
+                open={expanded}
+                onOpenChange={setExpanded}
+                pages={several}
+                view={() =>
+                  panes.current?.querySelector<HTMLElement>(
+                    ".clover-template-document-live-play",
+                  ) ??
+                  panes.current?.querySelector<HTMLElement>(
+                    ".clover-template-document-live :is(.clover-canvas-viewport, [tabindex='0'])",
+                  )
+                }
+              />
+            )}
+          </div>
+          {/* The pages, a Body entry for each view, the one in view live. */}
           <Sheets
             collapseControls={collapseControls}
             canvasOptions={canvasOptions}
-          >
-            {!docked && panelToggle}
-          </Sheets>
+            expanded={full}
+            onExpandedChange={setExpanded}
+            onHandle={setHandle}
+            labelledBy={`${id}-title`}
+          />
+          {mapShown && (
+            <Suspense fallback={null}>
+              <ExpandedMap
+                collapseId={`${id}-map-collapse`}
+                onCollapse={collapseMap}
+                onClose={closeMap}
+              />
+            </Suspense>
+          )}
         </Clover.SplitPane>
+        {/* The bar between the page and the aside, beside it; none over the page. */}
+        {docked && <Clover.SplitHandle aria-controls={asideId} />}
         {/*
-         * The panel, every template's (`shared/PanelPane.tsx`): its bar, its spine and
-         * toggle, the pane and, over the page, the wash beside it. Its About offers no
-         * downloads: the toolbar has them.
+         * The aside: the section its button chose, alone, under its name, a level under
+         * the title, its close button on its inner edge (Escape too, over the page).
+         * Drawn as the Panel's pane is (`Default.css`), its content Clover's part for it.
          */}
-        <PanelPane
-          pane={panel}
-          className="clover-template-document-panel"
-          layout={panelLayout}
-          sections={panelSections}
-          labels={panelLabels}
-          headingLevel={below(headingLevel)}
-          download={false}
-          languages={languages}
-          interfaceLanguages={interfaceLanguages}
-        />
+        <Clover.SplitPane
+          ref={aside.pane}
+          as="aside"
+          id={asideId}
+          name="panel"
+          data-side="end"
+          data-section={section}
+          className={[
+            "clover-template-document-aside clover-template-panel clover-template-drawer",
+            aside.over && "clover-template-float",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-labelledby={`${asideId}-title`}
+          // A choice made in it, a press or Enter, as it bubbles (`found`, above).
+          onClickCapture={() => {
+            choseInAside.current = true;
+            requestAnimationFrame(() => (choseInAside.current = false));
+          }}
+          onClick={(event) => {
+            if ((event.target as Element).closest?.(".clover-transcript-cue"))
+              openOnIt();
+          }}
+          size="24rem"
+          min={aside.over ? undefined : PANEL_MIN}
+          data-open={aside.opened}
+          hidden={!(aside.shown && offered.includes(section))}
+        >
+          {/*
+           * Its close, on its inner edge, beside the page and over it alike, as the
+           * Panel's sits on a pane sliding over the page (`Panel.css`; Mat, 2026-11-09:
+           * "add a close button on the left. like we do for the dragtoclose on
+           * responsive size"): Clover's round control and its cross, outside what
+           * scrolls, so it stays as the section scrolls under it.
+           */}
+          <button
+            type="button"
+            className="clover-canvas-button clover-template-document-aside-close"
+            lang={langOf("informationPanelClose")}
+            onClick={aside.close}
+          >
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              width="16"
+              height="16"
+              viewBox="0 0 512 512"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeWidth="45"
+                d="M154 154L358 358M358 154L154 358"
+              />
+            </svg>
+            <span style={Clover.visuallyHidden}>
+              {t("informationPanelClose")}
+            </span>
+            <Clover.Tip label={t("informationPanelClose")} />
+          </button>
+          <div className="clover-template-document-aside-scroll">
+            <div className="clover-template-document-aside-head">
+              <AsideTitle
+                id={`${asideId}-title`}
+                level={below(headingLevel)}
+                {...labelOf(section)}
+              />
+            </div>
+            {aside.shown && (
+              <Suspense fallback={null}>
+                <SectionContent
+                  section={section}
+                  headingLevel={below(below(headingLevel))}
+                  expandMapId={`${id}-map-expand`}
+                  onExpandMap={expandMap}
+                />
+              </Suspense>
+            )}
+          </div>
+          {/*
+           * Who provided it, at the aside's foot, at its end, whichever section it shows
+           * (Mat, 2026-11-09: "put this in lower right. show anytime the panel is open for
+           * any section"): each provider's logo, linked to its homepage and named by the
+           * provider (Mat, 2026-10-24).
+           */}
+          <Clover.Provider className="clover-template-document-provider">
+            <Clover.Logo />
+          </Clover.Provider>
+        </Clover.SplitPane>
+        {aside.scrim && (
+          <div className="clover-template-scrim" {...aside.scrim} />
+        )}
         {pages && sidebar.scrim && (
           <div
             className="clover-template-document-scrim clover-template-scrim"
@@ -431,5 +883,25 @@ function DocumentLayout({
         )}
       </Clover.Split>
     </>
+  );
+}
+
+/** The aside's name, a heading at `level`, or past 6 a paragraph that names it. */
+function AsideTitle({
+  id,
+  level,
+  text,
+  lang,
+}: {
+  id: string;
+  level: number;
+  text: string;
+  lang?: string;
+}) {
+  const Tag = (level <= 6 ? `h${level}` : "p") as React.ElementType;
+  return (
+    <Tag id={id} className="clover-template-document-aside-title" lang={lang}>
+      {text}
+    </Tag>
   );
 }

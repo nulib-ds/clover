@@ -285,15 +285,15 @@ test("a Timeline never loads the image renderer", async () => {
 });
 
 /*
- * A Gallery draws thumbnails until the reader opens one, and Document's panel starts
- * shut: the lightbox's Body and Document's Panel load on demand (`LightboxView`,
- * `PanelPart`), never with the template.
+ * A Gallery draws thumbnails until one is opened, and Document's aside starts shut: the
+ * lightbox's Body and Document's sections load on demand (`LightboxView`,
+ * `SectionContent`), never with the template.
  */
-test("a Gallery loads its lightbox's Body, and Document its Panel, only on demand", async () => {
+test("a Gallery loads its lightbox's Body, and Document its sections, only on demand", async () => {
   const chunks = await emitted();
   for (const [entry, part] of [
     ["templates/gallery/Gallery.mjs", "components/Body/Body.mjs"],
-    ["templates/document/Document.mjs", "components/Panel/Panel.mjs"],
+    ["templates/document/Document.mjs", "templates/document/SectionContent.mjs"],
   ]) {
     assert.ok(chunks.has(entry), `${entry} must be emitted`);
     assert.ok(
