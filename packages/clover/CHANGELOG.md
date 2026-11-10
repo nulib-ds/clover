@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.9.0] - 2026-11-10
+
 ### Added
 
 - **`Language`, the language toggle as a part of its own** (`<clover-language>`): the
