@@ -797,6 +797,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const shownCanvases = useRef<string | null>(null);
   /** Back at the placeholder since last drawn: reopening frames the Canvas afresh. */
   const placeholderShown = useRef(false);
+  /** A move's scene, asked to be framed, is not placed yet. */
+  const framing = useRef(false);
   const togglePlaceholder = () => {
     if (media) setMediaOpenedFor(showPlaceholder ? canvasKey : null);
     else setImagesOpen(showPlaceholder);
@@ -887,6 +889,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     placements: Rect[];
   } | null>(null);
   const markDrawn = useCallback(() => {
+    framing.current = false;
     const { canvases, scene, canvasKey } = latestScene.current;
     drawnScene.current =
       canvases && scene && shownCanvases.current === canvasKey
@@ -1083,8 +1086,17 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       (shownCanvases.current !== null && shownCanvases.current !== canvasKey);
     // Loading until it is drawn: at first, and again whenever the view moves on.
     if (!surface.isOpen || moved) setStatus("loading");
+    /*
+     * Framed afresh until the move's scene is placed (`markDrawn`): a call before then
+     * (the last view's media element let go, a Choice picked) supersedes the one that
+     * framed it, and would otherwise keep the last view's camera, a video's zoom over a
+     * picture of another size (Document's first picture after its videos).
+     */
+    if (moved) framing.current = true;
     const fit =
-      mediaOnly || (placeholderShown.current && surface.isOpen) || moved;
+      mediaOnly ||
+      (placeholderShown.current && surface.isOpen) ||
+      framing.current;
     shownCanvases.current = canvasKey;
     placeholderShown.current = false;
     flushed.current = false;

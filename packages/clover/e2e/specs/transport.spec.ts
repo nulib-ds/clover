@@ -83,6 +83,26 @@ const TEXT_SPACING = `* {
 p { margin-bottom: 2em !important; }`;
 
 /** The bar's parts and where they sit, against the Canvas. */
+/*
+ * Document's recordings wait as stills, their players out of sight until a page is
+ * pressed into (Mat, 2026-11-09): pressed off its play button, the full viewer opens on
+ * it without playing, its player's controls with it.
+ */
+async function openDocument(page: Page) {
+  const sheet = page.locator(".clover-template-document-sheet").first();
+  await expect(sheet).toBeVisible();
+  await sheet.scrollIntoViewIfNeeded();
+  // A quarter of the way across what shows of it, clear of its play button.
+  const box = (await sheet.boundingBox())!;
+  const view = page.viewportSize()!;
+  const top = Math.max(box.y, 0);
+  const bottom = Math.min(box.y + box.height, view.height);
+  await page.mouse.click(box.x + box.width * 0.25, top + (bottom - top) * 0.75);
+  await expect(
+    page.locator(".clover-template-document-column"),
+  ).toHaveAttribute("data-expanded");
+}
+
 async function layout(page: Page) {
   const bar = page.locator(".clover-canvas-transport-bar");
   await expect(bar).toHaveCount(1);
@@ -280,6 +300,7 @@ test.describe("transport", () => {
       await page.goto(
         `/?${scene}content=https://fixtures.test/captioned-opera.json`,
       );
+      if (scene) await openDocument(page);
       await expect(
         page.getByRole("button", { name: "Captions" }),
       ).toBeAttached();
@@ -291,14 +312,18 @@ test.describe("transport", () => {
         first: true,
       });
 
-      const chapters = page.getByRole("button", { name: "Chapters" });
-      await chapters.focus();
-      await page.keyboard.press("Enter");
-      const chaptersMenu = page.getByTestId("clover-canvas-chapters");
-      await expect(chaptersMenu).toBeVisible();
-      await expect.poll(() => inBody(chaptersMenu)).toBe(true);
-      await page.keyboard.press("Escape");
-      await expect(chapters).toBeFocused();
+      // Document's Canvas offers no Chapters (Mat, 2026-11-09: "don't include chapters
+      // here"): its contents are the aside's.
+      if (!scene) {
+        const chapters = page.getByRole("button", { name: "Chapters" });
+        await chapters.focus();
+        await page.keyboard.press("Enter");
+        const chaptersMenu = page.getByTestId("clover-canvas-chapters");
+        await expect(chaptersMenu).toBeVisible();
+        await expect.poll(() => inBody(chaptersMenu)).toBe(true);
+        await page.keyboard.press("Escape");
+        await expect(chapters).toBeFocused();
+      }
 
       // Keyboard focus moving on past an open menu closes it, so it never covers the
       // control focus lands on (WCAG 2.4.11).
@@ -659,7 +684,8 @@ test.describe("transport", () => {
     { scene: "", width: 375, height: 488 },
     { scene: "", width: 375, height: 812 },
     { scene: "", width: 1280, height: 800 },
-    { scene: "scene=document&", width: 375, height: 420 },
+    // Not Document: its player has no controls at its top (its annotations are the
+    // aside's; Mat, 2026-11-09), so nothing there for a title to keep clear of.
   ])
     for (const manifest of [poetry, named])
       test(`keeps a recording's title clear of the controls, ${scene ? "Document" : "Default"} at ${width} × ${height}, ${manifest === poetry ? "a long title" : "a file's name"}`, async ({

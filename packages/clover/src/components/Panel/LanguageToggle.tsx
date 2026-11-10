@@ -91,12 +91,18 @@ export function useLanguageToggle({
 export function LanguageToggle({
   values,
   interfaceLanguages,
+  menu,
+  name = "About",
 }: {
   values?: boolean;
   interfaceLanguages?: boolean;
+  /** Folded into the globe and the code in use however few there are. */
+  menu?: boolean;
+  /** The part that draws it, for the message outside a Root. */
+  name?: string;
 }) {
   const choice = useLanguageToggle({ values, interfaceLanguages });
-  const { drawsToggle } = useClover("About");
+  const { drawsToggle } = useClover(name);
   const drawn = !!choice;
   useEffect(() => (drawn ? drawsToggle?.() : undefined), [drawn, drawsToggle]);
   if (!choice) return null;
@@ -107,6 +113,7 @@ export function LanguageToggle({
         nameKey="readingLanguage"
         part="clover-about"
         fit={besideHeading}
+        menu={menu}
       />
     </Suspense>
   );

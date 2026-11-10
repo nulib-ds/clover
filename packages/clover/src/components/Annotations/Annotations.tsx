@@ -122,20 +122,20 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
     );
 
     /*
-     * A press on one: picked, and one on the recording playing played from its time, as
-     * a Transcript's cue is (`playFrom`). One elsewhere is gone to, not played.
+     * A press on one: picked, and one on a recording played from its time, as a
+     * Transcript's cue is (Mat, 2026-11-10: "make annotations automatically play the
+     * target media on click"): the one playing at once (`playFrom`), in the press; one on
+     * another Canvas, or not yet opened, gone to, opening at its time and playing from it.
      */
     const choose = (id: string) => {
       const entry = findEntry(sets, id);
       const time = entry && parseTime(entry.target.t);
       const element = clover.media.get();
-      if (
-        time &&
-        element &&
-        shown.some((canvas) => canvas.id === entry.canvasId)
-      )
-        playFrom(element, time.start);
+      const here = shown.some((canvas) => canvas.id === entry?.canvasId);
+      if (time && element && here) playFrom(element, time.start);
       clover.selectAnnotation(id);
+      if (time && entry && !(element && here))
+        clover.goTo(entry.canvasId, { time: time.start, autoplay: true });
     };
 
     /*

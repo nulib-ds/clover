@@ -110,6 +110,22 @@ globe.
 `Panel` or `About` leaves the interface languages out of it, and
 <span data-code-flavor="both">`languages={false}`</span> the resource's.
 
+### Placing the toggle
+
+`Language` is the same toggle as a component of its own, for a layout to place where it
+likes, inside a `Root`. With `menu`, it is the globe and the code in use however few
+languages there are. Give `About` <span data-code-flavor="both">`languages={false}`</span>
+so the page offers one.
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent={url}>
+  <Clover.Language menu />
+  <Clover.About languages={false} />
+</Clover.Root>;
+```
+
 ## Configuring the languages
 
 Call `initCloverI18n` near your app's entry point, before Clover draws:

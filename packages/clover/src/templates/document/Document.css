@@ -13,6 +13,16 @@
  */
 .clover-template-document {
   --clover-template-document-height: min(85vh, 56rem);
+  /*
+   * Its hairlines, the toolbar's and the logo's, fading as they go: the template's
+   * hairline color with a little of the muted text in it, so they show over the pages'
+   * gray ground too. Dividers only: nothing depends on their being seen.
+   */
+  --clover-template-document-rule: color-mix(
+    in srgb,
+    var(--clover-color-primary-muted, #26292b) 16%,
+    var(--clover-color-secondary-muted, #e6e8eb)
+  );
   display: flex;
   flex-direction: column;
   height: var(--clover-template-document-height);
@@ -36,65 +46,572 @@
 
 /* ---------- toolbar ---------- */
 
+/*
+ * Over the pages, a hairline under it that fades out toward both ends (Mat, 2026-11-10:
+ * "add the hairline back under the header. make it fade out at the edges"), over the
+ * toolbar's foot so it takes no room.
+ */
+/*
+ * As tall from the first as once its title (a line of it) and controls are in, so the
+ * pages under it never move as the resource loads (Mat, 2026-11-10: "imagine there an
+ * empty space for the label so that we don't have layout shift in most cases"): the
+ * controls' pill, taller than a title's line at a heading's usual sizes.
+ */
 .clover-template-document-toolbar {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--clover-space-s);
+  box-sizing: border-box;
+  min-height: calc(var(--clover-control) + 2px + 2 * var(--clover-space-m));
   padding: var(--clover-space-m) var(--clover-inset);
-  border-bottom: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+.clover-template-document-toolbar::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    var(--clover-template-document-rule) 20%,
+    var(--clover-template-document-rule) 80%,
+    transparent
+  );
+  pointer-events: none;
 }
 
 /*
- * The provider's logo (`Clover.Provider` around a `Clover.Logo`) at the toolbar's end;
- * where the row wraps, on a line of its own.
+ * The toolbar's controls at its end (`SectionControls.tsx`; Mat, 2026-11-09: "like in
+ * preview on a mac, build out the top right controls", "make this look more like an
+ * application menu, but don't change the over all look and feel", then "go with a light
+ * gray palette instead"): the sections' buttons and Download together on one capsule, as
+ * an application's toolbar groups its own, then Search, at the toolbar's foot, level
+ * with the place line under the title. Each capsule is the menus' light gray,
+ * `--clover-control` tall, as the controls round it are; its buttons Clover's smaller
+ * round size, `l`, past 24px (WCAG 2.5.8), as About's Download is (`Panel.css`), their
+ * glyphs in the text's color at the smaller size: clear at rest; the accent, the glyph
+ * white, under the pointer and focused, as every round control's; the open one in the
+ * controls' dark fill, the glyph white, about 13:1 against the gray (WCAG 1.4.11), as the
+ * docs' code switch marks its choice, its state named as well (`aria-expanded`); focused,
+ * the accent's ring, 1px clear, 4.5:1 and more against the gray.
  */
-.clover-template-document-provider {
-  max-width: 100%;
+.clover-template-document-actions {
+  --clover-template-document-key: max(24px, var(--clover-space-l));
+  --clover-template-document-key-room: calc(
+    (var(--clover-control) - var(--clover-template-document-key)) / 2
+  );
+  display: flex;
+  flex: 0 1 auto;
+  align-self: flex-end;
+  align-items: center;
+  gap: var(--clover-space-xs);
+  min-width: 0;
   margin-inline-start: auto;
 }
 
 /*
- * Its downloads, links on the toolbar's row (Mat, 2026-10-21): each group's title, then
- * its links, a line of their own where there is no room beside the title.
+ * The capsule and Search as one control (Mat, 2026-11-09: "connect these some how.
+ * extend the hairline"): one light gray pill in the search field's own edge, Clover's
+ * field edge, 3:1 against the toolbar (WCAG 1.4.11), and its shadow, the section buttons
+ * on its gray and the field at its end. The field keeps its edge, laid over the pill's
+ * at its top, foot and end, so its curved start is the line between the two ("outline
+ * should also cut across here"), and the gray fills in round the buttons up to it.
  */
-.clover-template-document-toolbar .clover-download-groups {
-  flex-direction: row;
-  flex-wrap: wrap;
-  column-gap: var(--clover-space-m);
-}
-
-.clover-template-document-toolbar .clover-download-group {
+.clover-template-document-tools {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: var(--clover-space-s);
-}
-
-.clover-template-document-toolbar .clover-download-title {
-  margin: 0;
-}
-
-.clover-template-document-toolbar .clover-download-list {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: var(--clover-space-s);
-}
-
-/* The whole title, wrapped (`clover-template-title`, `Default.css`), sharing its row. */
-.clover-template-document-title {
-  flex: 1 1 6rem;
+  flex: 0 1 auto;
+  align-items: center;
   min-width: 0;
+  border: 1px solid
+    var(
+      --clover-field-edge,
+      color-mix(
+        in srgb,
+        var(--clover-color-primary-muted, #26292b) 80%,
+        var(--clover-color-secondary, #fff)
+      )
+    );
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: var(--clover-color-control, #1a1d1e);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 2px 8px rgb(0 0 0 / 0.06);
+}
+
+.clover-template-document-tools[hidden] {
+  display: none;
+}
+
+.clover-template-document-tools > .clover-template-document-search {
+  align-self: stretch;
+  display: flex;
+  margin-block: -1px;
+  margin-inline-end: -1px;
+}
+
+.clover-template-document-tools
+  .clover-template-document-search
+  :is(.clover-content-search, .clover-content-search-field) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.clover-template-document-tools .clover-field-pill {
+  flex: 1 1 auto;
+}
+
+.clover-template-document-tools .clover-field-pill,
+.clover-template-document-tools .clover-field-pill:hover {
+  box-shadow: none;
+}
+
+/*
+ * The field in the capsule's dark fill, 3px round it (Mat, 2026-11-10: "give this a 3 pt
+ * outline"), its edge 16:1 against the toolbar (WCAG 1.4.11), the pill no taller: its
+ * room inside 2px less. The pill's own edge is the dark fill too.
+ */
+.clover-template-document-tools {
+  border-color: var(--clover-color-control, #1a1d1e);
+}
+
+.clover-template-document-tools .clover-field-pill {
+  border: 3px solid var(--clover-color-control, #1a1d1e);
+  padding: calc(var(--clover-space-3xs) - 2px);
+  padding-inline-start: calc(var(--clover-space-s) - 2px);
+  /*
+   * Its submit as far in from the end as from the top and foot, the capsule's room round
+   * its keys inside the 3px (Mat, 2026-11-10: "play button is a little off").
+   */
+  padding-inline-end: calc(var(--clover-template-document-key-room) - 2px);
+}
+
+/*
+ * Focused, the field's ring is that outline, in the accent, never one outside the pill
+ * (Mat, 2026-11-10: "make the outline around search come in a bit so that it replaces
+ * the black outline"): 5.9:1 against the toolbar, 3.65:1 against the black (WCAG 2.4.7,
+ * 1.4.11). Forced colors paint no border color: the system's highlight there.
+ */
+.clover-template-document-tools
+  .clover-field-pill:has(.clover-field-pill-query:focus-visible) {
+  border-color: var(--clover-color-accent, #0065c3);
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  .clover-template-document-tools
+    .clover-field-pill:has(.clover-field-pill-query:focus-visible) {
+    outline: 3px solid Highlight;
+    outline-offset: -3px;
+  }
+}
+
+.clover-template-document-bar {
+  display: flex;
+  flex: none;
+  gap: var(--clover-space-3xs);
+  padding: var(--clover-template-document-key-room);
+}
+
+.clover-template-document-group {
+  display: flex;
+  gap: var(--clover-space-3xs);
+}
+
+/*
+ * Its keys on the controls' dark fill, as Clover's round controls are (Mat, 2026-11-10:
+ * "let's make this the black/dark token bg. active items would be accent (respect high
+ * contrast)", then "match the token"): white glyphs (16:1), a light tint under the
+ * pointer, and the open one filled with the accent, its glyph white (5.9:1). The accent
+ * holds only 2.95:1 against the dark fill round it (Clover's own), short of the 3:1 a
+ * state needs (WCAG 1.4.11): so the open one is ringed inside in the glyphs' white too,
+ * and focus is a white ring, both 16:1 against the dark fill. In the higher-contrast mode
+ * the open one keeps the mode's dark fill, its white ring saying it is open
+ * (`styles/contrast.css`). The globe (`Clover.Language`) first, drawn as the others are,
+ * its menu under the capsule, as Download's.
+ */
+.clover-template-document-language {
+  display: contents;
+}
+
+.clover-template-document-bar
+  :is(button.clover-canvas-button, button.clover-languages-button) {
+  height: var(--clover-template-document-key);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+.clover-template-document-bar button.clover-canvas-button {
+  width: var(--clover-template-document-key);
+}
+
+.clover-template-document-bar button.clover-canvas-button svg {
+  width: var(--clover-text-s);
+  height: var(--clover-text-s);
+}
+
+.clover-template-document-bar
+  :is(button.clover-canvas-button, button.clover-languages-button):not(
+    [aria-expanded="true"]
+  ) {
+  background-color: transparent;
+}
+
+.clover-template-document-bar
+  :is(button.clover-canvas-button, button.clover-languages-button):hover:not(
+    [aria-expanded="true"]
+  ) {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-control-glyph, #fff) 16%,
+    transparent
+  );
+}
+
+.clover-template-document-bar
+  :is(
+    button.clover-canvas-button,
+    button.clover-languages-button
+  )[aria-expanded="true"] {
+  background-color: var(--clover-color-accent, #0065c3);
+  box-shadow: inset 0 0 0 2px var(--clover-color-control-glyph, #fff);
+}
+
+:where([data-high-contrast])
+  .clover-template-document-bar
+  :is(
+    button.clover-canvas-button,
+    button.clover-languages-button
+  )[aria-expanded="true"] {
+  background-color: var(--clover-accent-fill);
+}
+
+.clover-template-document-bar
+  :is(
+    button.clover-canvas-button,
+    button.clover-languages-button
+  ):focus-visible {
+  outline: 2px solid var(--clover-color-control-glyph, #fff);
+  outline-offset: 1px;
+}
+
+.clover-template-document-bar .clover-languages-menu {
+  z-index: 6;
+  top: calc(
+    100% + var(--clover-template-document-key-room) + var(--clover-space-xs)
+  );
+}
+
+/* Forced colors paint no fill: the open one in the system's highlight. */
+@media (forced-colors: active) {
+  .clover-template-document-bar
+    :is(
+      button.clover-canvas-button,
+      button.clover-languages-button
+    )[aria-expanded="true"] {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}
+
+/*
+ * Search, unfolded from its magnifier (`SectionControls.tsx`): Clover's Search, its own
+ * field alone, as wide as a query wants and no wider, giving way on a narrow line.
+ */
+.clover-template-document-search {
+  position: relative;
+  flex: 0 1 16rem;
+  min-width: min(10rem, 100%);
+}
+
+/*
+ * Unfolded by a press, it widens out of its magnifier, the field's room growing from the
+ * magnifier's width to its own, as a search field opens in an application's toolbar
+ * (Mat, 2026-11-09: "make it more smooth"); at once for less motion.
+ */
+.clover-template-document-search[data-unfolding] {
+  overflow: clip;
+  animation: clover-template-document-search-unfold 200ms
+    cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes clover-template-document-search-unfold {
+  from {
+    min-width: var(--clover-control);
+    max-width: var(--clover-control);
+  }
+
+  to {
+    max-width: 16rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-template-document-search[data-unfolding] {
+    overflow: visible;
+    animation: none;
+  }
+}
+
+/*
+ * Its submit clear at rest, its glyph in the text's color (16:1 on the field), and the
+ * accent only under the pointer or focused, Search's own fill then (Mat, 2026-11-09:
+ * "don't make this accent by default. it should only be accent on hover/focus").
+ */
+.clover-template-document-search
+  button.clover-field-pill-submit:not(:hover, :focus-visible) {
+  background-color: transparent;
+  color: var(--clover-color-primary, #1a1d1e);
+}
+
+/* Its hits are the aside's to list. */
+.clover-template-document-search
+  :is(.clover-content-search-group, .clover-content-search-more) {
+  display: none;
+}
+
+/*
+ * What it says while it searches, or that it failed, under its field, over the page
+ * rather than pushing the toolbar down. It says what a search found, once: the aside's
+ * Search, which lists the hits, keeps no status of its own (below; WCAG 4.1.3).
+ */
+.clover-template-document-search
+  .clover-content-search-status:is(
+    [data-status="loading"],
+    [data-status="error"]
+  ) {
+  position: absolute;
+  top: calc(100% + var(--clover-space-2xs));
+  inset-inline-start: var(--clover-space-s);
+  z-index: 4;
+}
+
+/*
+ * The aside (`Document.tsx`): one section, under its name, drawn as the Panel's pane is
+ * (`Default.css`), the inset all round. What scrolls is inside it, so its close button
+ * can sit across its inner edge and stay there, and the provider's logo at its foot.
+ * Search lists its hits alone there: its field and its status are the toolbar's, so the
+ * page has one search, not two (Mat, 2026-11-09).
+ */
+.clover-template-document-aside.clover-template-panel:not([hidden]) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.clover-template-document-aside-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding: var(--clover-inset);
+}
+
+/* As tall as the close button beside it, so the name sits level with it. */
+.clover-template-document-aside-head {
+  display: flex;
+  align-items: center;
+  min-height: var(--clover-control);
+  margin-block-end: var(--clover-space-s);
+}
+
+/*
+ * Its close, across its inner edge by the golden ratio, 38.2% over it and 61.8% over the
+ * page, level with its name, as the Panel's sits on a pane sliding over the page
+ * (`Panel.css`; Mat, 2026-11-09: "add a close button on the left. like we do for the
+ * dragtoclose on responsive size"), beside the page as over it. Over the bar between
+ * them, above its grip.
+ */
+.clover-template-document-aside > button.clover-template-document-aside-close {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: var(--clover-inset);
+  inset-inline-start: calc(-0.618 * var(--clover-control));
+}
+
+/*
+ * Who provided it, at its foot, at its end, whichever section it shows (Mat, 2026-11-09:
+ * "put this in lower right"), the section scrolling above it; the logo a size under its
+ * own 1.618rem ("make logo a tad smaller"). Over it, the toolbar's hairline, whole from
+ * the aside's start by the pages and fading out toward its end (Mat, 2026-11-10: "fade
+ * to the right the same way one in header does. it should extend fully to left until it
+ * hits the scrolling body section").
+ */
+.clover-template-document-provider {
+  --clover-logo-height: calc(var(--clover-space-m) + var(--clover-space-xs));
+  position: relative;
+  flex: none;
+  justify-content: flex-end;
+  margin: 0;
+  padding: var(--clover-space-m) var(--clover-inset);
+}
+
+.clover-template-document-provider::before {
+  content: "";
+  position: absolute;
+  /* Across the bar too (Split's, 3px), to the pages' edge. */
+  inset-inline: -3px 0;
+  top: 0;
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    var(--clover-template-document-rule) 50%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.clover-template-document-provider:dir(rtl)::before {
+  background-image: linear-gradient(
+    to left,
+    var(--clover-template-document-rule) 50%,
+    transparent
+  );
+}
+
+/* Its name muted, under the toolbar's title (Mat, 2026-11-09: "mute these titles"). */
+.clover-template-document-aside-title {
+  min-width: 0;
+  margin: 0;
+  color: var(--clover-color-primary-muted, #26292b);
+}
+
+.clover-template-document-aside
+  :is(.clover-content-search-field, .clover-content-search-status) {
+  display: none;
+}
+
+/*
+ * Its downloads, behind the bar's Download button (`SectionControls.tsx`; Mat,
+ * 2026-11-09: "make it a download button in the menu to the right"): a popover under it,
+ * at its end, drawn as the Canvas's menus are (`ControlMenu.css`) and About's downloads
+ * in it (`Panel.css`): Clover's ground and text, its radius and shadow, the smaller text,
+ * each group's title then its links, a row each, the menus' gray under the pointer.
+ */
+.clover-template-document-download {
+  position: relative;
+  display: flex;
+}
+
+.clover-template-document-download-menu {
+  position: absolute;
+  z-index: 6;
+  top: calc(
+    100% + var(--clover-template-document-key-room) + var(--clover-space-xs)
+  );
+  inset-inline-end: calc(-1 * var(--clover-template-document-key-room));
+  box-sizing: border-box;
+  min-width: 12rem;
+  max-width: min(20rem, 80vw);
+  padding: var(--clover-space-xs);
+  border-radius: var(--clover-radius, 3px);
+  background: var(--clover-color-secondary, #fff);
+  color: var(--clover-color-primary, #1a1d1e);
+  box-shadow: 0 4px 16px #0001;
+  font-size: var(--clover-text-s);
+  text-align: start;
+}
+
+:is(
+  .clover-template-document-bar,
+  .clover-template-document-download,
+  .clover-template-document-download-menu
+)[hidden] {
+  display: none;
+}
+
+/* Its tip says what its open popover shows: hidden while it is open. */
+button.clover-template-document-download-button[aria-expanded="true"]
+  > .clover-tip {
+  visibility: hidden;
+}
+
+.clover-template-document-download-menu .clover-download-title {
+  margin: 0;
+  padding: var(--clover-space-xs) var(--clover-space-s) 0;
+}
+
+.clover-template-document-download-menu .clover-download-link {
+  display: block;
+  padding: var(--clover-space-xs) var(--clover-space-s);
+  border-radius: var(--clover-radius, 3px);
+}
+
+.clover-template-document-download-menu .clover-download-link:hover {
+  background-color: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+/*
+ * The whole title, wrapped (`clover-template-title`, `Default.css`), sharing its row,
+ * and under it, `2xs` down, where the reader is (`place`, `Document.tsx`).
+ */
+.clover-template-document-heading {
+  display: flex;
+  flex: 1 1 6rem;
+  flex-direction: column;
+  gap: var(--clover-space-2xs);
+  min-width: 0;
+}
+
+/*
+ * The title and the place line a line each, cut short with an ellipsis where they run
+ * longer (Mat, 2026-11-10: "clamp this, it should not extend beyond one line"): the
+ * heading is whole for assistive technology, and the title is whole in About and each
+ * Canvas's label under its thumbnail, so nothing is lost (WCAG 1.4.10, 1.4.12). The
+ * place's count is never cut, only the labels after it.
+ */
+.clover-template-document-title {
+  min-width: 0;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * The place line, muted (Mat, 2026-11-09: "muted it"): `primary-muted`, 5.9:1 on the
+ * toolbar, a size under the page's own (`s`; "this can be [a] degree smaller"); the
+ * view's place, then its Canvases' labels, a dot between.
+ */
+.clover-template-document-place {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  gap: 0 var(--clover-space-xs);
+  margin: 0;
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-s);
+}
+
+.clover-template-document-place .clover-pager-room[hidden] {
+  display: none;
+}
+
+.clover-template-document-place > * {
+  flex: none;
+}
+
+.clover-template-document-place > .clover-template-document-labels {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /*
  * The page thumbnails' toggle, drawn as Clover's round controls are (`ui/Button.css`),
  * open or put away: the control's dark fill and light glyph, which hold over any image,
- * the accent under the pointer or focused. It holds the glyph of a list of thumbnails
- * (its pictures filled while the thumbnails show, so open and closed differ by more than
- * color) and where the reader is ("3 / 17"), `xs` apart, `s` before the glyph and
- * `xs` and `3xs` after the count (whose letters sit tighter to their box than the
- * glyph's lines do).
+ * the accent under the pointer or focused. It holds the panel toggle's glyph, mirrored,
+ * its pane at the start (filled while the thumbnails show, so open and closed differ by
+ * more than color), alone: round, as Clover's are.
  * `button.x`: one class ties with a reset's `[type="button"]`.
  */
 button.clover-template-document-sidebar-toggle {
@@ -102,10 +619,10 @@ button.clover-template-document-sidebar-toggle {
   flex: none;
   align-items: center;
   gap: var(--clover-space-xs);
-  min-height: var(--clover-control);
-  padding-block: 0;
-  padding-inline: var(--clover-space-s)
-    calc(var(--clover-space-xs) + var(--clover-space-3xs));
+  justify-content: center;
+  width: var(--clover-control);
+  height: var(--clover-control);
+  padding: 0;
   border: 0;
   border-radius: var(--clover-radius-pill, 2rem);
   background-color: var(--clover-color-control, #1a1d1e);
@@ -139,22 +656,14 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   outline-offset: 2px;
 }
 
-/*
- * The count in the control's light color, small, right beside the glyph. It keeps no
- * room for its widest ("17 / 17"): nothing sits after the toggle to be moved as it
- * grows, so it is only as wide as the count it shows. On one line: the toggle sits on
- * the spine, which has no width, so it is sized to fit and would break "1 / 17" in two.
- */
-.clover-template-document-sidebar-toggle .clover-template-document-position {
-  color: inherit;
-  font-size: var(--clover-text-xs);
-  white-space: nowrap;
+/* Full screen, the template fills the screen. */
+.clover-template-document:fullscreen {
+  height: 100%;
 }
 
-.clover-template-document-sidebar-toggle
-  .clover-template-document-position
-  > .clover-pager-room[hidden] {
-  display: none;
+/* Right to left, the thumbnails' pane is on the right, and the glyph draws it there. */
+button.clover-template-document-sidebar-toggle svg:dir(rtl) {
+  scale: -1 1;
 }
 
 /* ---------- panes ---------- */
@@ -179,42 +688,179 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 
 /*
  * The page thumbnails' pane, theirs from top to foot: their toggle sits on its spine
- * (below), over the top of its inner edge. The scroll padding brings a focused thumbnail
- * in below the toggle, never under it (WCAG 2.4.11).
+ * (below), over the top of its inner edge.
  */
 .clover-template-document-sidebar {
   /*
    * Its height the row's, never its list's: size containment keeps the thumbnails from
    * making the template taller than its height (or, as it grows in a short box, as tall
-   * as all of them), as the panel's does; it scrolls within, and at its foot or top the
-   * page scrolls on, as it does past the panel.
+   * as all of them), as the panel's does; its list scrolls within (below), and at its
+   * foot or top the page scrolls on, as it does past the panel.
    */
   contain: size;
-  overflow-y: auto;
-  padding: var(--clover-inset);
-  scroll-padding-top: calc(2 * var(--clover-inset) + var(--clover-control));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* No room of its own: the list's is inside what scrolls (below). */
+  padding: 0;
   background-color: var(--clover-color-secondary, #fff);
 }
 
 /*
- * Put away, the toggle sits over the page's top left as the Canvas's controls do its
- * right: the same inset in from the corner, `m` on a small screen (below).
+ * What scrolls, the whole pane, its scrollbar on the pane's edge (Mat, 2026-11-09:
+ * "scroll bar should be on the right edge"): the inset inside it, all round, so the room
+ * over the first thumbnail and under the last is there at the list's ends alone and
+ * scrolls away with them, the thumbnails between running to the pane's top and foot (Mat,
+ * 2026-11-09: "there should just be a bit of padding once the items are scrolled to the
+ * top", then "treat padding the same for the last item as well"). The scroll padding
+ * brings a focused thumbnail in below the toggle, never under it (WCAG 2.4.11).
  */
-.clover-template-document-sidebar-closed {
+.clover-template-document-thumbnails {
+  /* A column, so the shades' margins and Items' own add up, never collapse. */
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--clover-inset);
+  scroll-padding-top: calc(2 * var(--clover-inset) + var(--clover-control));
+}
+
+/*
+ * Thumbnails passing under the list's top and foot show that they do, as Items' slider
+ * shows them at its ends (`Items.css`; Mat, 2026-11-09: "as these slide the top/bottom,
+ * do a dropshadow inset like we do elsewhere", "only over the image content and not
+ * extend to edges"): a shadow at the top once the list has scrolled, and at the foot
+ * while there is more, `s` deep, as wide as the pictures, holding at the list's edge
+ * (sticky) and taking no room. The list's scroll drives them, no script; where
+ * scroll-driven animation is not supported, there are none (`ui/Shade.css`).
+ */
+@supports (timeline-scope: --clover-template-document-thumbnails) {
+  .clover-template-document-thumbnails {
+    scroll-timeline: --clover-template-document-thumbnails block;
+  }
+
+  .clover-template-document-thumbnails::before,
+  .clover-template-document-thumbnails::after {
+    content: "";
+    position: sticky;
+    z-index: 2;
+    display: block;
+    flex: none;
+    height: var(--clover-space-s);
+    background: linear-gradient(
+      var(--clover-template-document-shade),
+      rgb(0 0 0 / 0.16),
+      transparent
+    );
+    /* As wide as the pictures, its ends faded over `s`, as the slider's are. */
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--clover-space-s),
+      #000 calc(100% - var(--clover-space-s)),
+      transparent
+    );
+    opacity: 0;
+    pointer-events: none;
+    animation: clover-shade linear both;
+    animation-timeline: --clover-template-document-thumbnails;
+  }
+
+  /* From the list's own edge: a sticky offset is from inside its padding. */
+  .clover-template-document-thumbnails::before {
+    --clover-template-document-shade: to bottom;
+    top: calc(-1 * var(--clover-inset));
+    margin-top: calc(-1 * var(--clover-inset));
+    margin-bottom: calc(var(--clover-inset) - var(--clover-space-s));
+    animation-range: 0 var(--clover-space-m);
+  }
+
+  /* It fades as the room under the last thumbnail comes into view. */
+  .clover-template-document-thumbnails::after {
+    --clover-template-document-shade: to top;
+    bottom: calc(-1 * var(--clover-inset));
+    margin-top: calc(-1 * var(--clover-space-s));
+    animation-direction: reverse;
+    animation-range: calc(100% - var(--clover-inset)) 100%;
+  }
+}
+
+/*
+ * Over the page's top left (`Document.tsx`): the thumbnails' toggle while they are put
+ * away, then the view's controls (`ViewControls.tsx`), `xs` apart, the inset in from the
+ * corner, `m` on a small screen (below), over the full viewer too.
+ */
+.clover-template-document-lead {
   position: absolute;
   top: var(--clover-inset);
   inset-inline-start: var(--clover-inset);
   z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--clover-space-xs);
+}
+
+.clover-template-document-sidebar-closed {
+  display: flex;
+}
+
+/*
+ * With the thumbnails open beside the page, their toggle on the spine reaches into the
+ * page by half its width, less half the bar's: the group starts `xs` after it, the
+ * same gap as between its own controls (Mat, 2026-11-09: "normalize gap here").
+ */
+.clover-template-document-panes[data-sidebar="open"]:not([data-narrow])
+  .clover-template-document-lead {
+  inset-inline-start: calc(
+    var(--clover-control) / 2 - 1.5px + var(--clover-space-xs)
+  );
+}
+
+/*
+ * The view's control, the template's own (`ViewControls.tsx`): the magnifier, or in the
+ * full viewer the arrow back to the pages and Clover's pager beside it, `xs` apart, as
+ * the Canvas's controls are. The arrow mirrored right to left, pointing to the top start.
+ */
+.clover-template-document-view {
+  display: flex;
+  align-items: center;
+  gap: var(--clover-space-xs);
+}
+
+.clover-template-document-view:dir(rtl) .clover-template-document-back {
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+
+/*
+ * Their Tips, as a row's along the top of what they sit on: below them, the first's
+ * from its start, as the Canvas's are (`ui/Tip.css`).
+ */
+.clover-template-document-lead .clover-tip {
+  top: calc(100% + var(--clover-space-xs));
+  bottom: auto;
+}
+
+.clover-template-document-lead .clover-tip::before {
+  top: auto;
+  bottom: 100%;
+}
+
+.clover-template-document-lead > :first-child > :first-child > .clover-tip {
+  inset-inline: 0 auto;
+  translate: none;
 }
 
 /*
  * On a small screen (under 31rem, a phone's), the toolbar's ends, the thumbnails' toggle
- * over the page and its spine are `m` in, in line with the Canvas's controls, which step
- * there (`Canvas.css`; Mat, 2026-10-31).
+ * over the page and its spine are `m` in, in line with the Canvas's controls,
+ * which step there (`Canvas.css`; Mat, 2026-10-31).
  */
 @media (width < 31rem) {
   .clover-template-document-toolbar,
-  .clover-template-document-sidebar-closed,
+  .clover-template-document-lead,
   .clover-template-document-spine {
     --clover-inset: var(--clover-space-m);
   }
@@ -289,10 +935,17 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 
 /*
  * The column: the pages down it, a spread to a sheet (`Sheets.tsx`). It scrolls as a
- * PDF reader's continuous view does; where it rests, `Sheets` brings a sheet to its
- * top, the one place a sheet is active. Its own size is what the sheets are sized from.
+ * PDF reader's continuous view does, and rests where the reader leaves it; the sheet
+ * most in view is the active one. Its own size is what the sheets are sized from.
  */
 .clover-template-document-column {
+  /*
+   * The space around every page, `xl`: between two, over the first, under the last and
+   * at their sides (Mat, 2026-11-09: "a gap between them that equals left", "expand gap
+   * 1 step", then "that gap should include the outside edges too"), the live Canvas
+   * fitting its pictures inside it as the stills are (below).
+   */
+  --clover-template-document-gap: var(--clover-space-xl);
   position: absolute;
   inset: 0;
   overflow-x: hidden;
@@ -302,28 +955,33 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 
 .clover-template-document-sheets {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-template-document-gap);
+  padding-block: var(--clover-template-document-gap);
 }
 
 /*
- * A sheet: its pictures side by side at one height, fitted whole with the inset around
- * them, as the Canvas fits them at home. At most as tall as the column less twice the
- * inset, so under a sheet at rest the next one's picture shows by the inset's depth.
- * Between two sheets' pictures, the inset of each: `2l` of the gray ground. A document
- * of one sheet has nothing to show under it, and takes the whole column.
+ * A sheet, a Body entry for its view (`Sheets`): its pictures side by side at one
+ * height, fitted whole with the gap at their sides, as the Canvas fits them at home.
+ * At most as tall as the column less the gap above it and under it, and the inset's
+ * depth of the next one's picture, which always shows (`--…-tease`). The same gap
+ * between every two (Mat, 2026-11-09: "a uniform gap between each body instance"). None
+ * grows or fades: zoomed into, the live Canvas zooms within its sheet. A document of one
+ * sheet has nothing to show under it, and takes the whole column.
  */
 .clover-template-document-sheet {
-  --clover-template-document-tease: calc(2 * var(--clover-inset));
+  --clover-template-document-tease: var(--clover-template-document-gap);
   display: flex;
+  flex: none;
   justify-content: center;
   box-sizing: border-box;
   height: min(
-    100cqh - var(--clover-template-document-tease),
-    (100cqw - 2 * var(--clover-inset)) / var(--ratio) + 2 * var(--clover-inset)
+    100cqh - 2 * var(--clover-template-document-gap) -
+      var(--clover-template-document-tease),
+    (100cqw - 2 * var(--clover-template-document-gap)) / var(--ratio)
   );
-  padding: var(--clover-inset);
-  transition:
-    opacity 200ms ease,
-    height 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  padding-inline: var(--clover-template-document-gap);
 }
 
 /*
@@ -331,70 +989,537 @@ button.clover-template-document-sidebar-toggle:focus-visible {
  * as the Body is Default's pane (Mat, 2026-10-31), its still fitted whole inside.
  */
 .clover-template-document-sheet[data-fill] {
-  height: calc(100cqh - var(--clover-template-document-tease));
+  height: calc(
+    100cqh - 2 * var(--clover-template-document-gap) -
+      var(--clover-template-document-tease)
+  );
 }
 
 /*
- * Zoomed into, moved or turned, the active sheet takes the column's whole height, pushing
- * the others down (`Sheets`), and they dissolve away; the Canvas over it shows the
- * picture, its still out of sight beneath. Home again, it is a sheet among the rest.
- * A video showing its frames puts the still out of sight too (`data-covered`): the
+ * Zoomed into, moved or turned, the Canvas over the active sheet shows the picture, its
+ * still out of sight beneath (`Sheets`); home again, the still is back. A video showing
+ * its frames in the full viewer puts the still out of sight too (`data-covered`): the
  * still need not have the video's shape, and would show around it.
  */
 .clover-template-document-column[data-zoomed]
-  .clover-template-document-sheet[data-active] {
-  height: 100cqh;
-}
-
-.clover-template-document-column[data-zoomed]
   .clover-template-document-sheet[data-active]
+  .clover-template-document-frame
   > *,
-.clover-template-document-column[data-covered]
+.clover-template-document-column[data-covered][data-expanded]
   .clover-template-document-sheet[data-active]
+  .clover-template-document-frame
   > * {
   visibility: hidden;
 }
 
-/* And the other sheets dissolve away, until the Canvas is home again. */
-.clover-template-document-column[data-zoomed]
-  .clover-template-document-sheet:not([data-active]) {
-  --clover-template-document-muted: 0;
-  pointer-events: none;
+/*
+ * A video among the pages is its still until it is pressed into (Mat, 2026-11-09: "we
+ * should not see the seekbar/or other options for videos until it has been clicked
+ * into"): the still, its placeholderCanvas's picture, else its thumbnail
+ * (`Clover.stillSource`), and over it nothing of the player, its seek bar and controls
+ * out of sight and out of reach, so a press lands on the sheet, which opens the full
+ * viewer, the video in it. The magnifier opens it too, a keyboard's way. One page or many,
+ * alike (Mat, 2026-11-09: "don't treat video differently across number of items").
+ */
+.clover-template-document-column:not([data-expanded])
+  > .clover-template-document-sheets
+  > .clover-template-document-live[data-media]
+  > .clover-body {
+  visibility: hidden;
 }
 
 /*
- * A sheet not active is muted, and a press brings it to the top; under the pointer it
- * comes part way back, to show it will.
+ * Its play button, the live one (`Sheets`), in the still's own play button's place,
+ * which goes from under it; under the pointer or focused, the accent, as the still's is,
+ * the accent's ring focused.
  */
-.clover-template-document-sheet:not([data-active]) {
-  --clover-template-document-muted: 0.618;
+.clover-template-document-column:not([data-expanded])
+  > .clover-template-document-sheets
+  > .clover-template-document-live[data-media] {
   cursor: pointer;
-  opacity: var(--clover-template-document-muted);
 }
 
-.clover-template-document-sheet:not([data-active]):hover {
-  --clover-template-document-muted: 0.809;
+.clover-template-document-sheets:has(
+    > .clover-template-document-live > .clover-template-document-live-play
+  )
+  > .clover-template-document-sheet[data-active]
+  > .clover-template-document-play {
+  visibility: hidden;
+}
+
+button.clover-template-document-live-play {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+}
+
+button.clover-template-document-live-play:is(:hover, :focus-visible),
+.clover-template-document-live[data-media]:hover
+  > button.clover-template-document-live-play {
+  background-color: var(--clover-color-accent, #0065c3);
+}
+
+:where([data-high-contrast])
+  button.clover-template-document-live-play:is(:hover, :focus-visible),
+:where([data-high-contrast])
+  .clover-template-document-live[data-media]:hover
+  > button.clover-template-document-live-play {
+  background-color: var(--clover-accent-fill);
+}
+
+button.clover-template-document-live-play:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+/* A page that plays is pressed to play, not zoomed into. */
+.clover-template-document-sheets > .clover-template-document-sheet[data-media] {
+  cursor: pointer;
+}
+
+/*
+ * The play button over a video's still (`Sheets`), Clover's over a placeholder
+ * (`Placeholder.css`): `2xl` round, in the middle of the sheet, the controls' fill and
+ * glyph, its shadow, the accent while the sheet is under the pointer (the whole still
+ * opens it), the accent's ring in the higher-contrast mode.
+ */
+.clover-template-document-play {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--clover-space-2xl);
+  height: var(--clover-space-2xl);
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: var(--clover-color-control, #1a1d1e);
+  color: var(--clover-color-control-glyph, #fff);
+  box-shadow: 0 4px 16px #0003;
+  transform: translate(-50%, -50%);
+  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
+  cursor: pointer;
+}
+
+.clover-template-document-play svg {
+  width: calc(var(--clover-space-2xl) / (1 + 2 * 0.618));
+  height: calc(var(--clover-space-2xl) / (1 + 2 * 0.618));
+}
+
+.clover-template-document-sheet {
+  position: relative;
+}
+
+.clover-template-document-sheet:hover > .clover-template-document-play {
+  background-color: var(--clover-color-accent, #0065c3);
+}
+
+:where([data-high-contrast])
+  .clover-template-document-sheet:hover
+  > .clover-template-document-play {
+  background-color: var(--clover-accent-fill);
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .clover-template-document-sheet {
+  .clover-template-document-play {
     transition: none;
   }
 }
 
+/*
+ * Among the pages, Clover's loading mark runs along the top of the page's picture, where
+ * its lift is drawn, at its width, not along the Canvas's box round it and the gap (Mat,
+ * 2026-11-10: "show the load across the top of the resource"), from where `Sheets` says
+ * the frame lies. In the full viewer, along the top of the view, as ever.
+ */
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-live
+  .clover-loading[data-overlay] {
+  top: var(--clover-template-document-frame-top, 0px);
+  left: var(--clover-template-document-frame-left, 0px);
+  width: var(--clover-template-document-frame-width, 100%);
+}
+
+/*
+ * A press on a sheet opens it as the full viewer (`Sheets`): the pointer says so, on the
+ * live Canvas at home too.
+ */
+.clover-template-document-sheet:not([data-active]),
+.clover-template-document-column:not([data-expanded], [data-zoomed])
+  .clover-template-document-body
+  .clover-canvas-viewport {
+  cursor: zoom-in;
+}
+
+/*
+ * A single page has nothing after it to show: it takes the column's whole height, so its
+ * view has all the room (Mat, 2026-11-09: "make sure we are expanding the scrollable area
+ * to the full height of container"), its pictures fitted whole in the middle of it, as
+ * the live Canvas fits them, and its frame as close round them as any page's, so its lift
+ * and its ring wrap them (Mat, 2026-11-10: "doesn't wrap closely the media"). A Timeline's
+ * or a Scene's is as any other's (below).
+ */
 .clover-template-document-sheets[data-single]
   > .clover-template-document-sheet {
   --clover-template-document-tease: 0px;
+  align-items: center;
+  height: calc(100cqh - 2 * var(--clover-template-document-gap));
 }
 
-.clover-template-document-sheet > * {
+.clover-template-document-sheets[data-single]
+  > .clover-template-document-sheet:not([data-fill])
+  > .clover-template-document-frame {
+  height: min(
+    100%,
+    (100cqw - 2 * var(--clover-template-document-gap)) / var(--ratio)
+  );
+}
+
+/*
+ * A sheet's pictures, side by side in its frame, the frame their bounds: a recording's or
+ * a Scene's is the whole sheet, as the Body it is drawn in is. No ring marks the active
+ * one, and none is dimmed (Mat, 2026-11-09: "remove outline on items").
+ */
+.clover-template-document-frame {
+  position: relative;
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  border-radius: var(--clover-radius, 3px);
+  transition: box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
+ * A page under the pointer lifts a little: the shadow of Clover's play button over a
+ * placeholder round its pictures (`Placeholder.css`; Mat, 2026-11-09: "hover over the
+ * item, add a subtle dropshadow", then "a bit more noticable"), a spread's two as one. The active page's live Canvas lies over its still, so pointing
+ * at the Canvas lifts that page's still, which shows round it. Only among the pages, and
+ * only where a pointer can rest; at once for less motion.
+ */
+@media (hover: hover) {
+  .clover-template-document-column:not([data-expanded])
+    .clover-template-document-sheet:hover
+    > .clover-template-document-frame,
+  .clover-template-document-column:not([data-expanded])
+    .clover-template-document-sheets:has(> .clover-template-document-live:hover)
+    > .clover-template-document-sheet[data-active]
+    > .clover-template-document-frame {
+    box-shadow: 0 4px 16px #0003;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-template-document-frame {
+    transition: none;
+  }
+}
+
+/*
+ * Keyboard focus on the active page's Canvas rings its pictures, not the box round them
+ * and the gap (Mat, 2026-11-09: "make focus line around the media and not the container
+ * for keyboard tabbing"): the accent, 3px and 1px clear of the pictures, as a thumbnail's
+ * ring is, on the page's gray
+ * ground, against which it keeps 3:1 and more on both sides (WCAG 1.4.11, 2.4.7), in
+ * place of the Canvas's own ring inside its edge. Opened as the full viewer, the view is
+ * the whole column, and the Canvas's ring is its own again.
+ */
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-live
+  .clover-canvas-viewport:focus-visible::after {
+  box-shadow: none;
+}
+
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-sheets:has(
+    > .clover-template-document-live .clover-canvas-viewport:focus-visible
+  )
+  > .clover-template-document-sheet[data-active]
+  > .clover-template-document-frame {
+  /* As thick and as close as a thumbnail's ring in Items (Mat, 2026-11-10). */
+  outline: 3px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 1px;
+}
+
+@media (forced-colors: active) {
+  .clover-template-document-column:not([data-expanded])
+    .clover-template-document-live
+    .clover-canvas-viewport:focus-visible {
+    outline: none;
+  }
+
+  .clover-template-document-column:not([data-expanded])
+    .clover-template-document-sheets:has(
+      > .clover-template-document-live .clover-canvas-viewport:focus-visible
+    )
+    > .clover-template-document-sheet[data-active]
+    > .clover-template-document-frame {
+    outline: 3px solid CanvasText;
+  }
+}
+
+.clover-template-document-frame > * {
   display: block;
   height: 100%;
   min-width: 0;
 }
 
-.clover-template-document-sheet[data-fill] > * {
+/*
+ * Until its picture has loaded, each picture's box is the ground Clover's Canvas lays
+ * behind an image (`--clover-canvas-background`, a translucent black unless a page sets
+ * its own), so a page is never an empty space while it waits (Mat, 2026-11-09: "place a
+ * dull muted black with opacity behind the resource"). Loaded, the ground goes, so none
+ * shows round a picture fitted inside a box of another shape.
+ */
+.clover-template-document-frame > :not([data-loaded]) {
+  background-color: var(--clover-canvas-background, #0001);
+}
+
+/*
+ * A Timeline's or a Scene's sheet has no shape of its own: its still fills it, fitted
+ * whole inside.
+ */
+.clover-template-document-sheet[data-fill] {
+  align-items: center;
+}
+
+.clover-template-document-sheet[data-fill] > .clover-template-document-frame {
+  flex: 1 1 auto;
+}
+
+.clover-template-document-sheet[data-fill]
+  > .clover-template-document-frame
+  > * {
+  flex: 1 1 0;
   object-fit: contain;
+}
+
+/*
+ * A Scene's, loaded, takes its picture's own shape, as large as the sheet holds, in its
+ * middle, the frame round it, so the lift and the ring are round the picture, not the
+ * sheet (Mat, 2026-11-10: "the dropshadow does not properly wrap this thumb").
+ */
+.clover-template-document-sheet[data-fill]:not([data-media])
+  > .clover-template-document-frame:has(> img[data-loaded]) {
+  flex: none;
+  height: auto;
+}
+
+.clover-template-document-sheet[data-fill]:not([data-media])
+  > .clover-template-document-frame
+  > img[data-loaded] {
+  flex: none;
+  width: auto;
+  height: auto;
+  max-width: calc(100cqw - 2 * var(--clover-template-document-gap));
+  max-height: calc(
+    100cqh - 2 * var(--clover-template-document-gap) -
+      var(--clover-template-document-tease)
+  );
+}
+
+/*
+ * A page that plays is on the black Clover lays behind a video (`Canvas.css`), as a
+ * player's poster is, the lift and the ring round it (Mat, 2026-11-10: "maybe show as a
+ * black background like we do for video?"); a sound's picture small in its middle, as
+ * its player shows its artwork (`media/Player.css`: 12rem at the most, 40% of the room),
+ * the play button over it ("make thumb small"). With no picture, the black and the play
+ * button alone.
+ */
+.clover-template-document-sheet[data-media] > .clover-template-document-frame {
+  background-color: #000;
+}
+
+.clover-template-document-sheet[data-media="sound"]
+  > .clover-template-document-frame {
+  align-items: center;
+  justify-content: center;
+}
+
+.clover-template-document-sheet[data-media="sound"]
+  > .clover-template-document-frame
+  > * {
+  flex: none;
+  width: auto;
+  height: auto;
+  max-width: min(12rem, 40%);
+  max-height: min(12rem, 40%);
+  border-radius: calc(2 * var(--clover-radius, 3px));
+  background-color: transparent;
+}
+
+/* Waiting for its picture, or with none: its room, out of sight on the black. */
+.clover-template-document-sheet[data-media="sound"]
+  > .clover-template-document-frame
+  > span {
+  width: min(12rem, 40%);
+  aspect-ratio: 1;
+}
+
+/*
+ * Among the pages, the Canvas's own controls (its information, where a Canvas has some)
+ * at the column's top start, after the template's, and the boxes they open hanging from
+ * there (Mat, 2026-11-09: "put this on the left"): from where the template's end
+ * (`--clover-template-document-lead-end`, measured by `Document.tsx`), else the
+ * Canvas's inset. Right to left, mirrored. In the full viewer they are where the Canvas
+ * puts them, at its top end, the view's among them, as in Default (Mat, 2026-11-10:
+ * "don't try it different than how we align it in default viewer").
+ */
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-body
+  .clover-canvas
+  > .clover-canvas-controls[data-fit] {
+  left: var(
+    --clover-template-document-lead-end,
+    var(--clover-canvas-controls-inset)
+  );
+  justify-content: flex-start;
+}
+
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-body
+  .clover-canvas
+  > :is(.clover-canvas-caption, .clover-canvas-menu) {
+  right: auto;
+  left: var(
+    --clover-template-document-lead-end,
+    var(--clover-canvas-controls-inset)
+  );
+}
+
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-body
+  .clover-canvas
+  > .clover-canvas-controls[data-fit]:dir(rtl) {
+  right: var(
+    --clover-template-document-lead-end,
+    var(--clover-canvas-controls-inset)
+  );
+  left: var(--clover-canvas-controls-inset);
+}
+
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-body
+  .clover-canvas
+  > :is(.clover-canvas-caption, .clover-canvas-menu):dir(rtl) {
+  right: var(
+    --clover-template-document-lead-end,
+    var(--clover-canvas-controls-inset)
+  );
+  left: auto;
+}
+
+/*
+ * The aside's map (`SectionContent.tsx`): its Expand map at its top end, the end of its
+ * zoom row, as the Canvas's map box has it (`Caption.css`).
+ */
+.clover-template-document-map-box {
+  position: relative;
+}
+
+.clover-template-document-map-box .clover-geomap {
+  --clover-map-controls-end: calc(
+    var(--clover-control) + var(--clover-space-xs)
+  );
+}
+
+.clover-template-document-map-actions {
+  position: absolute;
+  z-index: 3;
+  top: var(--clover-inset);
+  right: var(--clover-inset);
+  display: flex;
+  gap: var(--clover-space-xs);
+}
+
+.clover-template-document-map-actions:dir(rtl) {
+  right: auto;
+  left: var(--clover-inset);
+}
+
+/* Right to left, the aside is at the start: the glyphs point the other way. */
+.clover-template-document-map-actions:dir(rtl) svg {
+  scale: -1 1;
+}
+
+/*
+ * Expanded over the pages' column, the whole of it, under the template's controls at
+ * its top start; its zoom row, Collapse map and Close at its top end. The pages out of
+ * sight and reach meanwhile, and the view's controls with them (`Document.tsx`).
+ */
+.clover-template-document-map {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--clover-color-secondary, #fff);
+}
+
+.clover-template-document-map > :not(.clover-template-document-map-actions) {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* The map the whole height (Mat, 2026-11-09: "the map should extend the height"). */
+.clover-template-document-map .clover-geomap {
+  --clover-map-height: 100%;
+  --clover-map-controls-end: calc(
+    2 * var(--clover-control) + 2 * var(--clover-space-xs)
+  );
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+}
+
+/*
+ * Its places out of sight ("don't show evanston/map options in this case"), but not out
+ * of reach: the list is the keyboard's way to each place, and what the map's description
+ * says follows it (WCAG 2.1.1, 1.3.1). With focus in it, it shows over the map's foot,
+ * the inset in, on the panel's ground, scrolling past half the map's height.
+ */
+.clover-template-document-map .clover-geomap-places:not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.clover-template-document-map .clover-geomap-places:focus-within {
+  position: absolute;
+  z-index: 3;
+  inset-inline: var(--clover-inset);
+  bottom: var(--clover-inset);
+  box-sizing: border-box;
+  max-height: 50%;
+  margin: 0;
+  padding: var(--clover-space-s);
+  overflow-y: auto;
+  border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-color-secondary, #fff);
+  box-shadow: 0 0 0 1px var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+.clover-template-document-main[data-map] > .clover-template-document-column {
+  visibility: hidden;
+}
+
+/*
+ * No Chapters in the Canvas's row (Mat, 2026-11-09: "don't include chapters here"): a
+ * recording's chapters are the aside's Contents, its Ranges, one press away in the
+ * toolbar. Out of the row, the tab order and the accessibility tree alike; still marked
+ * on the seek bar and named beside the time.
+ */
+.clover-template-document-body
+  .clover-canvas-controls
+  button[data-button="chapters"] {
+  display: none;
 }
 
 /* The live Canvas, laid exactly over its sheet (`Sheets`): its picture on the still. */
@@ -404,37 +1529,118 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   inset-inline: 0;
   top: 0;
   height: 100%;
-  transition: opacity 160ms ease;
 }
 
 .clover-template-document-body .clover-canvas {
-  --clover-canvas-inset: var(--clover-inset);
+  --clover-canvas-inset: var(--clover-template-document-gap);
   background-color: transparent;
 }
 
-/* Moved to a sheet the scroll has not yet rested on: its still shows until it does. */
-.clover-template-document-live[data-moved]:not(:focus-within) {
-  opacity: 0;
-  pointer-events: none;
+/*
+ * The live Canvas's controls held at the column's top start, whichever sheet is active
+ * and wherever it sits (Mat, 2026-11-09: "this should always just stay here. do not move
+ * it to other items"), by how far the column's top is from the Canvas's
+ * (`--clover-template-document-cut`, set at rest by `Sheets`), and with them what hangs
+ * from them (its menus, its information and the place), and a navigator: so the Canvas
+ * draws past its own box there, which its viewport, clipped itself, never does. The
+ * figure clips in its own inline style, which only `!important` outweighs. Full
+ * screen, the whole screen.
+ */
+.clover-template-document-body .clover-canvas:not(:fullscreen) {
+  overflow: visible !important;
+}
+
+.clover-template-document-body
+  .clover-canvas:not(:fullscreen)
+  > :is(
+    .clover-canvas-controls,
+    .clover-canvas-navigator,
+    .clover-canvas-menu,
+    .clover-canvas-caption
+  ) {
+  translate: 0 var(--clover-template-document-cut, 0px);
 }
 
 /*
- * While the scroll runs between sheets, the Canvas's controls slide away, as they do
- * when put away, and come back as it rests; not while focus is among them.
+ * Among the pages the live Canvas is always at home (a zoom opens the full viewer), so
+ * what it draws past its picture may lie over the pages around it: a hovered or focused
+ * hotspot's dimmed surround reaches over them all (Mat, 2026-11-09: "hover an annotation
+ * should extend overlay over other adjacent canvases"), the column clipping it. Its
+ * viewport and hotspots' layer clip in their own inline styles, which only `!important`
+ * outweighs. The full viewer keeps them clipped, so focus on a hotspot out of view
+ * never scrolls the column under it.
  */
-.clover-template-document-column[data-scrolling]
-  .clover-template-document-live:not(:focus-within)
-  .clover-canvas-controls
-  > * {
-  --clover-controls-shown: 0;
-  --clover-controls-events: none;
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-body
+  .clover-canvas:not(:fullscreen)
+  > .clover-canvas-viewport,
+.clover-template-document-column:not([data-expanded])
+  .clover-template-document-body
+  .clover-canvas:not(:fullscreen)
+  > .clover-canvas-viewport
+  > .clover-canvas-overlays {
+  overflow: visible !important;
+}
+
+/*
+ * The full viewer (`Sheets`, `data-expanded`): a press into a page, or a zoom, and the
+ * live Canvas covers the whole of the column's view, on the page's gray ground, the
+ * sheets held still under it until it closes (Mat, 2026-11-09: "expand the canvas to fit
+ * the whole wrapping container"). It takes every drag, to move about the page.
+ */
+.clover-template-document-column[data-expanded] {
+  overflow: hidden;
+}
+
+.clover-template-document-column[data-expanded] .clover-template-document-live {
+  z-index: 2;
+  background-color: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+/*
+ * A video opened takes the whole of the view, with no room around it, on the ground
+ * Clover gives a video, black, a page's own where it sets one (`--clover-canvas-background`;
+ * Mat, 2026-11-09: "when clicked into for video, fill the screen … do a black bg (use
+ * token)"), as a player has it.
+ */
+.clover-template-document-column[data-expanded]
+  .clover-template-document-body
+  .clover-canvas[data-media="video"] {
+  --clover-canvas-inset: 0px;
+  background-color: var(--clover-canvas-background);
+}
+
+/*
+ * A moving image opened, its frames playing, the same: the whole of the view, on a
+ * video's black (Mat, 2026-11-10: "make sure the buffalo goes full screen on this"). Its
+ * Canvas is a picture's, so its page's mark says so (`Sheets`).
+ */
+.clover-template-document-column[data-expanded]
+  .clover-template-document-live[data-media="moving"]
+  .clover-canvas {
+  --clover-canvas-inset: 0px;
+  --clover-canvas-background: #000;
+  background-color: var(--clover-canvas-background);
+}
+
+/*
+ * Moved while the column scrolls: its picture gives way to the still until the scroll
+ * rests, the two trading places at once, with no fade, as they show the same picture
+ * (Mat, 2026-11-09: "remove any opacity change between items"). Its own controls stay,
+ * held at the column's top (above).
+ */
+.clover-template-document-live[data-moved]:not(:focus-within)
+  .clover-canvas
+  > :not(.clover-canvas-controls, .clover-canvas-menu, .clover-canvas-caption) {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /*
  * A finger scrolls the column; zoomed into a sheet, the Canvas takes every drag. A Scene
  * takes every drag always, as in Default: a finger's drag turns it (Mat, 2026-10-31).
  */
-.clover-template-document-column:not([data-zoomed])
+.clover-template-document-column:not([data-zoomed], [data-expanded])
   :not(.clover-scene)
   > .clover-canvas-viewport {
   touch-action: pan-y;

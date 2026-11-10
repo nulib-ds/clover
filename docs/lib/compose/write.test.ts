@@ -65,7 +65,7 @@ describe("compose", () => {
   it("writes the Viewer in a template, with its imports and its styles", () => {
     const written = code({
       resource: URL,
-      viewer: { template: "Document", props: { panelLayout: "tabs" } },
+      viewer: { template: "Document", props: { defaultSidebarOpen: false } },
     });
     expect(written.code).toBe(
       [
@@ -77,7 +77,7 @@ describe("compose", () => {
         "<Viewer",
         `  iiifContent="${URL}"`,
         "  template={Document}",
-        '  panelLayout="tabs"',
+        "  defaultSidebarOpen={false}",
         "/>;",
       ].join("\n"),
     );

@@ -1,6 +1,6 @@
 ---
 title: Document template
-description: "The Viewer's Document template, read as a PDF is: a toolbar, page thumbnails down the left, the pages down one column, and the information panel."
+description: "The Viewer's Document template, read as a PDF is: a toolbar, page thumbnails down the left, the pages down one column, each section in an aside."
 ---
 
 import { ViewerExample } from "docs/components/Clover4/ViewerDocs";
@@ -18,58 +18,61 @@ import { TemplateHead } from "docs/components/Clover4/PartHead";
 
 <div className="docs-lede">
   Reads as a PDF does: a toolbar, page thumbnails down the left, the pages down
-  one column, and the information panel on the right.
+  one column, and each section alone in an aside on the right.
 </div>
 
 <LiveViewerExample
   wide
   resource="catalog"
   headingLevel={2}
-  height="26rem"
+  height="min(80svh - 4rem, 38.5rem)"
   templates={{
     Document: [
       { prop: "defaultSidebarOpen", value: true, remount: true },
       { prop: "defaultPanelOpen", value: false, remount: true },
-      {
-        prop: "panelLayout",
-        value: "accordion",
-        options: ["accordion", "tabs"],
-      },
     ],
   }}
 />
 
 ## API reference
 
-The toolbar holds the title, Download's links where there is a `rendering`, and the
-provider's logo. The pages run down one column, a spread to a sheet, the top of the next
-always showing: scrolling moves through them as a PDF reader's continuous view does, and
-PageUp and PageDown go a sheet at a time. A resource of one page has no thumbnails unless
-`singleItem` asks for them.
+The toolbar holds the title, where the page in view is and its Canvases' labels, and at
+its end a globe for the languages where the resource comes in several, a button for each
+section the resource has, Download where there is a `rendering`, and Search. A section's
+button opens it alone in an aside beside the pages, with its own bar, where there is room
+for both, and over them where there is not; the provider's logo is at the aside's foot.
+
+The pages run down one column, a spread to a sheet, the top of the next always in sight:
+they scroll freely, as a PDF reader's continuous view does, and PageUp and PageDown go a
+sheet at a time. Tab reaches the page in view, and from there Up and Down step to the
+previous page and the next, Home and End to the first and last, and Enter opens it. A press on a page, the pointer a magnifier over it, or a zoom on its
+Canvas opens it as the full viewer, the Canvas's own controls at its top end, and over
+its top left an arrow back to the pages, then Previous and Next; the arrow, or Escape,
+closes it. A video or a sound waits as its still on black, with a play button over it, until it
+is pressed into. A resource of one page has its thumbnail too, put away to start, unless
+`singleItem={false}` leaves it out.
 
 The thumbnails' toggle sits on the bar between them and the pages; drag the bar, or use
-the arrow keys on it, to widen or narrow them. The information panel sits to the right of
-the pages, with its own bar, where there is room for both, and slides out over them where
-there is not. On a phone the thumbnails float over the page too, and choosing one puts
-them away. Size it with `--clover-template-document-height`.
+the arrow keys on it, to widen or narrow them. On a phone the thumbnails float over the
+page, and choosing one puts them away. Size it with `--clover-template-document-height`.
 
 <ApiReference elements="clover-viewer">
 
-| Prop                 | Type                    | Default                      | Description                                                                                                                                                                                                                           |
-| -------------------- | ----------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.                                                                                                                                                                          |
-| `singleItem`         | `boolean`               | `false`                      | The page thumbnails and their toggle even where the resource has one page.                                                                                                                                                            |
-| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed.                                                                                                                                                                       |
-| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                                                                                                                                                                                    |
-| `panelSections`      | `PanelSection[]`        | All                          | Which of the panel's sections it may have; each still shows only where the resource has data for it, and no panel at all where it has none of them.                                                                                   |
-| `panelLabels`        | `PanelSectionLabels`    | —                            | What a panel section says, in place of its word in Clover's interface language: text, or text by language tag.                                                                                                                        |
-| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.                                                                                                                                                                        |
-| `languages`          | `boolean`               | `true`                       | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out.                                                                                                    |
-| `interfaceLanguages` | `boolean`               | `true`                       | The panel's language toggle also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of, the visitor's and your site's, where they differ; `false` leaves them out. |
-| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.                                                                                                                                                                            |
-| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.                                                                                                                                                                        |
-| `collapseControls`   | `"auto" \| "always"`    | `"auto"`                     | When the Body's view controls (zoom, rotation, reset, full screen) collapse behind one button: only where its row cannot hold them all, or always, leaving the media more room.                                                       |
-| `canvasOptions`      | `CloverCanvasOptions`   | —                            | The Body's Canvas `options`: its [gestures, zoom limits and motion](/docs/canvas#interaction).                                                                                                                                        |
+| Prop                 | Type                    | Default                      | Description                                                                                                                                                                                                         |
+| -------------------- | ----------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultSidebarOpen` | `boolean`               | Several pages                | Whether the page thumbnails start shown: by default where the resource has several pages, a single page's put away; over the page, not.                                                                             |
+| `singleItem`         | `boolean`               | `true`                       | The page thumbnails and their toggle where the resource has one page too.                                                                                                                                           |
+| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the aside starts open on About beside the page; over it, closed.                                                                                                                                            |
+| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | Not read by Document: each section opens alone in its aside.                                                                                                                                                        |
+| `panelSections`      | `PanelSection[]`        | All                          | Which sections the toolbar offers; each still only where the resource has data for it.                                                                                                                              |
+| `panelLabels`        | `PanelSectionLabels`    | —                            | What a section's button and the aside call it, in place of its word in Clover's interface language: text, or text by language tag.                                                                                  |
+| `download`           | `boolean`               | `true`                       | The Download button, its links in a menu under it, where there is a `rendering`.                                                                                                                                    |
+| `languages`          | `boolean`               | `true`                       | A globe among the toolbar's controls, where the resource comes in several languages, that sets the one it reads in; `false` leaves it out.                                                                          |
+| `interfaceLanguages` | `boolean`               | `true`                       | The globe also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of, the visitor's and your site's, where they differ; `false` leaves them out. |
+| `headingLevel`       | `number`                | `2`                          | The title's level; the aside's name a level below, and its section's headings a level below that.                                                                                                                   |
+| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the bars' widths are remembered; `false` forgets them.                                                                                                                                                        |
+| `collapseControls`   | `"auto" \| "always"`    | `"auto"`                     | For the Body's own controls (Choice, a Canvas's information, and in the full viewer the view's): only where their row cannot hold them all, or always.                                                              |
+| `canvasOptions`      | `CloverCanvasOptions`   | —                            | The Body's Canvas `options`: its [gestures, zoom limits and motion](/docs/canvas#interaction).                                                                                                                      |
 
 </ApiReference>
 
@@ -92,9 +95,9 @@ over the page's top left.
 
 </ViewerExample>
 
-### Panel open
+### Aside open
 
-Use `defaultPanelOpen` to start with the information panel open beside the pages. On a
+Use `defaultPanelOpen` to start with the aside open on About beside the pages. On a
 phone, where it would cover them, it starts closed whatever you pass.
 
 <ViewerExample
@@ -111,13 +114,32 @@ phone, where it would cover them, it starts closed whatever you pass.
 
 ### One page
 
-Use `singleItem` to show the page thumbnails, and their toggle, even where the resource
-has one page.
+A resource of one page keeps its thumbnail and the thumbnails' toggle. Use
+`singleItem={false}` to leave them out.
 
-<ViewerExample resource="photo" template="Document" props={{ singleItem: true }}>
+<ViewerExample resource="photo" template="Document" props={{ singleItem: false }}>
 
 ```jsx
-<Viewer iiifContent={url} template={Document} singleItem />
+<Viewer iiifContent={url} template={Document} singleItem={false} />
+```
+
+</ViewerExample>
+
+### A paged Presentation 2 Manifest
+
+A Presentation 2 Manifest from the Bodleian Libraries, `paged`: its first leaf alone, then
+the rest two to a sheet, as a book opens.
+
+<ViewerExample
+  resource="https://iiif.bodleian.ox.ac.uk/iiif/manifest/e32a277e-91e2-4a6d-8ba6-cc4bad230410.json"
+  template="Document"
+>
+
+```jsx
+<Viewer
+  iiifContent="https://iiif.bodleian.ox.ac.uk/iiif/manifest/e32a277e-91e2-4a6d-8ba6-cc4bad230410.json"
+  template={Document}
+/>
 ```
 
 </ViewerExample>

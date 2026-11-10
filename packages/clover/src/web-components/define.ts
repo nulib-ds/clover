@@ -100,6 +100,10 @@ const LOADERS: Record<string, LoadPart> = {
     () => import("../components/Download/Download"),
     "Download",
   ),
+  "clover-language": part(
+    () => import("../components/Panel/Language"),
+    "Language",
+  ),
   "clover-map": part(() => import("../components/Map/Map"), "CloverMap"),
   "clover-panel": () =>
     import("./elements/panel").then((module) => module.PanelElement),

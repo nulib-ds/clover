@@ -215,7 +215,7 @@ export const CAPABILITIES = {
       "internationalization",
       "localization",
     ],
-    parts: ["Panel", "About"],
+    parts: ["Panel", "About", "Language"],
     resource: "languages",
   },
   "content-state": {

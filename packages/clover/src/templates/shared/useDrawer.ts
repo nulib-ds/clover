@@ -21,6 +21,12 @@ export interface DrawerOptions {
   side: "start" | "end";
   /** Where focus goes as the reader opens it over the page. Default: the panel's. */
   focus?: (pane: HTMLElement) => HTMLElement | null | undefined;
+  /**
+   * Its toggle, where several buttons open it (Document's aside, a button a section):
+   * the one for what it shows, which focus goes back to. Default: the first button whose
+   * `aria-controls` names it.
+   */
+  toggle?: () => HTMLElement | null | undefined;
   /** Over the page it slides in and out; `false`, it simply shows and hides. */
   slides?: boolean;
   /** What sits on its edge and moves with it as it is dragged (its toggle, on its spine). */
@@ -45,7 +51,8 @@ export interface DrawerOptions {
  *   beside it, a drag back off the way it came or its toggle puts it away, and focus in
  *   it goes to its toggle; focus elsewhere is left where it is.
  *
- * Its toggle is the button whose `aria-controls` names it. A toggle the template draws
+ * Its toggle is the button whose `aria-controls` names it (`toggle`, where there are
+ * several). A toggle the template draws
  * in another place as the pane opens or closes is followed there (`useFollowFocus`).
  */
 export function useDrawer({
@@ -54,6 +61,7 @@ export function useDrawer({
   defaultOpen,
   side,
   focus = panelFocus,
+  toggle: findToggle,
   slides = true,
   alongside,
   followFocus,
@@ -77,6 +85,7 @@ export function useDrawer({
   const open = over ? openOver : openBeside;
 
   const toggle = () =>
+    findToggle?.() ??
     document.querySelector<HTMLElement>(`button[aria-controls~="${id}"]`);
   const follow = () => followFocus(toggle);
   // Focus in the pane as it goes is handed to its toggle, never left on what is hidden.

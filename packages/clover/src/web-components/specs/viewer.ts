@@ -109,7 +109,7 @@ export const viewerDocs: ElementDocs = {
     },
     "single-item": {
       description:
-        "Default and Document: the thumbnails even where the resource has one view, which has nothing to choose between. Gallery's grid always shows them.",
+        "Default and Document: the thumbnails where the resource has one view too, which Document shows by default and Default does not; \"false\" leaves Document's out. Gallery's grid always shows them.",
       default: "false",
     },
     header: {
@@ -124,40 +124,40 @@ export const viewerDocs: ElementDocs = {
     },
     download: {
       description:
-        "Default, Document and Gallery: \"false\" leaves out the downloads: Default's and the Gallery's from a Download button beside its panel's About heading, Document's in its toolbar (its panel's About offers none).",
+        "Default, Document and Gallery: \"false\" leaves out the downloads: Default's and the Gallery's from a Download button beside its panel's About heading, Document's from a Download button in its toolbar (its About offers none).",
       default: "true",
     },
     languages: {
       description:
-        'Default, Document and Gallery: where what the resource says of itself comes in several languages, the panel\'s About heading offers them, and the whole Viewer reads in the one chosen. "false" leaves the choice out.',
+        "Default, Document and Gallery: where what the resource says of itself comes in several languages, the panel's About heading offers them (Document's toolbar, as a globe), and the whole Viewer reads in the one chosen. \"false\" leaves the choice out.",
       default: "true",
     },
     "interface-languages": {
       description:
-        "Default, Document and Gallery: the panel's language toggle, beside its About heading, also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of: the visitor's and the site's, where they differ. \"false\" leaves them out.",
+        "Default, Document and Gallery: the panel's language toggle, beside its About heading (Document's globe, in its toolbar), also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of: the visitor's and the site's, where they differ. \"false\" leaves them out.",
       default: "true",
     },
     "panel-open": {
       description:
-        "Default, Document and Gallery: whether the information panel starts open beside the page (the Gallery's, beside its lightbox's view). Default's and the Gallery's do, by default; Document's starts shut. Where it would slide over the page (a phone), it starts shut.",
+        "Default, Document and Gallery: whether the information panel starts open beside the page (the Gallery's, beside its lightbox's view). Default's and the Gallery's do, by default; Document's aside, on About, starts shut. Where it would slide over the page (a phone), it starts shut.",
     },
     "panel-layout": {
       description:
-        "Default, Document and Gallery: the panel's sections as stacked boxes, each opened by its heading, or as tabs.",
+        "Default and Gallery: the panel's sections as stacked boxes, each opened by its heading, or as tabs. Document opens each alone in its aside.",
       default: "accordion",
     },
     "panel-sections": {
       description:
-        'Default, Document and Gallery: which of the panel\'s sections it may have, as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and there is no panel where none of them does.',
+        'Default, Document and Gallery: which of the panel\'s sections it may have (Document\'s toolbar\'s buttons), as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and there is no panel where none of them does.',
       default: "every section",
     },
     "panel-labels": {
       description:
-        "Default, Document and Gallery: what a panel section's tab or heading says, in place of its word in Clover's interface language, as JSON by the section's value: {\"annotations\": \"Chapters\"}, or a word by language tag to say it in several (clover-panel's labels).",
+        "Default, Document and Gallery: what a panel section's tab or heading says (Document's button and aside), in place of its word in Clover's interface language, as JSON by the section's value: {\"annotations\": \"Chapters\"}, or a word by language tag to say it in several (clover-panel's labels).",
     },
     "sidebar-open": {
       description:
-        "Document: whether the page thumbnails start shown beside the page, as they do by default. Where they would float over the page (a phone), they start put away.",
+        "Document: whether the page thumbnails start shown beside the page. By default, where the resource has several pages; a single page's starts put away. Where they would float over the page (a phone), they start put away.",
     },
     "storage-key": {
       description:
@@ -170,7 +170,7 @@ export const viewerDocs: ElementDocs = {
     },
     "collapse-controls": {
       description:
-        "Default, Document and Gallery: when the Body's view controls (zoom, the turns, reset, full screen) collapse behind one button, the Gallery's in its lightbox: auto, only where the row cannot hold them all; always, wherever there are any, leaving the media more room.",
+        "Default, Document and Gallery: when the Body's view controls (zoom, the turns, reset, full screen) collapse behind one button, the Gallery's in its lightbox: auto, only where the row cannot hold them all; always, wherever there are any, leaving the media more room. Document's view controls are its own, behind its magnifier: there, it is the Body's others (Choice, a Canvas's information).",
       default: "auto",
     },
     size: {

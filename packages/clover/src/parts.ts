@@ -48,6 +48,7 @@ export type {
 } from "./components/Panel/Panel";
 export { usePanelSections } from "./components/Panel/sections";
 export { About } from "./components/Panel/About";
+export { Language } from "./components/Panel/Language";
 export { Annotations } from "./components/Annotations/Annotations";
 export type { AnnotationsProps } from "./components/Annotations/Annotations";
 export { Transcript } from "./components/Transcript/Transcript";
@@ -102,6 +103,7 @@ export { CollectionSelect } from "./components/CollectionSelect/CollectionSelect
 export type { CollectionSelectProps } from "./components/CollectionSelect/CollectionSelect";
 export type { TranscriptProps } from "./components/Transcript/Transcript";
 export type { AboutProps } from "./components/Panel/About";
+export type { LanguageProps } from "./components/Panel/Language";
 export { PanelToggle } from "./components/Panel/PanelToggle";
 export type { PanelToggleProps } from "./components/Panel/PanelToggle";
 export type { StatusProps } from "./components/Status/Status";

@@ -216,6 +216,21 @@ export const resources: PlaygroundResource[] = [
     thumbnail:
       "https://api.nga.gov/iiif/53c83e9d-7a7f-46c7-8701-13fd2d26decc/pct:1.5494,2.0782,24.1071,21.7604/!300,300/0/default.jpg",
   },
+  // An album of paintings in the Bodleian Libraries, as Digital Bodleian publishes it: a
+  // Presentation 2 Manifest, its 84 leaves `paged` (Mat, 2026-11-10: "add it there").
+  // Its server sends CORS headers.
+  {
+    key: "album",
+    name: "Album",
+    title: "Bodleian Library MS. Ind. Inst. Misc. 22",
+    description:
+      "Presentation 2 Manifest with paged canvases, a logo and a rendering",
+    resource:
+      "https://iiif.bodleian.ox.ac.uk/iiif/manifest/e32a277e-91e2-4a6d-8ba6-cc4bad230410.json",
+    // The Manifest's own thumbnail, as it gives it.
+    thumbnail:
+      "https://iiif.bodleian.ox.ac.uk/iiif/image/e58b8c60-005c-4c41-a22f-07d49cb25ede/full/256,/0/default.jpg",
+  },
 ];
 
 export const resourceByKey = (key: string) =>

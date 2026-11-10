@@ -137,10 +137,10 @@ describe("checkLayout", () => {
   it("takes the Viewer in a template, its props the template's and the Viewer's", () => {
     expect(
       checkLayout({
-        viewer: { template: "document", props: { panelLayout: "tabs" } },
+        viewer: { template: "document", props: { defaultSidebarOpen: false } },
       }).layout,
     ).toEqual({
-      viewer: { template: "Document", props: { panelLayout: "tabs" } },
+      viewer: { template: "Document", props: { defaultSidebarOpen: false } },
     });
     expect(checkLayout({ viewer: { template: "Default" } }).layout).toEqual({
       viewer: {},

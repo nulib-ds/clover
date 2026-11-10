@@ -429,3 +429,51 @@ describe("About's language toggle", () => {
     expect(document.querySelector(".clover-languages-glyph")).toBeNull();
   });
 });
+
+describe("Language, the toggle as a part of its own", () => {
+  it("offers the resource's languages wherever a layout places it, as About does", async () => {
+    visitor("en");
+    render(
+      <Clover.Root iiifContent={multilingual}>
+        <Clover.Label as="h1" />
+        <Clover.Language />
+      </Clover.Root>,
+    );
+    expect(codes(await toggle())).toEqual(["ZH-HANT", "ZH-CN", "EN", "JA"]);
+    fireEvent.click(screen.getByRole("radio", { name: /日本語/ }));
+    expect(await title("感懐帖")).toBeInTheDocument();
+  });
+
+  it("menu: folded into the globe and the code in use, however few there are", async () => {
+    visitor("en");
+    render(
+      <Clover.Root iiifContent={multilingual}>
+        <Clover.Label as="h1" />
+        <Clover.Language menu />
+      </Clover.Root>,
+    );
+    const button = await screen.findByRole("button", { name: "EN, Language" });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("radio")).toBeNull();
+    fireEvent.click(button);
+    const menu = await toggle();
+    expect(
+      within(menu)
+        .getAllByRole("radio")
+        .map((radio) => radio.closest("label")?.textContent),
+    ).toEqual(["繁體中文", "中文（中国）", "English", "日本語"]);
+    fireEvent.click(within(menu).getByRole("radio", { name: "日本語" }));
+    expect(await title("感懐帖")).toBeInTheDocument();
+  });
+
+  it("interfaceLanguages={false}: the resource's languages alone", async () => {
+    visitor("fr");
+    initCloverI18n({ languages: ["en"] });
+    render(
+      <Clover.Root iiifContent={german}>
+        <Clover.Language interfaceLanguages={false} />
+      </Clover.Root>,
+    );
+    expect(codes(await toggle("Langue"))).toEqual(["DE", "EN"]);
+  });
+});

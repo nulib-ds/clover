@@ -1304,6 +1304,9 @@ e2e:docs`.
 - Branch from `main`; keep PRs focused and small.
 - Commits: concise, imperative (“Fix slider scroll behavior”); reference issues `#123`.
 - PRs: include description, linked issues, and screenshots/GIFs for UI changes.
+- A PR's title is short: 46 characters at the most, the length of "Show manifest title on
+  content state requests." (Mat, 2026-11-10), a sentence in the imperative, ending with a
+  period ("Refine Document template.").
 - A PR's description is slim (Mat, 2026-11-03; nulib-ds/clover#390 is the model): a line
   of what it is, then sections (`##`) of bullets, each item one line, conversational, no
   fluff, and no "Generated with Claude Code" or other agent line at the bottom. Commits
