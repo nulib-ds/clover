@@ -931,11 +931,18 @@ describe("templates", () => {
     expect(about).toHaveAccessibleDescription("This page");
     expect(annotations).toHaveAttribute("data-marked");
     expect(annotations).toHaveAccessibleDescription("This page");
-    // About shows the page's own after the resource's.
+    // About shows the page's own after the resource's; open, its dot is gone, and back
+    // as it closes.
     fireEvent.click(about);
     expect(
       await screen.findByText("The first page, described on its own."),
     ).toBeInTheDocument();
+    expect(about).not.toHaveAttribute("data-marked");
+    expect(about).not.toHaveAccessibleDescription("This page");
+    expect(annotations).toHaveAttribute("data-marked");
+    fireEvent.click(about);
+    await waitFor(() => expect(about).toHaveAttribute("data-marked"));
+    expect(about).toHaveAccessibleDescription("This page");
     // The next page holds nothing of its own: no marks.
     const listbox = screen.getByRole("listbox", { name: "Items" });
     fireEvent.click(within(listbox).getAllByRole("option")[1]);

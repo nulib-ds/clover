@@ -22,10 +22,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- **Document marks the sections that hold something of the page in view.** A dot in the
-  accent, ringed white, on the toolbar's button, and "This page" for assistive
-  technology: About where the page describes itself, Contents where it has chapters,
-  Annotations where one is listed on it, and the Map where it has a place of its own.
+- **Document marks the sections that hold something of the page in view.** A dot of the
+  accent, lightened to hold 3:1 on the dark capsule, on the toolbar's button, and "This
+  page" for assistive technology: About where the page describes itself, Contents where it
+  has chapters, Annotations where one is listed on it, and the Map where it has a place of
+  its own. Gone while its section is open, it comes back as it closes.
 - **Document's About shows the page's own information.** After the resource's, each page
   in view that describes itself: its label, summary and metadata.
 

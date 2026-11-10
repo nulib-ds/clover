@@ -13,13 +13,14 @@ resource has (About, the views, the Collection, the contents, the map, the trans
 annotations) and Download, where there is a `rendering`; and at its end, inside one edge
 with it, Clover's search field, open where the toolbar is 56rem wide or more, else a
 magnifier that opens into it. A section that holds something of the page in view has a dot
-in the accent on its button, described as "This page": About where the page describes
-itself (About then shows its label, summary and metadata after the resource's), Contents
-where it has chapters, Annotations where one is listed on it, and the Map where it has a
-place of its own. A section's button opens it alone in Document's own aside, beside the
-page with a bar to share the width where there is room, over the page where there is not,
-its close on its inner edge. Pressed again, the button puts it away. A search made in the
-toolbar lists its hits in the aside; the field's X clears it and puts both away.
+of the accent, lightened, on its button, described as "This page", gone while the section
+is open: About where the page describes itself (About then shows its label, summary and
+metadata after the resource's), Contents where it has chapters, Annotations where one is
+listed on it, and the Map where it has a place of its own. A section's button opens it
+alone in Document's own aside, beside the page with a bar to share the width where there
+is room, over the page where there is not, its close on its inner edge. Pressed again, the
+button puts it away. A search made in the toolbar lists its hits in the aside; the field's
+X clears it and puts both away.
 
 The pages scroll freely, with the wheel, a trackpad, a finger or the scrollbar; past the
 first or last, the web page scrolls on. The page most in view is the active one, its

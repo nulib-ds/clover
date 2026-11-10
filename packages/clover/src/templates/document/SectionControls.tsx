@@ -40,9 +40,11 @@ const useIsomorphicLayoutEffect =
  * Each button is a disclosure of the aside (`aria-expanded`, `aria-controls`), named by
  * its section, its glyph with it; the open one in the accent, as About's Download is.
  * A section that holds something of the page in sight (`marked`, `marks.ts`) carries a
- * dot in the accent at its top end, as a message app marks what is new (Mat,
+ * dot of the accent at its top end, as a message app marks what is new (Mat,
  * 2026-11-10: "a small facebook/slack style indicator on the item. we don't need a
- * number. it should be a accent dot"), and is described by "This page" (WCAG 1.3.1).
+ * number. it should be a accent dot"), and is described by "This page" (WCAG 1.3.1),
+ * both gone while its section is open, and back as it closes ("indicators should go away
+ * if clicked into. come back if clicked out of").
  */
 export function SectionControls({
   aside,
@@ -96,7 +98,9 @@ export function SectionControls({
   const langOf = Clover.useLangOf();
   // What a dot says, for each section it marks.
   const markId = `${aside}-marked`;
-  const anyMarked = sections.some((section) => marked?.has(section));
+  const marks = (section: PanelSection) =>
+    (marked?.has(section) ?? false) && open !== section;
+  const anyMarked = sections.some(marks);
   return (
     <div className="clover-template-document-actions">
       {provider}
@@ -113,7 +117,7 @@ export function SectionControls({
             >
               {sections.map((section) => {
                 const label = labelOf(section);
-                const mark = marked?.has(section) ?? false;
+                const mark = marks(section);
                 return (
                   <button
                     key={section}
