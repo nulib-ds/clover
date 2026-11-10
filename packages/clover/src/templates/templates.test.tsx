@@ -888,7 +888,7 @@ describe("templates", () => {
     ).toHaveAttribute("data-sidebar", "closed");
   });
 
-  it("Document: a single page's thumbnail and its toggle, put away to start, with no place under the title", async () => {
+  it("Document: a single page's thumbnail and its toggle, put away to start", async () => {
     const plain = render(<Templates.Document iiifContent={singleJson} />);
     const toggle = await screen.findByRole("button", { name: /^Show items/ });
     await waitFor(() =>
@@ -899,10 +899,6 @@ describe("templates", () => {
     expect(screen.queryByRole("listbox", { name: "Items" })).toBeNull();
     // Put away on its own, focus is left where it was.
     expect(toggle).not.toHaveFocus();
-    // "1 / 1" would say nothing.
-    expect(
-      document.querySelector(".clover-template-document-place"),
-    ).toBeNull();
     // Opened, its one thumbnail.
     fireEvent.click(toggle);
     const listbox = await screen.findByRole("listbox", { name: "Items" });

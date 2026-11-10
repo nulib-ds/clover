@@ -53,6 +53,7 @@ export function SectionControls({
   download,
   downloadHeadingLevel,
   language,
+  provider,
 }: {
   /** The aside's id. */
   aside: string;
@@ -76,6 +77,8 @@ export function SectionControls({
   downloadHeadingLevel: number;
   /** The languages to read in, first on the capsule (`Clover.Language`). */
   language?: React.ReactNode;
+  /** Who provided the resource, before the capsule (`Clover.Provider`). */
+  provider?: React.ReactNode;
 }) {
   // Whether there is anything to download, for the view in sight or the whole.
   const [downloads, setDownloads] = useState(false);
@@ -84,6 +87,7 @@ export function SectionControls({
   const bar = languages || sections.length > 0 || (download && downloads);
   return (
     <div className="clover-template-document-actions">
+      {provider}
       {/* The capsule and Search, one control in one edge (`Document.css`). */}
       <div className="clover-template-document-tools" hidden={!bar && !search}>
         <div className="clover-template-document-bar" hidden={!bar}>

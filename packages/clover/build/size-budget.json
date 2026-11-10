@@ -23,13 +23,13 @@
   "mapInitialGzip": 19950,
   "translatorGzip": 3600,
   "mapOnDemandGzip": 300150,
-  "webComponentsGzip": 133950,
+  "webComponentsGzip": 134000,
   "labelPageGzip": 37450,
   "elementsEntryGzip": 6300,
-  "composedPageGzip": 110400,
-  "layoutPageGzip": 129300,
+  "composedPageGzip": 110450,
+  "layoutPageGzip": 129350,
   "canvasElementGzip": 97050,
-  "documentElementGzip": 151050,
-  "galleryElementGzip": 137450,
+  "documentElementGzip": 151000,
+  "galleryElementGzip": 137500,
   "viewerEntryGzip": 113050
 }

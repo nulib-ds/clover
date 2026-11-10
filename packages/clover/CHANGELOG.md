@@ -11,15 +11,32 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Document's toolbar holds its title alone.** The line under it, where the page in view
+  is ("5 / 17") and its Canvases' labels, is put away until it has a better place; the
+  thumbnails mark the page in view, and each step through the pages says where it is.
+- **Document's provider logo is in its toolbar.** Before the controls' capsule, linked to
+  its homepage as before, whether the aside is open or not; the aside's foot holds it no
+  longer.
+- **Document's pages offer no information button.** The Canvas's own About, its summary
+  and metadata in a box over the page, is off in Document, among the pages and in the
+  full viewer; the aside's About describes the resource.
+- **Budgets.** Without the place line, the Viewer with Document loads 83.2 kB up front
+  (from 85.1) and 105.5 kB to first view (from 107.5). Document's styles, in the
+  `templates.css` every template shares, and the chunks they rename take six elements'
+  pages past their budgets by 3 to 70 bytes, each raised to the next 50: `<clover-viewer>`
+  134.0 kB, the elements' entry 6.3 kB, the four parts 110.45 kB, a layout of containers
+  129.35 kB, `<clover-canvas>` 97.05 kB and `<clover-viewer>` in Gallery 137.5 kB.
+
 ### Fixed
 
+- **Document's bars stay over the full viewer.** A page opened as the full viewer covered
+  half of the grips of the thumbnails' bar and the aside's; the page's pane now keeps
+  what it holds, so the grips show whole on either side.
 - **Document's search field is one width in every browser.** Chrome sized it to the
   field's words, about 13.3rem in a page's font, while Safari and Firefox gave it 16rem;
-  it is now 13.5rem in each, giving way on a narrow toolbar as before. Its few bytes,
-  and the chunks they rename, take six elements' pages past their budgets by 2 to 41
-  bytes, each raised to the next 50: `<clover-viewer>` 133.95 kB, the elements' entry
-  6.3 kB, a layout of containers 129.3 kB, `<clover-canvas>` 97.05 kB, `<clover-viewer>`
-  in Document 151.05 kB and in Gallery 137.45 kB.
+  it is now 13.5rem in each, giving way on a narrow toolbar as before.
 
 ## [4.9.0] - 2026-11-10
 

@@ -48,8 +48,9 @@ const SETTLE_MS = 200;
  * viewer offers (`VIEW_CONTROLS`), its annotations' list is the aside's (Mat, 2026-11-09: "remove this"), its hotspots still
  * on the page, and its map is the aside's too, which expands over the pages
  * (`SectionContent.tsx`; Mat, 2026-11-09: "remove this from over here. instead someone
- * should be able to do this from the sidebar panel map"). Choice and the information
- * stay, where a page has them.
+ * should be able to do this from the sidebar panel map"). Its information, its summary
+ * and metadata, is not offered either (Mat, 2026-11-10: "remove the metadata i at the
+ * canvas level"). Choice stays, where a page has one.
  */
 const OWN_CONTROLS = {
   zoom: false,
@@ -57,6 +58,7 @@ const OWN_CONTROLS = {
   rotation: false,
   reset: false,
   annotations: false,
+  information: false,
   map: false,
 } as const;
 /*
@@ -1059,7 +1061,7 @@ export function Sheets({
             /*
              * The view's controls (zoom, the turns, reset, full screen) only in the full
              * viewer, a video's its player's; among the pages the Canvas keeps its own
-             * (Choice, the place, information; `OWN_CONTROLS`). Open at once: the
+             * (Choice, the place; `OWN_CONTROLS`). Open at once: the
              * sheet's still is its placeholder.
              */
             controls={
