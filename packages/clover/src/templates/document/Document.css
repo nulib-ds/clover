@@ -321,11 +321,15 @@
 
 /*
  * Search, unfolded from its magnifier (`SectionControls.tsx`): Clover's Search, its own
- * field alone, as wide as a query wants and no wider, giving way on a narrow line.
+ * field alone, giving way on a narrow line. Its width is its own, not its field's
+ * (Mat, 2026-11-10: "the search bar … looks different in deployed site"): the capsule
+ * fits its content, and from a basis alone Chrome took the input's natural width, about
+ * 13.3rem in the site's font, while Safari and Firefox took the basis, then 16rem.
  */
 .clover-template-document-search {
   position: relative;
-  flex: 0 1 16rem;
+  flex: 0 1 13.5rem;
+  width: 13.5rem;
   min-width: min(10rem, 100%);
 }
 
@@ -347,7 +351,7 @@
   }
 
   to {
-    max-width: 16rem;
+    max-width: 13.5rem;
   }
 }
 

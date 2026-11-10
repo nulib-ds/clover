@@ -11,6 +11,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **Document's search field is one width in every browser.** Chrome sized it to the
+  field's words, about 13.3rem in a page's font, while Safari and Firefox gave it 16rem;
+  it is now 13.5rem in each, giving way on a narrow toolbar as before. Its few bytes,
+  and the chunks they rename, take six elements' pages past their budgets by 2 to 41
+  bytes, each raised to the next 50: `<clover-viewer>` 133.95 kB, the elements' entry
+  6.3 kB, a layout of containers 129.3 kB, `<clover-canvas>` 97.05 kB, `<clover-viewer>`
+  in Document 151.05 kB and in Gallery 137.45 kB.
+
 ## [4.9.0] - 2026-11-10
 
 ### Added
