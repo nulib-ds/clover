@@ -39,11 +39,16 @@ const useIsomorphicLayoutEffect =
  *
  * Each button is a disclosure of the aside (`aria-expanded`, `aria-controls`), named by
  * its section, its glyph with it; the open one in the accent, as About's Download is.
+ * A section that holds something of the page in sight (`marked`, `marks.ts`) carries a
+ * dot in the accent at its top end, as a message app marks what is new (Mat,
+ * 2026-11-10: "a small facebook/slack style indicator on the item. we don't need a
+ * number. it should be a accent dot"), and is described by "This page" (WCAG 1.3.1).
  */
 export function SectionControls({
   aside,
   sections,
   open,
+  marked,
   onChoose,
   labelOf,
   groupLabel,
@@ -61,6 +66,8 @@ export function SectionControls({
   sections: readonly PanelSection[];
   /** The section the aside shows, while it is open. */
   open: PanelSection | null;
+  /** The sections that hold something of the page in sight, each marked by a dot. */
+  marked?: ReadonlySet<PanelSection>;
   onChoose: (section: PanelSection) => void;
   labelOf: (section: PanelSection) => { text: string; lang?: string };
   /** The group's name, the sections' together ("Information panel"). */
@@ -85,6 +92,11 @@ export function SectionControls({
   // Whether the globe shows: `Clover.Language` draws nothing with nothing to choose.
   const [languages, setLanguages] = useState(false);
   const bar = languages || sections.length > 0 || (download && downloads);
+  const t = Clover.useT();
+  const langOf = Clover.useLangOf();
+  // What a dot says, for each section it marks.
+  const markId = `${aside}-marked`;
+  const anyMarked = sections.some((section) => marked?.has(section));
   return (
     <div className="clover-template-document-actions">
       {provider}
@@ -101,15 +113,18 @@ export function SectionControls({
             >
               {sections.map((section) => {
                 const label = labelOf(section);
+                const mark = marked?.has(section) ?? false;
                 return (
                   <button
                     key={section}
                     type="button"
                     className="clover-canvas-button clover-template-document-section"
                     data-section={section}
+                    data-marked={mark || undefined}
                     lang={label.lang}
                     aria-expanded={open === section}
                     aria-controls={aside}
+                    aria-describedby={mark ? markId : undefined}
                     onClick={() => onChoose(section)}
                   >
                     <svg
@@ -124,11 +139,22 @@ export function SectionControls({
                       {GLYPHS[section]}
                     </svg>
                     <span style={Clover.visuallyHidden}>{label.text}</span>
+                    {mark && (
+                      <span
+                        className="clover-template-document-mark"
+                        aria-hidden="true"
+                      />
+                    )}
                     <Clover.Tip label={label.text} />
                   </button>
                 );
               })}
             </div>
+          )}
+          {anyMarked && (
+            <span id={markId} hidden lang={langOf("downloadPage")}>
+              {t("downloadPage")}
+            </span>
           )}
           {download && (
             <DownloadControl

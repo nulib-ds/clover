@@ -322,6 +322,34 @@
 }
 
 /*
+ * The dot on a section that holds something of the page in sight (`marks.ts`): the
+ * accent, at the button's top end, ringed in the glyphs' white, which holds 16:1 against
+ * the dark fill round it (the accent alone holds 2.95:1, short of the 3:1 a mark needs;
+ * WCAG 1.4.11) and 5.9:1 against an open button's accent. Forced colors: the system's
+ * text color, ringed in its ground.
+ */
+.clover-template-document-mark {
+  position: absolute;
+  top: -1px;
+  inset-inline-end: -1px;
+  box-sizing: content-box;
+  width: 0.4rem;
+  height: 0.4rem;
+  border: 1.5px solid var(--clover-color-control-glyph, #fff);
+  border-radius: 50%;
+  background-color: var(--clover-color-accent, #0065c3);
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  .clover-template-document-mark {
+    forced-color-adjust: none;
+    border-color: Canvas;
+    background-color: CanvasText;
+  }
+}
+
+/*
  * Search, unfolded from its magnifier (`SectionControls.tsx`): Clover's Search, its own
  * field alone, giving way on a narrow line. Its width is its own, not its field's
  * (Mat, 2026-11-10: "the search bar … looks different in deployed site"): the capsule
@@ -418,6 +446,11 @@
   box-sizing: border-box;
   overflow-y: auto;
   padding: var(--clover-inset);
+}
+
+/* A page's own information, after the resource's in About (`SectionContent.tsx`). */
+.clover-template-document-page-about {
+  margin-block-start: var(--clover-space-xl);
 }
 
 /* As tall as the close button beside it, so the name sits level with it. */

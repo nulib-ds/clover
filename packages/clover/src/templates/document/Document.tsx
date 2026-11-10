@@ -27,6 +27,7 @@ import {
 import { Sheets } from "./Sheets";
 import { SectionControls } from "./SectionControls";
 import { ViewControls } from "./ViewControls";
+import { hasInformation, usePageMarks, useViewCanvases } from "./marks";
 import { mediaOf } from "./media";
 
 /* A section's content, loaded as the aside first opens (`SectionContent.tsx`). */
@@ -524,13 +525,14 @@ function DocumentLayout({
    * 2026-11-10: "let's remove this for now. I need to find a better spot for it"). The
    * thumbnails mark the page in view, and a step through the pages says its place.
    */
-  const sequence = Clover.useSequence();
+  const viewCanvases = useViewCanvases();
   // What the active page plays, if anything: its toggle is then Play.
-  const viewCanvases = (
-    sequence.views[Math.max(0, navigation.position)] ?? []
-  ).map((index) => sequence.canvases[index]);
   const media = mediaOf(viewCanvases);
   const full = expanded;
+  // The sections holding something of the page in sight, each marked in the toolbar.
+  const marked = usePageMarks(viewCanvases);
+  // The pages in sight that describe themselves, which About shows after the resource.
+  const described = viewCanvases.filter(hasInformation);
 
   const toggle = pages && (
     <button
@@ -601,6 +603,7 @@ function DocumentLayout({
             aside={asideId}
             sections={offered.filter((each) => each !== "search")}
             open={asideOpen ? section : null}
+            marked={marked}
             onChoose={chooseSection}
             labelOf={labelOf}
             groupLabel={{
@@ -843,6 +846,7 @@ function DocumentLayout({
                 <SectionContent
                   section={section}
                   headingLevel={below(below(headingLevel))}
+                  pages={described}
                   expandMapId={`${id}-map-expand`}
                   onExpandMap={expandMap}
                 />

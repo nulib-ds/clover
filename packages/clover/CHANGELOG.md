@@ -11,7 +11,23 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **`canvasHasMapData(canvas)`**, from `@nulib/clover` and `@nulib/clover/map`: whether
+  one Canvas has a place of its own, its `navPlace`, an annotation's, a GeoJSON body or a
+  georeference, as `hasMapData` asks of each Canvas of a Manifest.
+- **`useAnnotationPages({ listed: true })`**: only the AnnotationPages Annotations lists,
+  leaving out those that start hidden, a still Canvas's OCR. Called as before, it reads
+  them all.
+
 ### Changed
+
+- **Document marks the sections that hold something of the page in view.** A dot in the
+  accent, ringed white, on the toolbar's button, and "This page" for assistive
+  technology: About where the page describes itself, Contents where it has chapters,
+  Annotations where one is listed on it, and the Map where it has a place of its own.
+- **Document's About shows the page's own information.** After the resource's, each page
+  in view that describes itself: its label, summary and metadata.
 
 - **Document's toolbar holds its title alone.** The line under it, where the page in view
   is ("5 / 17") and its Canvases' labels, is put away until it has a better place; the
@@ -22,12 +38,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Document's pages offer no information button.** The Canvas's own About, its summary
   and metadata in a box over the page, is off in Document, among the pages and in the
   full viewer; the aside's About describes the resource.
-- **Budgets.** Without the place line, the Viewer with Document loads 83.2 kB up front
-  (from 85.1) and 105.5 kB to first view (from 107.5). Document's styles, in the
-  `templates.css` every template shares, and the chunks they rename take six elements'
-  pages past their budgets by 3 to 70 bytes, each raised to the next 50: `<clover-viewer>`
-  134.0 kB, the elements' entry 6.3 kB, the four parts 110.45 kB, a layout of containers
-  129.35 kB, `<clover-canvas>` 97.05 kB and `<clover-viewer>` in Gallery 137.5 kB.
+- **Budgets.** With the place line gone and the dots and the page's About come, the
+  Viewer with Document loads 83.6 kB up front (from 85.1) and 106.0 kB to first view
+  (from 107.5); `<clover-viewer>` in Document crosses its budget by 288 bytes, raised to
+  151.3 kB. The Default template, which shares `useAnnotationPages` and `hasMapData`,
+  crosses its own by 15, raised to 82.25 kB. Document's styles, in the `templates.css`
+  every template shares, and the chunks they rename take six elements' pages past their
+  budgets by 2 to 89 bytes, each raised to the next 50: `<clover-viewer>` 134.0 kB, the
+  elements' entry 6.3 kB, the four parts 110.45 kB, a layout of containers 129.35 kB,
+  `<clover-canvas>` 97.05 kB and `<clover-viewer>` in Gallery 137.5 kB.
 
 ### Fixed
 

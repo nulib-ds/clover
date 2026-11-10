@@ -18,6 +18,7 @@ export { setMapWorkerUrl } from "../core/map-config";
 export {
   affineTransform,
   boundsOf,
+  canvasHasMapData,
   cornersOf,
   georeferencesOf,
   hasMapData,

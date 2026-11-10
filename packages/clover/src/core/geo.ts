@@ -461,7 +461,7 @@ export function georeferencesOf(manifest: Manifest | null): Georeference[] {
   return result;
 }
 
-export { hasMapData } from "./geo-detect";
+export { canvasHasMapData, hasMapData } from "./geo-detect";
 
 // ── The affine overlay ────────────────────────────────────────────────────────
 

@@ -3,6 +3,8 @@ import React from "react";
 import * as Clover from "../../parts";
 import type { PanelSection } from "../../parts";
 
+type Json = Record<string, any>;
+
 /**
  * A section's content, alone in Document's aside (`Document.tsx`), from the parts Clover
  * draws each with: About, the views of a content state, the Collection, the contents,
@@ -14,10 +16,16 @@ import type { PanelSection } from "../../parts";
 export default function SectionContent({
   section,
   headingLevel,
+  pages = [],
   expandMapId,
   onExpandMap,
 }: {
   section: PanelSection;
+  /**
+   * The pages in view that describe themselves, for About (`marks.ts`): handed down, so
+   * this module, loaded apart, takes nothing from Document's own.
+   */
+  pages?: readonly Json[];
   /** The level of the section's own headings: a level under the aside's. */
   headingLevel: number;
   /** The map's Expand map button's id. */
@@ -33,12 +41,15 @@ export default function SectionContent({
        * on document").
        */
       return (
-        <Clover.About
-          headingLevel={headingLevel}
-          download={false}
-          languages={false}
-          interfaceLanguages={false}
-        />
+        <>
+          <Clover.About
+            headingLevel={headingLevel}
+            download={false}
+            languages={false}
+            interfaceLanguages={false}
+          />
+          <PageAbout pages={pages} headingLevel={headingLevel} />
+        </>
       );
     case "targets":
       return <Clover.Items of="targets" layout="list" />;
@@ -179,3 +190,53 @@ const LINE = {
 } as const;
 const FRAME = "M232 72H72V440H440V280";
 const BOX = { x: 144, y: 244, width: 124, height: 124, rx: 16 } as const;
+
+/**
+ * Each page in sight that describes itself, after the resource's About: its label, at
+ * the level of the resource's own, then its summary and metadata, as the Canvas's
+ * information shows them in the other layouts, which Document's pages do not offer (Mat,
+ * 2026-11-10: "remove the metadata i at the canvas level"). The toolbar's About is marked
+ * while there is one (`marks.ts`).
+ */
+function PageAbout({
+  pages,
+  headingLevel,
+}: {
+  pages: readonly Json[];
+  headingLevel: number;
+}) {
+  if (!pages.length) return null;
+  const title = (
+    headingLevel <= 6 ? `h${headingLevel}` : "p"
+  ) as React.ElementType;
+  return (
+    <>
+      {pages.map((canvas) => (
+        <div
+          key={canvas.id}
+          className="clover-about clover-template-document-page-about"
+        >
+          {canvas.label && (
+            <Clover.Label
+              label={canvas.label}
+              as={title}
+              className="clover-about-label clover-title"
+            />
+          )}
+          {canvas.summary && (
+            <Clover.Summary
+              value={canvas.summary}
+              className="clover-about-summary"
+            />
+          )}
+          {canvas.metadata?.length > 0 && (
+            <Clover.Metadata
+              value={canvas.metadata}
+              className="clover-about-metadata"
+            />
+          )}
+        </div>
+      ))}
+    </>
+  );
+}
