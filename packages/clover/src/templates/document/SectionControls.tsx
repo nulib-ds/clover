@@ -543,12 +543,17 @@ function DownloadControl({
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          {/* Its tray lighter than its arrow (Mat, 2026-11-11: "a bit too bold"). */}
-          <path d="M256 64v272M160 240l96 96 96-96" strokeWidth="56" />
+          {/*
+           * About's (`AboutActions`): an arrow down to a line. Each path unfilled itself,
+           * as a Canvas button fills its glyph (`ui/Button.css`; Mat, 2026-11-11: "some css
+           * being inherited down on the tray"), which had filled the arrow's head and tray.
+           */}
           <path
-            d="M88 368v32a40 40 0 0 0 40 40h256a40 40 0 0 0 40-40v-32"
-            strokeWidth="36"
+            d="M256 64v232M160 200l96 96 96-96"
+            fill="none"
+            strokeWidth="48"
           />
+          <path d="M96 440h320" fill="none" strokeWidth="48" />
         </svg>
         <span style={Clover.visuallyHidden}>{t("download")}</span>
         <Clover.Tip label={t("download")} />
