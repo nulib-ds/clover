@@ -270,7 +270,8 @@ export interface AccentPreset {
  * IIIF: a reader can pick their own institution and see Clover wearing it. Every value is
  * the institution's published brand color, and each clears 4.5:1 against the white text
  * Clover puts on a solid accent, and, as its text step, on the page in either mode
- * (`darkText`, for Texas A&M's maroon), but for Princeton's orange (below).
+ * (`darkText`, for Texas A&M's maroon), but for Princeton's orange and Carolina blue
+ * (below).
  *
  * They are the choices: the page has no field for a color of the reader's own.
  */
@@ -288,7 +289,14 @@ export const accentPresets: AccentPreset[] = [
   /* Its text step at 62% is 3.7:1 on a dark page; at 50%, 5.4:1 (4.5:1 on `--gray-3`). */
   { name: "Texas A&M maroon", value: "#500000", darkText: "50%" },
   { name: "Tulane green", value: "#006747" },
-  { name: "UCLA blue", value: "#2774AE" },
+  /*
+   * UNC's Carolina Blue (PMS 542 C), in place of UCLA's (Mat, 2026-11-11: "change this to
+   * UCLA to UNC tarheel blue"). As Princeton's orange, white on it is 3.0:1, so the site
+   * takes the higher-contrast mode with it: the accent kept to rings and lines, 3.0:1 on
+   * white and 6.3:1 on the dark page. Its text step holds 4.5:1 in either mode
+   * (`accent-presets.test.ts`).
+   */
+  { name: "Carolina blue", value: "#4B9CD3" },
 ];
 
 /**

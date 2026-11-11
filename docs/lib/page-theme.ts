@@ -106,7 +106,7 @@ export const applyPageTheme = (theme: Partial<PageTheme>) => {
  * The site's higher-contrast mode, on the document root (`data-high-contrast`): the site's
  * own solid fills read it (`tokens.css`), and so does every Clover on the page, whose
  * styles key on the same attribute around them. On while the accent cannot carry white
- * text at 4.5:1 (`carriesWhite`: Princeton's orange), or the reader's system asks for more
+ * text at 4.5:1 (`carriesWhite`: Princeton's orange, Carolina blue), or the reader's system asks for more
  * contrast, as Clover's own roots follow it, or the reader turns it on (High contrast, in
  * the Seamless story; remembered, as the accent is; Mat, 2026-10-29). What turns it on
  * first is `why`: the accent and the system leave the reader nothing to turn off.
