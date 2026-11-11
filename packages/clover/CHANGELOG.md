@@ -11,6 +11,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- Each entry in `exports` adds a `default` condition, so webpack's `next/dynamic` resolves
+  it ([#415](https://github.com/nulib-ds/clover/issues/415)).
+
 ## [4.9.2] - 2026-11-11
 
 ### Changed
