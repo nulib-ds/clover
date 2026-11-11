@@ -271,6 +271,8 @@ export class GestureController {
     if (!this.options.navigable || !this.tracksPointer(event.pointerType)) {
       return;
     }
+    // A drag the browser took over (to scroll the page) is the page's: no fling after it.
+    if (event.type === "pointercancel") return;
     const first = this.samples[0];
     const last = this.samples[this.samples.length - 1];
     const span = (last?.t ?? 0) - (first?.t ?? 0);

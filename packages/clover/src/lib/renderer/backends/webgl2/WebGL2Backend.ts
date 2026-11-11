@@ -127,6 +127,14 @@ export class WebGL2Backend implements Backend {
     const h = Math.max(1, Math.round(height * pixelRatio));
     if (this.canvas.width !== w) this.canvas.width = w;
     if (this.canvas.height !== h) this.canvas.height = h;
+    /*
+     * Its shown size the one it is drawn for, in pixels, never left to `100%`: iOS Safari
+     * kept an absolutely placed canvas at its old height as its host grew (Document's live
+     * page as it loads), its picture squeezed into it over the page's still (Mat,
+     * 2026-11-11: "the canvases being drawn multiple times as it scrolls").
+     */
+    this.canvas.style.width = `${Math.max(1, width)}px`;
+    this.canvas.style.height = `${Math.max(1, height)}px`;
   }
 
   begin(): void {

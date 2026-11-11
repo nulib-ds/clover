@@ -348,6 +348,23 @@ function DocumentLayout({
     followFocus,
   });
   const asideOpen = aside.open && offered.includes(section);
+  /*
+   * One panel at a time where either floats over the page (Mat, 2026-11-11: "if one
+   * opens, the other should close"): the one just opened stays, the other goes, focus
+   * staying with the one opened.
+   */
+  const wasOpen = useRef({ sidebar: sidebar.open, aside: aside.open });
+  useEffect(() => {
+    const was = wasOpen.current;
+    wasOpen.current = { sidebar: sidebar.open, aside: aside.open };
+    if (!(sidebar.over || aside.over) || !sidebar.open || !aside.open) return;
+    if (!was.aside) {
+      quiet.current = true;
+      sidebar.setOpen(false);
+    } else if (!was.sidebar) aside.setOpen(false);
+    // The drawers' setters are new each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebar.open, aside.open, sidebar.over, aside.over]);
   // Its section gone (another resource, another view without it): put away.
   useEffect(() => {
     if (aside.open && offered.length && !offered.includes(section))

@@ -485,7 +485,7 @@ test("zoomed in or out, the page opens as the full viewer; home leaves it open, 
   page,
 }) => {
   await open(page);
-  await expect(viewport(page)).toHaveCSS("touch-action", "pan-y");
+  await expect(viewport(page)).toHaveCSS("touch-action", "pan-x pan-y");
   await viewport(page).focus();
   await page.keyboard.press("+");
   await expect(column(page)).toHaveAttribute("data-zoomed", "");
@@ -504,7 +504,7 @@ test("zoomed in or out, the page opens as the full viewer; home leaves it open, 
   await expect(column(page)).not.toHaveAttribute("data-expanded");
   await expect(column(page)).not.toHaveAttribute("data-zoomed");
   await settled(page, 0);
-  await expect(viewport(page)).toHaveCSS("touch-action", "pan-y");
+  await expect(viewport(page)).toHaveCSS("touch-action", "pan-x pan-y");
 });
 
 test("a recording's or a Scene's sheet takes the column, and a finger's drag is the Scene's", async ({
@@ -610,6 +610,35 @@ test("a section's button opens it alone in the aside, beside the page; its close
   await page.keyboard.press("Enter");
   await expect(aside).toBeHidden();
   await expect(about).toBeFocused();
+});
+
+test("on a phone, one panel at a time, the aside over the page as Default's panel is", async ({
+  page,
+}) => {
+  await open(page, BOOK);
+  await page.setViewportSize({ width: 375, height: 812 });
+  const panes = page.locator(".clover-template-document-panes");
+  await expect(panes).toHaveAttribute("data-panel", "over");
+  // The thumbnails, opened over the page.
+  await page
+    .getByRole("button", { name: /^Show items/ })
+    .first()
+    .click();
+  await expect(panes).toHaveAttribute("data-sidebar", "open");
+  // About opened: the thumbnails go, and the aside leaves a strip of the page.
+  await page
+    .locator(".clover-template-document-toolbar")
+    .getByRole("button", { name: "About" })
+    .click();
+  const aside = page.locator(".clover-template-document-aside");
+  await expect(aside).toBeVisible();
+  await expect(panes).toHaveAttribute("data-sidebar", "closed");
+  await expect(aside).toHaveCSS("position", "absolute");
+  const [asideBox, panesBox] = await Promise.all([
+    aside.boundingBox(),
+    panes.boundingBox(),
+  ]);
+  expect(asideBox!.width).toBeLessThan(panesBox!.width - 16);
 });
 
 test("the column holds where it rests as it resizes", async ({ page }) => {

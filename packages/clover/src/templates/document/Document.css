@@ -57,8 +57,13 @@
  * empty space for the label so that we don't have layout shift in most cases"): the
  * controls' pill, taller than a title's line at a heading's usual sizes.
  */
+/*
+ * Over the panes, so its Tips and menus lie over a panel floating there (Mat, 2026-11-11:
+ * "note this popover sliding under panel"), over its wash too.
+ */
 .clover-template-document-toolbar {
   position: relative;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -434,11 +439,20 @@
  * page has one search, not two (Mat, 2026-11-09).
  */
 .clover-template-document-aside.clover-template-panel:not([hidden]) {
-  position: relative;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   overflow: visible;
+}
+
+/*
+ * Beside the page, it holds its close in place; over it, it floats as Default's panel
+ * does, from the end, never wider than the layout less a strip of the page (`Default.css`;
+ * Mat, 2026-11-11: "the right panel seems to overtake the full container").
+ */
+.clover-template-panes:not([data-panel="over"])
+  > .clover-template-document-aside.clover-template-panel:not([hidden]) {
+  position: relative;
 }
 
 .clover-template-document-aside-scroll {
@@ -1396,6 +1410,34 @@ button.clover-template-document-live-play:focus-visible {
 }
 
 /*
+ * In the full viewer the Canvas's controls stay at its top end, but their row starts
+ * where the template's end, so the Canvas, measuring the room it has (`RowFits.tsx`),
+ * puts what does not fit behind its image controls' button rather than under the
+ * template's on a narrow page (Mat, 2026-11-11: "controls being jammed together on
+ * smaller viewerports when viewer an item"). Right to left, mirrored.
+ */
+.clover-template-document-column[data-expanded]
+  .clover-template-document-body
+  .clover-canvas
+  > .clover-canvas-controls[data-fit] {
+  left: var(
+    --clover-template-document-lead-end,
+    var(--clover-canvas-controls-inset)
+  );
+}
+
+.clover-template-document-column[data-expanded]
+  .clover-template-document-body
+  .clover-canvas
+  > .clover-canvas-controls[data-fit]:dir(rtl) {
+  right: var(
+    --clover-template-document-lead-end,
+    var(--clover-canvas-controls-inset)
+  );
+  left: var(--clover-canvas-controls-inset);
+}
+
+/*
  * The aside's map (`SectionContent.tsx`): its Expand map at its top end, the end of its
  * zoom row, as the Canvas's map box has it (`Caption.css`).
  */
@@ -1620,13 +1662,16 @@ button.clover-template-document-live-play:focus-visible {
 }
 
 /*
- * A finger scrolls the column; zoomed into a sheet, the Canvas takes every drag. A Scene
- * takes every drag always, as in Default: a finger's drag turns it (Mat, 2026-10-31).
+ * A finger scrolls the column, whichever way it starts, so a drag never moves the Canvas
+ * among the sheets, which would open it as the full viewer (Mat, 2026-11-11: "attempt to
+ * scroll the scrolling section with a drag"); two fingers' pinch is the Canvas's, and
+ * opens it. Zoomed into a sheet, the Canvas takes every drag. A Scene takes every drag
+ * always, as in Default: a finger's drag turns it (Mat, 2026-10-31).
  */
 .clover-template-document-column:not([data-zoomed], [data-expanded])
   :not(.clover-scene)
   > .clover-canvas-viewport {
-  touch-action: pan-y;
+  touch-action: pan-x pan-y;
 }
 
 /* ---------- information panel ---------- */
