@@ -704,8 +704,8 @@ deadline.
     once they come into view past a point; every stroke draws once and stays drawn until
     the page loads again, never by the scroll's own position (`Swoosh.tsx`; Mat, 2026-10-22). Seamless has the site's Font family and Color (`BrandPicker.tsx`),
     which set the whole site and are remembered (`page-theme.ts`), Princeton's orange ahead
-    of Texas A&M's maroon (Mat, 2026-10-29), then McGill red, in place of Tulane's green,
-    and UNC's Carolina blue last, in place of UCLA's (Mat, 2026-11-11), and under the colors High contrast, a native
+    of Texas A&M's maroon (Mat, 2026-10-29), then Tulane's green, McGill red after it, and
+    UNC's Carolina blue last, in place of UCLA's (Mat, 2026-11-11), and under the colors High contrast, a native
     checkbox (Mat, 2026-10-29), the site's higher-contrast mode, remembered too: on the
     document root as `data-high-contrast`, which the site's solid fills read (`--solid-*`,
     `tokens.css`) and every Clover on the page follows, as its styles key on the attribute
