@@ -38,27 +38,33 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     },
     "./templates": {
       "types": "./dist/templates/index.d.mts",
-      "import": "./dist/templates/index.mjs"
+      "import": "./dist/templates/index.mjs",
+      "default": "./dist/templates/index.mjs"
     },
     "./map": {
       "types": "./dist/map/index.d.mts",
-      "import": "./dist/map/index.mjs"
+      "import": "./dist/map/index.mjs",
+      "default": "./dist/map/index.mjs"
     },
     "./three": {
       "types": "./dist/three/index.d.mts",
-      "import": "./dist/three/index.mjs"
+      "import": "./dist/three/index.mjs",
+      "default": "./dist/three/index.mjs"
     },
     "./web-components": {
       "types": "./dist/web-components/index.d.mts",
-      "import": "./dist/web-components/index.mjs"
+      "import": "./dist/web-components/index.mjs",
+      "default": "./dist/web-components/index.mjs"
     },
     "./web-components/viewer": {
       "types": "./dist/web-components/viewer/index.d.mts",
-      "import": "./dist/web-components/viewer/index.mjs"
+      "import": "./dist/web-components/viewer/index.mjs",
+      "default": "./dist/web-components/viewer/index.mjs"
     },
     "./web-components/three": "./dist/web-components/three.mjs",
     "./web-components/custom-elements.json": "./dist/web-components/custom-elements.json",
