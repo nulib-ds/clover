@@ -8,7 +8,7 @@
   "defaultTemplateGzip": 82250,
   "documentTemplateGzip": 85150,
   "galleryTemplateGzip": 33100,
-  "defaultTemplateFirstViewGzip": 101050,
+  "defaultTemplateFirstViewGzip": 101100,
   "documentTemplateFirstViewGzip": 107550,
   "galleryTemplateFirstViewGzip": 57600,
   "canvasFirstViewGzip": 51800,
@@ -29,7 +29,7 @@
   "composedPageGzip": 110450,
   "layoutPageGzip": 129350,
   "canvasElementGzip": 97050,
-  "documentElementGzip": 151300,
+  "documentElementGzip": 151350,
   "galleryElementGzip": 137500,
   "viewerEntryGzip": 113050
 }

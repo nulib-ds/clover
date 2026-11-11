@@ -540,11 +540,15 @@ function DownloadControl({
           viewBox="0 0 512 512"
           fill="none"
           stroke="currentColor"
-          strokeWidth="56"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M256 64v272M160 240l96 96 96-96M80 352v48a48 48 0 0 0 48 48h256a48 48 0 0 0 48-48v-48" />
+          {/* Its tray lighter than its arrow (Mat, 2026-11-11: "a bit too bold"). */}
+          <path d="M256 64v272M160 240l96 96 96-96" strokeWidth="56" />
+          <path
+            d="M88 368v32a40 40 0 0 0 40 40h256a40 40 0 0 0 40-40v-32"
+            strokeWidth="36"
+          />
         </svg>
         <span style={Clover.visuallyHidden}>{t("download")}</span>
         <Clover.Tip label={t("download")} />

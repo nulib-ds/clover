@@ -115,9 +115,14 @@ function DownloadButton({
   );
 }
 
+/* The Download glyph's arrow and tray, as Document's toolbar draws them too. */
+const DOWNLOAD_ARROW = "M256 64v272M160 240l96 96 96-96";
+const DOWNLOAD_TRAY = "M88 368v32a40 40 0 0 0 40 40h256a40 40 0 0 0 40-40v-32";
+
 /**
- * An arrow down into a tray, in the weight of the panel's chevrons beside it (their
- * 1.5px at the glyph's size, `text-s`; Mat, 2026-10-28: "less hairline").
+ * An arrow down into a tray: the arrow in the weight of the panel's chevrons beside it
+ * (their 1.5px at the glyph's size, `text-s`; Mat, 2026-10-28: "less hairline"), the tray
+ * lighter and flatter (Mat, 2026-11-11: "the bottom tray of this icon is a bit to bold").
  */
 function DownloadGlyph() {
   return (
@@ -128,11 +133,11 @@ function DownloadGlyph() {
       focusable="false"
       fill="none"
       stroke="currentColor"
-      strokeWidth="56"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M256 64v272M160 240l96 96 96-96M80 352v48a48 48 0 0 0 48 48h256a48 48 0 0 0 48-48v-48" />
+      <path d={DOWNLOAD_ARROW} strokeWidth="56" />
+      <path d={DOWNLOAD_TRAY} strokeWidth="36" />
     </svg>
   );
 }

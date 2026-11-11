@@ -29,6 +29,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   its own. Gone while its section is open, it comes back as it closes.
 - **Document's arrow back to the pages is bolder.** In the full viewer, a heavy shaft
   into a solid head at the corner, in place of a line arrow.
+- **Download's glyph has a lighter tray.** Its arrow as before, its tray thinner and a
+  little flatter, in About and in Document's toolbar.
 - **Document's About shows the page's own information.** After the resource's, each page
   in view that describes itself: its label, summary and metadata.
 
@@ -43,9 +45,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   full viewer; the aside's About describes the resource.
 - **Budgets.** With the place line gone and the dots and the page's About come, the
   Viewer with Document loads 83.6 kB up front (from 85.1) and 106.0 kB to first view
-  (from 107.5); `<clover-viewer>` in Document crosses its budget by 288 bytes, raised to
-  151.3 kB. The Default template, which shares `useAnnotationPages` and `hasMapData`,
-  crosses its own by 15, raised to 82.25 kB. Document's styles, in the `templates.css`
+  (from 107.5); `<clover-viewer>` in Document crosses its budget by 329 bytes, raised to
+  151.35 kB. The Default template, which shares `useAnnotationPages` and `hasMapData`,
+  crosses its own by 15, raised to 82.25 kB, and with Download's glyph its first view by
+  26, raised to 101.1 kB. Document's styles, in the `templates.css`
   every template shares, and the chunks they rename take six elements' pages past their
   budgets by 2 to 89 bytes, each raised to the next 50: `<clover-viewer>` 134.0 kB, the
   elements' entry 6.3 kB, the four parts 110.45 kB, a layout of containers 129.35 kB,
