@@ -111,6 +111,7 @@ come from `@nulib/clover/map` and `@nulib/clover`.
 | Helper                                       | Description                                                                                                                                                                                    |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `hasMapData(manifest, collection)`           | Tells you whether a Manifest, or the Collection it's in, has anything to put on a Map: a `navPlace`, a GeoJSON annotation body or a georeferencing annotation.                                 |
+| `canvasHasMapData(canvas)`                   | Tells you whether one Canvas has a place of its own: its `navPlace`, an annotation's, a GeoJSON annotation body or a georeferencing annotation.                                                |
 | `navPlaceOf(manifest, collection, language)` | Gathers every `navPlace` of the Collection, the Manifest, its Canvases and their loaded annotations into one GeoJSON FeatureCollection, each place named by what it belongs to, in `language`. |
 | `georeferencesOf(manifest)`                  | Gathers the georeferenced images of the Manifest's Canvases, from their loaded annotation pages.                                                                                               |
 | `readGeoreference(annotation, canvas)`       | Reads one Georeference Extension annotation as an image to lay over the Map: its control points, extent, mask and image. Returns `null` when it can't be drawn.                                |
@@ -198,22 +199,22 @@ the element's own and does not bubble, as `load` does not.
 These come from `@nulib/clover`, for components of your own inside a `Root`. Each
 re-renders only when what it reads changes.
 
-| Hook                                 | Returns                                                                                                                                                        |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useStatus()`                        | `{ status, error }`                                                                                                                                            |
-| `useManifest()`                      | The Manifest, in Presentation 4.                                                                                                                               |
-| `useSequence()`                      | `{ canvases, views, direction }`                                                                                                                               |
-| `useVisibleCanvases()`               | The Canvases of the current view.                                                                                                                              |
-| `useActiveCanvas()`                  | The current Canvas.                                                                                                                                            |
-| `useNavigation()`                    | `{ position, total, hasPrevious, hasNext, previous, next, first, last, goTo }`                                                                                 |
-| `useAnnotationCollection()`          | Annotations walked as one whole, the content's AnnotationPage or the Manifest's AnnotationCollection: `{ id, type, label, total, pages, entries }`, or `null`. |
-| `useLocalized(value)`                | `{ text, lang }` for a IIIF language map, in the Root's language.                                                                                              |
-| `useT()`                             | `t(key, values)`: the predefined strings, in Clover's interface language.                                                                                      |
-| `useLangOf()`                        | `langOf(key)`: a string's `lang` where it is not the page's language.                                                                                          |
-| `usePanelSections(names?)`           | Which of a `Panel`'s default sections this resource has data for, in the panel's order, narrowed to `names`: none of them, and a `Panel` would draw nothing.   |
-| `useAnnotationPages()`               | Each AnnotationPage the Manifest's Canvases carry, and each the `Root`'s `annotations` adds: its `id`, `label` and annotations (`entries`).                    |
-| `useCloverSelector(select, isEqual)` | Any value from the Root's state, by `select`, re-rendering only when it changes. `isEqual` compares it, where `select` returns a new object each time.         |
-| `useUniqueId()`                      | An id unique on the page, as Clover uses wherever it needs one.                                                                                                |
+| Hook                                 | Returns                                                                                                                                                                                  |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useStatus()`                        | `{ status, error }`                                                                                                                                                                      |
+| `useManifest()`                      | The Manifest, in Presentation 4.                                                                                                                                                         |
+| `useSequence()`                      | `{ canvases, views, direction }`                                                                                                                                                         |
+| `useVisibleCanvases()`               | The Canvases of the current view.                                                                                                                                                        |
+| `useActiveCanvas()`                  | The current Canvas.                                                                                                                                                                      |
+| `useNavigation()`                    | `{ position, total, hasPrevious, hasNext, previous, next, first, last, goTo }`                                                                                                           |
+| `useAnnotationCollection()`          | Annotations walked as one whole, the content's AnnotationPage or the Manifest's AnnotationCollection: `{ id, type, label, total, pages, entries }`, or `null`.                           |
+| `useLocalized(value)`                | `{ text, lang }` for a IIIF language map, in the Root's language.                                                                                                                        |
+| `useT()`                             | `t(key, values)`: the predefined strings, in Clover's interface language.                                                                                                                |
+| `useLangOf()`                        | `langOf(key)`: a string's `lang` where it is not the page's language.                                                                                                                    |
+| `usePanelSections(names?)`           | Which of a `Panel`'s default sections this resource has data for, in the panel's order, narrowed to `names`: none of them, and a `Panel` would draw nothing.                             |
+| `useAnnotationPages({ listed })`     | Each AnnotationPage the Manifest's Canvases carry, and each the `Root`'s `annotations` adds: its `id`, `label` and annotations (`entries`). With `listed`, only those Annotations lists. |
+| `useCloverSelector(select, isEqual)` | Any value from the Root's state, by `select`, re-rendering only when it changes. `isEqual` compares it, where `select` returns a new object each time.                                   |
+| `useUniqueId()`                      | An id unique on the page, as Clover uses wherever it needs one.                                                                                                                          |
 
 `useClover()` gives the Root's state and actions, for components that act rather than
 read.
@@ -869,7 +870,7 @@ function ContentsPanel() {
 
 ### `useAnnotationPages()`
 
-Each AnnotationPage, read with its annotations. The IIIF Cookbook's photograph of Göttingen (recipe 0021) has one page, holding a tag.
+Each AnnotationPage, read with its annotations. The IIIF Cookbook's photograph of Göttingen (recipe 0021) has one page, holding a tag. Pass `{ listed: true }` for only the pages Annotations lists, leaving out a still Canvas's OCR, which starts hidden.
 
 <Example>
 <AnnotationPagesDemo />

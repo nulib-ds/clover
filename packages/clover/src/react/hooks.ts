@@ -5,6 +5,7 @@ import {
   type AnnotationSet,
   selectAnnotationCollection,
   selectAnnotationSets,
+  selectListedSets,
 } from "../core/annotation-sets";
 import {
   type CloverStatus,
@@ -95,11 +96,19 @@ export function useAnnotationCollection(): AnnotationCollection | null {
 /**
  * Each AnnotationPage the Manifest's Canvases carry (as far as fetched), and each the host
  * added through the Root's `annotations`, read as a set: its `id`, `label` and annotations
- * (`entries`), painting annotations and caption files left out.
+ * (`entries`), painting annotations and caption files left out. With `listed`, only those
+ * Annotations lists: a still Canvas's OCR, which starts hidden, left out too.
  */
-export function useAnnotationPages(): AnnotationSet[] {
+export function useAnnotationPages({
+  listed = false,
+}: {
+  /** Only the pages Annotations lists. Default `false`. */
+  listed?: boolean;
+} = {}): AnnotationSet[] {
   return useCloverSelector((state) =>
-    selectAnnotationSets(state.manifest, state.addedSets),
+    listed
+      ? selectListedSets(state.manifest, state.addedSets)
+      : selectAnnotationSets(state.manifest, state.addedSets),
   );
 }
 

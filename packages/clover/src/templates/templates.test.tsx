@@ -888,7 +888,73 @@ describe("templates", () => {
     ).toHaveAttribute("data-sidebar", "closed");
   });
 
-  it("Document: a single page's thumbnail and its toggle, put away to start, with no place under the title", async () => {
+  it("Document: a dot marks the sections holding something of the page in sight, and About shows the page's own", async () => {
+    const [first, ...rest] = bookJson.items as any[];
+    const marked = {
+      ...bookJson,
+      id: "https://example.org/marked-book.json",
+      items: [
+        {
+          ...first,
+          summary: { en: ["The first page, described on its own."] },
+          annotations: [
+            {
+              id: `${first.id}/comments`,
+              type: "AnnotationPage",
+              items: [
+                {
+                  id: `${first.id}/comments/1`,
+                  type: "Annotation",
+                  motivation: "commenting",
+                  body: {
+                    type: "TextualBody",
+                    value: "A note on the first page",
+                    format: "text/plain",
+                    language: "en",
+                  },
+                  target: `${first.id}#xywh=0,0,100,100`,
+                },
+              ],
+            },
+          ],
+        },
+        ...rest,
+      ],
+    };
+    render(<Templates.Document iiifContent={marked} />);
+    const about = await screen.findByRole("button", { name: "About" });
+    const annotations = await screen.findByRole("button", {
+      name: "Annotations",
+    });
+    // The first page describes itself and carries a comment: both marked, and said so.
+    await waitFor(() => expect(about).toHaveAttribute("data-marked"));
+    expect(about).toHaveAccessibleDescription("This page");
+    expect(annotations).toHaveAttribute("data-marked");
+    expect(annotations).toHaveAccessibleDescription("This page");
+    // About shows the page's own after the resource's; open, its dot is gone, and back
+    // as it closes.
+    fireEvent.click(about);
+    expect(
+      await screen.findByText("The first page, described on its own."),
+    ).toBeInTheDocument();
+    expect(about).not.toHaveAttribute("data-marked");
+    expect(about).not.toHaveAccessibleDescription("This page");
+    expect(annotations).toHaveAttribute("data-marked");
+    fireEvent.click(about);
+    await waitFor(() => expect(about).toHaveAttribute("data-marked"));
+    expect(about).toHaveAccessibleDescription("This page");
+    // The next page holds nothing of its own: no marks.
+    const listbox = screen.getByRole("listbox", { name: "Items" });
+    fireEvent.click(within(listbox).getAllByRole("option")[1]);
+    await waitFor(() => expect(about).not.toHaveAttribute("data-marked"));
+    expect(annotations).not.toHaveAttribute("data-marked");
+    expect(about).not.toHaveAccessibleDescription("This page");
+    expect(
+      screen.queryByText("The first page, described on its own."),
+    ).toBeNull();
+  });
+
+  it("Document: a single page's thumbnail and its toggle, put away to start", async () => {
     const plain = render(<Templates.Document iiifContent={singleJson} />);
     const toggle = await screen.findByRole("button", { name: /^Show items/ });
     await waitFor(() =>
@@ -899,10 +965,6 @@ describe("templates", () => {
     expect(screen.queryByRole("listbox", { name: "Items" })).toBeNull();
     // Put away on its own, focus is left where it was.
     expect(toggle).not.toHaveFocus();
-    // "1 / 1" would say nothing.
-    expect(
-      document.querySelector(".clover-template-document-place"),
-    ).toBeNull();
     // Opened, its one thumbnail.
     fireEvent.click(toggle);
     const listbox = await screen.findByRole("listbox", { name: "Items" });

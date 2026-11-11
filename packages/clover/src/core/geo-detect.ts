@@ -16,25 +16,28 @@ export function hasMapData(
   if ((collection as Json | null)?.navPlace || (manifest as Json).navPlace) {
     return true;
   }
-  for (const canvas of selectSequence(manifest).canvases as Json[]) {
-    if (canvas.navPlace) return true;
-    if (isGeoreferenced(canvas)) return true;
-    for (const page of asArray(canvas.annotations) as Json[]) {
-      for (const annotation of asArray(page?.items) as Json[]) {
-        if (annotation?.navPlace) return true;
-        const bodies = asArray(annotation?.body) as Json[];
-        if (
-          bodies.some(
-            (body) =>
-              body?.type === "Feature" || body?.type === "FeatureCollection",
-          )
-        ) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
+  return selectSequence(manifest).canvases.some(canvasHasMapData);
+}
+
+/**
+ * Whether a Canvas has anything of its own to put on a map: its navPlace, an annotation's
+ * on it, a GeoJSON annotation body, or a georeferencing annotation, as far as its pages
+ * are loaded. Only a look, as `hasMapData`'s, which asks it of each Canvas.
+ */
+export function canvasHasMapData(canvas: unknown): boolean {
+  const json = canvas as Json | null;
+  if (!json) return false;
+  if (json.navPlace || isGeoreferenced(json)) return true;
+  return (asArray(json.annotations) as Json[]).some((page) =>
+    (asArray(page?.items) as Json[]).some(
+      (annotation) =>
+        Boolean(annotation?.navPlace) ||
+        (asArray(annotation?.body) as Json[]).some(
+          (body) =>
+            body?.type === "Feature" || body?.type === "FeatureCollection",
+        ),
+    ),
+  );
 }
 
 /**

@@ -28,4 +28,43 @@ describe("useAnnotationPages", () => {
     // The old name is the same hook.
     expect(Clover.useAnnotationSets).toBe(Clover.useAnnotationPages);
   });
+
+  it("with listed, leaves out the pages that start hidden, a still Canvas's OCR", async () => {
+    const canvas = commentJson.items[0];
+    const ocr = {
+      id: `${canvas.id}/ocr`,
+      type: "AnnotationPage",
+      items: [
+        {
+          id: `${canvas.id}/ocr/1`,
+          type: "Annotation",
+          motivation: "supplementing",
+          body: { type: "TextualBody", value: "A line read by machine" },
+          target: `${canvas.id}#xywh=10,10,200,20`,
+        },
+      ],
+    };
+    const manifest = {
+      ...commentJson,
+      id: "https://example.org/ocr.json",
+      items: [{ ...canvas, annotations: [...(canvas.annotations ?? []), ocr] }],
+    };
+    function Pages() {
+      const all = Clover.useAnnotationPages();
+      const listed = Clover.useAnnotationPages({ listed: true });
+      return (
+        <p>
+          {all.length} {listed.length} {listed[0]?.id}
+        </p>
+      );
+    }
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <Pages />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByText(`2 1 ${commentJson.items[0].annotations[0].id}`),
+    ).toBeInTheDocument();
+  });
 });

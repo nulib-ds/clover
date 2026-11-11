@@ -15,7 +15,7 @@ import {
 /*
  * Every accent the homepage offers keeps WCAG 2.2's 4.5:1 (1.4.3) as `tokens.css` mixes
  * its steps: white on its fill and its hover, or, where it cannot carry white text
- * (Princeton's orange), in the higher-contrast mode the site then takes, which keeps the
+ * (Princeton's orange, McGill red, Carolina blue), in the higher-contrast mode the site then takes, which keeps the
  * accent off what carries words and needs it at 3:1 as an edge (1.4.11). Its text step is
  * 4.5:1 on the page in either mode. A preset that fails names itself; a very dark one may
  * take a `darkText` share.
@@ -82,10 +82,10 @@ describe.each(
   });
 });
 
-it("puts Princeton's orange, alone of the presets, in the higher-contrast mode", () => {
+it("puts Princeton's orange, McGill red and Carolina blue, alone of the presets, in the higher-contrast mode", () => {
   expect(
     accentPresets
       .filter((preset) => preset.value && !carriesWhite(preset.value))
       .map((preset) => preset.name),
-  ).toEqual(["Princeton orange"]);
+  ).toEqual(["Princeton orange", "McGill red", "Carolina blue"]);
 });

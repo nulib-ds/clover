@@ -83,11 +83,10 @@ export function ViewControls({
           stroke="currentColor"
         >
           {/* Back up to the pages, mirrored in a language written right to left. */}
-          <path
-            {...STROKE}
-            d={BACK}
-            className="clover-template-document-back"
-          />
+          <g className="clover-template-document-back">
+            <path {...SHAFT} d={BACK_SHAFT} />
+            <path {...HEAD} d={BACK_HEAD} />
+          </g>
         </svg>
         <span style={Clover.visuallyHidden}>{label}</span>
         <Clover.Tip label={label} lang={langOf(key)} />
@@ -100,12 +99,16 @@ export function ViewControls({
   );
 }
 
-/* Clover's glyphs (`ui/controlGlyphs.tsx`, `Body/glyphs.tsx`), drawn here as a page's own. */
-const STROKE = {
+/*
+ * An arrow from the lower right to the top left, bold (Mat, 2026-11-11: "something more
+ * bold and obvious"): a heavy shaft, rounded at its tail, into a solid head at the
+ * corner, its corners rounded as Clover's glyphs' joins are (`ui/controlGlyphs.tsx`).
+ */
+const SHAFT = {
   fill: "none",
   strokeLinecap: "round",
-  strokeLinejoin: "round",
-  strokeWidth: 45,
+  strokeWidth: 72,
 } as const;
-/* An arrow from the lower right to the top left, its head at the corner. */
-const BACK = "M400 400L120 120M120 328V120H328";
+const HEAD = { strokeLinejoin: "round", strokeWidth: 40 } as const;
+const BACK_SHAFT = "M396 396L200 200";
+const BACK_HEAD = "M104 104H344L104 344Z";

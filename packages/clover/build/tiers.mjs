@@ -177,6 +177,8 @@ export const UNDERLAID = [
   "clover-template-scrim",
   // The play button over a video's or a sound's still in Document: a mark with no words.
   "clover-template-document-play",
+  // The dot on a section's button in Document's toolbar, for the page in view: a mark.
+  "clover-template-document-mark",
   // Document's live Canvas over its page's still, the page's own ground under its picture.
   "clover-template-document-live",
   // The lightbox's layer, see-through unless a page gives it a backdrop; its panel is a

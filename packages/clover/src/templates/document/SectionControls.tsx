@@ -39,11 +39,18 @@ const useIsomorphicLayoutEffect =
  *
  * Each button is a disclosure of the aside (`aria-expanded`, `aria-controls`), named by
  * its section, its glyph with it; the open one in the accent, as About's Download is.
+ * A section that holds something of the page in sight (`marked`, `marks.ts`) carries a
+ * dot of the accent at its top end, as a message app marks what is new (Mat,
+ * 2026-11-10: "a small facebook/slack style indicator on the item. we don't need a
+ * number. it should be a accent dot"), and is described by "This page" (WCAG 1.3.1),
+ * both gone while its section is open, and back as it closes ("indicators should go away
+ * if clicked into. come back if clicked out of").
  */
 export function SectionControls({
   aside,
   sections,
   open,
+  marked,
   onChoose,
   labelOf,
   groupLabel,
@@ -53,6 +60,7 @@ export function SectionControls({
   download,
   downloadHeadingLevel,
   language,
+  provider,
 }: {
   /** The aside's id. */
   aside: string;
@@ -60,6 +68,8 @@ export function SectionControls({
   sections: readonly PanelSection[];
   /** The section the aside shows, while it is open. */
   open: PanelSection | null;
+  /** The sections that hold something of the page in sight, each marked by a dot. */
+  marked?: ReadonlySet<PanelSection>;
   onChoose: (section: PanelSection) => void;
   labelOf: (section: PanelSection) => { text: string; lang?: string };
   /** The group's name, the sections' together ("Information panel"). */
@@ -76,14 +86,24 @@ export function SectionControls({
   downloadHeadingLevel: number;
   /** The languages to read in, first on the capsule (`Clover.Language`). */
   language?: React.ReactNode;
+  /** Who provided the resource, before the capsule (`Clover.Provider`). */
+  provider?: React.ReactNode;
 }) {
   // Whether there is anything to download, for the view in sight or the whole.
   const [downloads, setDownloads] = useState(false);
   // Whether the globe shows: `Clover.Language` draws nothing with nothing to choose.
   const [languages, setLanguages] = useState(false);
   const bar = languages || sections.length > 0 || (download && downloads);
+  const t = Clover.useT();
+  const langOf = Clover.useLangOf();
+  // What a dot says, for each section it marks.
+  const markId = `${aside}-marked`;
+  const marks = (section: PanelSection) =>
+    (marked?.has(section) ?? false) && open !== section;
+  const anyMarked = sections.some(marks);
   return (
     <div className="clover-template-document-actions">
+      {provider}
       {/* The capsule and Search, one control in one edge (`Document.css`). */}
       <div className="clover-template-document-tools" hidden={!bar && !search}>
         <div className="clover-template-document-bar" hidden={!bar}>
@@ -97,15 +117,18 @@ export function SectionControls({
             >
               {sections.map((section) => {
                 const label = labelOf(section);
+                const mark = marks(section);
                 return (
                   <button
                     key={section}
                     type="button"
                     className="clover-canvas-button clover-template-document-section"
                     data-section={section}
+                    data-marked={mark || undefined}
                     lang={label.lang}
                     aria-expanded={open === section}
                     aria-controls={aside}
+                    aria-describedby={mark ? markId : undefined}
                     onClick={() => onChoose(section)}
                   >
                     <svg
@@ -120,11 +143,22 @@ export function SectionControls({
                       {GLYPHS[section]}
                     </svg>
                     <span style={Clover.visuallyHidden}>{label.text}</span>
+                    {mark && (
+                      <span
+                        className="clover-template-document-mark"
+                        aria-hidden="true"
+                      />
+                    )}
                     <Clover.Tip label={label.text} />
                   </button>
                 );
               })}
             </div>
+          )}
+          {anyMarked && (
+            <span id={markId} hidden lang={langOf("downloadPage")}>
+              {t("downloadPage")}
+            </span>
           )}
           {download && (
             <DownloadControl
@@ -506,11 +540,20 @@ function DownloadControl({
           viewBox="0 0 512 512"
           fill="none"
           stroke="currentColor"
-          strokeWidth="56"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M256 64v272M160 240l96 96 96-96M80 352v48a48 48 0 0 0 48 48h256a48 48 0 0 0 48-48v-48" />
+          {/*
+           * About's (`AboutActions`): an arrow down to a line. Each path unfilled itself,
+           * as a Canvas button fills its glyph (`ui/Button.css`; Mat, 2026-11-11: "some css
+           * being inherited down on the tray"), which had filled the arrow's head and tray.
+           */}
+          <path
+            d="M256 64v232M160 200l96 96 96-96"
+            fill="none"
+            strokeWidth="48"
+          />
+          <path d="M96 440h320" fill="none" strokeWidth="48" />
         </svg>
         <span style={Clover.visuallyHidden}>{t("download")}</span>
         <Clover.Tip label={t("download")} />

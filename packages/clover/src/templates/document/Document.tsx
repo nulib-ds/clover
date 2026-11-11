@@ -27,6 +27,7 @@ import {
 import { Sheets } from "./Sheets";
 import { SectionControls } from "./SectionControls";
 import { ViewControls } from "./ViewControls";
+import { hasInformation, usePageMarks, useViewCanvases } from "./marks";
 import { mediaOf } from "./media";
 
 /* A section's content, loaded as the aside first opens (`SectionContent.tsx`). */
@@ -519,40 +520,19 @@ function DocumentLayout({
   const [handle, setHandle] = useState<Clover.CanvasHandle | null>(null);
 
   /*
-   * Where the reader is, under the title, muted (Mat, 2026-11-09: "remove the numbers
-   * here. put it under the manifest title. along with labels for canvases. muted it"):
-   * the view's place ("11 / 17", heard as "Item 11 of 17", `Clover.Position`), then the
-   * labels of its Canvases, a spread's both ("Page 18, Page 19"), each in its own
-   * language (`Clover.Value`). Nothing for a document of one page.
+   * The title stands alone in the toolbar: the place line under it (the view's place,
+   * "11 / 17", and its Canvases' labels) is put away until it has a better spot (Mat,
+   * 2026-11-10: "let's remove this for now. I need to find a better spot for it"). The
+   * thumbnails mark the page in view, and a step through the pages says its place.
    */
-  const sequence = Clover.useSequence();
+  const viewCanvases = useViewCanvases();
   // What the active page plays, if anything: its toggle is then Play.
-  const viewCanvases = (
-    sequence.views[Math.max(0, navigation.position)] ?? []
-  ).map((index) => sequence.canvases[index]);
   const media = mediaOf(viewCanvases);
   const full = expanded;
-  const shown = (sequence.views[Math.max(0, navigation.position)] ?? [])
-    .map((index) => sequence.canvases[index])
-    .filter((canvas) => canvas?.label);
-  const place = navigation.total > 1 && (
-    <p className="clover-template-document-place">
-      <Clover.Position className="clover-template-document-position" />
-      {shown.length > 0 && (
-        <>
-          <span aria-hidden="true">·</span>
-          <span className="clover-template-document-labels">
-            {shown.map((canvas, index) => (
-              <React.Fragment key={canvas.id}>
-                {index > 0 && ", "}
-                <Clover.Value value={canvas.label} />
-              </React.Fragment>
-            ))}
-          </span>
-        </>
-      )}
-    </p>
-  );
+  // The sections holding something of the page in sight, each marked in the toolbar.
+  const marked = usePageMarks(viewCanvases);
+  // The pages in sight that describe themselves, which About shows after the resource.
+  const described = viewCanvases.filter(hasInformation);
 
   const toggle = pages && (
     <button
@@ -567,7 +547,7 @@ function DocumentLayout({
        * The panel toggle's glyph, mirrored (Mat, 2026-11-09: "make the icon for the info
        * toggle instead"): a page with its pane at the start, the pane filled while the
        * thumbnails show, so open and closed differ by more than color. Its name is what
-       * it does; where the reader is, under the title (`place`).
+       * it does.
        */}
       <svg
         aria-hidden="true"
@@ -612,7 +592,6 @@ function DocumentLayout({
             className="clover-template-document-title clover-template-title clover-title"
             {...title.title}
           />
-          {place}
         </div>
         {/*
          * Its controls once the resource has loaded, with its title and pages, never a
@@ -624,6 +603,7 @@ function DocumentLayout({
             aside={asideId}
             sections={offered.filter((each) => each !== "search")}
             open={asideOpen ? section : null}
+            marked={marked}
             onChoose={chooseSection}
             labelOf={labelOf}
             groupLabel={{
@@ -644,6 +624,17 @@ function DocumentLayout({
               languages && (
                 <Clover.Language menu interfaceLanguages={interfaceLanguages} />
               )
+            }
+            provider={
+              /*
+               * Who provided it, in the toolbar before its controls, whichever section
+               * the aside shows or none (Mat, 2026-11-10: "move logo to header. to the
+               * left of controls. remove it from bottom"): each provider's logo, linked to
+               * its homepage and named by the provider (Mat, 2026-10-24).
+               */
+              <Clover.Provider className="clover-template-document-provider">
+                <Clover.Logo />
+              </Clover.Provider>
             }
           />
         )}
@@ -855,21 +846,13 @@ function DocumentLayout({
                 <SectionContent
                   section={section}
                   headingLevel={below(below(headingLevel))}
+                  pages={described}
                   expandMapId={`${id}-map-expand`}
                   onExpandMap={expandMap}
                 />
               </Suspense>
             )}
           </div>
-          {/*
-           * Who provided it, at the aside's foot, at its end, whichever section it shows
-           * (Mat, 2026-11-09: "put this in lower right. show anytime the panel is open for
-           * any section"): each provider's logo, linked to its homepage and named by the
-           * provider (Mat, 2026-10-24).
-           */}
-          <Clover.Provider className="clover-template-document-provider">
-            <Clover.Logo />
-          </Clover.Provider>
         </Clover.SplitPane>
         {aside.scrim && (
           <div className="clover-template-scrim" {...aside.scrim} />

@@ -17,6 +17,7 @@ import {
   affineTransform,
   boundsOf,
   canvasGeoreferences,
+  canvasHasMapData,
   cornersOf,
   georeferencesOf,
   hasMapData,
@@ -176,6 +177,22 @@ describe("georeferences", () => {
       DC_IMAGE_SERVICE_V3_ID,
     );
     expect(hasMapData(evanston())).toBe(true);
+  });
+
+  it("says whether one Canvas has a place of its own, as hasMapData asks of each", () => {
+    // A georeference.
+    expect(canvasHasMapData(evanston().items[0])).toBe(true);
+    // Its own navPlace (Cookbook 0240).
+    expect(
+      (canvasesJson.items as unknown[]).every((canvas) =>
+        canvasHasMapData(canvas),
+      ),
+    ).toBe(true);
+    // A place on an annotation's body (Cookbook 0139).
+    expect(canvasHasMapData(annotationJson.items[0])).toBe(true);
+    // Nothing of its own.
+    expect(canvasHasMapData({ id: "c", type: "Canvas" })).toBe(false);
+    expect(canvasHasMapData(undefined)).toBe(false);
   });
 
   it("reads one Canvas's, for its place box, the same as the Manifest's", () => {

@@ -79,6 +79,7 @@ export type { MapProps } from "./components/Map/Map";
 export {
   affineTransform,
   boundsOf,
+  canvasHasMapData,
   cornersOf,
   georeferencesOf,
   hasMapData,

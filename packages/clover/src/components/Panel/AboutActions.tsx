@@ -115,9 +115,15 @@ function DownloadButton({
   );
 }
 
+/* The Download glyph's arrow and the line it comes down to, as Document's toolbar's. */
+const DOWNLOAD_ARROW = "M256 64v232M160 200l96 96 96-96";
+const DOWNLOAD_LINE = "M96 440h320";
+
 /**
- * An arrow down into a tray, in the weight of the panel's chevrons beside it (their
- * 1.5px at the glyph's size, `text-s`; Mat, 2026-10-28: "less hairline").
+ * An arrow down to a line, one weight for both, near the panel's chevrons beside it
+ * (1.3px at the glyph's size, `text-s`; Mat, 2026-10-28: "less hairline"; 2026-11-11,
+ * the line in place of a tray: "use the `bar` variant"). Each path is unfilled itself, so
+ * a button that fills its glyphs (`ui/Button.css`) never fills the arrow's head.
  */
 function DownloadGlyph() {
   return (
@@ -128,11 +134,11 @@ function DownloadGlyph() {
       focusable="false"
       fill="none"
       stroke="currentColor"
-      strokeWidth="56"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M256 64v272M160 240l96 96 96-96M80 352v48a48 48 0 0 0 48 48h256a48 48 0 0 0 48-48v-48" />
+      <path d={DOWNLOAD_ARROW} fill="none" strokeWidth="48" />
+      <path d={DOWNLOAD_LINE} fill="none" strokeWidth="48" />
     </svg>
   );
 }

@@ -21,6 +21,7 @@ const DECORATION = [
   "clover-split-handle", // the bar between two panes, and its grip
   "clover-canvas-annotation-point", // a point's dot, ringed light and dark
   "clover-canvas-transport-mark-point", // a point's on the seek bar, ringed alike
+  "clover-template-document-mark", // a section's dot in Document's toolbar, ringed white
 ];
 
 function stylesheets(dir: string): string[] {

@@ -11,6 +11,61 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **`canvasHasMapData(canvas)`**, from `@nulib/clover` and `@nulib/clover/map`: whether
+  one Canvas has a place of its own, its `navPlace`, an annotation's, a GeoJSON body or a
+  georeference, as `hasMapData` asks of each Canvas of a Manifest.
+- **`useAnnotationPages({ listed: true })`**: only the AnnotationPages Annotations lists,
+  leaving out those that start hidden, a still Canvas's OCR. Called as before, it reads
+  them all.
+
+### Changed
+
+- **Document marks the sections that hold something of the page in view.** A dot of the
+  accent, ringed white, 1px, so it holds 3:1 on the dark capsule, on the toolbar's button,
+  and "This page" for assistive technology: About where the page describes itself, Contents where it
+  has chapters, Annotations where one is listed on it, and the Map where it has a place of
+  its own. Gone while its section is open, it comes back as it closes.
+- **Document's arrow back to the pages is bolder.** In the full viewer, a heavy shaft
+  into a solid head at the corner, in place of a line arrow.
+- **Download's glyph is an arrow down to a line.** One weight for both, in place of an
+  arrow into a tray, in About and in Document's toolbar.
+- **Document's About shows the page's own information.** After the resource's, each page
+  in view that describes itself: its label, summary and metadata.
+
+- **Document's toolbar holds its title alone.** The line under it, where the page in view
+  is ("5 / 17") and its Canvases' labels, is put away until it has a better place; the
+  thumbnails mark the page in view, and each step through the pages says where it is.
+- **Document's provider logo is in its toolbar.** Before the controls' capsule, linked to
+  its homepage as before, whether the aside is open or not; the aside's foot holds it no
+  longer.
+- **Document's pages offer no information button.** The Canvas's own About, its summary
+  and metadata in a box over the page, is off in Document, among the pages and in the
+  full viewer; the aside's About describes the resource.
+- **Budgets.** With the place line gone and the dots and the page's About come, the
+  Viewer with Document loads 83.7 kB up front (from 85.1) and 106.0 kB to first view
+  (from 107.5); `<clover-viewer>` in Document crosses its budget by 315 bytes, raised to
+  151.35 kB. The Default template, which shares `useAnnotationPages`, `hasMapData` and
+  Download's glyph, crosses its own by 28, raised to 82.25 kB. Document's styles, in the
+  `templates.css` every template shares, and the chunks they rename take six elements'
+  pages past their budgets by 3 to 104 bytes, each raised to the next 50:
+  `<clover-viewer>` 134.0 kB, the elements' entry 6.3 kB, the four parts 110.5 kB, a
+  layout of containers 129.4 kB, `<clover-canvas>` 97.05 kB and `<clover-viewer>` in
+  Gallery 137.5 kB.
+
+### Fixed
+
+- **Document's Download glyph is drawn in lines.** Its button, as every Canvas button,
+  fills its glyph (`ui/Button.css`), and its glyph left its paths' fill to the `svg`, so
+  its arrow's head and its tray were filled solid; each path is unfilled now.
+- **Document's bars stay over the full viewer.** A page opened as the full viewer covered
+  half of the grips of the thumbnails' bar and the aside's; the page's pane now keeps
+  what it holds, so the grips show whole on either side.
+- **Document's search field is one width in every browser.** Chrome sized it to the
+  field's words, about 13.3rem in a page's font, while Safari and Firefox gave it 16rem;
+  it is now 13.5rem in each, giving way on a narrow toolbar as before.
+
 ## [4.9.0] - 2026-11-10
 
 ### Added

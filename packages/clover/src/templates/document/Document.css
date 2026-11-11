@@ -106,9 +106,11 @@
   );
   display: flex;
   flex: 0 1 auto;
+  flex-wrap: wrap;
   align-self: flex-end;
   align-items: center;
-  gap: var(--clover-space-xs);
+  justify-content: flex-end;
+  gap: var(--clover-space-s) var(--clover-space-m);
   min-width: 0;
   margin-inline-start: auto;
 }
@@ -320,12 +322,45 @@
 }
 
 /*
+ * The dot on a section that holds something of the page in sight (`marks.ts`), at the
+ * button's top end: the accent itself, never lightened (Mat, 2026-11-11: "use true accent
+ * color"), ringed in the glyphs' white as thin as holds, 1px (a thinner line blurs to gray
+ * on a 1x screen), which holds 16:1 against the dark fill round it (WCAG 1.4.11), where
+ * the accent alone holds 2.95:1 (Clover's own) or less. Forced colors: the system's text
+ * color, ringed in its ground.
+ */
+.clover-template-document-mark {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  box-sizing: content-box;
+  width: 0.4rem;
+  height: 0.4rem;
+  border: 1px solid var(--clover-color-control-glyph, #fff);
+  border-radius: 50%;
+  background-color: var(--clover-color-accent, #0065c3);
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  .clover-template-document-mark {
+    forced-color-adjust: none;
+    border-color: Canvas;
+    background-color: CanvasText;
+  }
+}
+
+/*
  * Search, unfolded from its magnifier (`SectionControls.tsx`): Clover's Search, its own
- * field alone, as wide as a query wants and no wider, giving way on a narrow line.
+ * field alone, giving way on a narrow line. Its width is its own, not its field's
+ * (Mat, 2026-11-10: "the search bar … looks different in deployed site"): the capsule
+ * fits its content, and from a basis alone Chrome took the input's natural width, about
+ * 13.3rem in the site's font, while Safari and Firefox took the basis, then 16rem.
  */
 .clover-template-document-search {
   position: relative;
-  flex: 0 1 16rem;
+  flex: 0 1 13.5rem;
+  width: 13.5rem;
   min-width: min(10rem, 100%);
 }
 
@@ -347,7 +382,7 @@
   }
 
   to {
-    max-width: 16rem;
+    max-width: 13.5rem;
   }
 }
 
@@ -394,7 +429,7 @@
 /*
  * The aside (`Document.tsx`): one section, under its name, drawn as the Panel's pane is
  * (`Default.css`), the inset all round. What scrolls is inside it, so its close button
- * can sit across its inner edge and stay there, and the provider's logo at its foot.
+ * can sit across its inner edge and stay there.
  * Search lists its hits alone there: its field and its status are the toolbar's, so the
  * page has one search, not two (Mat, 2026-11-09).
  */
@@ -412,6 +447,11 @@
   box-sizing: border-box;
   overflow-y: auto;
   padding: var(--clover-inset);
+}
+
+/* A page's own information, after the resource's in About (`SectionContent.tsx`). */
+.clover-template-document-page-about {
+  margin-block-start: var(--clover-space-xl);
 }
 
 /* As tall as the close button beside it, so the name sits level with it. */
@@ -437,43 +477,18 @@
 }
 
 /*
- * Who provided it, at its foot, at its end, whichever section it shows (Mat, 2026-11-09:
- * "put this in lower right"), the section scrolling above it; the logo a size under its
- * own 1.618rem ("make logo a tad smaller"). Over it, the toolbar's hairline, whole from
- * the aside's start by the pages and fading out toward its end (Mat, 2026-11-10: "fade
- * to the right the same way one in header does. it should extend fully to left until it
- * hits the scrolling body section").
+ * Who provided it, in the toolbar, `m` before its controls (Mat, 2026-11-10: "move logo
+ * to header. to the left of controls"), the logo a size under its own 1.618rem (Mat,
+ * 2026-11-09: "make logo a tad smaller"). It gives way before the controls on a narrow
+ * line, smaller down to 6rem wide, then on a line of its own over them, at their end, as
+ * when Search opens on a phone: never cut, nor the controls (WCAG 1.4.10).
  */
 .clover-template-document-provider {
   --clover-logo-height: calc(var(--clover-space-m) + var(--clover-space-xs));
-  position: relative;
-  flex: none;
-  justify-content: flex-end;
+  flex: 1 1 min(6rem, 100%);
+  max-width: max-content;
+  min-width: 0;
   margin: 0;
-  padding: var(--clover-space-m) var(--clover-inset);
-}
-
-.clover-template-document-provider::before {
-  content: "";
-  position: absolute;
-  /* Across the bar too (Split's, 3px), to the pages' edge. */
-  inset-inline: -3px 0;
-  top: 0;
-  height: 1px;
-  background-image: linear-gradient(
-    to right,
-    var(--clover-template-document-rule) 50%,
-    transparent
-  );
-  pointer-events: none;
-}
-
-.clover-template-document-provider:dir(rtl)::before {
-  background-image: linear-gradient(
-    to left,
-    var(--clover-template-document-rule) 50%,
-    transparent
-  );
 }
 
 /* Its name muted, under the toolbar's title (Mat, 2026-11-09: "mute these titles"). */
@@ -561,47 +576,15 @@ button.clover-template-document-download-button[aria-expanded="true"]
 }
 
 /*
- * The title and the place line a line each, cut short with an ellipsis where they run
- * longer (Mat, 2026-11-10: "clamp this, it should not extend beyond one line"): the
- * heading is whole for assistive technology, and the title is whole in About and each
- * Canvas's label under its thumbnail, so nothing is lost (WCAG 1.4.10, 1.4.12). The
- * place's count is never cut, only the labels after it.
+ * The title a line, cut short with an ellipsis where it runs longer (Mat, 2026-11-10:
+ * "clamp this, it should not extend beyond one line"): the heading is whole for
+ * assistive technology, and the title is whole in About, so nothing is lost (WCAG
+ * 1.4.10, 1.4.12).
  */
 .clover-template-document-title {
   min-width: 0;
   overflow: hidden;
   overflow-wrap: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/*
- * The place line, muted (Mat, 2026-11-09: "muted it"): `primary-muted`, 5.9:1 on the
- * toolbar, a size under the page's own (`s`; "this can be [a] degree smaller"); the
- * view's place, then its Canvases' labels, a dot between.
- */
-.clover-template-document-place {
-  display: flex;
-  align-items: baseline;
-  min-width: 0;
-  gap: 0 var(--clover-space-xs);
-  margin: 0;
-  color: var(--clover-color-primary-muted, #26292b);
-  font-size: var(--clover-text-s);
-}
-
-.clover-template-document-place .clover-pager-room[hidden] {
-  display: none;
-}
-
-.clover-template-document-place > * {
-  flex: none;
-}
-
-.clover-template-document-place > .clover-template-document-labels {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -677,12 +660,12 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
 }
 
 /*
- * What floats over the page lies over everything in it (Mat, 2026-10-31: a part's
- * `z-index` reached over the panel): while the panel or the thumbnails float, the page's
- * pane is a stacking context of its own. Only then: beside it, nothing needs reach out.
+ * The page's pane is a stacking context of its own, so nothing on the page reaches out
+ * of it: what floats over the page lies over everything in it (Mat, 2026-10-31: a part's
+ * `z-index` reached over the panel), and the bars beside it keep their grips over the
+ * full viewer, on either side (Mat, 2026-11-10: "make sure handle stays visible").
  */
-.clover-template-document-panes:is([data-panel="over"], [data-narrow])
-  > .clover-template-document-main {
+.clover-template-document-main {
   isolation: isolate;
 }
 
