@@ -97,12 +97,19 @@
   content: "";
 }
 
-/* A moment's pause under the pointer, so passing over a row does not flash them all. */
-:hover > .clover-tip {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 400ms;
+/*
+ * A moment's pause under the pointer, so passing over a row does not flash them all.
+ * Only where the pointer hovers: a touch screen keeps `:hover` on what was tapped, and a
+ * Tip there would stay up, over a panel the tap opened (Mat, 2026-11-11). Each control's
+ * name is its own, never its Tip's, and focus still shows it.
+ */
+@media (hover: hover) {
+  :hover > .clover-tip {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 400ms;
+  }
 }
 
 /* At once, for keyboard focus: on the control, or on the radio in a label that holds it. */

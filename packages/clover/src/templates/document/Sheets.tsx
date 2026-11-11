@@ -43,6 +43,8 @@ const STILL_SIZE = 1600;
  * pauses on it, so this is long enough that a pause mid-gesture does not show the Canvas.
  */
 const SETTLE_MS = 200;
+/** A press held this long is no tap: it does not open the full viewer. */
+const HELD_MS = 500;
 /**
  * The Canvas's own controls among the pages: none of the view's, which only the full
  * viewer offers (`VIEW_CONTROLS`), its annotations' list is the aside's (Mat, 2026-11-09: "remove this"), its hotspots still
@@ -849,13 +851,22 @@ export function Sheets({
   /*
    * A press into the live Canvas among the sheets (a click or a tap, not a drag, and not
    * on one of its controls or hotspots) opens it as the full viewer (Mat, 2026-11-09).
+   * Not a press that stops the column's scroll, or comes as it settles: a finger that
+   * stops a fling only stops it (Mat, 2026-11-11: "inadvertant clicks bring you into a
+   * canvas spread causing a clunky UI"); nor a finger held, which asks for more.
    */
-  const pressed = useRef<{ x: number; y: number } | null>(null);
+  const pressed = useRef<{ x: number; y: number; at: number } | null>(null);
+  const press = (event: React.PointerEvent) => {
+    pressed.current = column.current?.hasAttribute("data-scrolling")
+      ? null
+      : { x: event.clientX, y: event.clientY, at: event.timeStamp };
+  };
   const into = (event: React.MouseEvent) => {
     const from = pressed.current;
     pressed.current = null;
     if (open.current || !from) return;
     if (Math.hypot(event.clientX - from.x, event.clientY - from.y) > 6) return;
+    if (event.timeStamp - from.at > HELD_MS) return;
     if (
       (event.target as Element).closest?.(
         "button, a, input, select, textarea, [role='button'], [role='menu'], .clover-canvas-controls",
@@ -864,9 +875,28 @@ export function Sheets({
       return;
     openHere();
   };
+  /*
+   * Among the sheets, only a zoom, in or out, opens the Canvas as the full viewer: a stray
+   * pan, a finger's drag before the column took it, goes home again at once (Mat,
+   * 2026-11-11: "inadvertant clicks bring you into a canvas spread"). Open, any move
+   * from home is a zoom, as before (`data-zoomed`).
+   */
   useEffect(() => {
     if (!handle) return;
-    return handle.on("viewport", () => zoom(!handle.atHome));
+    let homeZoom = handle.atHome ? handle.getCamera().zoom : null;
+    return handle.on("viewport", () => {
+      if (handle.atHome) {
+        homeZoom = handle.getCamera().zoom;
+        return zoom(false);
+      }
+      if (
+        !open.current &&
+        homeZoom !== null &&
+        Math.abs(handle.getCamera().zoom / homeZoom - 1) <= 0.01
+      )
+        return handle.home(true);
+      zoom(true);
+    });
     // `zoom` reads only refs.
   }, [handle]);
 
@@ -1016,9 +1046,7 @@ export function Sheets({
           className="clover-template-document-live"
           // What its page plays, out of sight among the pages (`Document.css`).
           data-media={livePlays ?? undefined}
-          onPointerDown={(event) =>
-            (pressed.current = { x: event.clientX, y: event.clientY })
-          }
+          onPointerDown={press}
           onClick={into}
         >
           {/*

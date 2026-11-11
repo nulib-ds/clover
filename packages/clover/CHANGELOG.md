@@ -11,6 +11,38 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Tips show under the pointer only where the device has one that hovers.** On a touch
+  screen a tap keeps `:hover` on what it pressed, and its Tip stayed up, over a panel the
+  tap had opened; each control is named for assistive technology as before, and keyboard
+  focus still shows its Tip.
+
+### Fixed
+
+- **A Canvas draws at the size of its box in iOS Safari.** Its canvas now takes its shown
+  size in pixels as the Canvas measures its box; left to `100%`, iOS Safari kept it at an
+  old height as the box grew (Document's page as it loads), its picture squeezed into it
+  over what was under it, its annotations no longer over what they mark.
+- **A Canvas no longer flings after a drag the browser took over** to scroll the page.
+- **Document's pages scroll by a finger's drag, whichever way it starts.** Among the
+  pages, a drag never moves a page's Canvas, which opened it in the full viewer; nor does
+  a tap that stops the pages' scroll or comes as it settles, nor a press held; a pinch, a
+  zoom, still opens it, and a tap at rest.
+- **Document's aside floats over a narrow page as Default's panel does,** from the end,
+  leaving a strip of the page, where it had taken the whole width; the toolbar's Tips and
+  menus lie over it.
+- **Document opens one panel at a time while either floats over the page:** the
+  thumbnails go as the aside opens, and the aside as the thumbnails open.
+- **Document's full viewer keeps the Canvas's controls clear of its own on a narrow
+  page,** those that do not fit behind the image controls' button, where they had run
+  under the arrow back and the pager.
+- **Budgets.** The canvas's shown size, set as it resizes, takes every Canvas's page past
+  its budget by a few bytes, and Document's touch and panel fixes `<clover-viewer>` in
+  Document by 237; each raised to the next 50: the Canvas up front 44.65 kB and to first
+  view 51.85 kB, `<clover-canvas>` 97.1 kB, the Default template 82.3 kB and to first view
+  101.1 kB, `<clover-viewer>` 134.05 kB, in Document 151.6 kB and in Gallery 137.55 kB.
+
 ## [4.9.1] - 2026-11-11
 
 ### Added
