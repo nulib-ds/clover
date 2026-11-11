@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.9.2] - 2026-11-11
+
 ### Changed
 
 - **Tips show under the pointer only where the device has one that hovers.** On a touch
