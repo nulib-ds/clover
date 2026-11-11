@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.9.3] - 2026-11-11
+
 ### Fixed
 
 - Each entry in `exports` adds a `default` condition, so webpack's `next/dynamic` resolves
