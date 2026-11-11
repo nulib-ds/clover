@@ -323,30 +323,29 @@
 
 /*
  * The dot on a section that holds something of the page in sight (`marks.ts`), at the
- * button's top end, with no ring (Mat, 2026-11-10: "is it not possible to do the
- * indicators without the white outline/stroke?"): the accent lightened with the glyphs'
- * white, 55 to 45, which holds 3.58:1 and more against the dark fill round it whatever
- * the accent, black included (WCAG 1.4.11), where the accent alone holds 2.95:1 (Clover's
- * own) or less. Forced colors: the system's text color.
+ * button's top end: the accent itself, never lightened (Mat, 2026-11-11: "use true accent
+ * color"), ringed in the glyphs' white as thin as holds, 1px (a thinner line blurs to gray
+ * on a 1x screen), which holds 16:1 against the dark fill round it (WCAG 1.4.11), where
+ * the accent alone holds 2.95:1 (Clover's own) or less. Forced colors: the system's text
+ * color, ringed in its ground.
  */
 .clover-template-document-mark {
   position: absolute;
   top: 0;
   inset-inline-end: 0;
-  width: 0.5rem;
-  height: 0.5rem;
+  box-sizing: content-box;
+  width: 0.4rem;
+  height: 0.4rem;
+  border: 1px solid var(--clover-color-control-glyph, #fff);
   border-radius: 50%;
-  background-color: color-mix(
-    in srgb,
-    var(--clover-color-accent, #0065c3) 55%,
-    var(--clover-color-control-glyph, #fff)
-  );
+  background-color: var(--clover-color-accent, #0065c3);
   pointer-events: none;
 }
 
 @media (forced-colors: active) {
   .clover-template-document-mark {
     forced-color-adjust: none;
+    border-color: Canvas;
     background-color: CanvasText;
   }
 }
