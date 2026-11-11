@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.9.1] - 2026-11-11
+
 ### Added
 
 - **`canvasHasMapData(canvas)`**, from `@nulib/clover` and `@nulib/clover/map`: whether
