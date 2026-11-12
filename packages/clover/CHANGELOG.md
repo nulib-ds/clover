@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.9.4] - 2026-11-12
+
 ### Added
 
 - `onSearchChange` on `Root` and the Viewer, and `clover-search-change` on `<clover-root>`
