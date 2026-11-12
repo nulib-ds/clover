@@ -23,7 +23,7 @@ import colosseumJson from "../../fixtures/iiif-cookbook/0318-navPlace-navDate-ma
 import { initCloverI18n } from "../../i18n";
 import { clearInfoCache } from "../../lib/renderer/sources/imageService";
 import * as Clover from "../../index";
-import { Map as CloverMap } from "../../map";
+import { Map as CloverMap, boundsOf, readGeoreference } from "../../map";
 import { stubViewport } from "../Canvas/testing/viewport";
 
 /** A MapLibre that records what is asked of it, and loads at once. */
@@ -848,7 +848,7 @@ describe("Map", () => {
     // Listed once its georeference loads, on demand: past a second on CI.
     const button = await screen.findByRole(
       "button",
-      { name: "Township map Georeferenced image" },
+      { name: "Township map" },
       { timeout: 4000 },
     );
     expect(within(button).getByText("Township map")).toHaveAttribute(
@@ -864,6 +864,111 @@ describe("Map", () => {
     expect(east).toBeLessThan(-87.5);
     expect(south).toBeGreaterThan(41.9);
     expect(north).toBeLessThan(42.2);
+  });
+
+  it("tells apart maps of one name by their place among it", async () => {
+    // A sheet of three maps, each georeferenced on its own, none named but by the sheet.
+    const sheet = { en: ["Sheet 21"] };
+    const three = [1, 2, 3].map((n) => ({
+      ...georeferenceOnService(),
+      id: `https://example.org/sheet-21/map-${n}`,
+      label: sheet,
+    }));
+    render(<CloverMap georeferences={three} />);
+    for (const n of [1, 2, 3])
+      expect(
+        await screen.findByRole(
+          "button",
+          { name: `Sheet 21 ${n} / 3` },
+          { timeout: 4000 },
+        ),
+      ).toBeInTheDocument();
+  });
+
+  it("pictures a georeferenced image's row by the map it is, small, as its info.json allows", async () => {
+    const one = {
+      ...georeferenceOnService(),
+      label: { en: ["Township map"] },
+      target: {
+        ...georeferenceOnService().target,
+        selector: {
+          type: "SvgSelector",
+          value:
+            '<svg><polygon points="1000,2000 5000,2000 5000,8000 1000,8000" /></svg>',
+        },
+      },
+    };
+    render(<CloverMap georeferences={[one]} />);
+    const row = await screen.findByRole(
+      "button",
+      { name: "Township map" },
+      { timeout: 4000 },
+    );
+    const picture = await waitFor(() => {
+      const found = row.querySelector("img.clover-entry-thumbnail");
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    // Decorative, as its name says what it is; cut to its mask's box, asked small.
+    expect(picture).toHaveAttribute("alt", "");
+    const src = picture.getAttribute("src")!;
+    expect(
+      src.startsWith(`${DC_IMAGE_SERVICE_V3_ID}/1000,2000,4000,6000/`),
+    ).toBe(true);
+    const [width] = src.split("/").at(-3)!.split(",").map(Number);
+    expect(width).toBeLessThanOrEqual(104);
+  });
+
+  it("outlines a georeferenced image at half strength while its row is pointed at, whole once chosen", async () => {
+    const one = { ...georeferenceOnService(), label: { en: ["Township map"] } };
+    render(<CloverMap georeferences={[one]} />);
+    const row = await screen.findByRole(
+      "button",
+      { name: "Township map" },
+      { timeout: 4000 },
+    );
+    const [map] = maps;
+    const outline = () =>
+      map.sources["geomap-overlay-outline"]?.setData.mock.calls.at(-1)?.[0] ??
+      map.sources["geomap-overlay-outline"]?.data;
+    fireEvent.mouseEnter(row);
+    await waitFor(() =>
+      expect(outline().features).toMatchObject([
+        { properties: { hover: true } },
+      ]),
+    );
+    fireEvent.mouseLeave(row);
+    await waitFor(() => expect(outline().features).toEqual([]));
+    fireEvent.click(row);
+    await waitFor(() =>
+      expect(outline().features).toMatchObject([
+        { properties: { hover: false } },
+      ]),
+    );
+  });
+
+  it("lights a georeferenced image's row while the pointer is over it on the map", async () => {
+    const one = { ...georeferenceOnService(), label: { en: ["Township map"] } };
+    render(<CloverMap georeferences={[one]} />);
+    const row = await screen.findByRole(
+      "button",
+      { name: "Township map" },
+      { timeout: 4000 },
+    );
+    const [map] = maps;
+    const [[west, south], [east, north]] = boundsOf(
+      [],
+      [readGeoreference(one)!],
+    )!;
+    const point = (lng: number, lat: number) =>
+      act(() =>
+        map.fire("mousemove", { point: { x: 0, y: 0 }, lngLat: { lng, lat } }),
+      );
+    map.under = [];
+    point((west + east) / 2, (south + north) / 2);
+    expect(row).toHaveAttribute("data-highlighted", "true");
+    point(east + 1, north + 1);
+    expect(row).not.toHaveAttribute("data-highlighted");
   });
 
   it("warps a georeferenced image onto the map by its control points", async () => {

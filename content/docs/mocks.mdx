@@ -139,6 +139,46 @@ It answers no query, so it is static only. The [Map](/docs/map) page draws it, w
 onto the map, and in a Viewer's Map tab. Its generator is
 `docs/mocks/georeference/index.mjs`.
 
+## Sanborn: fire insurance maps, georeferenced
+
+The Library of Congress's Sanborn Fire Insurance Maps of Evanston, Illinois, and of
+Northwestern University's campus there, georeferenced, in each shape the [Georeference Extension](https://iiif.io/api/extension/georef/) comes in
+on its own, apart from any Manifest, as a georeferencing tool publishes it:
+
+- **An Annotation**: Northwestern University's campus, in the 1920 volume.
+- **An AnnotationPage**: the 1920 volume's sheets from downtown Evanston through the
+  campus and along the lake, 30 of them.
+- **An AnnotationCollection** of two pages: the 1899 volume's sheets of the same ground,
+  21 of them, and those of 1920.
+
+The sheets are those [mapsnap](https://mapsnap.org/) fitted by machine with a confidence
+of 0.9 or more, centered from downtown through the campus, between Ridge Avenue and the
+lake, and the campus sheet, fitted with a confidence of 0.24 (a campus has few streets to
+match), which lies where the campus is, against the sheets beside it. mapsnap placed none
+of 1899's campus sheets, nor 1920's north of the campus. Each targets a bare image
+service (mapsnap's copy of the Library's image, at a quarter of its size), with no Canvas
+or Manifest named, so Clover shows the images themselves, and each is fitted from two
+control points by `helmert` (scale, rotation and shift).
+
+| Resource             | Published (static)                                                                                                                    | Live (`npm run dev`)                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Annotation           | [`/mocks/sanborn/annotation.json`](https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation.json)                        | `/api/mocks/sanborn/annotation.json`            |
+| AnnotationPage       | [`/mocks/sanborn/annotation-page.json`](https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation-page.json)              | `/api/mocks/sanborn/annotation-page.json`       |
+| AnnotationCollection | [`/mocks/sanborn/annotation-collection.json`](https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation-collection.json)  | `/api/mocks/sanborn/annotation-collection.json` |
+| A volume's sheets    | [`/mocks/sanborn/evanston/1899.json`](https://clover.iiif.library.northwestern.edu/mocks/sanborn/evanston/1899.json) (or `1920.json`) | `/api/mocks/sanborn/evanston/1899.json`         |
+
+In `npm run dev`, every file under `/mocks/sanborn/` opens live, so the Collection's pages
+load before they are deployed. Each annotation is kept as fetched (`evanston.json` beside
+its generator, `docs/mocks/sanborn/index.mjs`); only the documents' own ids are the
+mock's. The package's tests use a copy, in
+`packages/clover/src/fixtures/mocks/sanborn/`; copy the published files there again after
+a change.
+
+The Library of Congress's Sanborn maps are public domain. mapsnap's fits are under the
+[Open Database License](https://opendatacommons.org/licenses/odbl/1-0/), which asks for
+attribution, and that a database made from them be shared alike: every document carries
+both (`rights`, `requiredStatement`).
+
 ## Tagging: a photogravure
 
 Northwestern University Libraries' record of Edward S. Curtis's _The Vanishing Race –

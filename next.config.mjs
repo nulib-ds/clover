@@ -57,6 +57,13 @@ function webpack(config) {
 /* The mocks with a live copy for `npm run dev` (see /docs/mocks). */
 const liveMocks = () => fs.readdirSync(path.join(root, "pages/api/mocks"));
 
+/*
+ * The live copies that answer every file their static copy has, so all of it opens live:
+ * documents that reference each other by id (an AnnotationCollection's pages), not just a
+ * Manifest.
+ */
+const WHOLLY_LIVE = ["sanborn"];
+
 export default function config(phase) {
   const isDev = phase === PHASE_DEVELOPMENT_SERVER;
   /*
@@ -85,14 +92,22 @@ export default function config(phase) {
      * the homepage and the demos open it: the live Manifest's ids are under the dev server,
      * which answers them, so what the static one points to on the published site and that
      * is not deployed yet (a new mock's captions) is there. Only the Manifest, as the live
-     * copy does not serve every static file (content-search's example answers).
+     * copy does not serve every static file (content-search's example answers), but for
+     * the copies that do (`WHOLLY_LIVE`).
      */
     ...(isDev && {
       rewrites: async () => ({
-        beforeFiles: liveMocks().map((name) => ({
-          source: `/mocks/${name}/manifest.json`,
-          destination: `/api/mocks/${name}/manifest.json`,
-        })),
+        beforeFiles: liveMocks().map((name) =>
+          WHOLLY_LIVE.includes(name)
+            ? {
+                source: `/mocks/${name}/:path*`,
+                destination: `/api/mocks/${name}/:path*`,
+              }
+            : {
+                source: `/mocks/${name}/manifest.json`,
+                destination: `/api/mocks/${name}/manifest.json`,
+              },
+        ),
       }),
     }),
   });

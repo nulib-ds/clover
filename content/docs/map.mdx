@@ -98,6 +98,34 @@ In the [Canvas](/docs/canvas), a georeferenced Canvas has a Map control even wit
 
 </Example>
 
+### Georeference annotations
+
+Give `iiifContent` a georeference annotation on its own, or an AnnotationPage or
+AnnotationCollection of them, as Allmaps and other georeferencing tools publish them.
+Each one is laid on the Canvas it targets, in the Manifest its target names, where the
+map draws it. Where the target names no Manifest, or its Manifest cannot be fetched, the
+images it targets are shown, each as a Canvas of its own. The Viewer, a `Root` and a
+`Canvas` on its own open them the same way, and the Canvas's Map control lays each map
+over the ground.
+
+Each image is laid by the fit its annotation asks for: `helmert` (scale, rotation and
+shift) from two control points or more, and otherwise a first-order polynomial (affine)
+from three or more. A higher order or a thin plate spline is drawn by the affine fit.
+
+These are the Sanborn Fire Insurance Maps of Evanston, Illinois, from 1920, from downtown
+through Northwestern University's campus and along the lake, each sheet georeferenced by
+machine, in one AnnotationPage. Point at a sheet to find it in the list; choose one there
+to frame it and outline it.
+
+<Example>
+<MapDemo mock="sanborn/annotation-page.json" />
+
+```jsx
+<Clover.Map iiifContent="https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation-page.json" />
+```
+
+</Example>
+
 ### In a Viewer
 
 The Viewer adds a Map section to its Panel by itself, where the resource has places or a

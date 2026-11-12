@@ -41,15 +41,19 @@ export function canvasHasMapData(canvas: unknown): boolean {
 }
 
 /**
+ * Whether an annotation is a Georeference Extension annotation (motivation
+ * `georeferencing`): a map to lay on what it targets, never a note or a place to go.
+ */
+export const isGeoreferencing = (annotation: unknown): boolean =>
+  asArray((annotation as Json | null)?.motivation).includes("georeferencing");
+
+/**
  * Whether a Canvas's loaded annotation pages georeference it (a `georeferencing`
  * annotation): a look, as `hasMapData`'s, for the Canvas's map control.
  */
 export function isGeoreferenced(canvas: unknown): boolean {
   return (asArray((canvas as Json | null)?.annotations) as Json[]).some(
-    (page) =>
-      (asArray(page?.items) as Json[]).some((annotation) =>
-        asArray(annotation?.motivation).includes("georeferencing"),
-      ),
+    (page) => (asArray(page?.items) as Json[]).some(isGeoreferencing),
   );
 }
 

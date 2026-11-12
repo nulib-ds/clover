@@ -840,7 +840,7 @@ describe("templates", () => {
       expect(sidebar).not.toHaveAttribute("hidden");
       expect(about()).toHaveAttribute("aria-expanded", "true");
       // Open on arrival, its content loads first.
-      await within(aside).findByText("IIIF Manifest");
+      await within(aside).findByText("IIIF");
       within(aside).getAllByRole("link")[0].focus();
       width.mockReturnValue(390);
       act(() => panes.forEach((measure) => measure()));
@@ -1461,7 +1461,7 @@ describe("templates", () => {
     expect(
       within(aside).getByRole("heading", { level: 3, name: "About" }),
     ).toBeInTheDocument();
-    await within(aside).findByText("IIIF Manifest");
+    await within(aside).findByText("IIIF");
     expect(within(aside).queryByRole("tab")).toBeNull();
     expect(within(aside).queryByRole("button", { name: "About" })).toBeNull();
     const bars = screen.getAllByRole("separator");
@@ -1570,7 +1570,7 @@ describe("templates", () => {
     expect(
       await within(aside).findByRole("heading", {
         level: 5,
-        name: "IIIF Manifest",
+        name: "IIIF",
       }),
     ).toBeInTheDocument();
   });
@@ -1600,7 +1600,7 @@ describe("templates", () => {
     const aside = document.querySelector<HTMLElement>(
       ".clover-template-document-aside",
     )!;
-    await within(aside).findByText("IIIF Manifest");
+    await within(aside).findByText("IIIF");
     expect(within(aside).queryByRole("radio")).toBeNull();
   });
 
@@ -1681,7 +1681,7 @@ describe("templates", () => {
     expect(
       within(aside).getByRole("heading", { level: 5, name: "About" }),
     ).toBeInTheDocument();
-    await within(aside).findByText("IIIF Manifest");
+    await within(aside).findByText("IIIF");
     expect(
       within(aside).queryByRole("heading", { name: "Download" }),
     ).toBeNull();
@@ -1695,7 +1695,7 @@ describe("templates", () => {
     await screen.findByRole("heading", { level: 4 });
     // About is a 5, its titles 6.
     expect(
-      await screen.findByRole("heading", { level: 6, name: "IIIF Manifest" }),
+      await screen.findByRole("heading", { level: 6, name: "IIIF" }),
     ).toBeInTheDocument();
     // The downloads: named groups in the Download button's popover, never headings.
     fireEvent.click(screen.getByRole("button", { name: "Download" }));

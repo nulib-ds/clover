@@ -2,6 +2,7 @@ import type { AnnotationSet } from "./annotation-sets";
 import { parseAnnotationTarget } from "./annotations";
 import type { ResolvedContentState, Target } from "./content-state";
 import { resolveContentState } from "./content-state-reader";
+import { isGeoreferencing } from "./geo-detect";
 import type { Json } from "./json";
 import {
   CloverContentError,
@@ -97,6 +98,15 @@ export async function follow(
   options: LoadContentOptions,
   load: typeof loadContent,
 ): Promise<Loaded> {
+  // A georeference is not a place to go: what it targets opens, the map laid on it.
+  if (isGeoreferencing(state)) {
+    const { georeferenceContent } = await import("./georeference-content");
+    return georeferenceContent([state], options, load, {
+      id: String(state.id ?? ""),
+      rights: state.rights,
+      requiredStatement: state.requiredStatement,
+    });
+  }
   const resolved = await resolve(state);
   if (!resolved) throw new CloverContentError("Unreadable content state");
   const loaded = await load(resolved.id, {

@@ -11,6 +11,61 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Georeference annotations as the content.** `iiifContent` on the Viewer, `Root`, `Map`
+  and a standalone `Canvas` (and their elements' `iiif-content`) takes a Georeference
+  Extension annotation on its own, or an AnnotationPage or AnnotationCollection of them,
+  as Allmaps and other georeferencing tools publish them. Each opens the Manifest its
+  target names (through its Canvas, or its image service's Canvas), with every map laid on
+  its Canvas for the Map, the Panel's Map section and the Canvas's Map control. Where the
+  target names no Manifest, or its Manifest cannot be fetched, the image services
+  targeted are shown, each a Canvas of its own. Before, a lone georeference opened its
+  image with no map laid on it, and a page of them failed ("The annotations name no
+  Manifest").
+- **Helmert fits.** A georeference whose `transformation` is `helmert` is laid by scale,
+  rotation and shift, from two control points or more; before, it needed three and was
+  fitted as affine. `Georeference` has an optional `transformation`, `"helmert"` or
+  `"polynomial"`.
+
+### Changed
+
+- A map frames a georeferenced image whole, however small its ground (a fire insurance
+  sheet's few blocks), where places alone still stop at zoom 12; `zoom` still caps both.
+  `boundsOf` bounds an overlay by its mask, the part of the image that is map, where it
+  has one, so a sheet holding several maps frames the maps, not the whole sheet as each
+  one's fit would place it.
+- The map's list names a georeferenced image by its label alone, with no "Georeferenced
+  image" under it (the `mapOverlay` string is gone from every locale); one with no label
+  is numbered after the places, as an unnamed place is; and images of one name are told
+  apart by their place among it ("Sheet 21 2 / 3").
+- A georeferenced image chosen is outlined in the accent, a little clear of its edge and
+  over everything else on the map: the one last chosen from the map's list, those on a
+  Canvas in view, and one whose annotation is picked.
+- Each georeferenced image's row in the map's list shows a small picture of it, as an
+  annotation's row does: cut to the part that is map, asked small as its server's
+  `info.json` allows, or the whole sheet at a size it lists where the server cannot cut
+  (level 0). `resolveThumbnail` takes `orWhole: true` for that fallback.
+- Pointing at a georeferenced image, on the map or at its row, outlines it at half
+  strength, as Items rings an item under the pointer; on the map, its row lights as the
+  pointer lights a row, as a place's does.
+- Where more than four georeferenced images are drawn together, each image is asked
+  smaller (never under 768 px on its longer side), so an atlas of sheets holds about as
+  much memory as four would.
+- About names the resource's address "IIIF", whatever it is, in place of "IIIF Manifest"
+  or "IIIF Canvas" (the strings `aboutIiif`, in place of `aboutManifest` and
+  `aboutCanvas`), and names it for a Manifest Clover made of the images georeferences
+  target too.
+- A georeference on a Canvas's own pages that targets that Canvas's image service, as
+  Allmaps writes them, belongs to that Canvas, so a map of the view lays it; before, only
+  the Canvas's map control did.
+- **Budgets.** The helmert fit, the framing by mask, the outline, pointing and the list's
+  numbering take the Map's by about 1.2 kB; the thumbnail resolver's whole-image fallback
+  and the shared georeferencing check take the pages that load them past theirs by 7 to
+  212 bytes, and the overlay rows' layout base.css by 77; each raised to the next 50: the
+  Map 21.15 kB and to first view 31.55 kB, the Timeline 29.3 kB and to first view
+  56.8 kB, the Canvas to first view 51.9 kB, Gallery 33.25 kB and base.css 15.1 kB.
+
 ## [4.9.5] - 2026-11-12
 
 ### Added

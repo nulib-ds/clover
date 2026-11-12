@@ -429,6 +429,16 @@
  * place's: its name, and under it so, its owner's date (Cookbook 0318). One caption's
  * lines, `3xs` apart.
  */
+/*
+ * A georeferenced image's row: its picture, cut to the map it is, beside its name, as an
+ * annotation's region sits beside its words (`ui/EntryThumbnail.css`).
+ */
+.clover-geomap-places .clover-geomap-overlay {
+  display: flex;
+  align-items: center;
+  gap: var(--clover-space-s);
+}
+
 .clover-geomap-places :is(span + span, .clover-geomap-place-date) {
   display: block;
   margin-block-start: var(--clover-space-3xs);

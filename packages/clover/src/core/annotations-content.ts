@@ -1,19 +1,24 @@
-import { loadAnnotationSets } from "./annotation-collection";
+import { loadAnnotationPages, setsOf } from "./annotation-collection";
 import { manifestOfAnnotation } from "./annotation-sets";
+import { isGeoreferencing } from "./geo-detect";
 import {
   CloverContentError,
   type LoadContentOptions,
   type Loaded,
+  loadContent,
   loadManifest,
 } from "./load";
+import { asArray } from "../lib/asArray";
 
 /**
  * Annotations as the content: an AnnotationPage (and the pages its `next` leads to) or
  * an AnnotationCollection, made apart from any Manifest. Each annotation names its
  * Canvas's Manifest (`partOf`): the first one's is opened (or the host's choice among
  * them), at that annotation's Canvas, that annotation to be picked, and all of them come
- * back as sets to show wherever their Canvases are. Its own module, loaded only for such
- * content, so no other page carries it.
+ * back as sets to show wherever their Canvases are. Georeference Extension annotations
+ * among them are not notes: they are placed on the Canvases or images they georeference
+ * (`georeferenceContent`), and the rest, if any, come back as sets as ever. Its own
+ * module, loaded only for such content, so no other page carries it.
  */
 export async function annotationsContent(
   json: Record<string, any>,
@@ -27,9 +32,23 @@ export async function annotationsContent(
       : ("AnnotationPage" as const),
     ...(json.label ? { label: json.label } : {}),
   };
-  const annotationSets = (await loadAnnotationSets(json, options)).map(
-    (set) => ({ ...set, content }),
-  );
+  const pages = await loadAnnotationPages(json, options);
+  const annotationSets = setsOf(pages).map((set) => ({ ...set, content }));
+
+  const georeferences = pages
+    .flatMap(({ raw }) => asArray(raw.items) as Record<string, any>[])
+    .filter(isGeoreferencing);
+  if (georeferences.length) {
+    const { georeferenceContent } = await import("./georeference-content");
+    const loaded = await georeferenceContent(
+      georeferences,
+      options,
+      loadContent,
+      { ...json, id: content.id },
+    );
+    return annotationSets.length ? { ...loaded, annotationSets } : loaded;
+  }
+
   const entries = annotationSets.flatMap((set) => set.entries);
   const first =
     entries.find(

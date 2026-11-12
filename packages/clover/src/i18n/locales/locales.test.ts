@@ -58,7 +58,7 @@ it("writes English in sentence case: a capital opens a sentence or a proper name
  * spells the same way.
  */
 const SAME_AS_ENGLISH: Record<string, string[]> = {
-  "*": ["controlShortcut"],
+  "*": ["controlShortcut", "aboutIiif"],
   fr: [
     "aboutDate",
     "canvasImage",

@@ -1712,8 +1712,24 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   curated in its generator (its words, and `LEFT_OUT`: a resource another recipe owns is
   listed once, so 0466 and 0599 are out), from `recipes.json`, which
   `npm run build:cookbook` writes (static; the homepage's field and Natural story read
-  it). The package's tests use copies of
-  `page-transcript`, `paged`, `rudolf-hess-nuremberg` and `transcripts`, in
+  it); `sanborn`, the Library of Congress's Sanborn Fire Insurance Maps of Evanston, Illinois,
+  and Northwestern's campus there, georeferenced, in each shape the Georeference
+  Extension comes in on its own, apart from any Manifest (Mat, 2026-11-12: "build out
+  fixtures for each with georeference … it's the sanborn maps", "lean on this evanston
+  example for all cases/mocks. drop the texas ones", then "fill out this example further.
+  try to include maps of Northwestern University too … stick to sanborn maps"): a lone
+  Annotation (the campus, 1920), an AnnotationPage (1920's 30 sheets from downtown
+  through the campus and along the lake; "bring in other related sanborn maps that cover
+  this region") and an AnnotationCollection of two pages (1899's 21 sheets of the same
+  ground, and 1920's), as mapsnap fitted them by machine (centered from downtown through
+  the campus, Ridge Avenue to the lake, confidence 0.9 or more; and the campus sheet at
+  0.24, which lies where the campus is), on bare
+  image services, from two points by `helmert`, each annotation kept as fetched
+  (`evanston.json`), every document carrying mapsnap's ODbL (static, and wholly live in
+  `npm run dev` under `pages/api/mocks/sanborn/`, every file of it rewritten there,
+  `WHOLLY_LIVE` in `next.config.mjs`, so the Collection's pages load before they are
+  deployed). The package's tests use copies of
+  `page-transcript`, `paged`, `rudolf-hess-nuremberg`, `sanborn` and `transcripts`, in
   `packages/clover/src/fixtures/mocks/<name>/`.
 
 ## Agent tools (WebMCP)

@@ -37,6 +37,11 @@ export interface ThumbnailSource {
    * syntax in the service's own pixels (a painting's selector), read against its `info.json`.
    */
   region?: RegionShare | string;
+  /**
+   * Where the server cannot cut `region` (level 0), the whole image instead, at a size it
+   * lists, rather than nothing: a georeferenced sheet's picture (`Map`).
+   */
+  orWhole?: boolean;
   /** Used if the service cannot answer. */
   fallback?: string;
   /** The pixels `fallback` is, as its own `width` and `height` say (a `thumbnail`'s). */
@@ -155,7 +160,11 @@ export async function resolveThumbnail(
         ? regionShare(source.region, info)
         : source.region;
     if (share === null) return source.fallback;
-    return sizedImageUrl(info, size, share) ?? source.fallback;
+    return (
+      sizedImageUrl(info, size, share) ??
+      (share && source.orWhole ? sizedImageUrl(info, size) : null) ??
+      source.fallback
+    );
   } catch {
     return source.fallback;
   }

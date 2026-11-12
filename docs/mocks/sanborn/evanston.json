@@ -1,0 +1,4011 @@
+{
+  "sanborn01857_003": {
+    "id": "https://data.mapsnap.org/runs/v2.0/iiif/chronoscope/sanborn01857_003.main.iiif.json",
+    "type": "AnnotationPage",
+    "@context": ["http://www.w3.org/ns/anno.jsonld"],
+    "label": "Evanston, Illinois | 1899 | mapsnap generated fit (2026-10-18)",
+    "creator": {
+      "type": "Software",
+      "name": "mapsnap",
+      "homepage": "https://mapsnap.org"
+    },
+    "rights": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "metadata": [
+      {
+        "label": "generated",
+        "value": "2026-10-18"
+      },
+      {
+        "label": "run",
+        "value": "corpus-v2"
+      },
+      {
+        "label": "pages",
+        "value": "84"
+      },
+      {
+        "label": "placed",
+        "value": "75"
+      },
+      {
+        "label": "unplaced",
+        "value": "9"
+      },
+      {
+        "label": "fit sources",
+        "value": "georef-snap 44, georef 30, snap:0 1"
+      },
+      {
+        "label": "key map",
+        "value": "georeferenced"
+      },
+      {
+        "label": "split sheets",
+        "value": "7 sheet(s) cut into 16 panels"
+      },
+      {
+        "label": "unplaced pages",
+        "value": "p42__3 (tier 1, 42.03226,-87.69273 +/-100m); p54__3 (tier 1, 42.02750,-87.69571 +/-112m); p56__2 (tier 1, 42.02765,-87.67596 +/-200m); p5__2 (tier 2, 42.05015,-87.68055 +/-286m); p60__1 (tier 1, 42.02667,-87.70076 +/-254m); p6__1 (tier 1, 42.05234,-87.67569 +/-254m); p6__2 (tier 1, 42.05420,-87.67651 +/-114m); p72__1 (tier 1, 42.05915,-87.67647 +/-127m); p72__2 (tier 1, 42.05752,-87.67595 +/-100m)"
+      }
+    ],
+    "items": [
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0013/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p13",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.95"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0013/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0013",
+            "type": "ImageService3",
+            "width": 1422,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"196.8,1065.7 207.1,255.4 224.3,255.1 862.8,252.6 985.5,259.0 1093.8,291.6 1319.0,289.2 1312.0,310.0 1295.7,358.2 1077.0,1028.6 1021.2,1221.8 886.6,1715.7 879.5,1915.5 741.5,1867.7 680.1,1856.9 398.9,1861.9 372.1,1878.8 241.9,1878.1 208.3,1861.0 203.8,1861.0 184.6,1861.2 172.4,1780.3 183.7,1069.7 196.8,1065.7\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0013/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [202, 1056],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68349307266837, 42.04703766991679]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [873, 262],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68181459111852, 42.048443543282104]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0015/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p15",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "5"
+          },
+          {
+            "label": "intersections",
+            "value": "6"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0015/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0015",
+            "type": "ImageService3",
+            "width": 1421,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1143.3,1869.5 493.0,1868.0 95.2,1863.3 88.8,1863.2 91.9,1169.4 100.7,264.3 409.6,262.9 1237.9,262.3 1236.2,839.7 1231.8,1816.8 1235.4,1901.8 1143.3,1869.5\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0015/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [493, 263],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6772163, 42.0472859]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [493, 1868],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6785269, 42.044556]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0016/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p16",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.96"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0016/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0016",
+            "type": "ImageService3",
+            "width": 1412,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"58.0,1869.3 55.5,902.9 53.1,331.7 80.0,331.6 122.2,121.4 154.0,208.6 365.5,249.4 821.1,75.4 1229.2,288.4 1346.3,717.6 1304.3,1055.4 1351.5,1504.2 439.9,1828.6 62.2,1953.4 58.0,1869.3\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0016/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [658, 1217],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67485801327881, 42.04493867921146]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [816, 1702],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67490154376081, 42.044008024437346]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0021/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p21",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.96"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0021/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0021",
+            "type": "ImageService3",
+            "width": 1420,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"847.1,276.6 1401.5,284.4 1404.3,486.9 1395.7,1086.7 1395.0,1884.2 1337.3,1883.2 15.2,1860.1 29.8,1281.5 30.6,1060.9 41.9,265.0 847.1,276.6\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0021/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [782, 1885],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68505697800813, 42.04267378996329]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [782, 262],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68505465526812, 42.045624579122986]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0022/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p22",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0022/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0022",
+            "type": "ImageService3",
+            "width": 1412,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"89.7,1064.6 86.5,458.9 79.7,254.4 85.5,254.4 119.1,271.8 249.8,272.9 276.9,256.1 559.1,252.1 620.7,263.1 759.1,311.6 1383.8,515.9 1394.3,519.4 1395.0,763.2 1340.6,1068.2 1339.9,1859.8 830.1,1860.4 794.2,1843.5 586.0,1850.8 547.1,1869.0 104.5,1869.8 89.7,1064.6\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0022/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [768, 1066],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68190922572357, 42.0440975268372]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [768, 309],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68187247058542, 42.04546008334974]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0023/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p23",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0023/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0023",
+            "type": "ImageService3",
+            "width": 1423,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1070.0,1600.4 1066.9,2020.3 324.8,2012.7 279.8,2007.8 288.1,1609.3 286.0,639.7 291.7,641.0 311.1,359.5 249.9,160.2 330.5,70.5 611.6,45.5 790.6,177.1 1047.8,174.5 1051.7,237.2 1077.2,228.9 1076.2,632.2 1112.1,1208.8 1074.8,1208.8 1070.0,1600.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0023/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [281, 1210],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67489711372009, 42.04403183353276]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [281, 481],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67310882083663, 42.04401880877665]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0024/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p24",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "10"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0024/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0024",
+            "type": "ImageService3",
+            "width": 1412,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1323.0,336.4 569.5,341.5 523.8,337.4 464.1,415.4 259.5,1037.0 130.8,1416.2 38.5,1687.8 17.6,1749.5 5.6,1787.1 1.0,1801.7 1.0,1804.9 244.5,1802.5 551.0,1855.0 1345.1,1850.2 1337.8,1481.0 1338.0,1102.0 1330.4,720.5 1324.3,407.4 1323.0,336.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0024/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [540, 1102],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6787021, 42.0440561]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1338, 1102],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.678754, 42.0426247]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0028/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p28",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0028/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0028",
+            "type": "ImageService3",
+            "width": 1412,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"74.7,1958.3 55.6,964.6 30.6,964.5 34.2,503.9 32.2,162.8 1350.8,172.9 1392.4,173.2 1395.0,1230.0 1392.0,1963.3 1347.8,1963.1 783.6,1961.5 152.0,1958.8 74.7,1958.3\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0028/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [789, 963],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68509680974677, 42.04124669362462]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [789, 160],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68507630950016, 42.0427106035297]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0029/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p29",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.94"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0029/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0029",
+            "type": "ImageService3",
+            "width": 1414,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1394.3,2002.8 1394.2,2047.0 695.0,2006.9 695.1,1993.0 695.4,1948.9 63.8,1943.5 62.3,1943.5 68.7,1202.0 71.0,133.4 87.1,133.7 529.0,139.1 568.1,121.5 776.0,117.1 811.7,134.5 1320.7,141.2 1322.2,943.5 1327.5,1530.7 1338.4,1640.5 1384.1,1936.5 1394.3,2002.8\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0029/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [662, 930],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68217183334113, 42.0412326866189]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1328, 930],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6805549302922, 42.04122569662543]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0003/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p3",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.94"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0003/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0003",
+            "type": "ImageService3",
+            "width": 1418,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"83.8,2069.8 83.7,1228.3 61.5,1228.1 64.2,435.2 104.2,59.0 236.9,57.9 1390.2,70.1 1390.3,513.0 1385.8,1289.8 1385.8,2069.5 1318.8,2059.8 1104.5,2059.3 1045.3,2070.2 568.0,2067.9 187.4,2069.4 83.8,2069.8\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0003/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [569, 2070],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68679341005097, 42.04851369623869]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1366, 56],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6848016854549, 42.05214206457544]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0030/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p30",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0030/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0030",
+            "type": "ImageService3",
+            "width": 1412,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"537.9,2005.9 267.1,2005.3 254.6,1927.0 207.2,1632.1 195.8,1522.7 187.0,937.2 180.8,137.2 547.1,135.5 923.3,141.4 1301.9,139.6 1321.8,139.6 1318.2,947.4 1311.5,947.4 1339.2,2007.8 1300.4,2007.7 847.0,2006.6 537.9,2005.9\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0030/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [915, 2008],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67882736332905, 42.039249910253616]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [915, 141],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67877410568269, 42.042625619545696]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0031/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p31",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0031/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0031",
+            "type": "ImageService3",
+            "width": 1414,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"439.7,2009.8 373.1,2010.0 104.6,2011.1 70.0,950.7 76.7,950.7 75.1,142.7 366.0,139.6 436.5,138.8 859.8,138.4 1254.4,140.1 1254.8,193.7 1259.9,950.2 1258.5,1384.2 1262.2,2006.3 511.6,2009.4 439.7,2009.8\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0031/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [440, 945],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67693105133172, 42.04115738590978]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1271, 945],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6749084522593, 42.04113005265479]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0032/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p32",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0032/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0032",
+            "type": "ImageService3",
+            "width": 1412,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"77.0,1380.2 83.0,946.3 85.9,189.8 86.0,173.8 667.0,138.9 1073.4,140.8 1065.2,115.0 1128.3,111.2 1128.3,120.7 1270.3,149.4 1330.8,253.4 1299.2,1977.2 1389.8,1985.1 1389.7,2010.7 671.9,2006.1 74.0,2002.3 77.0,1380.2\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0032/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [643, 2016],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67359216383254, 42.039179247116444]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [76, 946],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67495265388045, 42.041121623795]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0004/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p4",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "7"
+          },
+          {
+            "label": "intersections",
+            "value": "14"
+          },
+          {
+            "label": "confidence",
+            "value": "0.94"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0004/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0004",
+            "type": "ImageService3",
+            "width": 1412,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"730.0,2072.0 671.5,2072.8 150.2,2072.5 145.8,1292.3 146.0,515.0 143.3,72.0 314.9,72.1 475.6,71.6 1371.0,71.7 1370.6,296.0 1340.9,520.2 1338.5,825.8 1340.9,972.7 1336.1,1197.0 1365.1,1235.2 1367.7,1335.8 1370.0,1906.2 1368.1,2074.5 730.0,2072.0\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0004/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [730, 2072],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6833921, 42.0484838]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [146, 515],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6847538, 42.0513151]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0065/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p65",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0065/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0065",
+            "type": "ImageService3",
+            "width": 1410,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"169.7,2075.9 36.7,2077.9 59.1,1977.7 333.8,416.5 384.2,129.9 383.9,86.7 400.5,88.9 467.0,40.4 779.4,38.0 1054.8,39.7 1322.8,36.4 1319.8,422.1 1324.4,1074.0 1326.0,1528.4 1325.4,2079.8 169.7,2075.9\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0065/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [211, 1068],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68740908907945, 42.05397724027936]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1330, 49],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6846460551704, 42.05578107125202]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0066/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p66",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0066/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0066",
+            "type": "ImageService3",
+            "width": 1416,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"411.9,50.6 451.4,37.1 532.1,37.0 576.2,50.5 949.7,50.4 1300.0,48.1 1300.6,131.5 1301.3,428.4 1306.4,1075.4 1304.1,2067.4 417.8,2067.7 258.8,2068.2 89.0,2068.1 90.3,1523.2 89.3,1074.2 85.6,430.0 88.9,48.8 411.9,50.6\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0066/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1321, 1080],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68167361833194, 42.053884372440706]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [86, 426],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68468532453743, 42.055115200437925]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0067/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p67",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.91"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0067/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0067",
+            "type": "ImageService3",
+            "width": 1417,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"677.8,1974.5 379.5,1971.8 335.1,1971.6 335.3,1940.4 248.4,1503.4 383.1,1503.8 385.7,1159.6 342.6,1159.3 149.5,1158.3 68.5,166.6 111.4,99.7 363.5,76.2 489.9,120.2 912.5,73.7 1276.3,131.4 1347.2,194.7 1327.7,1977.0 677.8,1974.5\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0067/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [374, 1164],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67970771305572, 42.05562051515506]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1334, 1164],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67971853363605, 42.05387485925701]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0068/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p68",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.95"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0068/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0068",
+            "type": "ImageService3",
+            "width": 1416,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1204.0,686.9 1203.8,1122.8 1225.9,1193.3 1228.1,1238.1 1226.2,1594.5 1232.8,1982.0 234.4,1982.8 227.7,197.0 231.3,200.1 980.8,126.1 1190.5,211.3 1225.8,686.6 1204.0,686.9\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0068/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1242, 2006],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6818135962617, 42.05206571133411]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [225, 139],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67720293296577, 42.05384567257953]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0069/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p69",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0069/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0069",
+            "type": "ImageService3",
+            "width": 1417,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1364.0,1438.2 1360.6,2057.4 1278.6,2056.4 1238.3,2069.7 910.3,2063.7 641.3,2063.4 364.9,2058.0 51.3,2056.1 64.6,1638.3 176.0,1337.8 37.9,528.0 73.9,145.2 133.7,77.5 1041.2,51.5 1281.3,73.2 1353.0,147.7 1359.8,576.6 1318.7,588.5 1366.4,601.8 1365.8,1410.7 1343.5,1438.2 1364.0,1438.2\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0069/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [918, 2065],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68464445518785, 42.05580170433866]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [918, 587],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68463085133072, 42.05845917114083]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0070/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p70",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "4"
+          },
+          {
+            "label": "intersections",
+            "value": "3"
+          },
+          {
+            "label": "confidence",
+            "value": "0.92"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0070/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0070",
+            "type": "ImageService3",
+            "width": 1416,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"910.4,2103.1 878.5,2103.1 878.4,2062.9 518.8,2063.3 135.4,2061.5 90.2,2047.4 89.1,1421.8 68.5,1421.9 90.8,1394.0 85.5,576.6 37.2,563.5 78.7,551.2 68.8,117.8 890.2,56.0 959.4,138.6 1126.2,144.4 1373.7,141.7 1349.4,570.5 1350.2,570.6 1356.3,2011.4 910.4,2103.1\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0070/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [876, 1404],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6816726, 42.0569419]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [876, 568],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6816506, 42.0584294]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0008/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1899 | sanborn01857_003 p8",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "5"
+          },
+          {
+            "label": "intersections",
+            "value": "7"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-18T14:30:15Z",
+        "modified": "2026-10-18T14:30:15Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0008/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0008",
+            "type": "ImageService3",
+            "width": 1412,
+            "height": 2126
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1249.3,2057.4 1222.0,2057.0 393.0,2049.8 98.0,2048.3 90.8,1042.0 92.7,1042.1 87.7,132.1 702.3,85.0 967.5,119.8 1127.5,262.3 1275.9,210.9 1221.2,601.7 1313.0,981.4 1255.2,1729.2 1295.5,1845.4 1249.3,2057.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571899:01857_1899-0008/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1222, 2057],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6755095, 42.0468354]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [497, 108],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6756262, 42.0505862]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "sanborn01857_004": {
+    "id": "https://data.mapsnap.org/runs/v2.0/iiif/chronoscope/sanborn01857_004.main.iiif.json",
+    "type": "AnnotationPage",
+    "@context": ["http://www.w3.org/ns/anno.jsonld"],
+    "label": "Evanston, Illinois | 1920 | mapsnap generated fit (2026-10-17)",
+    "creator": {
+      "type": "Software",
+      "name": "mapsnap",
+      "homepage": "https://mapsnap.org"
+    },
+    "rights": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "metadata": [
+      {
+        "label": "generated",
+        "value": "2026-10-17"
+      },
+      {
+        "label": "run",
+        "value": "corpus-v2"
+      },
+      {
+        "label": "pages",
+        "value": "125"
+      },
+      {
+        "label": "placed",
+        "value": "117"
+      },
+      {
+        "label": "unplaced",
+        "value": "8"
+      },
+      {
+        "label": "fit sources",
+        "value": "georef 71, georef-snap 46"
+      },
+      {
+        "label": "key map",
+        "value": "georeferenced"
+      },
+      {
+        "label": "split sheets",
+        "value": "9 sheet(s) cut into 19 panels"
+      },
+      {
+        "label": "unplaced pages",
+        "value": "p104__2 (tier 1, 42.06207,-87.70074 +/-100m); p109__1 (tier 1, 42.06719,-87.70041 +/-114m); p113__2 (tier 1, 42.06413,-87.67681 +/-121m); p115__1 (tier 2, 42.05348,-87.67641 +/-372m); p85__2 (tier 1, 42.02020,-87.67252 +/-100m); p85__3 (tier 1, 42.01978,-87.67253 +/-100m); p86__1 (tier 3, 42.02609,-87.70673 +/-482m); p86__2 (tier 1, 42.02735,-87.70635 +/-154m)"
+      }
+    ],
+    "items": [
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0001/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p1",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "6"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0001/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0001",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"892.0,1738.0 1212.1,1740.7 1251.3,1752.1 1342.7,1752.3 1374.8,1741.0 1340.6,1727.7 1335.6,1123.6 1291.7,1110.6 1341.2,1096.7 1324.4,307.8 1297.7,307.7 1276.4,295.2 897.4,294.1 845.8,294.0 709.8,293.6 688.2,293.6 672.4,293.5 614.5,293.3 527.9,293.1 175.0,1052.5 1.0,1699.5 1.0,1755.5 31.5,1745.1 47.6,1738.7 360.0,1737.6 629.7,1740.3 892.0,1738.0\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0001/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [402, 1738],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6858796, 42.0558163]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [892, 1738],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6846632, 42.0558041]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0010/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p10",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "9"
+          },
+          {
+            "label": "intersections",
+            "value": "8"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0010/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0010",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1042.1,2016.8 690.7,2012.5 313.0,2016.0 319.5,1082.4 317.8,408.4 318.4,117.1 713.4,117.3 1050.7,117.7 1111.6,117.7 1112.0,410.0 1112.9,1084.1 1110.8,2006.3 1081.7,2015.3 1042.1,2016.8\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0010/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1112, 410],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6797045, 42.0550548]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [313, 2016],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6817545, 42.0520815]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0113__1/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p113 [1]",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "8"
+          },
+          {
+            "label": "intersections",
+            "value": "17"
+          },
+          {
+            "label": "confidence",
+            "value": "0.96"
+          },
+          {
+            "label": "confidence_provisional",
+            "value": "true"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          },
+          {
+            "label": "split_canvas_x",
+            "value": "0.0"
+          },
+          {
+            "label": "split_canvas_y",
+            "value": "0.0"
+          },
+          {
+            "label": "split_canvas_w",
+            "value": "5628.0"
+          },
+          {
+            "label": "split_canvas_h",
+            "value": "8252.0"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0113__1/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0113",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"26.6,2028.2 783.4,2014.0 783.4,2015.4 1151.0,1974.8 1153.8,1982.7 1239.3,1958.4 1239.8,1951.6 1312.0,1928.0 1381.9,1809.8 1392.6,1500.3 1301.6,1196.8 1319.8,1050.8 1205.5,984.5 1156.6,982.5 1042.7,983.2 1034.3,977.7 1006.5,880.1 983.4,879.6 770.7,154.3 672.0,134.9 644.0,179.2 513.1,182.4 497.6,142.8 377.1,123.8 328.9,85.0 110.5,79.3 23.5,394.4 29.1,920.2 67.3,1111.1 82.2,1111.1 79.6,1493.9 72.9,1656.5 59.4,1781.9 42.1,1908.3 26.6,2028.2\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0113__1/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [429, 1109],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6811529, 42.0686877]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [998, 1530],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6783624, 42.067076]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0114/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p114",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "11"
+          },
+          {
+            "label": "intersections",
+            "value": "24"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0114/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0114",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"92.4,1969.3 81.8,1963.1 92.0,1957.2 128.1,1957.1 54.0,1396.6 68.2,1396.7 78.2,1389.4 140.7,1389.8 480.1,1187.6 479.7,1109.9 479.6,1087.8 479.3,1062.8 479.1,928.2 11.9,742.5 3.7,737.3 30.6,645.5 93.7,429.0 139.0,126.1 140.3,116.8 895.2,113.2 895.2,114.6 1262.4,79.2 1265.0,87.1 1350.7,64.1 1348.0,97.3 1370.0,115.2 1391.5,441.5 1371.2,946.0 1396.7,1308.5 1355.3,1515.8 1384.4,1881.9 1369.3,1971.1 736.0,1967.1 685.1,1966.8 157.9,1963.5 147.8,1969.7 107.7,1969.4 92.4,1969.3\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0114/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [881, 1395],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6796293, 42.0605357]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [881, 1968],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6796586, 42.0584052]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115__2/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p115 [2]",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.24"
+          },
+          {
+            "label": "confidence_provisional",
+            "value": "true"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          },
+          {
+            "label": "split_canvas_x",
+            "value": "2266.0"
+          },
+          {
+            "label": "split_canvas_y",
+            "value": "1150.4"
+          },
+          {
+            "label": "split_canvas_w",
+            "value": "3362.0"
+          },
+          {
+            "label": "split_canvas_h",
+            "value": "7101.6"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115__2/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"840.2,1782.5 1162.2,1891.3 1205.5,1912.5 1221.4,1935.2 1222.5,1949.8 1272.1,1917.5 1307.8,1907.8 1326.5,1890.3 1343.0,1895.9 1341.2,1802.5 1364.8,399.7 1317.1,360.9 1020.1,323.2 637.5,337.8 639.6,646.5 641.6,961.8 642.9,1653.7 642.5,1676.5 639.5,1694.5 684.2,1722.5 723.8,1741.9 792.9,1766.1 840.2,1782.5\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115__2/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [644.5, 1717.1],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67726795681673, 42.05102155265735]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [641.5, 312.6],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67714684808173, 42.0562640936786]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0014/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p14",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "7"
+          },
+          {
+            "label": "intersections",
+            "value": "14"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0014/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0014",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"505.8,1256.6 501.8,1242.7 499.7,1240.8 42.0,46.4 42.6,40.4 65.8,40.4 92.0,40.5 173.4,38.7 1308.7,45.8 1310.8,481.7 1309.6,1246.4 1313.1,2014.0 1247.0,2004.8 1036.1,2005.2 977.8,2016.2 796.8,2016.2 560.5,2016.0 508.0,2016.0 509.6,1694.8 508.8,1267.1 505.8,1256.6\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0014/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [508, 2016],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6867957, 42.0485175]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1310, 621],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6847607, 42.0510591]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0015/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p15",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0015/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0015",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"661.5,2007.7 508.1,2009.7 96.1,2008.0 92.0,1247.0 92.6,488.9 90.2,56.8 1287.6,57.1 1287.0,275.9 1319.3,494.0 1318.7,535.1 1314.5,868.2 1257.5,837.1 1258.0,904.3 1313.7,930.4 1314.1,1164.2 1281.3,1191.8 1283.8,1289.9 1285.8,1846.3 1283.8,2010.4 661.5,2007.7\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0015/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [679, 1196],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68331729598171, 42.04998781452461]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [679, 2006],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6833483719736, 42.048486490534934]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0016/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p16",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.92"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0016/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0016",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"463.7,2002.5 345.0,1997.5 343.9,1834.8 331.6,1283.6 327.4,1186.5 359.4,1158.5 354.6,926.8 299.0,902.0 297.2,835.5 354.2,865.2 352.2,535.1 352.2,497.0 352.2,494.4 316.1,278.8 312.6,62.0 688.5,50.1 1038.3,46.5 1045.4,46.0 1170.2,488.6 1217.7,488.1 1100.2,1164.9 1126.1,1193.2 1075.6,1222.0 1023.4,1312.6 967.4,1467.6 775.2,2062.0 667.8,2062.0 662.7,2062.0 651.6,2058.4 463.7,2002.5\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0016/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [342, 1195],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68177769064545, 42.049961512053656]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1109, 102],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6797529163635, 42.05195611357919]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p17",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "5"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"932.0,20.4 934.4,27.8 940.8,64.1 1044.2,87.3 1132.2,97.9 1279.3,97.8 1319.0,97.8 1318.0,1009.8 1310.2,1009.9 1330.0,1986.8 1301.4,1987.3 1203.4,1988.7 956.0,1992.0 165.0,1992.0 101.4,1992.3 57.4,1992.6 164.8,1956.7 158.8,1327.8 163.0,1161.9 184.0,1058.7 223.1,1015.2 189.2,996.4 85.7,312.6 932.0,20.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [956, 1992],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6789367, 42.0477391]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [165, 1992],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6807916, 42.0482515]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0018/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p18",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "5"
+          },
+          {
+            "label": "intersections",
+            "value": "7"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0018/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0018",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1334.5,1404.2 1330.2,959.9 1250.6,803.2 1200.3,813.6 1055.6,433.3 1265.1,350.1 1275.2,99.4 1177.3,42.0 1162.5,1.0 1126.5,1.0 1102.8,45.4 1040.9,87.0 967.1,180.4 955.8,153.2 910.6,120.3 814.6,108.0 131.0,108.2 70.0,107.8 59.5,1020.4 51.6,1020.5 61.1,1998.2 335.9,1996.2 1141.5,1993.0 1142.5,1889.6 1290.5,1419.5 1334.5,1404.2\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0018/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [417, 1016],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6763862, 42.0489978]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [417, 1996],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6772163, 42.0472859]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0002/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p2",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0002/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0002",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"102.2,1738.3 97.0,1139.0 53.5,1126.1 102.5,1112.3 85.5,329.4 89.6,329.4 170.0,329.7 190.2,317.4 1245.5,319.9 1326.3,320.1 1275.7,1832.1 1244.1,1832.1 848.3,1832.8 847.9,1750.8 503.4,1752.3 136.2,1751.6 102.2,1738.3\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0002/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [335, 316],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68291720789335, 42.05844802110303]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [845, 1129],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68166970030482, 42.056924593432605]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0022/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p22",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "5"
+          },
+          {
+            "label": "intersections",
+            "value": "6"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0022/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0022",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"446.2,1814.3 401.8,1814.4 348.3,1034.8 305.5,269.4 1100.0,260.0 1102.0,531.7 1100.1,1026.2 1100.0,1813.0 446.2,1814.3\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0022/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1100, 1813],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6868665, 42.0456198]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1100, 260],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6867957, 42.0485175]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0023/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p23",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0023/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0023",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"769.1,1802.4 37.0,1807.7 34.1,1021.5 34.1,527.4 31.0,255.9 82.7,255.6 493.3,252.7 550.6,241.5 758.1,239.5 823.2,248.1 1232.1,247.2 1384.5,244.1 1381.9,661.0 1383.0,1020.5 1350.0,1030.4 1340.1,1737.0 1366.2,1798.1 769.1,1802.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0023/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [763, 1022],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68499767244032, 42.0470569592734]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1347, 1806],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68357271170167, 42.0455690584649]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p24",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "13"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"849.0,232.4 968.1,238.7 1156.1,296.7 1208.8,314.6 1268.9,334.9 1056.8,985.0 1002.7,1172.4 872.3,1651.4 865.4,1845.2 731.5,1798.8 672.0,1788.3 399.4,1793.2 373.3,1809.6 247.1,1809.0 214.5,1792.3 188.2,1731.2 196.9,1023.0 230.0,1013.0 228.2,652.8 230.0,235.0 849.0,232.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [230, 1013],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6834386, 42.0470343]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [230, 235],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6833921, 42.0484838]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0025/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p25",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "5"
+          },
+          {
+            "label": "intersections",
+            "value": "6"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0025/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0025",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1331.1,1690.5 990.0,1688.0 284.1,1695.8 228.8,1508.7 200.0,1010.0 191.8,814.0 186.2,125.9 979.7,133.0 1227.9,131.9 1321.5,131.5 1349.4,1013.8 1327.3,1013.9 1340.4,1690.5 1331.1,1690.5\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0025/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [200, 1010],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6815095, 42.0467031]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [990, 1688],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6802321, 42.0450244]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0026/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p26",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "8"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0026/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0026",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1231.3,1604.9 1206.7,1613.1 1206.9,1658.0 1211.0,1740.7 856.6,1865.5 515.8,1990.8 492.6,1751.2 489.0,1714.0 420.2,1712.9 111.5,1712.8 95.8,1038.1 117.9,1037.9 86.7,158.2 91.3,158.1 394.6,154.2 1199.8,146.7 1206.3,1534.2 1272.1,1720.5 1231.3,1604.9\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0026/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1203, 1029],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.676261, 42.0452946]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [489, 1714],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6785269, 42.044556]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0027/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p27",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "13"
+          },
+          {
+            "label": "confidence",
+            "value": "0.90"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0027/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0027",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"659.8,2022.4 1406.0,2020.1 1406.0,1976.4 1345.9,1974.2 1291.8,1088.3 1398.1,779.5 1333.6,267.4 1148.3,79.0 825.5,38.8 838.2,1.0 790.9,1.0 495.2,398.9 460.0,497.0 1.0,1815.8 1.0,2017.9 7.0,2018.0 329.4,2024.2 659.8,2022.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0027/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [731, 2022],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6748809, 42.0440216]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [460, 497],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6755095, 42.0468354]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028__1/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p28 [1]",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "4"
+          },
+          {
+            "label": "intersections",
+            "value": "4"
+          },
+          {
+            "label": "confidence",
+            "value": "0.96"
+          },
+          {
+            "label": "confidence_provisional",
+            "value": "true"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          },
+          {
+            "label": "split_canvas_x",
+            "value": "0.0"
+          },
+          {
+            "label": "split_canvas_y",
+            "value": "4194.8"
+          },
+          {
+            "label": "split_canvas_w",
+            "value": "5628.0"
+          },
+          {
+            "label": "split_canvas_h",
+            "value": "4057.2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028__1/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1345.4,1944.1 1406.0,1943.8 1406.0,1870.2 1395.5,1838.3 1314.8,1838.7 1369.7,1618.3 1318.8,1202.4 1229.7,1123.4 1137.0,1120.6 1136.2,1164.2 390.8,1170.4 62.8,1173.8 54.7,1945.9 75.0,1946.0 462.0,1948.0 883.5,1946.2 1345.4,1944.1\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028__1/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [462, 1948.1],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6749132, 42.0425856]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [462, 1169.6],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6748809, 42.0440216]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028__2/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p28 [2]",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "5"
+          },
+          {
+            "label": "intersections",
+            "value": "6"
+          },
+          {
+            "label": "confidence",
+            "value": "0.98"
+          },
+          {
+            "label": "confidence_provisional",
+            "value": "true"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          },
+          {
+            "label": "split_canvas_x",
+            "value": "0.0"
+          },
+          {
+            "label": "split_canvas_y",
+            "value": "0.0"
+          },
+          {
+            "label": "split_canvas_w",
+            "value": "5628.0"
+          },
+          {
+            "label": "split_canvas_h",
+            "value": "4194.8"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028__2/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1269.7,122.3 951.0,122.0 944.1,122.0 941.9,1.0 915.7,1.0 902.0,42.5 880.0,122.0 505.6,128.4 143.9,139.7 146.0,907.8 814.8,892.7 883.1,891.2 1272.1,886.4 1273.5,886.3 1271.6,122.2 1269.7,122.3\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028__2/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [880, 122],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6768542, 42.0440483]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [146, 907.8],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.678754, 42.0426247]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0003/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p3",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.94"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0003/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0003",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1386.0,1922.6 396.1,1916.0 395.2,1627.6 335.2,1627.7 33.5,1627.9 84.7,140.0 105.2,140.1 1352.9,144.4 1322.5,326.8 1371.1,1312.4 1385.6,1312.0 1386.0,1922.6\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0003/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1353, 1286],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67725109207981, 42.056220284037394]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1353, 1934],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67727258752821, 42.05499717466799]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0032/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p32",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.96"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0032/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0032",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"13.2,675.0 31.2,1045.5 49.2,1483.3 49.3,1806.6 62.5,1806.8 658.2,1815.0 1381.6,1825.1 1384.0,1442.0 1389.3,1062.6 1396.1,300.2 678.3,292.6 37.8,284.9 1.0,284.4 1.0,422.8 13.2,675.0\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0032/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [676, 1058],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68688045827544, 42.044161794484516]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1376, 278],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6850766936311, 42.045642079780855]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0033/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p33",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "12"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0033/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0033",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1344.0,1786.9 1142.3,1792.7 1104.6,1810.0 676.0,1808.0 67.9,1805.3 66.7,1412.8 68.4,1024.0 68.0,243.0 667.7,243.8 700.2,260.8 826.7,262.7 853.0,246.6 1126.3,244.4 1185.9,255.6 1319.6,303.4 1325.5,1071.5 1326.3,1535.6 1378.7,1803.4 1344.0,1786.9\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0033/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [676, 1808],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6835564, 42.0426746]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [68, 243],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6850254, 42.0455995]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0034/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p34",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "13"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0034/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0034",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"980.8,1809.9 679.0,1813.6 134.4,1814.3 80.8,1547.8 77.5,1085.7 67.2,320.8 732.6,539.1 1052.2,650.5 1351.2,753.6 1406.0,773.5 1406.0,816.9 1351.0,1046.0 1345.0,1812.9 980.8,1809.9\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0034/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1351, 1046],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6787021, 42.0440561]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [77, 1046],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6819045, 42.0441016]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0004/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p4",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.93"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0004/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0004",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1159.0,20.4 1168.7,637.2 1184.0,1991.2 1183.7,2028.1 265.4,2032.7 145.3,1598.1 177.0,1596.3 205.2,1587.1 191.8,687.1 179.6,29.2 1159.0,20.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0004/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [181, 1594],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.679816347678, 42.05207060731831]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1184, 28],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67712483324829, 42.0550020012906]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0040/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p40",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "9"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0040/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0040",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"155.3,1905.2 123.0,1905.4 50.1,931.9 25.9,932.0 24.6,480.6 19.1,146.3 760.0,144.0 1367.8,142.1 1365.0,924.6 1372.2,1896.6 774.4,1901.3 155.3,1905.2\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0040/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [760, 928],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6851201, 42.041237]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [760, 144],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6850786, 42.042695]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0041/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p41",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0041/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0041",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"1349.5,1986.5 662.3,1931.3 662.1,1913.8 45.7,1916.5 40.8,937.8 45.5,149.9 476.8,149.5 514.8,131.9 717.6,125.0 752.7,141.5 1303.2,141.0 1318.9,140.8 1306.9,924.7 1261.2,924.6 1273.8,1497.5 1285.9,1604.6 1347.0,1969.4 1349.5,1986.5\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0041/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [43, 1911],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68364502697942, 42.03942190534726]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1277, 147],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68049341924295, 42.04263701016991]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0042/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p42",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "9"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0042/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0042",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"125.0,1958.4 85.7,1958.7 25.4,1597.8 13.6,1491.9 1.3,925.2 46.6,925.4 58.9,150.0 344.9,146.7 709.1,150.1 1376.6,142.7 1406.0,142.3 1406.0,1953.1 1383.6,1953.2 176.5,1958.2 125.0,1958.4\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0042/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [714, 926],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6787774, 42.0411755]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [714, 1956],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6788248, 42.0392521]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0043/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p43",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "0"
+          },
+          {
+            "label": "intersections",
+            "value": "0"
+          },
+          {
+            "label": "confidence",
+            "value": "0.97"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0043/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0043",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"21.0,1942.7 1347.9,1936.5 1345.5,1330.1 1376.0,1330.2 1371.2,912.2 1368.3,912.3 1359.2,127.5 1225.8,128.4 809.4,131.1 427.1,129.7 405.6,129.7 17.1,130.3 1.0,130.4 1.0,1942.8 21.0,1942.7\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0043/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [31, 1943],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67695381701665, 42.039231832729946]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [31, 126],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.67686852181916, 42.04262217102585]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0008/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p8",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "8"
+          },
+          {
+            "label": "intersections",
+            "value": "9"
+          },
+          {
+            "label": "confidence",
+            "value": "1.00"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0008/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0008",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"187.0,2026.6 106.7,2029.2 57.9,2029.5 79.0,1932.2 334.0,415.9 376.7,162.1 375.6,128.4 376.6,128.4 377.6,157.0 383.6,121.0 391.6,73.4 438.2,56.8 454.1,50.2 763.5,45.6 1030.7,45.2 1290.5,40.0 1290.5,414.2 1299.7,1046.4 1304.5,1487.2 1308.0,2022.0 187.0,2026.6\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0008/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [818, 1048],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.68591, 42.0539508]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1308, 2022],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6847432, 42.0521161]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0009/georef",
+        "type": "Annotation",
+        "@context": [
+          "http://iiif.io/api/extension/georef/1/context.json",
+          "http://iiif.io/api/presentation/3/context.json"
+        ],
+        "label": "Evanston, Illinois | 1920 | sanborn01857_004 p9",
+        "metadata": [
+          {
+            "label": "streets",
+            "value": "6"
+          },
+          {
+            "label": "intersections",
+            "value": "8"
+          },
+          {
+            "label": "confidence",
+            "value": "0.99"
+          },
+          {
+            "label": "confidence_model",
+            "value": "corpus-v2"
+          }
+        ],
+        "created": "2026-10-17T21:38:45Z",
+        "modified": "2026-10-17T21:38:45Z",
+        "motivation": "georeferencing",
+        "target": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0009/selector",
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0009",
+            "type": "ImageService3",
+            "width": 1407,
+            "height": 2063
+          },
+          "selector": {
+            "type": "SvgSelector",
+            "value": "<svg><polygon points=\"404.0,35.9 443.0,47.0 533.6,46.9 565.4,35.6 932.4,35.1 1276.7,32.6 1277.4,114.5 1278.4,406.3 1283.9,1081.5 1282.7,2016.8 88.8,2018.7 89.4,1483.2 88.0,1042.0 83.7,409.1 86.6,34.4 404.0,35.9\" /></svg>"
+          }
+        },
+        "body": {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0009/gcps",
+          "type": "FeatureCollection",
+          "transformation": {
+            "type": "helmert"
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [88, 1042],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.684703, 42.0539314]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "resourceCoords": [1284, 1042],
+                "type": "gcp"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-87.6817094, 42.0538932]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

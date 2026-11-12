@@ -12,6 +12,7 @@ import {
   DC_IMAGE_SERVICE_V3_ID,
   evanston,
 } from "../fixtures/georef";
+import evanston1899 from "../fixtures/mocks/sanborn/evanston/1899.json";
 import { p4 } from "../fixtures/presentation4";
 import {
   affineTransform,
@@ -21,6 +22,7 @@ import {
   cornersOf,
   georeferencesOf,
   hasMapData,
+  helmertTransform,
   navPlaceOf,
   readGeoreference,
 } from "./geo";
@@ -258,6 +260,64 @@ describe("georeferences", () => {
     };
     expect(readGeoreference(two, { width: 10, height: 10 })).toBeNull();
   });
+
+  it("takes two points where its transformation is helmert", () => {
+    const georeference = readGeoreference(sheet);
+    expect(georeference).toMatchObject({
+      transformation: "helmert",
+      width: sheet.target.source.width,
+      height: sheet.target.source.height,
+      image: { service: [{ id: sheet.target.source.id }] },
+    });
+    expect(georeference?.points).toHaveLength(2);
+  });
+});
+
+/** Sheet 68 of Evanston's 1899 Sanborn volume, fitted by mapsnap from two points. */
+const sheet = evanston1899.items[0] as Record<string, any>;
+
+describe("the helmert overlay", () => {
+  it("passes through both its control points", () => {
+    const { points } = readGeoreference(sheet)!;
+    const transform = helmertTransform(points)!;
+    for (const { resource, geo } of points) {
+      const [lng, lat] = transform(resource);
+      expect(lng).toBeCloseTo(geo[0], 9);
+      expect(lat).toBeCloseTo(geo[1], 9);
+    }
+  });
+
+  it("keeps the sheet's shape, face up, never mirrored", () => {
+    const georeference = readGeoreference(sheet)!;
+    const corners = cornersOf(georeference)!;
+    const [tl, tr, br, bl] = corners;
+    for (const [lng, lat] of corners) {
+      expect(lng).toBeGreaterThan(-87.7);
+      expect(lng).toBeLessThan(-87.66);
+      expect(lat).toBeGreaterThan(42.04);
+      expect(lat).toBeLessThan(42.07);
+    }
+    // Clockwise on the ground, as on the scan: a sheet may be turned, never flipped.
+    const area = corners.reduce((sum, [x, y], i) => {
+      const [nx, ny] = corners[(i + 1) % 4];
+      return sum + x * ny - nx * y;
+    }, 0);
+    expect(area).toBeLessThan(0);
+    // A similarity: opposite sides as long, as the scan's are.
+    const length = (a: number[], b: number[]) =>
+      Math.hypot(
+        (a[0] - b[0]) * Math.cos((42.05 * Math.PI) / 180),
+        a[1] - b[1],
+      );
+    expect(length(tl, tr)).toBeCloseTo(length(bl, br), 6);
+    expect(length(tl, bl)).toBeCloseTo(length(tr, br), 6);
+  });
+
+  it("needs two points that are not one", () => {
+    const [first] = readGeoreference(sheet)!.points;
+    expect(helmertTransform([first])).toBeNull();
+    expect(helmertTransform([first, first])).toBeNull();
+  });
 });
 
 describe("the affine overlay", () => {
@@ -284,6 +344,25 @@ describe("the affine overlay", () => {
     expect(tl[1]).toBeGreaterThan(bl[1]);
     expect(tr[0]).toBeGreaterThan(tl[0]);
     void br;
+  });
+
+  it("bounds an overlay by its mask, the part of the image that is map", () => {
+    // A sheet's mask traces its map: inside the whole scan, which a sheet of several maps
+    // would place far off by any one map's fit.
+    const overlay = readGeoreference(sheet)!;
+    expect(overlay.mask?.length).toBeGreaterThan(3);
+    const [[west, south], [east, north]] = boundsOf([], [overlay])!;
+    const corners = cornersOf(overlay)!;
+    const lngs = corners.map(([lng]) => lng);
+    const lats = corners.map(([, lat]) => lat);
+    expect(west).toBeGreaterThanOrEqual(Math.min(...lngs));
+    expect(east).toBeLessThanOrEqual(Math.max(...lngs));
+    expect(south).toBeGreaterThanOrEqual(Math.min(...lats));
+    expect(north).toBeLessThanOrEqual(Math.max(...lats));
+    expect((east - west) * (north - south)).toBeLessThan(
+      (Math.max(...lngs) - Math.min(...lngs)) *
+        (Math.max(...lats) - Math.min(...lats)),
+    );
   });
 
   it("bounds the features and the overlays together", () => {

@@ -1,4 +1,12 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  Suspense,
+  forwardRef,
+  lazy,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { useUniqueId } from "../../ui/useUniqueId";
 import {
@@ -14,6 +22,7 @@ import {
   boundsOf,
   cornersOf,
   georeferencesOf,
+  groundOf,
   navPlaceOf,
   pictureOf,
   type Position,
@@ -37,7 +46,6 @@ import { directionOf, languageProps } from "../../i18n/direction";
 import { Tip } from "../../ui/Tip";
 import { ZoomIn, ZoomOut } from "../../ui/controlGlyphs";
 import { Information } from "../Body/glyphs";
-import { PICTURE_SIZE } from "../../ui/EntryThumbnail";
 import { NavDate } from "../../ui/NavDate";
 import { readDate } from "../../core/dates";
 import { dateTimeOf, formatDate } from "../../core/dates-format";
@@ -278,17 +286,48 @@ function useGiven<T>(value: unknown, read: (value: unknown) => T): T {
   return memo.current.result;
 }
 
+/*
+ * An overlay's picture in its row, and what it reads images with: loaded only for a map
+ * with an overlay listed, so a map of places alone carries none of it.
+ */
+const OverlayPicture = lazy(() => import("./OverlayPicture"));
+
+/**
+ * A place's picture, as large as a chapter's (`PICTURE_SIZE`, `ui/EntryThumbnail`): a copy,
+ * as importing it would bring that module, and what it reads pictures with, into every
+ * map's first load (the overlays' rows load it lazily, `OverlayPicture`).
+ */
+const PICTURE_SIZE = 336;
+
 /** Longer side, in pixels, of the image an overlay draws. */
 const OVERLAY_SIZE = 2048;
 
+/**
+ * Longer side, in pixels, of each overlay's image where several are drawn together: as
+ * large as four at most would be, all told (a sheet of an atlas, many at once), never
+ * under 768.
+ */
+const overlaySize = (count: number) =>
+  count <= 4
+    ? OVERLAY_SIZE
+    : Math.max(768, Math.round((OVERLAY_SIZE * 2) / Math.sqrt(count)));
+
 /** The zoom a lone point is framed at. */
 const POINT_ZOOM = 8;
+
+/**
+ * The closest a georeferenced image is framed: whole, however small its ground (a fire
+ * insurance map's few blocks), where places stop at 12 (`frame`).
+ */
+const OVERLAY_ZOOM = 19;
 
 const NAVPLACE = "geomap-navplace";
 const FILL = "geomap-navplace-fill";
 const LINE = "geomap-navplace-line";
 const CASING = "geomap-navplace-casing";
 const ACCENT = "geomap-navplace-accent";
+/** The outline round the georeferenced images chosen. */
+const OUTLINE = "geomap-overlay-outline";
 const POINT = "geomap-navplace-point";
 const POINT_EDGE = "geomap-navplace-point-edge";
 const POINT_HIT = "geomap-navplace-point-hit";
@@ -370,6 +409,26 @@ function MapView({
   const [failed, setFailed] = useState(false);
   // The overlays on the map, by id, once their images are drawn.
   const [drawnIds, setDrawnIds] = useState<ReadonlySet<string>>(NO_IDS);
+  // The overlay last chosen from the list.
+  const [chosen, setChosen] = useState<string | null>(null);
+  // The row of what is under the pointer on the map, lit as the pointer lights a row:
+  // `place-<index>` or `overlay-<id>`.
+  const [pointed, setPointed] = useState<string | null>(null);
+  // The overlay whose row is under the pointer, or focused.
+  const [rowHover, setRowHover] = useState<string | null>(null);
+  // Outlined at half strength, as Items rings an item under the pointer: the overlay
+  // whose row is pointed at or focused, else the one under the pointer on the map.
+  const hovered =
+    rowHover ??
+    (pointed?.startsWith("overlay-") ? pointed.slice("overlay-".length) : null);
+  // Where each overlay drawn shows, for finding the one under the pointer.
+  const grounds = useMemo(
+    () =>
+      (overlay ? overlays : [])
+        .filter((item) => drawnIds.has(item.id))
+        .map((item) => ({ id: item.id, ring: groundOf(item) })),
+    [overlay, overlays, drawnIds],
+  );
   const latest = useRef({
     onSelect,
     onHighlight,
@@ -377,6 +436,8 @@ function MapView({
     features,
     host: root.hostLanguage,
     request,
+    grounds,
+    point: setPointed,
   });
   latest.current = {
     onSelect,
@@ -385,6 +446,8 @@ function MapView({
     features,
     host: root.hostLanguage,
     request,
+    grounds,
+    point: setPointed,
   };
   // Names a place in a popup at a point, once MapLibre is up.
   const name = useRef<((feature: MapFeature, at: unknown) => void) | null>(
@@ -741,6 +804,9 @@ function MapView({
             }) ?? []) as MapFeature[];
             if (!under.length) {
               if (hovered !== undefined) leave();
+              // Off the places, the image under the pointer lights its row.
+              const sheet = overlayAt(latest.current.grounds, event.lngLat);
+              latest.current.point(sheet ? `overlay-${sheet}` : null);
               return;
             }
             instance.getCanvas().style.cursor = "pointer";
@@ -748,6 +814,7 @@ function MapView({
               under.find((each) => idOf(each) === hovered) ?? under[0];
             if (keyOf(feature) !== dismissed) show(feature);
             const id = idOf(feature);
+            latest.current.point(`place-${id}`);
             if (id === hovered) return;
             mark(hovered, "hover", false);
             hovered = id;
@@ -756,6 +823,7 @@ function MapView({
           });
           instance.on("mouseout", () => {
             if (hovered !== undefined) leave();
+            latest.current.point(null);
           });
           // A press off the places lets go of the one picked.
           instance.on("click", (event: any) => {
@@ -914,30 +982,37 @@ function MapView({
       if (drawn.current[item.id]) return;
       const layer = `geomap-overlay-${index}-${hash(item.id)}`;
       drawn.current[item.id] = layer;
-      void drawOverlay(item, request).then((canvas) => {
-        if (!live || !canvas || drawn.current[item.id] !== layer) return;
-        const corners = cornersOf(item);
-        if (!corners || map.getSource(layer)) return;
-        map.addSource(layer, {
-          type: "canvas",
-          canvas,
-          coordinates: corners,
-          animate: false,
-        });
-        map.addLayer(
-          {
-            id: layer,
-            type: "raster",
-            source: layer,
-            paint: {
-              "raster-opacity": overlayOpacity,
-              "raster-fade-duration": 0,
+      void drawOverlay(item, request, overlaySize(wanted.length)).then(
+        (canvas) => {
+          if (!live || !canvas || drawn.current[item.id] !== layer) return;
+          const corners = cornersOf(item);
+          if (!corners || map.getSource(layer)) return;
+          map.addSource(layer, {
+            type: "canvas",
+            canvas,
+            coordinates: corners,
+            animate: false,
+          });
+          map.addLayer(
+            {
+              id: layer,
+              type: "raster",
+              source: layer,
+              paint: {
+                "raster-opacity": overlayOpacity,
+                "raster-fade-duration": 0,
+              },
             },
-          },
-          map.getLayer(FILL) ? FILL : undefined,
-        );
-        setDrawnIds((before) => new Set(before).add(item.id));
-      });
+            // Under the places and the outline, however late its image arrives.
+            map.getLayer(FILL)
+              ? FILL
+              : map.getLayer(OUTLINE)
+                ? OUTLINE
+                : undefined,
+          );
+          setDrawnIds((before) => new Set(before).add(item.id));
+        },
+      );
     });
     return () => {
       live = false;
@@ -955,6 +1030,70 @@ function MapView({
     }
   }, [map, overlayOpacity]);
 
+  /*
+   * The images chosen, outlined in the accent a little clear of their edge, as Items rings
+   * the item chosen (Mat, 2026-11-12): the one last chosen from the list, those on a
+   * Canvas in view, and one whose annotation is picked. Each is outlined where it shows,
+   * round its mask, else its corners, over everything else on the map.
+   */
+  const outlined = useMemo(
+    () =>
+      (overlay ? overlays : []).filter(
+        (item) =>
+          item.id === chosen ||
+          (item.canvasId && current?.includes(item.canvasId)) ||
+          activeAnnotations?.includes(item.id),
+      ),
+    [overlay, overlays, chosen, current, activeAnnotations],
+  );
+  useEffect(() => {
+    if (!map) return;
+    const half = overlays.filter(
+      (item) => item.id === hovered && !outlined.includes(item),
+    );
+    const data = {
+      type: "FeatureCollection",
+      features: [...outlined, ...half].flatMap((item) => {
+        const ring = outlineOf(item);
+        return ring
+          ? [
+              {
+                type: "Feature",
+                properties: { hover: half.includes(item) },
+                geometry: ring,
+              },
+            ]
+          : [];
+      }),
+    };
+    const source = map.getSource(OUTLINE);
+    if (source) return void source.setData(data);
+    map.addSource(OUTLINE, { type: "geojson", data });
+    map.addLayer(
+      {
+        id: OUTLINE,
+        type: "line",
+        source: OUTLINE,
+        layout: { "line-join": "round" },
+        paint: {
+          "line-color": colorsOf(container.current).accent,
+          "line-width": 3,
+          // Its middle 2.5px outside the edge: 3px wide, 1px clear.
+          "line-offset": 2.5,
+          // Under the pointer, at half strength (`--clover-accent-ring-hover`).
+          "line-opacity": [
+            "case",
+            ["boolean", ["get", "hover"], false],
+            0.5,
+            1,
+          ],
+        },
+      },
+      // Over everything else on the map: the images (each added under it, however
+      // late), the places and the basemap's labels.
+    );
+  }, [map, outlined, overlays, hovered]);
+
   // Frame what there is, once for each extent: a place chosen stays framed when the
   // view it opens draws nothing new, and a map given another place (a Collection's next
   // member) eases to it (Mat, 2026-11-08).
@@ -962,13 +1101,16 @@ function MapView({
     if (!map) return;
     const bounds = boundsOf(features.features, overlay ? overlays : []);
     if (!bounds) return;
-    frameAll.current = () => frame(map, bounds, zoom ?? POINT_ZOOM, zoom);
+    // Images laid over the map are framed whole; places alone, no closer than 12.
+    const most =
+      zoom ?? (overlay && overlays.length ? OVERLAY_ZOOM : undefined);
+    frameAll.current = () => frame(map, bounds, zoom ?? POINT_ZOOM, most);
     const extent = bounds.flat().join();
     if (extent === framed.current) return;
     // The first framing is at once; each one after glides there from where it was.
     const glide = framed.current !== "";
     framed.current = extent;
-    frame(map, bounds, zoom ?? POINT_ZOOM, zoom, glide);
+    frame(map, bounds, zoom ?? POINT_ZOOM, most, glide);
   }, [map, features, overlays, overlay, zoom]);
 
   // Asked to frame again: once the map has its new size, which its observer reports.
@@ -989,8 +1131,10 @@ function MapView({
     onSelect?.(feature);
   };
   const show = (item: Georeference) => {
+    setChosen(item.id);
     const bounds = boundsOf([], [item]);
-    if (map && bounds) frame(map, bounds, zoom ?? POINT_ZOOM, zoom);
+    if (map && bounds)
+      frame(map, bounds, zoom ?? POINT_ZOOM, zoom ?? OVERLAY_ZOOM);
   };
 
   return (
@@ -1057,6 +1201,9 @@ function MapView({
                   <li key={`place-${index}`}>
                     <button
                       type="button"
+                      data-highlighted={
+                        pointed === `place-${index}` ? "true" : undefined
+                      }
                       {...languageProps(nameLang)}
                       aria-current={
                         current?.includes(canvasId ?? manifestId ?? "")
@@ -1076,21 +1223,50 @@ function MapView({
                   </li>
                 );
               })}
-              {listed.map((item) => {
+              {listed.map((item, index) => {
                 const label = localize(item.label, language);
+                // Maps of one name (a sheet's several, each georeferenced on its own)
+                // told apart by their place among it, as figures: "1 / 3".
+                const same = label.text
+                  ? listed.filter(
+                      (other) =>
+                        localize(other.label, language).text === label.text,
+                    )
+                  : [];
                 return (
                   <li key={item.id}>
-                    <button type="button" onClick={() => show(item)}>
-                      {label.text && (
-                        <>
+                    <button
+                      type="button"
+                      className="clover-geomap-overlay"
+                      onClick={() => show(item)}
+                      onMouseEnter={() => setRowHover(item.id)}
+                      onMouseLeave={() => setRowHover(null)}
+                      onFocus={() => setRowHover(item.id)}
+                      onBlur={() => setRowHover(null)}
+                      data-highlighted={
+                        pointed === `overlay-${item.id}` ? "true" : undefined
+                      }
+                    >
+                      {/* The map it is, small, as an annotation's region shows. */}
+                      <Suspense fallback={null}>
+                        <OverlayPicture overlay={item} request={request} />
+                      </Suspense>
+                      {label.text ? (
+                        <span>
                           <span {...languageProps(label.lang)}>
                             {label.text}
-                          </span>{" "}
-                        </>
+                          </span>
+                          {same.length > 1 &&
+                            ` ${same.indexOf(item) + 1} / ${same.length}`}
+                        </span>
+                      ) : (
+                        // Unnamed, numbered after the places, as an unnamed place is.
+                        <span {...languageProps(langOf("mapPlaceUntitled"))}>
+                          {t("mapPlaceUntitled", {
+                            number: features.features.length + index + 1,
+                          })}
+                        </span>
                       )}
-                      <span {...languageProps(langOf("mapOverlay"))}>
-                        {t("mapOverlay")}
-                      </span>
                     </button>
                   </li>
                 );
@@ -1105,7 +1281,7 @@ function MapView({
 
 /**
  * Frame a box: a lone point centered at `zoom`, anything else to its bounds, no closer
- * than `most` (the Map's `zoom`), else 12.
+ * than `most` (the Map's `zoom`, or `OVERLAY_ZOOM` for a georeferenced image), else 12.
  */
 function frame(
   map: any,
@@ -1132,6 +1308,48 @@ const GLIDE = 600;
 const reducedMotion = () =>
   typeof window !== "undefined" &&
   Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+
+/**
+ * Where an overlay shows, as a ring round it, counter-clockwise on the ground (as a
+ * north-up map reads it), its inside on the left, so a line offset to its right lies
+ * outside it. Null where it has no fit.
+ */
+function outlineOf(item: Georeference) {
+  const ground = groundOf(item);
+  if (ground.length < 3) return null;
+  const area = ground.reduce((sum, [x, y], i) => {
+    const [nx, ny] = ground[(i + 1) % ground.length];
+    return sum + x * ny - nx * y;
+  }, 0);
+  const ring = area < 0 ? [...ground].reverse() : ground;
+  return { type: "LineString", coordinates: [...ring, ring[0]] };
+}
+
+/**
+ * The overlay under a point, by where each shows: the last drawn that holds it, as the
+ * last drawn shows on top. Ray casting, on longitude and latitude.
+ */
+function overlayAt(
+  grounds: { id: string; ring: Position[] }[],
+  at: { lng: number; lat: number } | undefined,
+): string | null {
+  if (!at) return null;
+  for (let i = grounds.length - 1; i >= 0; i--) {
+    const { ring } = grounds[i];
+    let inside = false;
+    for (let j = 0, k = ring.length - 1; j < ring.length; k = j++) {
+      const [x1, y1] = ring[j];
+      const [x2, y2] = ring[k];
+      if (
+        y1 > at.lat !== y2 > at.lat &&
+        at.lng < ((x2 - x1) * (at.lat - y1)) / (y2 - y1) + x1
+      )
+        inside = !inside;
+    }
+    if (inside) return grounds[i].id;
+  }
+  return null;
+}
 
 /** The middle of a box. */
 function center([[west, south], [east, north]]: [Position, Position]) {
@@ -1292,16 +1510,17 @@ function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
 }
 
 /**
- * An overlay's picture: the image (about 2048 px), clipped to its mask, on a canvas for
- * MapLibre's canvas source. Null if the image will not load (or, without CORS, cannot be
- * drawn into WebGL).
+ * An overlay's picture: the image (about `size` px, `overlaySize`), clipped to its mask,
+ * on a canvas for MapLibre's canvas source. Null if the image will not load (or, without
+ * CORS, cannot be drawn into WebGL).
  */
 async function drawOverlay(
   overlay: Georeference,
   request: CloverRequest | undefined,
+  size: number,
 ): Promise<HTMLCanvasElement | null> {
   const { overlayImageUrl } = await import("./overlayImage");
-  const url = await overlayImageUrl(overlay.image, OVERLAY_SIZE, request);
+  const url = await overlayImageUrl(overlay.image, size, request);
   if (!url) return null;
   const image = await new Promise<HTMLImageElement | null>((done) => {
     const element = new Image();
