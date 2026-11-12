@@ -19,6 +19,7 @@
     "build:cookbook": "vite-node -c vitest.config.mjs scripts/build-cookbook.mjs",
     "build:maplibre-worker": "node ./scripts/build-maplibre-worker.mjs",
     "build:icons": "node scripts/build-icons.mjs",
+    "build:readme-hero": "node scripts/build-readme-hero.mjs",
     "prebuild:docs": "npm run build:maplibre-worker && npm run build",
     "predev": "npm run build:maplibre-worker",
     "pretypecheck": "npm run build:maplibre-worker",

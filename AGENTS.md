@@ -972,6 +972,87 @@ deadline.
     it after changing the SVG, and commit all three. Tried and set aside that day: the
     wordmark's C on the accent (it read as a crescent moon) and the stroke across a black
     tile (at 16px, the "thin blue line" symbol).
+  - The READMEs' hero (Mat, 2026-11-11: "evoke clover's modular capabilities across media
+    types … think hero landing page graphic/superbowl commercial"; "make it look more flat
+    at 0deg with a slight perspective as if I am looking up at it straight on. the items
+    should appear as if they [are] exploding out of the screen"; then, annotating it,
+    "make the bike catalog the main thing", "the main one should look like the viewer",
+    the Esu Scene and the Hess Canvas beside it as options, "obvious they are different
+    mediums"; then "too much going on, remove the left stuff … make things explode out
+    still!!! fun!! superbowl. think back to the first graphic with the 3d look"; then
+    "make it explode more", "tuck scene and Canvas a little underneath the right side of
+    viewer"): a Viewer, straight on and seen from a little below, as the Default template
+    lays out the White bicycle catalog, a `paged` book, on the spread of Page 24 and
+    Page 25 with Page 24's Now annotation picked ("use page 24 and 25 now and then
+    instead"; Page 3 and Page 4 before), blown apart, every page, word and region read from
+    the `paged` mock. Its parts are blocks on a Root, white faces and the accent's sides, as
+    the first draft drew them; it shows flat for a beat, gathers itself, then they spring
+    off the Root and away from its middle, the Label nearest so it rises clear, past
+    their places and back, with a ring, speed lines behind them and sparks, the Root
+    reaching up under the Label as they go ("the base under body annotations items and
+    metadata should extend under label as well"), at half strength ("make root base
+    underneath about 50% translucent"). Its Label is the catalog's own title
+    ("make title the same title we use for the bike catalog"), typed in, close over the
+    Body and Annotations, its block thinner so its underside shows no deeper than the
+    Body's ("this label should be closer to the body and annotations"; "make extruded
+    blue part less deep. like it is for body"); its Body (`<Body />`: "in the main viewer
+    change the 'Canvas' label to 'Body'", undoing that morning's "make body on bike be
+    `Canvas`") shows the spread ("make sure the spreads of a `paged` canvases are showing
+    in both items and the Canvas"), zoomed in on Page 24 as a picked annotation brings
+    its region into view ("zoom the canvas in a bit"), its annotations framed as Clover
+    frames them ("draw annotation for Now more close to how it is in our content"): Then
+    at rest, Now picked, from the outside in a dark edge, the accent's band and a light
+    line, each twice Clover's width so it shows at this size, nothing over what it marks
+    and the picture around it dimmed a little; by Now's edge, below Then's picture, its
+    Tip, a block standing out of the Body, Now's words in regular weight on Clover's
+    control fill as its Tip shows them ("have an extruded label for the annotation body on
+    the canvas"; "Now should not be bold"); its zoom buttons discs in a row at its top
+    right, as the control cluster lays them out. Items shows the views as Clover pairs the
+    catalog's Canvases (`groupViews`), Page 20 and Page 21 to Page 28 and Page 29, each
+    page's label under it, Page 24 and Page 25 chosen, their labels in the accent's text,
+    between its previous and next, discs as the zoom buttons are, in the control fill
+    ("this should be black, I think. and make it extrude like the + - buttons"). Its Panel
+    holds Annotations, as Clover lists them, under Page 24, each its picture and its words
+    in regular weight, Now chosen, a line from Now to its Tip on the Body ("draw the line
+    from NOW in right to annotation in viewer canvas"; "still show the annotation line
+    somehow"), and About, the record's own Metadata. Each
+    part's block is named in its edge, but the Root's ("just remove the root label").
+    Every word, the names too, is Google Sans Flex, the site's, embedded so it holds in
+    an image ("make sure fonts are google sans", then "Switch to Google Sans" for the
+    names, in the code's face until then), each name's pill as wide as the script measures
+    it in a browser (`measureNames`). From under its right side slide the other media,
+    blocks of their own: a Canvas (the Nuremberg footage, a play disc in its lower left,
+    Hess annotated; no film strip) and a Scene (the Esu shrine, standing out of it), with
+    no badge naming their medium ("the element should speak for itself"). Annotations
+    are the accent's, never green or amber ("make annotations use accent color").
+    Nothing floats free of the Viewer: no Now note, no flying pages ("remove the stray
+    annotation below",
+    "remove the random stray thumbs"), and no Timeline, Hindenburg, language toggle, or
+    the languages, accessibility terms and tests that once floated at its left ("remove
+    timeline altogether and hinderburg"; "remove the internationalization piece";
+    "remove the left stuff"). The READMEs need no `h1`
+    over it (Mat asked, same day): the wordmark is the picture's, and GitHub and npm title
+    the page. `npm run build:readme-hero` (`scripts/build-readme-hero.mjs`) draws it into
+    `.github/assets/` through a pinhole camera of its own, in the site's tokens, its
+    wordmark and stroke read from `Logo.tsx` and `tokens.css`; change the script and run
+    it, never the SVGs. The fixtures' pictures are taken once into
+    `.github/assets/fixtures/` at sizes their servers list (`--fetch` takes them again),
+    each no larger than the READMEs show it on a 2× screen (Mat, 2026-11-11: "use smaller
+    images if possible"; `FIXTURE`), since every change to the picture adds its four SVGs
+    to the history again; the shrine is drawn by three.js through the same camera, and
+    drawn again when the camera, the frame or its scale changes. Running the script
+    unchanged writes the same bytes, and nothing else runs it: building or releasing
+    Clover leaves the SVGs alone. The catalog's pages carry Northwestern's "Further
+    distribution … not permitted" attribution, as the card pictures' rule (2026-10-16)
+    records, and the shrine is © Northwestern; a README that shows them is Mat's call
+    (2026-11-11: committing the SVGs puts the catalog's scans in the repository, the
+    shrine's model being there already). It plays once,
+    under 5 seconds (WCAG 2.2.2), and each
+    README's `<picture>` picks it by `prefers-color-scheme`, and its still copy (`-still`)
+    by `prefers-reduced-motion`, which an image's own styles cannot be relied on to see.
+    The package's README links them absolutely, from `main`. The script writes the
+    READMEs' alt (`ALT`), which names every word the picture shows, and the credit under
+    it (`CREDIT`).
   - Every card, container, call to action and code block on the site has one radius,
     `--radius-4` (12px), Nextra's code blocks, callouts and search field too
     (`layout.css`); what sits inside one takes a smaller step (`--radius-2`,

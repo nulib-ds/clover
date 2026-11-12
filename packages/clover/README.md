@@ -1,4 +1,11 @@
-# @nulib/clover
+<picture>
+  <source media="(prefers-color-scheme: dark) and (prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/nulib-ds/clover/main/.github/assets/hero-dark-still.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/nulib-ds/clover/main/.github/assets/hero-dark.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/nulib-ds/clover/main/.github/assets/hero-light-still.svg">
+  <img alt="The Clover IIIF wordmark over a Clover Viewer blown apart into its blocks on a Root, each block named in its edge, seen from a little below, showing the White bicycle catalog as a paged book: its Label, “Portfolio of illustrations showing the White bicycles : then and now”; its Body zoomed in on Page 24 of the spread of Page 24 and Page 25, its Then and Now annotations framed as Clover frames them, Now picked, the picture around it dimmed, and its Tip standing out of the Body saying “Now – Three generations of a family cycle along a lakeside path.”; Items, its views Page 20 and Page 21, Page 22 and Page 23, Page 24 and Page 25, Page 26 and Page 27, Page 28 and Page 29, Page 24 and Page 25 chosen, between its previous and next buttons; and a Panel of Annotations, under Page 24, “Then – Family rides in a two-horse surrey along a country road.” and “Now – Three generations of a family cycle along a lakeside path.”, Now chosen, a line from Now to its Tip on the Body, and About, its Metadata (Contributor, White Sewing Machine Company (Author); Date, 1896; Location, Ohio--Cleveland; Publisher, The White Sewing Machine Co.). Sliding out from under its right side, other media as options: a Canvas of the Nuremberg footage, Rudolf Hess annotated, a pointer pressing its play button, and a Scene, the Esu shrine standing out of it." src="https://raw.githubusercontent.com/nulib-ds/clover/main/.github/assets/hero-light.svg">
+</picture>
+
+<sub>The White Sewing Machine Company's bicycle catalog (1896), courtesy of Northwestern University Libraries; an Esu shrine, © 2025 Northwestern University; the Nuremberg judgment (1946), National Archives, via Wikimedia Commons.</sub>
 
 **A viewer as distinctive as your collections.** Design a user experience rooted in IIIF.
 
