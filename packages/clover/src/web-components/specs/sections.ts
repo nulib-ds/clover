@@ -355,7 +355,7 @@ export const map: ElementSpec = {
 export const mapDocs: ElementDocs = {
   name: "CloverMapElement",
   description:
-    "A map: inside a clover-root, its places (navPlace) and the view's georeferenced images; alone, those of the iiif-content it is given. Its places and images are listed under it by Items, the map's text and the keyboard's way to each.",
+    "Shows where a IIIF resource is: the places in its navPlace, and its georeferenced images laid over the map. Inside a clover-root it maps the root's resource; alone, its iiif-content. Items lists each place and image under it.",
   attributes: {
     "iiif-content": {
       description: "Alone: a IIIF resource, by URL, to map.",
@@ -370,17 +370,17 @@ export const mapDocs: ElementDocs = {
     },
     overlays: {
       description:
-        "Inside a root: whose georeferenced images it lays, the Canvases' in view or every Canvas's (all), an atlas's sheets at once, zooming to the view's as it changes; every Canvas's by default where georeference annotations are the content. Alone, every one.",
+        "Inside a root: whose georeferenced images to show, the Canvases' in view (view) or every Canvas's (all), the map then zooming to the one in view as it changes. Content that is georeference annotations shows all unless set. Alone, every image shows.",
       default: "view",
     },
     items: {
       description:
-        'How its places and georeferenced images are listed under it, by Items: list, grid, slider or masonry; "false" lists none, where the page lists them itself (a clover-items of="georeferences", say), which is then the map\'s text and the keyboard\'s way to each.',
+        'How Items lists the places and images under the map: list, grid, slider or masonry. "false" lists none, and the page must then give a list of its own (a clover-items of="georeferences", say): the list is the map in words, and how a keyboard reaches each place.',
       default: "list",
     },
     outlines: {
       description:
-        "Offers the map's outline options, behind a gear after its zoom controls: Outlines, pressed to outline every georeferenced image on the map, and Selection outline, pressed to put away the accent's outline round the one chosen.",
+        "Adds a gear beside the zoom buttons with two options. Outlines draws the edge of every georeferenced image; Selection outline hides the accent outline around the chosen one.",
       default: "false",
     },
     "style-url": {
@@ -388,7 +388,7 @@ export const mapDocs: ElementDocs = {
     },
     "scroll-zoom": {
       description:
-        "Zoom with the wheel or a trackpad, which can trap the page's scroll.",
+        "Zooms with the mouse wheel or trackpad. Off by default, so scrolling the page never gets caught in the map.",
       default: "false",
     },
     zoom: {
@@ -397,7 +397,7 @@ export const mapDocs: ElementDocs = {
     },
     credits: {
       description:
-        "\"false\" leaves out the basemap's credits, the ⓘ in the map's lower corner, which a basemap's license may ask for: give them on the page yourself.",
+        "\"false\" hides the basemap's credits, the ⓘ in the map's corner. The basemap's license may require them, so credit it on the page yourself first.",
       default: "true",
     },
     language: { description: "Alone: the language to read IIIF text in." },
