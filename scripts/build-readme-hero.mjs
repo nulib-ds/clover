@@ -1683,14 +1683,15 @@ for (const readme of ["README.md", "packages/clover/README.md"]) {
   const text = readFileSync(path, "utf8");
   const img = /(<img alt=")[^"]*(" src="[^"]*hero-light\.svg">)/;
   if (!img.test(text)) throw new Error(`${readme} has no hero to describe`);
-  const credit = /(<\/picture>\n\n<sub>)[^<]*(<\/sub>)/;
-  let next = text.replace(img, `$1${escape(ALT).replace(/"/g, "&quot;")}$2`);
-  next = credit.test(next)
-    ? next.replace(credit, `$1${escape(CREDIT)}$2`)
-    : next.replace(
-        "</picture>\n",
-        `</picture>\n\n<sub>${escape(CREDIT)}</sub>\n`,
-      );
+  /* The credit is the README's last section, Credits, under its License (Mat, 2026-11-11:
+   * "move the credit down below the License", then "add a 'Credits'"). */
+  let next = text
+    .replace(img, `$1${escape(ALT).replace(/"/g, "&quot;")}$2`)
+    .replace(/(<\/picture>\n)\n<sub>[^<]*<\/sub>\n/, "$1")
+    .replace(/\n+(## Credits\n+)?(<sub>)?[^\n<]*(<\/sub>)?\n*$/, (end) =>
+      end.includes("Credits") || end.includes("<sub>") ? "\n" : end,
+    );
+  next = `${next.replace(/\n*$/, "\n")}\n## Credits\n\n${escape(CREDIT)}\n`;
   if (next !== text) writeFileSync(path, next);
   console.log(
     `${readme}  alt and credit ${next === text ? "current" : "written"}`,

@@ -1051,8 +1051,8 @@ deadline.
     README's `<picture>` picks it by `prefers-color-scheme`, and its still copy (`-still`)
     by `prefers-reduced-motion`, which an image's own styles cannot be relied on to see.
     The package's README links them absolutely, from `main`. The script writes the
-    READMEs' alt (`ALT`), which names every word the picture shows, and the credit under
-    it (`CREDIT`).
+    READMEs' alt (`ALT`), which names every word the picture shows, and the credit,
+    each README's last line, under its License (`CREDIT`; Mat, 2026-11-11).
   - Every card, container, call to action and code block on the site has one radius,
     `--radius-4` (12px), Nextra's code blocks, callouts and search field too
     (`layout.css`); what sits inside one takes a smaller step (`--radius-2`,
