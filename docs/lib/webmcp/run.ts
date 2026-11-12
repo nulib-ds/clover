@@ -3,17 +3,54 @@ import { readResource } from "docs/lib/compose/read-resource";
 import { suggest } from "docs/lib/compose/suggest";
 import { compose } from "docs/lib/compose/write";
 import { pageAddress } from "docs/lib/live-code";
+import { basePath } from "docs/lib/router";
+import { earlierPackage, isEarlierVersion } from "docs/lib/site";
 import { firstHost, showPreview } from "docs/lib/webmcp/preview-store";
 import type { ToolName } from "docs/lib/webmcp/tools";
+
+/** The page the user has open, as the docs route it: its base path and `.html` off. */
+function routeHere() {
+  if (typeof location === "undefined") return "/";
+  const path = location.pathname.replace(/\.html$/, "").replace(/\/+$/, "");
+  const route =
+    basePath && path.startsWith(basePath) ? path.slice(basePath.length) : path;
+  return route || "/";
+}
+
+/*
+ * What every answer on a 3.x page carries (Mat, 2026-11-12): that the page the user has
+ * open documents a deprecated version, never to be used or recommended but to support an
+ * older installation, and that the answer is Clover 4's, with where its docs are.
+ */
+const EARLIER_PAGE = {
+  version: "3.x",
+  package: earlierPackage,
+  status: "deprecated",
+  says: `The page the user has open documents Clover 3.x (${earlierPackage}), which is deprecated and no longer maintained. Don't use or recommend it unless the user is supporting an older installation. These tools answer for Clover 4 (@nulib/clover) alone, documented at ${pageAddress("/docs")}; ${pageAddress("/docs/upgrading")} moves a 3.x page to Clover 4.`,
+  docs: pageAddress("/docs"),
+  upgrading: pageAddress("/docs/upgrading"),
+};
 
 /**
  * What each agent tool does (`tools.ts`), loaded by the page the first time one is called
  * (`AgentTools.tsx`), with the compose engine behind it: no page loads either until an
  * agent asks. Each answers with plain data, which WebMCP serializes as JSON; a layout that
  * does not hold, or a resource that cannot be read, is an answer too (`ok: false`), never
- * a thrown error. The caller's cancel (`signal`) stops a resource being read.
+ * a thrown error. The caller's cancel (`signal`) stops a resource being read. On a 3.x
+ * page, each answer says it is deprecated (`deprecated`).
  */
 export async function run(
+  name: ToolName,
+  input: unknown,
+  signal?: AbortSignal,
+): Promise<unknown> {
+  const answer = await answerOf(name, input, signal);
+  return isEarlierVersion(routeHere())
+    ? { ...(answer as object), deprecated: EARLIER_PAGE }
+    : answer;
+}
+
+async function answerOf(
   name: ToolName,
   input: unknown,
   signal?: AbortSignal,

@@ -36,9 +36,12 @@ export interface ToolDefinition {
   annotations: { readOnlyHint: boolean; untrustedContentHint?: boolean };
 }
 
-/** What Clover is, closing each description, for an agent that meets the tools alone. */
+/**
+ * What Clover is, closing each description, for an agent that meets the tools alone, and
+ * that its earlier version is deprecated (Mat, 2026-11-12).
+ */
 export const CLOVER =
-  "Clover (@nulib/clover) is a IIIF viewer and the parts it is built from, in React or as web components.";
+  "Clover (@nulib/clover) is a IIIF viewer and the parts it is built from, in React or as web components; Clover 3.x (@samvera/clover-iiif) is deprecated.";
 
 /** Each tool, as the page registers it. */
 export function agentTools(): ToolDefinition[] {

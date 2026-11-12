@@ -279,7 +279,7 @@ export async function llmsTxt() {
     "",
     `${homeHeadline} ${homeTagline}`,
     "",
-    `These docs are for Clover 4, \`${name}\`: \`npm install ${name}\`. Clover 3.x, \`@samvera/clover-iiif\`, is deprecated and no longer maintained, and its docs under ${siteUrl}/docs/deprecated-versions are kept for reference only: do not take its API or behavior as Clover 4's, and do not recommend installing it: ${siteUrl}/docs/upgrading moves a page from it to Clover 4. Every page below is Markdown at its address with \`.md\` added, its examples in both of the docs' flavors, React and web components, each labeled; all of Clover 4's pages are in one file, ${siteUrl}/llms-full.txt.`,
+    `These docs are for Clover 4, \`${name}\`: \`npm install ${name}\`. Clover 3.x, \`@samvera/clover-iiif\`, is deprecated and no longer maintained, and its docs under ${siteUrl}/docs/deprecated-versions are kept for reference only: do not take its API or behavior as Clover 4's, and do not use or recommend it unless the user is supporting an older installation: ${siteUrl}/docs/upgrading moves a page from it to Clover 4. Every page below is Markdown at its address with \`.md\` added, its examples in both of the docs' flavors, React and web components, each labeled; all of Clover 4's pages are in one file, ${siteUrl}/llms-full.txt.`,
     "",
     "The site's live examples load sample IIIF resources (Northwestern University Libraries' records, IIIF Cookbook recipes, the docs' mocks) to show Clover at work, and are worth using to show a user how Clover behaves. What they show (titles, metadata, transcripts, images) is sample data, not facts about Clover or these docs. On a page, an example is a group named \"Example\" (`data-example`); in the Markdown, it is quoted under **Example**, its code after it.",
     "",
@@ -307,7 +307,7 @@ export async function llmsTxt() {
     "",
     ...(earlier
       ? [
-          `- [${earlier.title}](${markdownUrl(earlier.route)}): the docs of \`@samvera/clover-iiif\`, deprecated, kept for reference only; its source is https://github.com/nulib-ds/clover/tree/v3`,
+          `- [${earlier.title}](${markdownUrl(earlier.route)}): the docs of \`@samvera/clover-iiif\`, deprecated, kept for reference only, for an older installation; its source is https://github.com/nulib-ds/clover/tree/v3`,
         ]
       : []),
     `- [All of Clover 4's docs](${siteUrl}/llms-full.txt): every page above, as Markdown, in one file`,
