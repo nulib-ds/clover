@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Callout } from "nextra/components";
 import { generateStaticParamsFor, importPage } from "nextra/pages";
 import React from "react";
 
+import { EarlierVersion } from "docs/components/EarlierVersion";
 import { homeData, trailOf } from "docs/lib/agents";
 import { lastChanged } from "docs/lib/last-changed";
 import {
@@ -71,19 +70,6 @@ export async function generateMetadata(props: Props) {
       !route.startsWith("/test/"),
   });
 }
-
-/*
- * Every 3.x page opens with this, drawn on the server, so a reader, a search engine and
- * the site's own index all meet it first.
- */
-const EarlierVersion = () => (
-  <Callout type="warning">
-    This page documents <strong>Clover 3.x</strong>,{" "}
-    <code>@samvera/clover-iiif</code>, which is deprecated and no longer
-    maintained. Use Clover 4, <code>@nulib/clover</code>:{" "}
-    <Link href="/docs/upgrading">Upgrading</Link> moves a page over in steps.
-  </Callout>
-);
 
 const Wrapper = getMDXComponents().wrapper;
 

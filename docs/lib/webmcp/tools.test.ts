@@ -88,6 +88,42 @@ describe("agentTools", () => {
     frame.remove();
   });
 
+  it("says in each tool's description that 3.x is deprecated", () => {
+    for (const tool of tools)
+      expect(tool.description).toContain(
+        "Clover 3.x (@samvera/clover-iiif) is deprecated.",
+      );
+  });
+
+  it("says on a 3.x page, in every answer, that it is deprecated, and nowhere else", async () => {
+    const was = location.pathname;
+    try {
+      history.replaceState(null, "", "/docs/items");
+      for (const name of TOOL_NAMES)
+        expect(await run(name, {}), name).not.toHaveProperty("deprecated");
+      history.replaceState(null, "", "/docs/deprecated-versions/label");
+      for (const name of TOOL_NAMES)
+        expect(await run(name, {}), name).toMatchObject({
+          deprecated: {
+            version: "3.x",
+            package: "@samvera/clover-iiif",
+            status: "deprecated",
+            says: expect.stringContaining(
+              "Don't use or recommend it unless the user is supporting an older installation.",
+            ),
+            docs: expect.stringMatching(/\/docs$/),
+            upgrading: expect.stringMatching(/\/docs\/upgrading$/),
+          },
+        });
+      history.replaceState(null, "", "/docs/deprecated-versions");
+      await expect(
+        run("clover_suggest_layout", { needs: ["captions"] }),
+      ).resolves.toMatchObject({ ok: true, deprecated: { version: "3.x" } });
+    } finally {
+      history.replaceState(null, "", was);
+    }
+  });
+
   it("changes the page, and says so", () => {
     expect(
       tools.find((tool) => tool.name === "clover_preview_layout")?.annotations,

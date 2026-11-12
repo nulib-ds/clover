@@ -16,7 +16,7 @@ import {
 /*
  * Every page's description is what a search result shows under its title, and what
  * `llms.txt` says of it. These keep each one the page's own and short enough to show
- * whole, 3.x's with what they document after it (`earlierDescription`).
+ * whole, 3.x's after saying they are deprecated (`earlierDescription`).
  */
 const CONTENT = join(dirname(fileURLToPath(import.meta.url)), "../../content");
 
@@ -74,17 +74,56 @@ describe("page descriptions", () => {
 });
 
 describe("3.x pages", () => {
-  it("say their version in their titles, once", () => {
-    expect(earlierTitle("Slider")).toBe("Slider (3.x)");
-    expect(earlierTitle("Slider (3.x)")).toBe("Slider (3.x)");
-    expect(earlierTitle("Clover 3.x")).toBe("Clover 3.x");
+  it("say their version, and that it is deprecated, in their titles, once", () => {
+    expect(earlierTitle("Slider")).toBe("Slider (3.x, deprecated)");
+    expect(earlierTitle("Slider (3.x)")).toBe("Slider (3.x, deprecated)");
+    expect(earlierTitle("Slider (3.x, deprecated)")).toBe(
+      "Slider (3.x, deprecated)",
+    );
+    expect(earlierTitle("Clover 3.x")).toBe("Clover 3.x (deprecated)");
+    expect(earlierTitle("Clover 3.x (deprecated)")).toBe(
+      "Clover 3.x (deprecated)",
+    );
   });
 
-  it("open their descriptions with their own words", () => {
-    expect(earlierDescription("Slider, a carousel.")).toMatch(
-      /^Slider, a carousel\. Clover 3\.x/,
+  it("open their descriptions by saying they are deprecated, then their own words", () => {
+    expect(earlierDescription("Slider, a carousel.")).toBe(
+      "Deprecated: for an older installation only. Use Clover 4's docs at /docs. Slider, a carousel.",
     );
-    expect(earlierDescription()).toMatch(/^Clover 3\.x/);
+    expect(earlierDescription()).toBe(
+      "Deprecated: for an older installation only. Use Clover 4's docs at /docs.",
+    );
+  });
+
+  it("say in their structured data that they are deprecated, and what to use", () => {
+    const article = structuredData({
+      title: earlierTitle("Label (3.x)"),
+      description: earlierDescription("Label."),
+      route: "/docs/deprecated-versions/label",
+    })["@graph"][0] as Record<string, unknown>;
+    expect(article).toMatchObject({
+      headline: "Label (3.x, deprecated)",
+      version: "3.x",
+      creativeWorkStatus: "Deprecated",
+      about: {
+        name: "@samvera/clover-iiif",
+        creativeWorkStatus: "Deprecated",
+      },
+    });
+    expect(article.abstract).toContain(
+      "Don't use it unless you are supporting an older installation.",
+    );
+    expect(article.abstract).toContain(`${siteUrl}/docs;`);
+  });
+
+  it("are the only pages structured data calls deprecated", () => {
+    const article = structuredData({
+      title: "Items",
+      description: "Items.",
+      route: "/docs/items",
+    })["@graph"][0] as Record<string, unknown>;
+    expect(article.creativeWorkStatus).toBeUndefined();
+    expect(article.abstract).toBeUndefined();
   });
 });
 

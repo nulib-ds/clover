@@ -169,37 +169,58 @@ export function pageMetadata({
 
 /*
  * Clover 3.x, `@samvera/clover-iiif`, is deprecated (Mat, 2026-11-03): its docs are
- * kept under `/docs/deprecated-versions/` for reference. Every
- * page there says so to a reader, to search engines (its description and structured
- * data) and to the site's own search (its results are titled "(3.x)" and rank below
- * Clover 4's): see `app/[[...mdxPath]]/page.tsx`.
+ * kept under `/docs/deprecated-versions/` for reference. Every page there says so at
+ * once (Mat, 2026-11-12: "IT SHOULD be immediately clear that this is a deprecated
+ * version and advice is to not use unless you are supporting an older installation"):
+ * to a reader, in its title and the notice opening its body; to search engines, in its
+ * title, description and structured data; and to agents, in those, its Markdown and
+ * every answer the agent tools give on it (`docs/lib/webmcp/run.ts`). It is out of the
+ * site's own search. See `app/[[...mdxPath]]/page.tsx`.
  */
 export const isEarlierVersion = (route: string) =>
   route === "/docs/deprecated-versions" ||
   route.startsWith("/docs/deprecated-versions/");
 
-const EARLIER = "(3.x)";
+/* The deprecated package, as its pages and the agents' answers name it. */
+export const earlierPackage = "@samvera/clover-iiif";
 
-/**
- * A 3.x page's title, always ending "(3.x)", so a result says which version it is; but
- * not "Clover 3.x (3.x)", its overview's, which says it already.
+/*
+ * What to do instead, said alike wherever a 3.x page speaks to a search engine or an
+ * agent (its structured data's `abstract`, the agent tools' answers): the notice on the
+ * page says the same, with its links (`EarlierVersion.tsx`).
  */
-export const earlierTitle = (title: string) =>
-  title.endsWith(EARLIER) || title.endsWith("3.x")
-    ? title
-    : `${title} ${EARLIER}`;
+export const earlierAdvice = `Clover 3.x (${earlierPackage}) is deprecated and no longer maintained. Don't use it unless you are supporting an older installation. Use Clover 4 (@nulib/clover) instead, documented at ${siteUrl}/docs; ${siteUrl}/docs/upgrading moves a 3.x page to Clover 4.`;
 
-/* What every 3.x page's description says it documents. */
-const EARLIER_DESCRIPTION =
-  "Clover 3.x (@samvera/clover-iiif), deprecated and no longer maintained.";
+const EARLIER = "(3.x, deprecated)";
 
 /**
- * A 3.x page's description: its own, then what it documents, so a search result opens
- * with the page's own words (Mat, 2026-10-30; the other way about, all 3.x pages' results
- * read alike).
+ * A 3.x page's title, always ending "(3.x, deprecated)", so a browser's tab and a search
+ * result say which version it is and that it is deprecated (Mat, 2026-11-12; "(3.x)"
+ * from 2026-10-30): "Label (3.x)" in its front matter, or "Label", is "Label (3.x,
+ * deprecated)", and its overview's, "Clover 3.x", "Clover 3.x (deprecated)".
+ */
+export const earlierTitle = (title: string) => {
+  if (title.endsWith(EARLIER) || title.endsWith("3.x (deprecated)"))
+    return title;
+  const own = title.replace(/\s*\(3\.x\)$/, "");
+  return own.endsWith("3.x") ? `${own} (deprecated)` : `${own} ${EARLIER}`;
+};
+
+/*
+ * What every 3.x page's description opens with: that it is deprecated, for an older
+ * installation only, and where Clover 4 is. Short, so the longest 3.x description, with
+ * it, still fits a search result (`DESCRIPTION_MOST`).
+ */
+const EARLIER_DESCRIPTION =
+  "Deprecated: for an older installation only. Use Clover 4's docs at /docs.";
+
+/**
+ * A 3.x page's description: that it is deprecated, then its own words, so a search
+ * result says so before anything else (Mat, 2026-11-12: "Lead with Deprecated"; its own
+ * words first from 2026-10-30, so 3.x pages' results read less alike).
  */
 export const earlierDescription = (description?: string) =>
-  [description, EARLIER_DESCRIPTION].filter(Boolean).join(" ");
+  [EARLIER_DESCRIPTION, description].filter(Boolean).join(" ");
 
 /** A place in the docs' menu, for a page's breadcrumbs: its name and its route. */
 export interface Crumb {
@@ -248,7 +269,15 @@ export function structuredData({
         inLanguage: "en",
         ...(modified && { dateModified: modified }),
         version: earlier ? "3.x" : "4",
-        ...(earlier && { creativeWorkStatus: "Deprecated" }),
+        /*
+         * A 3.x page is deprecated, as the software it documents is, and its abstract
+         * says what to do instead, with Clover 4's docs and Upgrading by their addresses
+         * (Mat, 2026-11-12).
+         */
+        ...(earlier && {
+          creativeWorkStatus: "Deprecated",
+          abstract: earlierAdvice,
+        }),
         isPartOf: {
           "@type": "WebSite",
           name: siteName,
@@ -259,8 +288,9 @@ export function structuredData({
         about: earlier
           ? {
               "@type": "SoftwareSourceCode",
-              name: "@samvera/clover-iiif",
+              name: earlierPackage,
               version: "3.x",
+              creativeWorkStatus: "Deprecated",
               codeRepository: "https://github.com/nulib-ds/clover/tree/v3",
             }
           : {

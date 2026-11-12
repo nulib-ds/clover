@@ -39,16 +39,27 @@ deadline.
     2026-11-04) moves a page from 3.x to Clover 4 in steps, as Get started installs:
     the setup's radio cards (`InstallGuide`), then each way's swap and imports, React's
     `options` moved to props, and the other components. Every 3.x notice links there.
-    Its page titles end in "(3.x)" so search results tell the two apart (its overview's,
-    "Clover 3.x", says it already).
+    Its page titles end in "(3.x, deprecated)" so a tab and a search result tell the two
+    apart and say it is deprecated (Mat, 2026-11-12; "(3.x)" from 2026-10-30), its
+    overview's "Clover 3.x (deprecated)" (`earlierTitle`, `docs/lib/site.ts`; the front
+    matter keeps "(3.x)", and the menu and the headings their own names).
   - The 3.x pages are for reference, never the standard (Mat, 2026-10-20). They document
     an earlier version: never take their API, behavior, wording or patterns as how
     Clover 4 works or should work. The package's source, its tests, its own AGENTS.md
-    and DESIGN.md, and the 4.x pages are the authority. Every 3.x page says so to
-    readers, search engines and agents: a notice opening the page and a "(3.x)" title,
-    a description in its own words, then what it documents (Mat, 2026-10-30: its own
-    words first, so its search result opens with them), schema.org data (`version: "3.x"`,
-    `creativeWorkStatus: "Deprecated"`), and no place in the site's search (Mat,
+    and DESIGN.md, and the 4.x pages are the authority. Every 3.x page says so at once
+    (Mat, 2026-11-12: "IT SHOULD be immediately clear that this is a deprecated version
+    and advice is to not use unless you are supporting an older installation. use 4.x
+    docs at /docs instead.") to readers, search engines and agents: a notice opening its
+    body, before its title (`docs/components/EarlierVersion.tsx`: "Clover 3.x is
+    deprecated", a `note` named so, in the contrast guide's amber, saying not to use it
+    unless supporting an older installation, with "Go to Clover 4 docs" to `/docs` and
+    Upgrading; the overview has no notice of its own), its "(3.x, deprecated)" title, a
+    description opening "Deprecated: for an older installation only. Use Clover 4's docs
+    at /docs.", then in its own words (Mat, 2026-11-12: "Lead with Deprecated"; its own
+    words first from 2026-10-30, so its search result opened with them), schema.org data (`version: "3.x"`, `creativeWorkStatus: "Deprecated"`
+    on the page and on `@samvera/clover-iiif`, and an `abstract`, `earlierAdvice`, saying
+    what to use instead), a `deprecated` note in every answer the agent tools give on it
+    (`docs/lib/webmcp/run.ts`), and no place in the site's search (Mat,
     2026-11-05: "results for search SHOULD NOT include any of the deprecated 3.x docs";
     Upgrading, a 4.x page, stays): its `main` has no `data-pagefind-body`
     (`app/[[...mdxPath]]/page.tsx`, `docs/lib/site.ts`), while the sitemap, its Markdown
