@@ -1,6 +1,6 @@
 ---
 title: Search
-description: "IIIF Content Search of the Root's Manifest, version 1 or 2: a field, then the hits by Canvas with the words around them, drawn on the Canvas."
+description: "Search renders the responses of a IIIF Content Search service: a field to search a Manifest's text, and a list of results that walks through its Canvases."
 ---
 
 import { ViewerExample } from "docs/components/Clover4/ViewerDocs";
@@ -17,8 +17,9 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 </div>
 
 <div className="docs-lede">
-  IIIF Content Search of the Manifest: a field, then the hits by Canvas, with
-  the words around them, and Previous and Next to step through them.
+  Renders the search responses for a IIIF Content Search service, which searches
+  the text of a Manifest, and provides a list of results that walks the user
+  through its Canvases.
 </div>
 
 <LivePart
@@ -31,43 +32,48 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 
 ## API reference
 
-Inside a `Root`, it searches the Manifest through its Content Search service, version 1 or
-2, and lists the hits by Canvas, each with the words around it, from up to 10 pages of
-results. Choosing a hit goes to it and frames it, and every hit is drawn on the Canvas.
-Inside the field, before its clear, Previous and Next step through the hits in order, across Canvases,
-showing which is current over the total ("3 / 11"); results go to their first hit as
-they arrive, as find in a page does, starting from the current Canvas: its first hit, where
-it has hits, else the first of all. So a page opened with a query (a content
-state and a `searchQuery`, from a site's search results) stays on that page. With `sticky` the field is held in
-view as the hits scroll; the Panel's own Search section has it, and draws its hits on the
-Canvas only while it is open. The page's own text, its OCR, is not drawn until a
-search finds something in it; without a search service, the Canvas's annotations menu
-offers it instead ([Searching supplementing annotations](#searching-supplementing-annotations)). In a Panel, a search started outside its Search section
-opens it ([The open section](/docs/panel#the-open-section)). It renders nothing without a
-search service. Its other props, and its `ref`, go to its
-element.
+Place Search inside a `Root`. It searches the Manifest through its Content Search service,
+version 1 or 2, and renders nothing when the Manifest has no service.
+
+Search reads up to 10 pages of a response and lists the results by Canvas, with the words
+around each one. Choosing a result opens its Canvas and frames the result. Previous and
+Next step through the results in order and show the place, such as "3 / 11".
+
+When results arrive, Search selects the first one on the current Canvas, or the first of
+all when that Canvas has none. A content state can
+[select a specific result](#open-a-content-search-response-to-a-specific-result) instead.
+
+Each result is highlighted on the Canvas. In a `Panel`, results are highlighted only while
+its Search section is open, and a search started elsewhere
+[opens that section](/docs/panel#the-open-section). `sticky` keeps the field in view while
+the results scroll.
+
+OCR stays hidden until a search finds a result in it. When a Manifest has no search
+service, the Canvas's annotations menu lists its OCR instead
+([Searching supplementing annotations](#searching-supplementing-annotations)).
+
+Its other props, and its `ref`, go to its element.
 
 <ApiReference elements="clover-search">
 
-| Prop           | Type                 | Default   | Description                                                                            |
-| -------------- | -------------------- | --------- | -------------------------------------------------------------------------------------- |
-| `headingLevel` | `number`             | `3`       | Each Canvas's heading, one below the heading it sits under.                            |
-| `sticky`       | `boolean`            | `false`   | The field held in view as the hits scroll under it.                                    |
-| `size`         | `"large" \| "small"` | `"large"` | The field's size: its submit a round control's, or a tad smaller, for a narrow column. |
-| `as`           | element type         | `"div"`   | The element to render.                                                                 |
-| `className`    | `string`             | —         | Added to `clover-content-search`.                                                      |
+| Prop           | Type                 | Default   | Description                                                             |
+| -------------- | -------------------- | --------- | ----------------------------------------------------------------------- |
+| `headingLevel` | `number`             | `3`       | The level of each Canvas's heading: one below the heading above Search. |
+| `sticky`       | `boolean`            | `false`   | Keeps the field in view while the results scroll.                       |
+| `size`         | `"large" \| "small"` | `"large"` | The field's size. Use `small` for a narrow column.                      |
+| `as`           | element type         | `"div"`   | The element to render.                                                  |
+| `className`    | `string`             | —         | Added to `clover-content-search`.                                       |
 
 </ApiReference>
 
 ## Examples
 
-### A query to start with
+### Search when the Manifest opens
 
-Use `searchQuery`, on the Viewer or a `Root`, to search as the Manifest opens and again
-whenever it changes. The Viewer draws the hits on the Canvas and lists them in its Panel's
-Search section. `onSearchChange` hears each query as it changes, one typed in the Search
-field too, and `""` once it is cleared, so a page can keep it in its address, as the
-homepage does with `?q=`.
+Set `searchQuery` on the Viewer or a `Root` to search as soon as the Manifest opens, and
+again whenever the query changes. The Viewer lists the results in its Panel's Search
+section and highlights them on the Canvas. `onSearchChange` reports each new query, and
+`""` when the search is cleared, so your page can keep the query in its address.
 
 <ViewerExample resource="search" props={{ searchQuery: "Moskau" }}>
 
@@ -80,10 +86,94 @@ homepage does with `?q=`.
 
 </ViewerExample>
 
-### From your own part
+### Open a Content Search response to a specific result
 
-`clover.search(query)`, from `useClover()`, searches as the field does, and the Root holds
-the results as `search`. To ask a service yourself, leaving the Root alone, use
+Pass the query as `searchQuery`. As `iiifContent`, pass a
+[content state](/docs/content-state#target-a-content-search-result) whose target is one
+result's annotation. That annotation must match an annotation in the search responses:
+Clover runs the search and compares their `id` values.
+
+- If a response has an annotation with the same `id`, Clover selects that result.
+- If none does, Clover shows the content state's annotation in
+  [Annotations](/docs/annotations) instead, as it would any annotation. The search still
+  selects its first result on that Canvas, or its first result of all when that Canvas has
+  none.
+- If the search finds nothing, the annotation stays selected in Annotations.
+
+This example selects the tenth of ten results for "pedals", on Page 21.
+
+<ViewerExample
+  resource="catalog"
+  place={{ canvas: 21, xywh: "661,3125,304,100", hit: "hit/22-w148" }}
+  props={{ searchQuery: "pedals" }}
+>
+
+```jsx {6,25}
+const targetSpecificResult = {
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  type: "Annotation",
+  motivation: ["contentState"],
+  target: {
+    id: "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/22-w148",
+    type: "Annotation",
+    target: {
+      type: "SpecificResource",
+      source: {
+        id: "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/22",
+        type: "Canvas",
+        partOf: [
+          {
+            id: "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
+            type: "Manifest",
+          },
+        ],
+      },
+      selector: { type: "FragmentSelector", value: "xywh=661,3125,304,100" },
+    },
+  },
+};
+
+<Viewer iiifContent={targetSpecificResult} searchQuery="pedals" />;
+```
+
+```html twin {1,9,28}
+<clover-viewer search-query="pedals"></clover-viewer>
+
+<script type="module">
+  const targetSpecificResult = {
+    "@context": "http://iiif.io/api/presentation/3/context.json",
+    type: "Annotation",
+    motivation: ["contentState"],
+    target: {
+      id: "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/22-w148",
+      type: "Annotation",
+      target: {
+        type: "SpecificResource",
+        source: {
+          id: "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/22",
+          type: "Canvas",
+          partOf: [
+            {
+              id: "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
+              type: "Manifest",
+            },
+          ],
+        },
+        selector: { type: "FragmentSelector", value: "xywh=661,3125,304,100" },
+      },
+    },
+  };
+
+  document.querySelector("clover-viewer").iiifContent = targetSpecificResult;
+</script>
+```
+
+</ViewerExample>
+
+### Search from your own component
+
+Call `clover.search(query)`, from `useClover()`, to search as the field does. The `Root`
+keeps the results in its state as `search`. To query a service without the `Root`, use
 `searchServiceOf(manifest)` and `search(service, query)`.
 
 ```jsx
@@ -108,9 +198,10 @@ function SearchFor({ query }) {
 </script>
 ```
 
-### Without highlights
+### Hide the highlights on the Canvas
 
-The hits are drawn as the annotation set `SEARCH_SET_ID`. Hide it, and they stay listed.
+Search highlights its results on the Canvas as the annotation set `SEARCH_SET_ID`. Hide
+that set, and the results stay listed.
 
 ```jsx
 clover.setSetVisible(Clover.SEARCH_SET_ID, false);
@@ -118,7 +209,7 @@ clover.setSetVisible(Clover.SEARCH_SET_ID, false);
 
 ```html twin
 <script type="module">
-  // The search's hits are the set "content-search".
+  // The search's results are the set "content-search".
   document
     .querySelector("clover-root")
     .clover.setSetVisible("content-search", false);
@@ -129,19 +220,25 @@ clover.setSetVisible(Clover.SEARCH_SET_ID, false);
 
 <div data-code-flavor="both">
 
-Search asks the Manifest's Content Search service for words, and its hits point into the
-annotations that hold a page's OCR, drawn where the words are. A Manifest without a
-service, as Cookbook 0068's newspaper is, still has its OCR in reach: the Canvas's
-annotations menu lists each page's lines in the order given, choosing a line zooms to it,
-and the page's toggle draws every line on the image. Clover does not search the lines
-itself. They start hidden either way, and the Annotations list leaves them out, as a page
-of OCR runs to hundreds of lines; with a service, the menu leaves them to its hits.
+A Content Search service finds words in a Manifest's OCR, and each result points to the
+annotation that holds them. Clover doesn't search OCR itself.
 
-Clover treats an annotation as OCR by what it is, not by the file it came in: its
-motivation is `supplementing`, its target a region of a Canvas that does not play (a
-`xywh` fragment, an SVG selector or a point), and it sits in the Canvas's `annotations`,
-embedded or in an AnnotationPage referenced by its address. Its words are a
-`TextualBody`, read by its `format`:
+For a Manifest without a service, such as Cookbook 0068's newspaper, the Canvas's
+annotations menu lists each page's lines. Choose a line to zoom to it, or turn on the
+page's toggle to show every line on the image. With a service, the menu leaves OCR out,
+and search results show it.
+
+OCR starts hidden either way, and the Annotations list leaves it out, since one page can
+hold hundreds of lines.
+
+Clover treats an annotation as OCR when:
+
+- Its motivation is `supplementing`.
+- Its target is a region of a Canvas that has no duration: an `xywh` fragment, an SVG
+  selector or a point.
+- It is in the Canvas's `annotations`, embedded or in a referenced AnnotationPage.
+
+Its text is a `TextualBody`, read by its `format`:
 
 - `text/plain`, or any type not listed here: as written.
 - `text/html`: IIIF's HTML, sanitized to what the Presentation API allows.
@@ -149,7 +246,7 @@ embedded or in an AnnotationPage referenced by its address. Its words are a
 - No `format`: as written, unless the whole value is HTML (from a first `<` to a last
   `>`), read as IIIF's HTML.
 
-OCR kept in a file of its own is not read line by line:
+OCR in a separate file isn't read line by line:
 
 - `application/xml`, ALTO (its `profile` `http://www.loc.gov/standards/alto/`), or any
   other file given as a Canvas's or the Manifest's `rendering`: offered in Download, as
@@ -167,4 +264,4 @@ OCR kept in a file of its own is not read line by line:
 - `iiifContentSearchQuery={{ q }}` is `searchQuery`.
 - `renderOverlays: false` is `clover.setSetVisible(SEARCH_SET_ID, false)`.
 - `defaultTab: "manifest-content-search"` is the Panel's `defaultValue="search"`.
-- There is no `searchResultsLimit`: every hit returned is listed.
+- There is no `searchResultsLimit`: every result returned is listed.

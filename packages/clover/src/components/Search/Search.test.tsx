@@ -1,4 +1,5 @@
 import {
+  cleanup,
   fireEvent,
   render,
   screen,
@@ -9,6 +10,7 @@ import React from "react";
 
 import {
   CANVAS,
+  MANIFEST,
   SEARCH_V1,
   SEARCH_V2,
   manifest,
@@ -20,6 +22,8 @@ import * as Clover from "../../index";
 import { createClover } from "../../core/clover";
 
 const withSearch = manifest([{ id: SEARCH_V2, type: "SearchService2" }]);
+/** An annotation without text, as the Annotations list names it: by its number. */
+const LISTED = "Find on the image: 1";
 
 function mockFetch() {
   return vi.fn(async (url: string) => {
@@ -259,6 +263,185 @@ describe("Search", () => {
     await waitFor(() =>
       expect(heard.mock.calls).toEqual([["bird"], [""], ["bird"]]),
     );
+  });
+
+  /*
+   * Mat, 2026-11-12: a content state that targets one hit, by its annotation's `id`, with
+   * the hit's own target inside, and the query beside it.
+   */
+  it("keeps the hit a content state targets as the Root's search answers, not its Canvas's first", async () => {
+    const pages = mockFetch();
+    const fetch = vi.fn(async (url: string) =>
+      url === MANIFEST
+        ? new Response(JSON.stringify(withSearch), { status: 200 })
+        : pages(url),
+    );
+    const state = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      type: "Annotation",
+      motivation: ["contentState"],
+      target: {
+        id: "https://example.org/hit/2",
+        type: "Annotation",
+        motivation: "highlighting",
+        target: {
+          type: "SpecificResource",
+          source: {
+            id: CANVAS(1),
+            type: "Canvas",
+            partOf: [{ id: MANIFEST, type: "Manifest" }],
+          },
+          selector: { type: "FragmentSelector", value: "xywh=100,400,250,20" },
+        },
+      },
+    };
+    render(
+      <Clover.Root iiifContent={state} request={{ fetch }} searchQuery="bird">
+        <Clover.Label of="canvas" data-testid="canvas" />
+        <Clover.Search />
+        <Clover.Annotations />
+      </Clover.Root>,
+    );
+    await screen.findByText("3 results");
+    // The second of the first Canvas's two hits, where the first would be chosen alone.
+    await screen.findByText("Result 2 of 3");
+    const hits = within(
+      document.querySelector<HTMLElement>(".clover-content-search")!,
+    )
+      .getAllByRole("listitem")
+      .map((item) => within(item).getByRole("button"));
+    expect(hits[1]).toHaveAttribute("aria-current", "true");
+    expect(hits[0]).not.toHaveAttribute("aria-current", "true");
+    expect(screen.getByTestId("canvas")).toHaveTextContent("Page 1");
+    // It is the search's result: not listed with the annotations too.
+    expect(screen.queryByRole("button", { name: LISTED })).toBeNull();
+  });
+
+  /*
+   * What the Search page says of a content state whose annotation no response holds
+   * (Mat, 2026-11-12: "it should just relegate to an annotation in the annotation pane").
+   */
+  it("lists the content state's annotation with the annotations where no response holds it, the search going to its first result as ever", async () => {
+    const state = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      type: "Annotation",
+      motivation: ["contentState"],
+      target: {
+        id: "https://example.org/hit/gone",
+        type: "Annotation",
+        target: {
+          type: "SpecificResource",
+          source: {
+            id: CANVAS(2),
+            type: "Canvas",
+            partOf: [{ id: MANIFEST, type: "Manifest" }],
+          },
+          selector: { type: "FragmentSelector", value: "xywh=10,10,200,20" },
+        },
+      },
+    };
+    const answer = (items: unknown[]) =>
+      new Response(JSON.stringify({ type: "AnnotationPage", items }), {
+        status: 200,
+      });
+    const pages = mockFetch();
+    const fetch = vi.fn(async (url: string) =>
+      url === MANIFEST
+        ? new Response(JSON.stringify(withSearch), { status: 200 })
+        : url === `${SEARCH_V2}?q=one`
+          ? answer([
+              {
+                id: "https://example.org/hit/only",
+                type: "Annotation",
+                motivation: "highlighting",
+                body: { type: "TextualBody", value: "one" },
+                target: `${CANVAS(1)}#xywh=100,100,250,20`,
+              },
+            ])
+          : url === `${SEARCH_V2}?q=none`
+            ? answer([])
+            : pages(url),
+    );
+    const open = (query: string) =>
+      render(
+        <Clover.Root
+          iiifContent={state}
+          request={{ fetch }}
+          searchQuery={query}
+        >
+          <Clover.Label of="canvas" data-testid="canvas" />
+          <Clover.Search />
+          <Clover.Annotations />
+        </Clover.Root>,
+      );
+
+    // Results on its Canvas: the first of those, the third of three, on Page 2.
+    let view = open("bird");
+    await screen.findByText("Result 3 of 3");
+    expect(screen.getByTestId("canvas")).toHaveTextContent("Page 2");
+    // The annotation is listed, an annotation like any other, the result the one chosen.
+    expect(await screen.findByRole("button", { name: LISTED })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    view.unmount();
+
+    // None on its Canvas: the first result of all, on Page 1.
+    view = open("one");
+    await screen.findByText("Result 1 of 1");
+    expect(screen.getByTestId("canvas")).toHaveTextContent("Page 1");
+    view.unmount();
+
+    // No results: the Canvas the content state opened, its annotation listed and chosen.
+    view = open("none");
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("status")
+          .some((status) => status.textContent === "No results"),
+      ).toBe(true),
+    );
+    expect(screen.getByTestId("canvas")).toHaveTextContent("Page 2");
+    expect(await screen.findByRole("button", { name: LISTED })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    view.unmount();
+
+    // No query at all: listed and chosen from the start.
+    render(
+      <Clover.Root iiifContent={state} request={{ fetch }}>
+        <Clover.Label of="canvas" data-testid="canvas" />
+        <Clover.Annotations />
+      </Clover.Root>,
+    );
+    expect(await screen.findByRole("button", { name: LISTED })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByTestId("canvas")).toHaveTextContent("Page 2");
+    cleanup();
+
+    // A query, and a Manifest with no service to ask: listed all the same.
+    render(
+      <Clover.Root
+        iiifContent={state}
+        request={{
+          fetch: vi.fn(
+            async () =>
+              new Response(JSON.stringify(manifest([])), { status: 200 }),
+          ),
+        }}
+        searchQuery="bird"
+      >
+        <Clover.Label of="canvas" data-testid="canvas" />
+        <Clover.Annotations />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("button", { name: LISTED }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("canvas")).toHaveTextContent("Page 2");
   });
 
   it("says when nothing matched, or the service failed", async () => {

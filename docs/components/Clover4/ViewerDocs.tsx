@@ -111,17 +111,29 @@ function useResource(key: string) {
   return url;
 }
 
+/** Where an example opens: a region of a Canvas, and a search's hit there. */
+export interface Place {
+  /** The Canvas, by its place in the Manifest's `items`. */
+  canvas: number;
+  /** The region, in the Canvas's pixels. */
+  xywh: string;
+  /**
+   * A Content Search hit to target, by its `id` under the Manifest's search service, as
+   * the docs' mocks name theirs (`hit/22-w148`): the content state then targets the hit.
+   */
+  hit?: string;
+}
+
 /**
  * A content state for a region of one of the Manifest's Canvases, by its place in
- * `items`: the Manifest is read first, so the ids are the ones it was served with.
+ * `items`, or for a search's hit there: the Manifest is read first, so the ids are the
+ * ones it was served with, the dev server's in `npm run dev`.
  */
-function usePlace(
-  url: string | null,
-  place: { canvas: number; xywh: string } | undefined,
-) {
+function usePlace(url: string | null, place: Place | undefined) {
   const [state, setState] = useState<string | null>(null);
   const canvas = place?.canvas;
   const xywh = place?.xywh;
+  const hit = place?.hit;
   useEffect(() => {
     if (!url || canvas === undefined || !xywh) return;
     let live = true;
@@ -130,27 +142,38 @@ function usePlace(
       .then((manifest) => {
         const id = manifest.items?.[canvas]?.id;
         if (!live || !id) return;
+        const region = {
+          type: "SpecificResource",
+          source: {
+            id,
+            type: "Canvas",
+            partOf: [{ id: url, type: "Manifest" }],
+          },
+          selector: { type: "FragmentSelector", value: `xywh=${xywh}` },
+        };
+        const service = ([] as Array<Record<string, string>>)
+          .concat(manifest.service ?? [])
+          .find((each) => /SearchService/.test(each.type ?? each["@type"]));
         setState(
           encodeContentState({
             "@context": "http://iiif.io/api/presentation/3/context.json",
             type: "Annotation",
             motivation: ["contentState"],
-            target: {
-              type: "SpecificResource",
-              source: {
-                id,
-                type: "Canvas",
-                partOf: [{ id: url, type: "Manifest" }],
-              },
-              selector: { type: "FragmentSelector", value: `xywh=${xywh}` },
-            },
+            target:
+              hit && service
+                ? {
+                    id: `${service.id ?? service["@id"]}/${hit}`,
+                    type: "Annotation",
+                    target: region,
+                  }
+                : region,
           }),
         );
       });
     return () => {
       live = false;
     };
-  }, [url, canvas, xywh]);
+  }, [url, canvas, xywh, hit]);
   return state;
 }
 
@@ -185,8 +208,11 @@ export interface LiveProps {
   props?: Record<string, Plain>;
   /** Custom properties on the Viewer's own root (`--clover-…`), beside the example's own. */
   vars?: Record<string, string>;
-  /** Open at a region of a Canvas, by its place in the Manifest, as a content state. */
-  place?: { canvas: number; xywh: string };
+  /**
+   * Open at a region of a Canvas, by its place in the Manifest, or at a search's hit
+   * there, as a content state.
+   */
+  place?: Place;
   /** The Body's height (`--clover-body-height`). */
   height?: string;
   /** A box of this height for the Viewer to `fill`. */

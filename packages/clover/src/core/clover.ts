@@ -270,6 +270,8 @@ export interface Initial {
   canvasId?: string | null;
   defaultCanvasId?: string | null;
   manifestId?: string | null;
+  /** Whether the host has a query to search for once the Manifest shows (`searchQuery`). */
+  searching?: boolean;
 }
 
 const NO_SEARCH: SearchState = {
@@ -316,6 +318,16 @@ export function createClover(options: CloverOptions = {}): Clover {
   let layerSets: AnnotationSet[] = [];
   let hostSets: AnnotationSet[] = [];
   let stateSets: AnnotationSet[] = [];
+  /**
+   * The annotation a content state targets (a search's result, by its `id`), held while
+   * a search is to answer: where the answer has it, it is the search's; where it has not,
+   * it is listed with the content's own, as a note is (Mat, 2026-11-12: "it should just
+   * relegate to an annotation in the annotation pane"). Which, the search's own code
+   * decides (`searchInto`), and with no query to search for, the content state's lists it
+   * from the start (`follow`): here, only what must outlive both, and the search with
+   * nothing to ask, which lists it.
+   */
+  let sought: AnnotationSet | null = null;
   /** Manifests shown so far, so a module that arrives late reads the one still shown. */
   let arrivals = 0;
   /** One of those to pick once a host that holds the Manifest moves to it. */
@@ -351,6 +363,13 @@ export function createClover(options: CloverOptions = {}): Clover {
     layerSets.length || hostSets.length || stateSets.length
       ? [...layerSets, ...hostSets, ...stateSets]
       : INITIAL.addedSets;
+  /** The sought annotation, settled: listed with the content's own where given. */
+  const settle = (listed?: AnnotationSet | null) => {
+    sought = null;
+    if (!listed) return;
+    stateSets = [...stateSets, listed];
+    store.set({ addedSets: added() });
+  };
   let request = options.request;
   let loading: AbortController | null = null;
   /** Referenced pages already asked for, so each is fetched once. */
@@ -578,6 +597,7 @@ export function createClover(options: CloverOptions = {}): Clover {
         request,
         signal,
         manifestId: initial.manifestId ?? undefined,
+        searching: initial.searching,
       });
       if (signal.aborted) return;
       /*
@@ -592,6 +612,7 @@ export function createClover(options: CloverOptions = {}): Clover {
       stateSets = noted.length
         ? [{ id: `${note!.id}#content-state`, source: "added", entries: noted }]
         : (loaded.annotationSets ?? []);
+      sought = loaded.sought ?? null;
       const pick = pending ?? noted[0]?.id ?? loaded.pick;
       pending = null;
       store.set({ throughCollection: Boolean(loaded.collection) });
@@ -816,6 +837,8 @@ export function createClover(options: CloverOptions = {}): Clover {
       const q = query.trim();
       if (!q || !service) {
         searching = null;
+        // No search to answer with a content state's annotation: it is listed.
+        settle(sought);
         store.set({ search: NO_SEARCH, annotationId: null });
         return;
       }
@@ -827,7 +850,15 @@ export function createClover(options: CloverOptions = {}): Clover {
       try {
         // Asking and reading a service, and the rest of this, load with the first search.
         const { searchInto } = await import("./search");
-        await searchInto(store, service, q, request, controller.signal);
+        await searchInto(
+          store,
+          service,
+          q,
+          request,
+          controller.signal,
+          sought,
+          settle,
+        );
       } catch {
         // The search's own code would not load.
         store.set({

@@ -1,3 +1,4 @@
+import type { AnnotationSet } from "./annotation-sets";
 import { parseAnnotationTarget } from "./annotations";
 import type { ResolvedContentState, Target } from "./content-state";
 import { resolveContentState } from "./content-state-reader";
@@ -105,6 +106,14 @@ export async function follow(
     follows: (options.follows ?? 0) + 1,
   });
   const { target } = resolved;
+  /*
+   * The annotation it targets (a search's result, by its `id`; Mat, 2026-11-12). With a
+   * query to search for, it is held for the answer (`sought`): the search's result where
+   * the answer has it, else listed (`searchInto`), as it is where the Manifest has no
+   * service to ask (`clover.search`). With no query, it is listed from the start, as the
+   * content's own annotations are, and picked.
+   */
+  const set = soughtSet(resolved.sought);
   return placeTarget({
     ...loaded,
     target:
@@ -112,8 +121,48 @@ export async function follow(
         ? { ...loaded.target, ...target }
         : (loaded.target ?? target),
     annotation: loaded.annotation ?? resolved.annotation,
+    ...(set && !loaded.annotationSets && !options.searching
+      ? { annotationSets: [set], pick: resolved.pick }
+      : {}),
+    sought: loaded.sought ?? (options.searching ? set : undefined),
     targets: loaded.targets ?? resolved.targets,
   });
+}
+
+/**
+ * The annotation a content state targets, as a set of its own, as its note's is
+ * (`${id}#content-state`): listed with the content's own annotations where no search
+ * answers with it. Made here, not by `readPage`, which leaves out an annotation without a
+ * body, as a search's result is: the list names one by its number. Its text bodies are
+ * read here too, not by `readBodies`: importing that, or the search service's reader,
+ * moves them into chunks every Map and element page loads (500 B on a Map alone).
+ */
+function soughtSet(annotation: Json | undefined): AnnotationSet | undefined {
+  const target =
+    annotation && parseAnnotationTarget(asArray(annotation.target)[0] as never);
+  if (!target?.id) return undefined;
+  const id = `${annotation!.id}#content-state`;
+  return {
+    id,
+    source: "added",
+    entries: [
+      {
+        id: annotation!.id,
+        setId: id,
+        canvasId: target.id,
+        target,
+        motivation: asArray(annotation!.motivation) as string[],
+        bodies: (asArray(annotation!.body) as Json[])
+          .filter((body) => typeof body?.value === "string")
+          .map((body) => ({
+            value: body.value as string,
+            format: body.format,
+            language: asArray(body.language)[0] as string | undefined,
+          })),
+        annotation: annotation!,
+      },
+    ],
+  };
 }
 
 /**
@@ -128,7 +177,12 @@ export async function resolve(
   const json = await readAnnotation(state);
   const resolved = resolveContentState(json);
   if (!resolved) return null;
-  const first = json.type === "Annotation" ? asArray(json.target)[0] : json;
+  const targeted = json.type === "Annotation" ? asArray(json.target)[0] : json;
+  // A target that is an annotation (a search's hit): where that one targets.
+  const first =
+    (targeted as Json)?.type === "Annotation"
+      ? asArray((targeted as Json).target)[0]
+      : targeted;
   const region = svgRegion(parseAnnotationTarget(first as any).svg);
   const note = resolved.annotation;
   return {

@@ -33,6 +33,18 @@ export interface ResolvedContentState {
    */
   annotation?: Json;
   /**
+   * An annotation the content state targets, by its `id`: a Content Search result, say,
+   * its own target where to go. Picked on arrival, or, not yet loaded, once it is: a
+   * search's result as its search answers (`Search`).
+   */
+  pick?: string;
+  /**
+   * That annotation itself: listed with the content's own annotations, as a note is,
+   * where no search answers with it (Mat, 2026-11-12: "it should just relegate to an
+   * annotation in the annotation pane").
+   */
+  sought?: Json;
+  /**
    * Every target, where a content state names two or more (Cookbook 0540: two Canvases
    * from two Manifests, to compare): opened on the first, each to be gone to in turn.
    */

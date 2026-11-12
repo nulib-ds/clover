@@ -300,6 +300,56 @@ A Timeline or a Scene is named by its own `type`, and its context is the one tha
 defines them. A Canvas shown on its own, outside any Manifest, is named without a
 `partOf`.
 
+## Target a Content Search result
+
+A content state can target one result of a Content Search. Set its `target` to the
+result's annotation: the annotation's `id`, as the search service returns it, and the
+annotation's own `target`.
+
+Pass the query as `searchQuery` too. Clover runs the search and selects the result whose
+annotation has the same `id`. If no annotation in the search responses has that `id`, or
+you pass no query, Clover shows the content state's annotation in
+[Annotations](/docs/annotations) instead.
+[Search](/docs/search#open-a-content-search-response-to-a-specific-result) lists each
+case.
+
+This content state targets the tenth result for "pedals" in the catalog, on Page 21:
+
+```json {6-7}
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "type": "Annotation",
+  "motivation": ["contentState"],
+  "target": {
+    "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/22-w148",
+    "type": "Annotation",
+    "target": {
+      "type": "SpecificResource",
+      "source": {
+        "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/22",
+        "type": "Canvas",
+        "partOf": [
+          {
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
+            "type": "Manifest"
+          }
+        ]
+      },
+      "selector": {
+        "type": "FragmentSelector",
+        "value": "xywh=661,3125,304,100"
+      }
+    }
+  }
+}
+```
+
+The `id` must match the one the search service returns. A service that numbers its
+results in order may give the same result a different `id` when its results change.
+
+In Annotations, the annotation shows the text of its `body`. Without a `body`, it shows a
+picture of its region.
+
 ## Encoded
 
 `encoded` is the same annotation as the Content State API encodes it for a URL:

@@ -39,7 +39,9 @@ const ROOTS = ["Manifest", "Collection", "sc:Manifest", "sc:Collection"];
 /** A content state's first target, and the selectors that say where in it. */
 const firstTarget = (state: Record<string, any>) => {
   const targets = state.target ?? state;
-  const named = Array.isArray(targets) ? targets[0] : targets;
+  const first = Array.isArray(targets) ? targets[0] : targets;
+  // An annotation it targets (a search's hit) is where that annotation targets.
+  const named = first?.type === "Annotation" ? [first.target].flat()[0] : first;
   // A SpecificResource names what it selects from as its `source`: Clover writes one for
   // a view with a time or a region (`buildContentState`), and its reader takes it so.
   return named?.type === "SpecificResource"

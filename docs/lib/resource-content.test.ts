@@ -86,6 +86,33 @@ describe("homepage resource addresses", () => {
     ).toBe("https://example.org/manifest");
   });
 
+  // Mat, 2026-11-12: a content state that targets a search's hit, by its `id`.
+  it("reads the Manifest of a content state that targets an annotation, and where it opens", () => {
+    const state = encode({
+      type: "Annotation",
+      motivation: ["contentState"],
+      target: {
+        id: "https://example.org/search/hit/3-w7",
+        type: "Annotation",
+        target: {
+          type: "SpecificResource",
+          source: {
+            id: "https://example.org/canvas/3",
+            type: "Canvas",
+            partOf: [{ id: "https://example.org/manifest", type: "Manifest" }],
+          },
+          selector: { type: "FragmentSelector", value: "xywh=10,20,30,40" },
+        },
+      },
+    });
+    expect(rootAddress(state)).toBe("https://example.org/manifest");
+    const items = [1, 2, 3, 4].map((n) => `https://example.org/canvas/${n}`);
+    expect(contentStateNote(state, items)).toEqual([
+      { word: "Canvas", text: "3 / 4" },
+      { text: "xywh=10,20,30,40" },
+    ]);
+  });
+
   it("ignores unknown or malformed targets without throwing", () => {
     for (const target of [
       null,

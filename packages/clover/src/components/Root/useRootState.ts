@@ -140,6 +140,7 @@ export function useRootState<Props extends RootStateOptions>({
     canvasId,
     defaultCanvasId,
     manifestId: manifestId ?? defaultManifestId,
+    searching: Boolean(searchQuery),
   };
   const requestSettings = requestKey(request);
   const content = useRef(iiifContent);

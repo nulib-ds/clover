@@ -61,9 +61,10 @@ const collectionOf = (resource: Json | undefined) =>
  * `partOf`, then goes to the Canvas (and its region or time); one naming a Manifest or
  * Collection loads it. A Manifest that is itself `partOf` a Collection, the target's or
  * its Canvas's, loads that Collection and opens on the Manifest, so the reader arrives
- * among its members. Where there are several targets it opens on the first, and holds
- * them all (`targets`), each resolved the same way, so the reader can go to each in turn
- * (Cookbook 0540).
+ * among its members. A target that is an annotation (a Content Search hit, Mat,
+ * 2026-11-12) goes where that annotation targets, and picks it by its `id` (`pick`).
+ * Where there are several targets it opens on the first, and holds them all (`targets`),
+ * each resolved the same way, so the reader can go to each in turn (Cookbook 0540).
  */
 export function resolveContentState(json: Json): ResolvedContentState | null {
   const all = (
@@ -111,6 +112,15 @@ function resolveTarget(
   target: Json | string,
   json: Json,
 ): ResolvedContentState | null {
+  // An annotation, by its `id`: where it targets, and it, to pick there.
+  if (typeof target === "object" && target?.type === "Annotation") {
+    const where = asArray(target.target)[0] as Json | string | undefined;
+    const resolved =
+      where && where !== target ? resolveTarget(where, json) : null;
+    return resolved && typeof target.id === "string"
+      ? { ...resolved, pick: target.id, sought: target }
+      : resolved;
+  }
   const parsed = parseAnnotationTarget(target as any);
   const resource: Json =
     typeof target === "string"

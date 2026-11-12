@@ -99,7 +99,9 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
    * Like find in a page, it starts where the reader is: on a Canvas with hits of its
    * own, the first of those, so a reader who arrives at a page with a query (a content
    * state and a `searchQuery`, from a host's search results) stays on that page. On a
-   * Canvas without hits, the answer's first hit.
+   * Canvas without hits, the answer's first hit. A content state that targets one hit
+   * (its annotation, by `id`; Mat, 2026-11-12) has it chosen with the answer
+   * (`searchInto`), and it is kept: the tenth of ten reads "10 / 10".
    */
   const arrived = useRef<unknown>(null);
   useEffect(() => {
