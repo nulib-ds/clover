@@ -1002,7 +1002,9 @@ deadline.
     change the 'Canvas' label to 'Body'", undoing that morning's "make body on bike be
     `Canvas`") shows the spread ("make sure the spreads of a `paged` canvases are showing
     in both items and the Canvas"), zoomed in on Page 24 as a picked annotation brings
-    its region into view ("zoom the canvas in a bit"), its annotations framed as Clover
+    its region into view ("zoom the canvas in a bit"), the page meeting the Body's left
+    edge ("nudge the image spread over so it fill this space"; Mat, 2026-11-12), its
+    annotations framed as Clover
     frames them ("draw annotation for Now more close to how it is in our content"): Then
     at rest, Now picked, from the outside in a dark edge, the accent's band and a light
     line, each twice Clover's width so it shows at this size, nothing over what it marks
@@ -1016,9 +1018,10 @@ deadline.
     between its previous and next, discs as the zoom buttons are, in the control fill
     ("this should be black, I think. and make it extrude like the + - buttons"). Its Panel
     holds Annotations, as Clover lists them, under Page 24, each its picture and its words
-    in regular weight, Now chosen, a line from Now to its Tip on the Body ("draw the line
-    from NOW in right to annotation in viewer canvas"; "still show the annotation line
-    somehow"), and About, the record's own Metadata. Each
+    in regular weight, Now chosen, a line from Now to its Tip on the Body, dimmed, in the
+    text's color ("draw the line from NOW in right to annotation in viewer canvas"; "still
+    show the annotation line somehow"; "dim this line. make translucent black and not
+    blue"), and About, the record's own Metadata. Each
     part's block is named in its edge, but the Root's ("just remove the root label").
     Every word, the names too, is Google Sans Flex, the site's, embedded so it holds in
     an image ("make sure fonts are google sans", then "Switch to Google Sans" for the
@@ -1033,11 +1036,11 @@ deadline.
     "remove the random stray thumbs"), and no Timeline, Hindenburg, language toggle, or
     the languages, accessibility terms and tests that once floated at its left ("remove
     timeline altogether and hinderburg"; "remove the internationalization piece";
-    "remove the left stuff"). The READMEs need no `h1`
-    over it (Mat asked, same day): the wordmark is the picture's, and GitHub and npm title
-    the page. `npm run build:readme-hero` (`scripts/build-readme-hero.mjs`) draws it into
-    `.github/assets/` through a pinhole camera of its own, in the site's tokens, its
-    wordmark and stroke read from `Logo.tsx` and `tokens.css`; change the script and run
+    "remove the left stuff"), no pointer at the play disc ("remove the cursor"), and no
+    wordmark: the root README titles itself `# Clover` under the picture ("remove logo,
+    just do an h1 as `# Clover` below the graphic"; Mat, 2026-11-12).
+    `npm run build:readme-hero` (`scripts/build-readme-hero.mjs`) draws it into
+    `.github/assets/` through a pinhole camera of its own, in the site's tokens; change the script and run
     it, never the SVGs. The fixtures' pictures are taken once into
     `.github/assets/fixtures/` at sizes their servers list (`--fetch` takes them again),
     each no larger than the READMEs show it on a 2× screen (Mat, 2026-11-11: "use smaller
@@ -1054,8 +1057,8 @@ deadline.
     README's `<picture>` picks it by `prefers-color-scheme`, and its still copy (`-still`)
     by `prefers-reduced-motion`, which an image's own styles cannot be relied on to see.
     The package's README links them absolutely, from `main`. The script writes the
-    READMEs' alt (`ALT`), which names every word the picture shows, and the credit under
-    it (`CREDIT`).
+    READMEs' alt (`ALT`), which names every word the picture shows, and the credit,
+    each README's last line, under its License (`CREDIT`; Mat, 2026-11-11).
   - Every card, container, call to action and code block on the site has one radius,
     `--radius-4` (12px), Nextra's code blocks, callouts and search field too
     (`layout.css`); what sits inside one takes a smaller step (`--radius-2`,

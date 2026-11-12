@@ -482,10 +482,6 @@ function clip(defs, shape) {
 }
 const roundClip = (defs, x, y, w, h, r = 0) => clip(defs, rect(x, y, w, h, r));
 
-/** A pointer, its tip at (x, y). */
-const pointer = (x, y) =>
-  `<path transform="translate(${n(x)} ${n(y)}) rotate(-8) scale(1.6)" d="M0 0L0 25L6.2 19.6L10.4 29.2L14.6 27.4L10.5 18H19Z" fill="${BLACK}" stroke="${WHITE}" stroke-width="2" stroke-linejoin="round"/>`;
-
 /**
  * A disc standing out of a face toward the reader, its middle at (x, y) of the world and
  * its face at `front`: its side, its face and what is on it (in its own coordinates, its
@@ -879,22 +875,6 @@ const onHess = (images) => {
   return HESS.map((v) => v * k);
 };
 
-/* ── The brand ───────────────────────────────────────────────────────────── */
-
-/* The hero's stroke (`--swoosh` in tokens.css), in its 300 × 24 box. */
-const SWOOSH = decodeURIComponent(
-  readFileSync(join(ROOT, "docs/styles/tokens.css"), "utf8").match(
-    /--swoosh:\s*url\("data:image\/svg\+xml,([^"]+)"\)/,
-  )[1],
-).match(/d='([^']+)'/)[1];
-
-/* The wordmark's shapes (`docs/components/Logo.tsx`), in its 45.11 × 8.15 box. */
-const WORDMARK = [
-  ...readFileSync(join(ROOT, "docs/components/Logo.tsx"), "utf8")
-    .match(/const PATHS = \[([\s\S]*?)\];/)[1]
-    .matchAll(/"([^"]+)"/g),
-].map((match) => match[1]);
-
 /* ── The layout ──────────────────────────────────────────────────────────── */
 
 /* The Root, in the world, its face at z = 0, its middle at the origin. As the parts blow
@@ -984,11 +964,12 @@ const frontOf = (id) => {
 /*
  * The Body's view, zoomed in a little on Now (Mat, 2026-11-11: "zoom the canvas in a
  * bit"), as a picked annotation brings its region into view: Page 24 as tall as the Body,
- * its middle `ANNOTATED_AT` across it, Page 25 beside it at the gutter. In the Body's
- * face's coordinates.
+ * its middle `ANNOTATED_AT` across it, so it meets the Body's left edge with no ground
+ * showing (Mat, 2026-11-12: "nudge the image spread over so it fill this space"), Page
+ * 25 beside it at the gutter. In the Body's face's coordinates.
  */
 const BODY_FACE = { w: 860 - 2 * GAP, h: 524 - 2 * GAP };
-const ANNOTATED_AT = 0.42;
+const ANNOTATED_AT = 0.3;
 /* Now's Tip, a block standing out of the Body by its region's edge ("have an extruded
  * label for the annotation body on the canvas"): how far it stands out, its corners, and
  * how far down the region it hangs, below Then's picture. */
@@ -1005,7 +986,7 @@ const MODEL = { at: [867, 266, 50], w: 360, h: 300, angles: [0, -10, -3] };
 const SHRINE = { foot: [985, 386, 200], height: 330 };
 
 /* What the picture shows, every word in it named: its title, and the READMEs' alt. */
-const ALT = `The Clover IIIF wordmark over a Clover Viewer blown apart into its blocks on a Root, each block named in its edge, seen from a little below, showing the White bicycle catalog as a paged book: its Label, “${TITLE}”; its Body zoomed in on ${ANNOTATED} of the spread of ${SHOWN.join(" and ")}, its Then and Now annotations framed as Clover frames them, Now picked, the picture around it dimmed, and its Tip standing out of the Body saying “${NOW.text}”; Items, its views ${SPREADS.map((spread) => spread.join(" and ")).join(", ")}, ${SHOWN.join(" and ")} chosen, between its previous and next buttons; and a Panel of Annotations, under ${ANNOTATED}, “${THEN.text}” and “${NOW.text}”, Now chosen, a line from Now to its Tip on the Body, and About, its Metadata (${METADATA.map(([label, value]) => `${label}, ${value}`).join("; ")}). Sliding out from under its right side, other media as options: a Canvas of the Nuremberg footage, Rudolf Hess annotated, a pointer pressing its play button, and a Scene, the Esu shrine standing out of it.`;
+const ALT = `A Clover Viewer blown apart into its blocks on a Root, each block named in its edge, seen from a little below, showing the White bicycle catalog as a paged book: its Label, “${TITLE}”; its Body zoomed in on ${ANNOTATED} of the spread of ${SHOWN.join(" and ")}, its Then and Now annotations framed as Clover frames them, Now picked, the picture around it dimmed, and its Tip standing out of the Body saying “${NOW.text}”; Items, its views ${SPREADS.map((spread) => spread.join(" and ")).join(", ")}, ${SHOWN.join(" and ")} chosen, between its previous and next buttons; and a Panel of Annotations, under ${ANNOTATED}, “${THEN.text}” and “${NOW.text}”, Now chosen, a line from Now to its Tip on the Body, and About, its Metadata (${METADATA.map(([label, value]) => `${label}, ${value}`).join("; ")}). Sliding out from under its right side, other media as options: a Canvas of the Nuremberg footage, Rudolf Hess annotated, its play button, and a Scene, the Esu shrine standing out of it.`;
 /* Whose the examples are, under the picture. */
 const CREDIT = `The White Sewing Machine Company's bicycle catalog (1896), courtesy of Northwestern University Libraries; an Esu shrine, © 2025 Northwestern University; the Nuremberg judgment (1946), National Archives, via Wikimedia Commons.`;
 
@@ -1022,15 +1003,10 @@ ${FONT_FACE}
 .rise{animation-name:rise;--t:.6s}
 .pop{animation-name:pop;--t:.8s;transform-box:fill-box;transform-origin:50% 100%;animation-timing-function:cubic-bezier(.2,1.5,.4,1)}
 .boing{animation-name:boing;--t:.7s;transform-box:fill-box;transform-origin:center;animation-timing-function:ease-out}
-.glide{animation-name:glide;--t:.7s;animation-timing-function:cubic-bezier(.2,.9,.3,1)}
-.press{animation-name:press;--t:.3s;transform-box:fill-box;transform-origin:0 0;animation-timing-function:ease-in-out}
-.ripple{animation-name:ripple;--t:.9s;opacity:0;transform-box:fill-box;transform-origin:center}
 .streak{animation-name:streak;--t:.6s;opacity:0;stroke-dasharray:1;animation-timing-function:ease-out}
 .spark{animation-name:spark;--t:.45s;opacity:0;transform-box:fill-box;transform-origin:center}
 .draw{animation-name:draw;--t:.8s;stroke-dasharray:1;animation-timing-function:cubic-bezier(.45,0,.2,1)}
 .type{animation-name:type;--t:1.1s}
-.win{animation-name:win;--t:.7s;animation-timing-function:cubic-bezier(.5,0,.2,1)}
-.ink{animation-name:ink;--t:.7s;animation-timing-function:cubic-bezier(.5,0,.2,1)}
 svg{font-family:${FONT_SANS}}
 @keyframes burst{0%{opacity:0;transform:var(--from)}12%{opacity:1}}
 @keyframes blast{0%{transform:var(--from);animation-timing-function:cubic-bezier(.55,0,.9,.45)}22%{transform:var(--squeeze);animation-timing-function:cubic-bezier(.2,1.7,.35,1)}}
@@ -1040,15 +1016,10 @@ svg{font-family:${FONT_SANS}}
 @keyframes rise{from{opacity:0;transform:translateY(30px)}}
 @keyframes pop{0%{opacity:0;transform:translateY(60px) scale(.3)}30%{opacity:1}}
 @keyframes boing{0%{opacity:0;transform:scale(.2)}45%{opacity:1;transform:scale(1.22)}65%{transform:scale(.9)}82%{transform:scale(1.06)}100%{transform:none}}
-@keyframes glide{from{opacity:0;transform:translate(120px,90px)}}
-@keyframes press{50%{transform:scale(.82)}}
-@keyframes ripple{0%{opacity:0;transform:scale(.25)}12%{opacity:.9}100%{opacity:0;transform:scale(1.7)}}
 @keyframes streak{0%{opacity:0;stroke-dashoffset:1}30%{opacity:.9}100%{opacity:0;stroke-dashoffset:-1}}
 @keyframes spark{0%{opacity:0;transform:scale(.3)}30%{opacity:1}100%{opacity:0;transform:scale(1.3)}}
 @keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes type{from{transform:none}}
-@keyframes win{from{transform:translateX(calc(-1px*var(--w)))}}
-@keyframes ink{from{transform:translateX(calc(1px*var(--w)))}}
 @media (prefers-reduced-motion:reduce){.a{animation:none!important}}
 `;
 
@@ -1476,7 +1447,9 @@ function hero(p, images, still = false) {
     ]);
     const to = project([...label.at, label.front]);
     layers.above.push(
-      `<g ${anim("fade", BLAST + 0.55)}><circle cx="${n(from[0])}" cy="${n(from[1])}" r="8" fill="${p.a9}"/></g><path d="M${xy(from)}L${xy(to)}" ${anim("draw", BLAST + 0.6)} pathLength="1" fill="none" stroke="${p.a9}" stroke-width="4" stroke-linecap="round"/><g ${anim("fade", BLAST + 1.15)}><circle cx="${n(to[0])}" cy="${n(to[1])}" r="8" fill="${p.a9}"/></g>`,
+      /* Dimmed, the text's color seen through (Mat, 2026-11-12: "dim this line. make
+       * translucent black and not blue"). */
+      `<g opacity="0.4"><g ${anim("fade", BLAST + 0.55)}><circle cx="${n(from[0])}" cy="${n(from[1])}" r="8" fill="${p.ink}"/></g><path d="M${xy(from)}L${xy(to)}" ${anim("draw", BLAST + 0.6)} pathLength="1" fill="none" stroke="${p.ink}" stroke-width="4" stroke-linecap="round"/><g ${anim("fade", BLAST + 1.15)}><circle cx="${n(to[0])}" cy="${n(to[1])}" r="8" fill="${p.ink}"/></g></g>`,
     );
   }
 
@@ -1506,15 +1479,11 @@ function hero(p, images, still = false) {
       },
       delay,
     );
-    /* Its play button, a disc standing out of its lower left, and a pointer pressing it. */
+    /* Its play button, a disc standing out of its lower left, with no pointer at it
+     * (Mat, 2026-11-12: "remove the cursor"). */
     const button = video.corner(play[0], play[1]);
     layers.behind.push(
       `<g ${anim("boing", delay + 0.6)}>${disc(button[0], button[1], 46, button[2], button[2] + 24, { face: ACCENT, side: mix(ACCENT, 0.72, BLACK) }, playGlyph(46))}</g>`,
-    );
-    const [px, py] = project([button[0] + 18, button[1] + 24, button[2] + 24]);
-    const at = delay + 0.85;
-    layers.top.push(
-      `<g ${anim("glide", at)}><g ${anim("press", at + 0.62)}>${pointer(px, py)}</g></g><g ${anim("ripple", at + 0.62)}><ellipse cx="${n(px)}" cy="${n(py)}" rx="30" ry="30" fill="none" stroke="${WHITE}" stroke-width="3"/></g>`,
     );
   }
   {
@@ -1559,20 +1528,7 @@ function hero(p, images, still = false) {
     );
   }
 
-  const [mx, my] = markAt();
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-labelledby="title"><title id="title">${escape(ALT)}</title><style>${STYLE.trim()}${still ? "\n.a{animation:none!important}" : ""}</style><defs>${defs.join("")}</defs><rect width="${W}" height="${H}" rx="32" fill="${p.g1}"/>${layers.root.join("")}${layers.behind.join("")}${layers.shadows.join("")}${layers.parts.join("")}${layers.above.join("")}${layers.top.join("")}${wordmark(p, BURST + 1.9, mx, my)}</svg>\n`;
-}
-
-/* The wordmark's size: its scale, and the box it and its stroke fill. */
-const MARK = { scale: 9.6, width: 45.11 * 9.6, height: 8.15 * 9.6 + 34 };
-
-/** Where the wordmark sits: over the Label, the nearest block, at its left edge. */
-function markAt() {
-  const label = PARTS.find((part) => part.id === "label");
-  const box = boxOf(label, label.shift);
-  const [x] = project([box.x, box.y, frontOf("label")]);
-  const [, y] = project([0, rootTop(), 0]);
-  return [x + 6, y - 36 - MARK.height];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-labelledby="title"><title id="title">${escape(ALT)}</title><style>${STYLE.trim()}${still ? "\n.a{animation:none!important}" : ""}</style><defs>${defs.join("")}</defs><rect width="${W}" height="${H}" rx="32" fill="${p.g1}"/>${layers.root.join("")}${layers.behind.join("")}${layers.shadows.join("")}${layers.parts.join("")}${layers.above.join("")}${layers.top.join("")}</svg>\n`;
 }
 
 /** How far up the Root reaches once the parts are off: over the Label's name, by a
@@ -1595,22 +1551,9 @@ function rootTop() {
   return Math.min(ROOT_SLAB.y, high);
 }
 
-/** The wordmark, with the hero's stroke drawing under it. */
-function wordmark(p, delay, left, top) {
-  const SCALE = MARK.scale;
-  const em = 8.15 / 0.75;
-  const x0 = -0.04 * em;
-  const x1 = 45.11 + 0.06 * em;
-  const y0 = 8.15 - 0.035 * em;
-  const height = 0.42 * em;
-  const width = x1 - x0;
-  const reach = n(width * SCALE);
-  return `<g transform="translate(${n(left)} ${n(top)})"><g ${anim("win", delay, `--w:${reach}`)}><clipPath id="stroke-window"><rect x="${n(x0 * SCALE - 4)}" y="${n(y0 * SCALE - 20)}" width="${n(width * SCALE + 8)}" height="${n(height * SCALE + 40)}"/></clipPath><g clip-path="url(#stroke-window)"><g ${anim("ink", delay, `--w:${reach}`)}><g transform="scale(${SCALE}) rotate(1.5 ${n((x0 + x1) / 2)} ${n(y0 + height / 2)})"><linearGradient id="stroke-ink" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="${ACCENT}" stop-opacity="0.3"/><stop offset="1" stop-color="${ACCENT}"/></linearGradient><path transform="translate(${f4(x0)} ${f4(y0)}) scale(${f4(width / 300)} ${f4(height / 24)})" d="${SWOOSH}" fill="url(#stroke-ink)"/></g></g></g></g><g ${anim("fade", 0.05)} transform="scale(${SCALE})" fill="${p.ink}">${WORDMARK.map((d) => `<path d="${d}"/>`).join("")}</g></g>`;
-}
-
 /**
  * The picture's frame: a first pass, with stand-ins for the fixtures' pictures, gathers
- * where everything falls (and the shrine's box, and the wordmark's), and the picture is
+ * where everything falls (and the shrine's box), and the picture is
  * that, with room around it, the camera's middle wherever that puts it.
  */
 function frame() {
@@ -1634,9 +1577,6 @@ function frame() {
   for (const dx of [-110, 110])
     for (const dz of [-110, 110])
       for (const y of [fy, fy - SHRINE.height]) project([fx + dx, y, fz + dz]);
-  const [mx, my] = markAt();
-  BOUNDS[0] = Math.min(BOUNDS[0], mx);
-  BOUNDS[1] = Math.min(BOUNDS[1], my);
   const [x0, y0, x1, y1] = BOUNDS;
   BOUNDS = null;
   const margin = 56;
@@ -1683,14 +1623,15 @@ for (const readme of ["README.md", "packages/clover/README.md"]) {
   const text = readFileSync(path, "utf8");
   const img = /(<img alt=")[^"]*(" src="[^"]*hero-light\.svg">)/;
   if (!img.test(text)) throw new Error(`${readme} has no hero to describe`);
-  const credit = /(<\/picture>\n\n<sub>)[^<]*(<\/sub>)/;
-  let next = text.replace(img, `$1${escape(ALT).replace(/"/g, "&quot;")}$2`);
-  next = credit.test(next)
-    ? next.replace(credit, `$1${escape(CREDIT)}$2`)
-    : next.replace(
-        "</picture>\n",
-        `</picture>\n\n<sub>${escape(CREDIT)}</sub>\n`,
-      );
+  /* The credit is the README's last section, Credits, under its License (Mat, 2026-11-11:
+   * "move the credit down below the License", then "add a 'Credits'"). */
+  let next = text
+    .replace(img, `$1${escape(ALT).replace(/"/g, "&quot;")}$2`)
+    .replace(/(<\/picture>\n)\n<sub>[^<]*<\/sub>\n/, "$1")
+    .replace(/\n+(## Credits\n+)?(<sub>)?[^\n<]*(<\/sub>)?\n*$/, (end) =>
+      end.includes("Credits") || end.includes("<sub>") ? "\n" : end,
+    );
+  next = `${next.replace(/\n*$/, "\n")}\n## Credits\n\n_${escape(CREDIT)}_\n`;
   if (next !== text) writeFileSync(path, next);
   console.log(
     `${readme}  alt and credit ${next === text ? "current" : "written"}`,
