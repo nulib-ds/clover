@@ -266,6 +266,8 @@ export interface LiveDemo {
   beside?: LiveBeside;
   /** The height of the box around Canvas, Timeline or Scene. */
   height?: number;
+  /** The parts its Root holds before it, fixed (`LivePart`'s `before`). */
+  before?: { part: PartName; props?: Record<string, unknown> }[];
 }
 
 function Demo({
@@ -311,6 +313,21 @@ function Demo({
     <PartDemo
       part={demo.part as PartName}
       props={props}
+      parts={
+        demo.before?.length
+          ? [
+              // Each with its knobs' values (`before-0`), laid over its own props.
+              ...demo.before.map((each, index) => ({
+                part: each.part,
+                props: {
+                  ...each.props,
+                  ...knobProps(knobs, values, `before-${index}`),
+                },
+              })),
+              { part: demo.part as PartName, props },
+            ]
+          : undefined
+      }
       resource={demo.resource}
       body={demo.body}
       box={(box?.height as string | undefined) ?? demo.box}

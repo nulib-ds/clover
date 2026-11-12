@@ -124,12 +124,12 @@ export default function PlaceBox({
       {open && (
         <GivenMap
           navPlace={feature}
-          overlays={overlays}
+          read={overlays}
           owner={owner}
           reframe={swapped}
           forwardedRef={null}
           landmark={false}
-          list={false}
+          items={false}
           language={language}
         />
       )}

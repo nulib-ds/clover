@@ -128,7 +128,6 @@ County, Illinois_, as a Manifest of one Canvas, with:
 - the [Georeference Extension](https://iiif.io/api/extension/georef/) annotation its Meadow
   authoring tool stored (three control points, the whole image as its mask, a first-order
   polynomial transformation), on the Canvas's annotation page;
-- a [navPlace](https://iiif.io/api/extension/navplace/) point naming Evanston, Illinois;
 - the image from Northwestern's IIIF Image API (level 2, 7337 × 9833, CORS open).
 
 | Resource | Published (static)                                                                                                   |
@@ -136,7 +135,7 @@ County, Illinois_, as a Manifest of one Canvas, with:
 | Manifest | [`/mocks/georeference/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json) |
 
 It answers no query, so it is static only. The [Map](/docs/map) page draws it, warped
-onto the map, and in a Viewer's Map tab. Its generator is
+onto the map. Its generator is
 `docs/mocks/georeference/index.mjs`.
 
 ## Sanborn: fire insurance maps, georeferenced
@@ -147,7 +146,7 @@ on its own, apart from any Manifest, as a georeferencing tool publishes it:
 
 - **An Annotation**: Northwestern University's campus, in the 1920 volume.
 - **An AnnotationPage**: the 1920 volume's sheets from downtown Evanston through the
-  campus and along the lake, 30 of them.
+  campus and along the lake, 30 of them, under a label and a summary of its own.
 - **An AnnotationCollection** of two pages: the 1899 volume's sheets of the same ground,
   21 of them, and those of 1920.
 

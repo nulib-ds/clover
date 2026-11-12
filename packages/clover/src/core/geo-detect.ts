@@ -57,4 +57,8 @@ export function isGeoreferenced(canvas: unknown): boolean {
   );
 }
 
+/** Whether any Canvas of a Manifest is georeferenced, as far as its pages are loaded. */
+export const hasGeoreferences = (manifest: Manifest | null): boolean =>
+  Boolean(manifest) && selectSequence(manifest).canvases.some(isGeoreferenced);
+
 type Json = Record<string, any>;

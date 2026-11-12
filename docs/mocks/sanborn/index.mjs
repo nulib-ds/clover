@@ -28,8 +28,8 @@
  *
  * Each annotation is kept as fetched; only the documents' own ids are this mock's, so
  * each answers at its id, and the pages and the Collection are made here (their `label`,
- * the Collection's `total`, `first` and `last`, and each of its pages' `partOf`, `next`
- * and `prev`).
+ * the AnnotationPage's `summary`, the Collection's `total`, `first` and `last`, and each
+ * of its pages' `partOf`, `next` and `prev`).
  *
  * Rights: the Library of Congress's Sanborn maps are public domain; mapsnap's fits are
  * under the Open Database License, which asks for attribution and that a database made
@@ -71,9 +71,7 @@ const copy = (json) => JSON.parse(JSON.stringify(json));
 const sheets = (year) => copy(evanston[VOLUMES[year]].items);
 
 const LABEL = {
-  en: [
-    "Sanborn Fire Insurance Maps of Evanston, Illinois, 1899 and 1920, georeferenced by machine",
-  ],
+  en: ["Sanborn Fire Insurance Maps of Evanston, Illinois, 1899 and 1920"],
 };
 
 const RIGHTS = "https://opendatacommons.org/licenses/odbl/1-0/";
@@ -99,20 +97,28 @@ export function annotation(base = PUBLIC_BASE) {
   };
 }
 
-/** The 1920 volume's sheets: a page of their georeferences, at this mock's address. */
+/**
+ * The 1920 volume's sheets: a page of their georeferences, at this mock's address, its
+ * label and summary its own, the summary written from its sheets (Mat, 2026-11-12:
+ * "include a Label for annotationpage and a summary"), which a Root reads as a Manifest's.
+ */
 export function annotationPage(base = PUBLIC_BASE) {
+  const items = sheets(1920);
   return {
     "@context": ANNOTATIONS,
     id: urls(base).annotationPage,
     type: "AnnotationPage",
     label: {
+      en: ["Sanborn Fire Insurance Maps of Evanston, Illinois, 1920"],
+    },
+    summary: {
       en: [
-        "Sanborn Fire Insurance Maps of Evanston, Illinois, 1920, georeferenced by machine",
+        `Downtown Evanston, Northwestern University's campus and the lakefront, on ${items.length} sheets of the 1920 volume. The Library of Congress scanned them, and mapsnap fitted each to the map from two control points.`,
       ],
     },
     rights: RIGHTS,
     requiredStatement: ATTRIBUTION,
-    items: sheets(1920),
+    items,
   };
 }
 

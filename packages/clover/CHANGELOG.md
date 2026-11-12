@@ -23,6 +23,30 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   targeted are shown, each a Canvas of its own. Before, a lone georeference opened its
   image with no map laid on it, and a page of them failed ("The annotations name no
   Manifest").
+- **The Map's list, by Items.** `items` on `Map` (`items` on `<clover-map>`) lists its
+  places and georeferenced images through Items, in one of its layouts: `list` (the
+  default), `grid`, `slider` or `masonry`; `false` lists none, for a page that lists them
+  itself. The list is a listbox named "On the map" (the string `mapItemsLabel`, in every
+  locale), its items pictured: a place by its owner's picture, a georeferenced image cut
+  to the map it is, asked small as its server's `info.json` allows, or the whole sheet at
+  a size it lists where the server cannot cut (`resolveThumbnail` takes `orWhole: true`
+  for that). It replaces the list of buttons, `.clover-geomap-places`; its class is
+  `.clover-geomap-items`.
+- **Every sheet at once.** `overlays="all"` on `Map` lays every Canvas's georeferenced
+  images inside a `Root`, not only those of the Canvases in view. It opens on them all,
+  then follows the view: as the Canvas in view changes, the map eases to its sheets, so
+  one chosen in `Items` beside it is framed as one chosen in the map's own list is.
+- **Outline options.** `outlines` on `Map` (`outlines` on `<clover-map>`) offers the
+  map's options behind a gear after its zoom controls, which stay in sight: pressed, its
+  tray opens on one ground, as a Canvas's controls do behind More, the gear its close.
+  In it, Outlines, off to start, outlines every georeferenced image on the map in the
+  controls' dark color; Selection outline, on to start, takes away the accent's outline
+  round the one chosen. It is off by default. Its strings, in every locale: `mapOptions`,
+  `mapExpandOptions`, `mapCollapseOptions`, `mapOutlines` and `mapSelectionOutline`.
+- **Items of georeferences.** `of="georeferences"` on `Items` lists the Root's
+  georeferenced images, each the map it is. Choosing one goes to its Canvas; pointing at
+  one, there or on a `Map` beside it, lights it in both, through the Root's `highlight`,
+  which a page's own list may use too.
 - **Helmert fits.** A georeference whose `transformation` is `helmert` is laid by scale,
   rotation and shift, from two control points or more; before, it needed three and was
   fitted as affine. `Georeference` has an optional `transformation`, `"helmert"` or
@@ -40,15 +64,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   is numbered after the places, as an unnamed place is; and images of one name are told
   apart by their place among it ("Sheet 21 2 / 3").
 - A georeferenced image chosen is outlined in the accent, a little clear of its edge and
-  over everything else on the map: the one last chosen from the map's list, those on a
-  Canvas in view, and one whose annotation is picked.
-- Each georeferenced image's row in the map's list shows a small picture of it, as an
-  annotation's row does: cut to the part that is map, asked small as its server's
-  `info.json` allows, or the whole sheet at a size it lists where the server cannot cut
-  (level 0). `resolveThumbnail` takes `orWhole: true` for that fallback.
-- Pointing at a georeferenced image, on the map or at its row, outlines it at half
-  strength, as Items rings an item under the pointer; on the map, its row lights as the
-  pointer lights a row, as a place's does.
+  over everything else on the map: the one last chosen from the map's list or on the map,
+  until the view moves elsewhere, those on a Canvas in view, and one whose annotation is
+  picked.
+- A georeferenced image pressed on the map is chosen, as its item in the map's list is:
+  the map zooms to it and, inside a `Root`, the view goes to its Canvas. The pointer is a
+  hand over one. Before, a press on an image did nothing.
+- Pointing at a georeferenced image, on the map or at its item, outlines it at half
+  strength, as Items rings an item under the pointer, and lights its item; a place under
+  the pointer lights its item too, as does an annotation a place is, pointed at
+  elsewhere.
 - Where more than four georeferenced images are drawn together, each image is asked
   smaller (never under 768 px on its longer side), so an atlas of sheets holds about as
   much memory as four would.
@@ -59,12 +84,19 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - A georeference on a Canvas's own pages that targets that Canvas's image service, as
   Allmaps writes them, belongs to that Canvas, so a map of the view lays it; before, only
   the Canvas's map control did.
-- **Budgets.** The helmert fit, the framing by mask, the outline, pointing and the list's
-  numbering take the Map's by about 1.2 kB; the thumbnail resolver's whole-image fallback
-  and the shared georeferencing check take the pages that load them past theirs by 7 to
-  212 bytes, and the overlay rows' layout base.css by 77; each raised to the next 50: the
-  Map 21.15 kB and to first view 31.55 kB, the Timeline 29.3 kB and to first view
-  56.8 kB, the Canvas to first view 51.9 kB, Gallery 33.25 kB and base.css 15.1 kB.
+- **Budgets.** Items drawing the Map's list takes a page with a Map alone, to its first
+  view, from 30.35 kB to 46.95 kB: Items' code, loaded with the list wherever the map lists
+  something (a map that lists nothing, as a Canvas's map box, never reaches it), and the
+  map's options, which every map carries for now, though `outlines` is off by default. The
+  outline, pointing, `overlays`, a press on a sheet, following the view, the options and
+  the helmert fit take the Map before MapLibre to 23.95 kB; Items' pointing and
+  `of="georeferences"`, and the options' strings, which every template loads, take the
+  Default template to 82.7 kB and to first view 101.5 kB, Gallery to 33.6 kB and to first
+  view 58.1 kB, a Scene to first view 30 kB, the translator to 3.65 kB, `<clover-viewer>`
+  to 134.45 kB, Document's element to 152.05 kB, Gallery's to 138 kB, `<clover-canvas>` to
+  97.35 kB, the elements' entry to 6.35 kB, a page of labels to 37.65 kB, the Viewer's own
+  entry to 113.35 kB, the four parts to 111 kB and a layout to 129.85 kB; the rows' layout
+  and the options' tray take base.css to 15.1 kB. Each raised to the next 50.
 
 ## [4.9.5] - 2026-11-12
 

@@ -336,6 +336,12 @@ export const map: ElementSpec = {
     "iiif-content": { prop: "iiifContent", type: "string" },
     overlay: { prop: "overlay", type: "boolean" },
     "overlay-opacity": { prop: "overlayOpacity", type: "number", min: 0 },
+    overlays: { prop: "overlays", type: ["view", "all"] },
+    items: {
+      prop: "items",
+      type: ["list", "grid", "slider", "masonry", "false"],
+    },
+    outlines: { prop: "outlines", type: "boolean" },
     "style-url": { prop: "styleUrl", type: "string" },
     "scroll-zoom": { prop: "scrollZoom", type: "boolean" },
     zoom: { prop: "zoom", type: "number", min: 0 },
@@ -349,7 +355,7 @@ export const map: ElementSpec = {
 export const mapDocs: ElementDocs = {
   name: "CloverMapElement",
   description:
-    "A map: inside a clover-root, its places (navPlace) and the view's georeferenced images; alone, those of the iiif-content it is given. Its places are listed under it as buttons, for the keyboard.",
+    "A map: inside a clover-root, its places (navPlace) and the view's georeferenced images; alone, those of the iiif-content it is given. Its places and images are listed under it by Items, the map's text and the keyboard's way to each.",
   attributes: {
     "iiif-content": {
       description: "Alone: a IIIF resource, by URL, to map.",
@@ -361,6 +367,21 @@ export const mapDocs: ElementDocs = {
     "overlay-opacity": {
       description: "The georeferenced images' opacity, 0 to 1.",
       default: "1",
+    },
+    overlays: {
+      description:
+        "Inside a root: whose georeferenced images it lays, the Canvases' in view or every Canvas's (all), an atlas's sheets at once, zooming to the view's as it changes. Alone, every one.",
+      default: "view",
+    },
+    items: {
+      description:
+        'How its places and georeferenced images are listed under it, by Items: list, grid, slider or masonry; "false" lists none, where the page lists them itself (a clover-items of="georeferences", say), which is then the map\'s text and the keyboard\'s way to each.',
+      default: "list",
+    },
+    outlines: {
+      description:
+        "Offers the map's outline options, behind a gear after its zoom controls: Outlines, pressed to outline every georeferenced image on the map, and Selection outline, pressed to put away the accent's outline round the one chosen.",
+      default: "false",
     },
     "style-url": {
       description: "A MapLibre style URL. Clover's relief basemap by default.",

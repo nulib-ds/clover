@@ -1,6 +1,8 @@
 import React, { Suspense, forwardRef, lazy } from "react";
 
-import { ConnectedMap, GivenMap, type MapProps } from "./MapView";
+import { MapList } from "./MapList";
+import { ConnectedMap } from "./ConnectedMap";
+import { GivenMap, type MapProps } from "./MapView";
 import { useOptionalClover } from "../../react/context";
 import { join } from "../../lib/classnames";
 
@@ -51,7 +53,7 @@ export const CloverMap = forwardRef<HTMLElement, MapProps>(
     return root && !given ? (
       <ConnectedMap {...rest} scope="view" forwardedRef={ref} />
     ) : (
-      <GivenMap {...rest} forwardedRef={ref} />
+      <GivenMap {...rest} List={MapList} forwardedRef={ref} />
     );
   },
 );

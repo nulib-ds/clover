@@ -180,6 +180,9 @@ describe("an AnnotationPage of georeferences as the content", () => {
     const manifest = state.manifest as Json;
     expect(manifest.id).toBe(page.id);
     expect(manifest.label).toEqual(page.label);
+    // Its summary too, as a Manifest's.
+    expect(page.summary).toBeDefined();
+    expect(manifest.summary).toEqual(page.summary);
     expect(manifest.requiredStatement).toEqual(page.requiredStatement);
     expect(manifest.items.map((canvas: Json) => canvas.id)).toEqual(
       imagesOf(page.items).map((image) => `${image}/canvas`),

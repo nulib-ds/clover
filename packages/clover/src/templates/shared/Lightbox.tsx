@@ -30,8 +30,8 @@ export interface LightboxProps {
   /** The level of its title, a level under the layout's. Default 3. */
   headingLevel?: number;
   /**
-   * How the reader moves on from the view shown: a short strip of thumbnails (`slider`,
-   * Items' carousel), or `pager`, Previous, the position and Next. Default `slider`.
+   * How the reader moves on from the view shown: a short strip of thumbnails (Items'
+   * `slider`), or `pager`, Previous, the position and Next. Default `slider`.
    */
   items?: "slider" | "pager";
   /**

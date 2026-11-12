@@ -122,8 +122,9 @@ come from `@nulib/clover/map` and `@nulib/clover`.
 
 ### Map example
 
-These read Northwestern's _Map of the Township of Evanston, Cook County, Illinois_. Each
-result is in the comment under it, rounded.
+These read Northwestern's _Map of the Township of Evanston, Cook County, Illinois_, and,
+for `navPlaceOf`, its slide of a Chicago bus, which has a place. Each result is in the
+comment under it, rounded.
 
 ```js
 import {
@@ -135,16 +136,14 @@ import {
   toPresentation4,
 } from "@nulib/clover";
 
-const url =
-  "https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json";
-const manifest = await toPresentation4(await (await fetch(url)).json());
+const read = async (url) => toPresentation4(await (await fetch(url)).json());
+
+const manifest = await read(
+  "https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json",
+);
 
 hasMapData(manifest);
 // true: it has something to put on a map
-
-const places = navPlaceOf(manifest);
-// A FeatureCollection with one place, "Evanston, Illinois",
-// a Point at [-87.6877, 42.0451]
 
 const [georeference] = georeferencesOf(manifest);
 // The scanned map: its control points, width, height, label and image
@@ -158,9 +157,18 @@ cornersOf(georeference);
 //   [-87.7208, 41.99], bottom left
 // ]
 
-boundsOf(places.features, [georeference]);
-// The box around them all, [[west, south], [east, north]]:
+boundsOf([], [georeference]);
+// The box around it, [[west, south], [east, north]]:
 // [[-87.7208, 41.9877], [-87.6241, 42.0777]]
+
+const bus = await read(
+  "https://clover.iiif.library.northwestern.edu/mocks/navplace/manifest.json",
+);
+
+navPlaceOf(bus);
+// A FeatureCollection with one place,
+// "Michigan Avenue and Washington Street, Chicago, Illinois",
+// a Point at [-87.6245, 41.8833]
 ```
 
 ## Events

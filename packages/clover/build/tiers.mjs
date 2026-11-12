@@ -153,7 +153,7 @@ export const SURFACES = [
   // map's places shown over its foot while focus is in them.
   "clover-template-document-download-menu",
   "clover-template-document-map",
-  "clover-geomap-places",
+  "clover-geomap-items",
 ];
 
 /**

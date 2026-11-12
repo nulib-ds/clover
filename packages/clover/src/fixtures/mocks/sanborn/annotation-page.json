@@ -3,8 +3,11 @@
   "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation-page.json",
   "type": "AnnotationPage",
   "label": {
+    "en": ["Sanborn Fire Insurance Maps of Evanston, Illinois, 1920"]
+  },
+  "summary": {
     "en": [
-      "Sanborn Fire Insurance Maps of Evanston, Illinois, 1920, georeferenced by machine"
+      "Downtown Evanston, Northwestern University's campus and the lakefront, on 30 sheets of the 1920 volume. The Library of Congress scanned them, and mapsnap fitted each to the map from two control points."
     ]
   },
   "rights": "https://opendatacommons.org/licenses/odbl/1-0/",

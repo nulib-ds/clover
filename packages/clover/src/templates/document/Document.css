@@ -1505,7 +1505,7 @@ button.clover-template-document-live-play:focus-visible {
  * says follows it (WCAG 2.1.1, 1.3.1). With focus in it, it shows over the map's foot,
  * the inset in, on the panel's ground, scrolling past half the map's height.
  */
-.clover-template-document-map .clover-geomap-places:not(:focus-within) {
+.clover-template-document-map .clover-geomap-items:not(:focus-within) {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1516,7 +1516,7 @@ button.clover-template-document-live-play:focus-visible {
   white-space: nowrap;
 }
 
-.clover-template-document-map .clover-geomap-places:focus-within {
+.clover-template-document-map .clover-geomap-items:focus-within {
   position: absolute;
   z-index: 3;
   inset-inline: var(--clover-inset);

@@ -193,17 +193,22 @@ export const resources: PlaygroundResource[] = [
     resource: nul("d8fb6329-f7fb-48bf-8bb7-70a64ded5a15"),
     thumbnail: `${works}/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15/thumbnail`,
   },
-  // Georeferenced, so the Viewer adds a Map tab that lays the sheet over the town.
+  /*
+   * Evanston's Sanborn maps of 1920, georeferenced, so the Viewer adds a Map tab that lays
+   * every sheet over the town (Mat, 2026-11-12: "replace the georeference example in
+   * playground with the sanborn maps"). Its picture, the campus sheet, at the smallest
+   * size its level 0 `info.json` lists.
+   */
   {
     key: "map",
     name: "Map",
-    title: "Map of the Township of Evanston, Cook County, Illinois",
-    description: "Manifest with a georeference annotation and a navPlace",
-    resource: "georeference/manifest.json",
+    title: "Sanborn Fire Insurance Maps of Evanston, Illinois, 1920",
+    description: "AnnotationPage of georeference annotations on image services",
+    resource: "sanborn/annotation-page.json",
     mock: true,
     map: true,
     thumbnail:
-      "https://iiif.dc.library.northwestern.edu/iiif/3/2fb1e81a-9e24-420c-b224-0bfd6a279baf/full/!300,300/0/default.jpg",
+      "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115/full/176,258/0/default.jpg",
   },
   {
     key: "animation",

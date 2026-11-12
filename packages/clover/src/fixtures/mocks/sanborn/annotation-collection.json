@@ -3,9 +3,7 @@
   "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation-collection.json",
   "type": "AnnotationCollection",
   "label": {
-    "en": [
-      "Sanborn Fire Insurance Maps of Evanston, Illinois, 1899 and 1920, georeferenced by machine"
-    ]
+    "en": ["Sanborn Fire Insurance Maps of Evanston, Illinois, 1899 and 1920"]
   },
   "total": 51,
   "first": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/evanston/1899.json",

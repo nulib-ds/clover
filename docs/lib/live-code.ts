@@ -17,7 +17,8 @@ export type Plain = string | number | boolean;
  * in the code alone, its value read by the example itself (the Viewer's template, which
  * picks the code shown).
  */
-export type KnobOn = "part" | "root" | "box" | "code";
+/** Where a knob sits: the part, its Root, its box, the code, or a part placed before it. */
+export type KnobOn = "part" | "root" | "box" | "code" | `before-${number}`;
 
 /** A value in an example's code that the reader can change. */
 export interface Knob {

@@ -182,6 +182,19 @@ interface LivePartProps {
   alone?: boolean;
   /** React's imports, where the code is a whole module (`Map`'s own import). */
   imports?: string[];
+  /**
+   * The parts its Root holds before it, fixed: each with the props its code writes
+   * (`shown`) and those given to the demo alone (`props`), as the Map page's "Customize
+   * layout" places a `Map`, the resource's `Label` and `Summary` over `Items` whose layout
+   * changes (Mat, 2026-11-12: "allow layout to change here").
+   */
+  before?: {
+    part: PartName;
+    shown?: Record<string, unknown>;
+    props?: Record<string, unknown>;
+    /** Its lines marked in the code, in place of the part's: the page's own part. */
+    mark?: boolean;
+  }[];
 }
 
 export function LivePart({
@@ -195,11 +208,19 @@ export function LivePart({
   beside,
   alone = false,
   imports,
+  before = [],
 }: LivePartProps) {
   const tag = elementTag(part);
+  // A knob on a part placed before it (`before-0`) is named by that part.
+  const owner = (knob: Knob) =>
+    knob.on === "root"
+      ? "Root"
+      : knob.on?.startsWith("before-")
+        ? before[Number(knob.on.slice("before-".length))].part
+        : part;
   const named = knobs.map((knob) => ({
     ...knob,
-    label: labelOf(knob.on === "root" ? "Root" : part, knob),
+    label: labelOf(owner(knob), knob),
   }));
   const on = (where: Knob["on"]) =>
     named.filter((knob) => (knob.on ?? "part") === where);
@@ -212,7 +233,7 @@ export function LivePart({
       ...(bodyPart || part === "Map" ? [url(tag)] : []),
       ...attrsOf(tag, shown, on("part")),
     ],
-    mark: !single,
+    mark: !single && !before.some((each) => each.mark),
   };
   // The box around it: Canvas, Timeline or Scene fills one with a height; a tall part
   // scrolls in one.
@@ -279,6 +300,18 @@ export function LivePart({
                     },
                   ]
                 : []),
+              ...before.map(
+                (each, index): CodeNode => ({
+                  jsx: `Clover.${each.part}`,
+                  html: elementTag(each.part),
+                  attrs: attrsOf(
+                    elementTag(each.part),
+                    each.shown ?? {},
+                    on(`before-${index}`),
+                  ),
+                  mark: each.mark,
+                }),
+              ),
               wrapped,
               ...(body && beside
                 ? [
@@ -302,6 +335,10 @@ export function LivePart({
     body,
     box,
     beside,
+    before: before.map(({ part: each, shown: written, props: given }) => ({
+      part: each,
+      props: { ...given, ...written },
+    })),
   };
   return <LiveFrame tree={tree} knobs={named} demo={demo} />;
 }

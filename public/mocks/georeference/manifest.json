@@ -1,6 +1,5 @@
 {
   "@context": [
-    "http://iiif.io/api/extension/navplace/context.json",
     "http://iiif.io/api/extension/georef/1/context.json",
     "http://iiif.io/api/presentation/3/context.json"
   ],
@@ -13,7 +12,7 @@
   },
   "summary": {
     "en": [
-      "A mock for the IIIF Georeference and navPlace extensions: a scanned map, its control points, and the town it shows. Published by Clover IIIF for testing viewers."
+      "A mock for the IIIF Georeference Extension: a scanned map and its control points. Published by Clover IIIF for testing viewers."
     ]
   },
   "requiredStatement": {
@@ -40,30 +39,6 @@
       "format": "text/html"
     }
   ],
-  "navPlace": {
-    "id": "https://clover.iiif.library.northwestern.edu/mocks/georeference/feature-collection/1",
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "id": "https://clover.iiif.library.northwestern.edu/mocks/georeference/feature/1",
-        "type": "Feature",
-        "properties": {
-          "label": {
-            "en": [
-              "Evanston, Illinois"
-            ]
-          }
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [
-            -87.6877,
-            42.0451
-          ]
-        }
-      }
-    ]
-  },
   "items": [
     {
       "id": "https://clover.iiif.library.northwestern.edu/mocks/georeference/canvas/1",

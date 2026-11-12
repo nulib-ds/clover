@@ -66,7 +66,7 @@ describe("checkLayout", () => {
       parts: [
         {
           part: "Items",
-          props: { layout: "carousel", thumbnailSize: 0, header: "yes" },
+          props: { layout: "unknown", thumbnailSize: 0, header: "yes" },
         },
       ],
     }).map((issue) => issue.says);
@@ -149,7 +149,7 @@ describe("checkLayout", () => {
       errors({ viewer: { template: "Document", props: { size: "12rem" } } })[0]
         .says,
     ).toBe("`size` is Gallery's: Document does not read it.");
-    expect(errors({ viewer: { template: "Carousel" } })[0].says).toMatch(
+    expect(errors({ viewer: { template: "Unknown" } })[0].says).toMatch(
       /The templates are Default, Document, Gallery/,
     );
   });

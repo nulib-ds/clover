@@ -87,8 +87,8 @@ describe("3.x pages", () => {
   });
 
   it("open their descriptions by saying they are deprecated, then their own words", () => {
-    expect(earlierDescription("Slider, a carousel.")).toBe(
-      "Deprecated: for an older installation only. Use Clover 4's docs at /docs. Slider, a carousel.",
+    expect(earlierDescription("Slider, a row of thumbnails.")).toBe(
+      "Deprecated: for an older installation only. Use Clover 4's docs at /docs. Slider, a row of thumbnails.",
     );
     expect(earlierDescription()).toBe(
       "Deprecated: for an older installation only. Use Clover 4's docs at /docs.",

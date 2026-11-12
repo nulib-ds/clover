@@ -150,7 +150,7 @@
 
 /*
  * Rows: what a reader picks from a list in the panel (an annotation, a Range, a cue, a
- * search hit, a place on the map), written once. `xs` by `s` inside, an accent edge at
+ * search hit), written once. `xs` by `s` inside, an accent edge at
  * the start when it is the current one. Each part keeps only its own layout. A Contents
  * entry's toggle, beside its row, takes the rows' tint under the pointer.
  */
@@ -158,8 +158,7 @@
   .clover-annotations-entry,
   button.clover-contents-button,
   .clover-transcript-cue > button,
-  button.clover-content-search-hit,
-  .clover-geomap-places button
+  button.clover-content-search-hit
 ) {
   box-sizing: border-box;
   width: 100%;
@@ -180,7 +179,6 @@
     button.clover-contents-button,
     .clover-transcript-cue > button,
     button.clover-content-search-hit,
-    .clover-geomap-places button,
     button.clover-contents-toggle
   ):is(:hover, [data-highlighted="true"]):not(:disabled) {
   background-color: var(--clover-color-secondary-muted, #e6e8eb);
@@ -190,8 +188,7 @@
   .clover-annotations-entry[data-selected="true"],
   button.clover-contents-button[aria-current="true"],
   .clover-transcript-cue[aria-current="true"] > button,
-  button.clover-content-search-hit[aria-current="true"],
-  .clover-geomap-places button[aria-current="true"]
+  button.clover-content-search-hit[aria-current="true"]
 ) {
   border-inline-start-color: var(--clover-color-accent, #0065c3);
   /* The accent, faintly: whatever the accent is, never a color of its own. */
@@ -211,8 +208,7 @@
     .clover-annotations-entry,
     button.clover-contents-button,
     .clover-transcript-cue > button,
-    button.clover-content-search-hit,
-    .clover-geomap-places button
+    button.clover-content-search-hit
   ) {
     border-inline-start-color: Canvas;
   }
@@ -221,8 +217,7 @@
     .clover-annotations-entry[data-selected="true"],
     button.clover-contents-button[aria-current="true"],
     .clover-transcript-cue[aria-current="true"] > button,
-    button.clover-content-search-hit[aria-current="true"],
-    .clover-geomap-places button[aria-current="true"]
+    button.clover-content-search-hit[aria-current="true"]
   ) {
     border-inline-start-color: Highlight;
   }
@@ -236,8 +231,7 @@
   .clover-annotations-list,
   .clover-contents-list,
   .clover-transcript-cues,
-  .clover-content-search-hits,
-  .clover-geomap-places
+  .clover-content-search-hits
 ) {
   display: flex;
   flex-direction: column;

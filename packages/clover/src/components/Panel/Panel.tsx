@@ -33,7 +33,9 @@ import { languageProps } from "../../i18n/direction";
  * a page without a map loads.
  */
 const RootMap = lazy(() =>
-  import("../Map/MapView").then((module) => ({ default: module.RootMap })),
+  import("../Map/ConnectedMap").then((module) => ({
+    default: module.RootMap,
+  })),
 );
 
 /*

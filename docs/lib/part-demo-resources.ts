@@ -11,6 +11,12 @@ export const RESOURCES = {
   tagging: "tagging/manifest.json",
   /** The Sullivan slide: navPlace. */
   navplace: "navplace/manifest.json",
+  /**
+   * Evanston's Sanborn maps of 1920, from downtown through Northwestern's campus: an
+   * AnnotationPage of georeferences on bare image services, shown as a Manifest of their
+   * images, for a `Map` of every sheet beside `Items` of them.
+   */
+  sanborn: "sanborn/annotation-page.json",
   /** _Lunchroom Manners_: captions and a plain-text transcript (the Canvas's `rendering`). */
   transcripts: "transcripts/manifest.json",
   /** The Nuremberg reel: chapters, captions, tracked annotations. */
