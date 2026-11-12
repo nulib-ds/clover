@@ -1,5 +1,6 @@
 import { createClover } from "./clover";
 import { canvasGeoreferences, cornersOf, georeferencesOf } from "./geo";
+import { isGeoreferencedContent } from "./geo-detect";
 import annotation from "../fixtures/mocks/sanborn/annotation.json";
 import collection from "../fixtures/mocks/sanborn/annotation-collection.json";
 import page from "../fixtures/mocks/sanborn/annotation-page.json";
@@ -180,6 +181,8 @@ describe("an AnnotationPage of georeferences as the content", () => {
     const manifest = state.manifest as Json;
     expect(manifest.id).toBe(page.id);
     expect(manifest.label).toEqual(page.label);
+    // Marked, so its maps lay every sheet.
+    expect(isGeoreferencedContent(manifest)).toBe(true);
     // Its summary too, as a Manifest's.
     expect(page.summary).toBeDefined();
     expect(manifest.summary).toEqual(page.summary);

@@ -1668,7 +1668,13 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     extent's change frames them already, so the templates' maps are unchanged. So a page
     may list the sheets itself: `items={false}` beside `Items of="georeferences"`, or its
     own list from `georeferencesOf`, `clover.goTo` and `clover.highlight` (the Map page's
-    first example, and its "Customize layout"). A choice made on the map gives way as the
+    first example, and its "Customize layout"). Where georeference annotations are the
+    content (`isGeoreferencedContent`, a symbol `georeferenceContent` sets on the
+    Manifest), the Root's maps lay every sheet by default, the Canvas's map box too
+    (`PlaceBox`, reading the Root's Manifest, its view's Canvases `current`);
+    `overlays="view"` keeps the view's (Mat, 2026-11-12: "in the map inset, we should see
+    all items, with the active one selected", "same for in the main view"). A choice made
+    on the map gives way as the
     view moves elsewhere (`viewKey`; Mat, 2026-11-12: "clicking one and then hitting next
     shows multiple"), so one sheet is outlined whole.
   - `outlines` (Mat, 2026-11-12: "add ability to toggle on/off annotation outlines,

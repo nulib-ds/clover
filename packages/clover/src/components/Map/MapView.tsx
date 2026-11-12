@@ -133,6 +133,8 @@ export function GivenMap({
     language?: string;
     /** Overlays already read, with their Canvases (`Canvas/PlaceBox`), over `georeferences`. */
     read?: Georeference[];
+    /** The Canvases in view, where it lays more than theirs: outlined, and followed. */
+    current?: string[];
     /** What lists them (`MapList`): the Map's own hands it; the Canvas's map box never. */
     List?: ViewProps["List"];
     reframe?: unknown;

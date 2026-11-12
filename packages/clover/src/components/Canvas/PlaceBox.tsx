@@ -3,6 +3,9 @@ import React, { useMemo } from "react";
 import { Close, CollapseMap, ExpandMap } from "../Body/glyphs";
 import { GivenMap } from "../Map/MapView";
 import { canvasGeoreferences } from "../../core/geo";
+import { isGeoreferencedContent } from "../../core/geo-detect";
+import { selectSequence } from "../../core/selectors";
+import { useOptionalCloverSelector } from "../../react/context";
 import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { type LanguageMapLike, localize } from "../../core/value";
@@ -57,12 +60,28 @@ export default function PlaceBox({
   language?: string;
 }) {
   const { t, langOf } = useCloverTranslation();
+  /*
+   * Inside a Root given georeference annotations as its content, every sheet, the ones in
+   * view outlined, as the Root's own map lays them (`isGeoreferencedContent`); else the
+   * view's alone.
+   */
+  const atlas = useOptionalCloverSelector(
+    (state) => (isGeoreferencedContent(state.manifest) ? state.manifest : null),
+    null,
+  );
   const overlays = useMemo(
     () =>
-      (canvases ?? []).flatMap((canvas) =>
-        canvasGeoreferences(canvas as never),
+      (atlas ? selectSequence(atlas).canvases : (canvases ?? [])).flatMap(
+        (canvas) => canvasGeoreferences(canvas as never),
       ),
-    [canvases],
+    [atlas, canvases],
+  );
+  const current = useMemo(
+    () =>
+      atlas
+        ? (canvases ?? []).map((canvas) => (canvas as { id: string }).id)
+        : undefined,
+    [atlas, canvases],
   );
   useOneOpen(open, () => onClose(false));
   const heading = localize(name, language);
@@ -125,6 +144,7 @@ export default function PlaceBox({
         <GivenMap
           navPlace={feature}
           read={overlays}
+          current={current}
           owner={owner}
           reframe={swapped}
           forwardedRef={null}

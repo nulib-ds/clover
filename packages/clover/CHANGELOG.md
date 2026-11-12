@@ -35,7 +35,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Every sheet at once.** `overlays="all"` on `Map` lays every Canvas's georeferenced
   images inside a `Root`, not only those of the Canvases in view. It opens on them all,
   then follows the view: as the Canvas in view changes, the map eases to its sheets, so
-  one chosen in `Items` beside it is framed as one chosen in the map's own list is.
+  one chosen in `Items` beside it is framed as one chosen in the map's own list is. Where
+  georeference annotations are the content, a Root's maps, the Panel's and the Canvas's
+  own map too, lay every sheet by default, the one in view outlined; `overlays="view"`
+  keeps the view's.
 - **Outline options.** `outlines` on `Map` (`outlines` on `<clover-map>`) offers the
   map's options behind a gear after its zoom controls, which stay in sight: pressed, its
   tray opens on one ground, as a Canvas's controls do behind More, the gear its close.
@@ -85,18 +88,20 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Allmaps writes them, belongs to that Canvas, so a map of the view lays it; before, only
   the Canvas's map control did.
 - **Budgets.** Items drawing the Map's list takes a page with a Map alone, to its first
-  view, from 30.35 kB to 46.95 kB: Items' code, loaded with the list wherever the map lists
+  view, from 30.35 kB to 47 kB: Items' code, loaded with the list wherever the map lists
   something (a map that lists nothing, as a Canvas's map box, never reaches it), and the
   map's options, which every map carries for now, though `outlines` is off by default. The
   outline, pointing, `overlays`, a press on a sheet, following the view, the options and
-  the helmert fit take the Map before MapLibre to 23.95 kB; Items' pointing and
-  `of="georeferences"`, and the options' strings, which every template loads, take the
-  Default template to 82.7 kB and to first view 101.5 kB, Gallery to 33.6 kB and to first
-  view 58.1 kB, a Scene to first view 30 kB, the translator to 3.65 kB, `<clover-viewer>`
-  to 134.45 kB, Document's element to 152.05 kB, Gallery's to 138 kB, `<clover-canvas>` to
-  97.35 kB, the elements' entry to 6.35 kB, a page of labels to 37.65 kB, the Viewer's own
-  entry to 113.35 kB, the four parts to 111 kB and a layout to 129.85 kB; the rows' layout
-  and the options' tray take base.css to 15.1 kB. Each raised to the next 50.
+  the helmert fit take the Map before MapLibre to 24.05 kB. A Canvas's map box laying
+  every sheet of georeference content takes a Canvas's first load to 44.7 kB and to first
+  view 51.95 kB, and a Timeline's to 29.35 kB. Items' pointing and `of="georeferences"`,
+  and the options' strings, which every template loads, take the Default template to
+  82.8 kB and to first view 101.55 kB, Gallery to 33.65 kB and to first view 58.15 kB, a
+  Scene to first view 30 kB, the translator to 3.65 kB, `<clover-viewer>` to 134.5 kB,
+  Document's element to 152.1 kB, Gallery's to 138 kB, `<clover-canvas>` to 97.45 kB, the
+  elements' entry to 6.35 kB, a page of labels to 37.65 kB, the Viewer's own entry to
+  113.4 kB, the four parts to 111.05 kB and a layout to 129.9 kB; the rows' layout and the
+  options' tray take base.css to 15.1 kB. Each raised to the next 50.
 
 ## [4.9.5] - 2026-11-12
 

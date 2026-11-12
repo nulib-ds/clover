@@ -1,3 +1,4 @@
+import sanbornPage from "../../fixtures/mocks/sanborn/annotation-page.json";
 import {
   act,
   fireEvent,
@@ -1324,6 +1325,46 @@ describe("Map", () => {
     fireEvent.click(gear);
     fireEvent.click(screen.getByRole("button", { name: "Outlines" }));
     await waitFor(() => expect(edges().features).toHaveLength(0));
+  });
+
+  it("lays every sheet where georeference annotations are the content, the one in view outlined", async () => {
+    let root: any;
+    const Spy = () => {
+      root = Clover.useClover("test");
+      return null;
+    };
+    const { unmount: gone } = render(
+      <Clover.Root iiifContent={sanbornPage}>
+        <Spy />
+        <CloverMap items={false} />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps[0]?.fitBounds).toHaveBeenCalled(), {
+      timeout: 4000,
+    });
+    const sheets = georeferencesOf(root.clover.store.get().manifest);
+    expect(sheets).toHaveLength(sanbornPage.items.length);
+    const framed = () => maps.at(-1)!.fitBounds.mock.calls[0][0];
+    // Framed on them all, not the view's one.
+    expect(framed()).toEqual(boundsOf([], sheets));
+    const outline = () =>
+      maps
+        .at(-1)!
+        .sources["geomap-overlay-outline"]?.setData.mock.calls.at(-1)?.[0] ??
+      maps.at(-1)!.sources["geomap-overlay-outline"]?.data;
+    await waitFor(() => expect(outline().features).toHaveLength(1));
+    gone();
+
+    // Asked for the view's, the view's.
+    render(
+      <Clover.Root iiifContent={sanbornPage}>
+        <CloverMap items={false} overlays="view" />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps.at(-1)!.fitBounds).toHaveBeenCalled(), {
+      timeout: 4000,
+    });
+    expect(framed()).toEqual(boundsOf([], sheets.slice(0, 1)));
   });
 
   it("warps a georeferenced image onto the map by its control points", async () => {

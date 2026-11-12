@@ -8,6 +8,7 @@ import {
   type loadContent,
 } from "./load";
 import { type Manifest, toPresentation4 } from "./presentation";
+import { markGeoreferencedContent } from "./geo-detect";
 
 /**
  * Georeference Extension annotations as the content, given alone or on pages (an
@@ -291,7 +292,8 @@ export async function georeferenceContent(
   const { manifest, first } = laidOn(loaded.manifest, placed, pageId);
   return {
     ...loaded,
-    manifest,
+    // Its maps lay every sheet (`isGeoreferencedContent`).
+    manifest: markGeoreferencedContent(manifest),
     ...(first ? { target: { canvasId: first } } : {}),
   };
 }

@@ -370,7 +370,7 @@ export const mapDocs: ElementDocs = {
     },
     overlays: {
       description:
-        "Inside a root: whose georeferenced images it lays, the Canvases' in view or every Canvas's (all), an atlas's sheets at once, zooming to the view's as it changes. Alone, every one.",
+        "Inside a root: whose georeferenced images it lays, the Canvases' in view or every Canvas's (all), an atlas's sheets at once, zooming to the view's as it changes; every Canvas's by default where georeference annotations are the content. Alone, every one.",
       default: "view",
     },
     items: {

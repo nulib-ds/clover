@@ -4,6 +4,7 @@ import { MapList } from "./MapList";
 import { type Forwarded, type MapProps, MapView } from "./MapView";
 import { type Georeference, georeferencesOf, navPlaceOf } from "../../core/geo";
 import { selectShownId, selectVisibleCanvases } from "../../core/selectors";
+import { isGeoreferencedContent } from "../../core/geo-detect";
 import {
   useOptionalClover,
   useOptionalCloverSelector,
@@ -36,7 +37,7 @@ export const RootMap = forwardRef<
 /** The Root's places, and the overlays of the view (or, standalone, every Canvas). */
 export function ConnectedMap({
   scope,
-  overlays: whose = "view",
+  overlays: whose,
   onSelect,
   ...rest
 }: Omit<MapProps, "iiifContent" | "request" | "language"> &
@@ -55,14 +56,21 @@ export function ConnectedMap({
     NO_CANVASES,
   );
   // The same array while the view holds, so the map is not re-framed under the reader.
+  // Georeference annotations given as the content: every sheet, unless asked for the view's.
+  const atlas = useOptionalCloverSelector(
+    (state) => isGeoreferencedContent(state.manifest),
+    false,
+  );
+  const every =
+    scope === "all" || whose === "all" || (atlas && whose !== "view");
   const overlays = useMemo(
     () =>
-      scope === "all" || whose === "all"
+      every
         ? all
         : all.filter((overlay) =>
             shown.some((canvas) => canvas.id === overlay.canvasId),
           ),
-    [scope, whose, all, shown],
+    [every, all, shown],
   );
   // The annotations pointed at and picked, as the Canvas's hotspots show them.
   const picked = useOptionalCloverSelector((state) => state.annotationId, null);

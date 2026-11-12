@@ -62,3 +62,24 @@ export const hasGeoreferences = (manifest: Manifest | null): boolean =>
   Boolean(manifest) && selectSequence(manifest).canvases.some(isGeoreferenced);
 
 type Json = Record<string, any>;
+
+/**
+ * A Manifest Clover made from, or laid with, georeference annotations given as the content
+ * (an Annotation, AnnotationPage or AnnotationCollection, `georeference-content.ts`): its
+ * maps then lay every sheet, the one in view outlined (Mat, 2026-11-12: "because this is
+ * an annotation page / annotation collection resource. in the map inset, we should see all
+ * items, with the active one selected", then "same for in the main view"). A symbol, so it
+ * never leaves with the Manifest's JSON; a spread of the Manifest keeps it.
+ */
+const GEOREFERENCED_CONTENT = Symbol.for("clover.georeferencedContent");
+
+export function markGeoreferencedContent<T extends object>(manifest: T): T {
+  (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT] = true;
+  return manifest;
+}
+
+export const isGeoreferencedContent = (manifest: unknown) =>
+  Boolean(
+    manifest &&
+      (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT] === true,
+  );
