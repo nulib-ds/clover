@@ -43,6 +43,7 @@ the code, or change a value, and the example follows.
 | `defaultManifestId`    | `string`                          | In a Collection, the member to open first.                                                                                 |
 | `onManifestChange`     | `(manifestId) => void`            | In a Collection, another member opened, or was asked for.                                                                  |
 | `searchQuery`          | `string`                          | A Content Search to run once the Manifest is shown, and whenever it changes.                                               |
+| `onSearchChange`       | `(query: string) => void`         | The search's query changed: a search run, or `""` as it is cleared or another Manifest opens.                              |
 | `onContentStateChange` | `({ json, encoded }) => void`     | The current view, as a content state, as it changes.                                                                       |
 | `renderers`            | list                              | Components that draw views Clover does not; see [Custom renderer](/docs/composing/customizing#custom-renderer).            |
 | `as`                   | element type                      | Default `div`.                                                                                                             |

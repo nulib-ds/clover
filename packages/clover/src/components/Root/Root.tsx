@@ -45,6 +45,11 @@ export interface RootProps
    * changes (3.x's `iiifContentSearchQuery`). The reader can search on from `Search`.
    */
   searchQuery?: string;
+  /**
+   * The search's query, whenever it changes: a search run, from `searchQuery` or the
+   * Search field, and `""` as it is cleared or another Manifest opens.
+   */
+  onSearchChange?: (query: string) => void;
   /** Credentials, headers and `fetch` for every request any part makes. */
   request?: CloverRequest;
   /** The language to read IIIF text in. The reader's, by default. */

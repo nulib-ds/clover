@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -248,6 +249,28 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
       [origin, router.basePath],
     );
     const resource = current === OWN ? own : entry ? addressOf(entry) : null;
+    const addressOfKey = (key: string) => {
+      const found = resourceByKey(key);
+      return found ? addressOf(found) : null;
+    };
+
+    /*
+     * The search's query, `?q=` in the link (Mat, 2026-11-12: "helpful for sharing link
+     * examples"), with the resource it was made on. Each search the Viewer reports
+     * (`onSearchChange`) is held here and written to the link, never to state, so a search
+     * never renders the Viewer again, let alone reloads it. The Viewer is given it as it
+     * opens (`opening`): a link's, then the last search as a template switch opens it
+     * again. Another resource starts with none.
+     */
+    const search = useRef<{ query: string; on: string | null }>({
+      query: "",
+      on: null,
+    });
+    const [opening, setOpening] = useState<string>();
+    const moveTo = (shown: string | null) => {
+      if (search.current.on !== shown)
+        search.current = { query: "", on: shown };
+    };
 
     /* A map's worker is set before its resource opens, and only for one that has places. */
     const mapReady = useMapWorker(Boolean(entry?.map));
@@ -263,7 +286,8 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     /*
      * Read state out of the URL once the router and the origin are known, so a shared link
      * restores it. The resource travels as `iiif-content`, the parameter Clover has always
-     * read for a resource handed to the docs; one of ours is matched back to its key.
+     * read for a resource handed to the docs; one of ours is matched back to its key. A
+     * query (`q`) is searched for in what the link opens.
      */
     useEffect(() => {
       if (!router.isReady || !origin) return;
@@ -287,6 +311,14 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
           loadMapWorker();
         }
       }
+      const asked = typeof q.q === "string" ? q.q.trim() : "";
+      if (asked) {
+        search.current = {
+          query: asked,
+          on: content ?? addressOfKey(templateSpecs[next].defaultResource),
+        };
+        setOpening(asked);
+      }
       // A shared link's accent wins over the reader's stored one.
       if (typeof q.accent === "string") {
         setPageTheme({ accent: normalizeHex(q.accent) });
@@ -297,14 +329,16 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
 
     /**
      * Mirror the shareable parts of the state into the URL, without a navigation. Only what
-     * differs from a first visit is named: the template, unless it is Default, and the
-     * resource, once the reader has picked one.
+     * differs from a first visit is named: the template, unless it is Default, the
+     * resource, once the reader has picked one, and the search on what is shown.
      */
     const syncUrl = useCallback(
-      (t: TemplateKey, content: string | null) => {
+      (t: TemplateKey, content: string | null, shown: string | null) => {
         const query: Record<string, string> = {};
         if (t !== "default") query.t = t;
         if (content) query["iiif-content"] = content;
+        if (search.current.on === shown && search.current.query)
+          query.q = search.current.query;
         const { accent } = readStoredPageTheme();
         if (accent) query.accent = accent;
         router.replace({ query }, undefined, { shallow: true, scroll: false });
@@ -317,7 +351,18 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
      * can come quickly after another, and each would otherwise be a history entry.
      */
     const syncLatest = useRef(() => {});
-    syncLatest.current = () => syncUrl(active, picked ? resource : null);
+    syncLatest.current = () =>
+      syncUrl(active, picked ? resource : null, resource);
+
+    /* A search in the Viewer, or one cleared: into the link, if it changed. */
+    const shownRef = useRef(resource);
+    shownRef.current = resource;
+    const heardSearch = useCallback((query: string) => {
+      const on = shownRef.current;
+      if (search.current.on === on && search.current.query === query) return;
+      search.current = { query, on };
+      syncLatest.current();
+    }, []);
     useEffect(() => {
       if (!router.isReady) return;
       let timer: ReturnType<typeof setTimeout> | undefined;
@@ -331,23 +376,38 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
       };
     }, [router.isReady]);
 
+    /* A template opens the Viewer again: on the same resource, with its last search. */
     const selectTemplate = (key: TemplateKey) => {
+      const shown = picked
+        ? resource
+        : addressOfKey(templateSpecs[key].defaultResource);
+      moveTo(shown);
+      setOpening(search.current.query || undefined);
       setActive(key);
-      syncUrl(key, picked ? resource : null);
+      syncUrl(key, picked ? resource : null, shown);
     };
 
     const selectResource = (key: string) => {
-      setPicked(key);
       const chosen = resourceByKey(key);
-      syncUrl(active, chosen ? addressOf(chosen) : null);
+      const shown = chosen ? addressOf(chosen) : null;
+      if (shown !== resource) {
+        moveTo(shown);
+        setOpening(undefined);
+      }
+      setPicked(key);
+      syncUrl(active, shown, shown);
     };
 
     /* The reader's own: an address or a content state, which may have places. */
     const openOwn = (content: string) => {
+      if (content !== resource) {
+        moveTo(content);
+        setOpening(undefined);
+      }
       loadMapWorker();
       setOwn(content);
       setPicked(OWN);
-      syncUrl(active, content);
+      syncUrl(active, content, content);
     };
 
     /*
@@ -393,6 +453,33 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
           ?.focus();
     }, [layoutOpen]);
 
+    /*
+     * The Viewer, made again only when what it shows does: the link's changes (a search
+     * written to it, an accent) render the playground, and pass it by.
+     */
+    const viewer = useMemo(
+      () =>
+        ready ? (
+          <TemplateViewer
+            key={`${active}-${resource}`}
+            template={spec.name as "Default"}
+            iiifContent={resource}
+            headingLevel={3}
+            // The catalog's search, answered here: the static site cannot read `?q=`.
+            request={MOCK_SEARCH}
+            searchQuery={opening}
+            onSearchChange={heardSearch}
+            /*
+             * Gallery held to the frame, as its own `height` holds it (Mat, 2026-11-01:
+             * "max-height this container"): its header stays and its grid scrolls under
+             * it, rather than all of it scrolling in the frame.
+             */
+            {...(spec.name === "Gallery" ? { height: "100%" } : undefined)}
+          />
+        ) : null,
+      [ready, active, resource, spec.name, opening, heardSearch],
+    );
+
     return (
       <>
         <section
@@ -430,24 +517,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
               ref={viewerRef}
               {...example(EXAMPLE)}
             >
-              {ready && (
-                <TemplateViewer
-                  key={`${active}-${resource}`}
-                  template={spec.name as "Default"}
-                  iiifContent={resource}
-                  headingLevel={3}
-                  // The catalog's search, answered here: the static site cannot read `?q=`.
-                  request={MOCK_SEARCH}
-                  /*
-                   * Gallery held to the frame, as its own `height` holds it (Mat,
-                   * 2026-11-01: "max-height this container"): its header stays and its
-                   * grid scrolls under it, rather than all of it scrolling in the frame.
-                   */
-                  {...(spec.name === "Gallery"
-                    ? { height: "100%" }
-                    : undefined)}
-                />
-              )}
+              {viewer}
             </div>
             <div aria-hidden="true" className={styles.reach} data-reach="" />
           </div>

@@ -11,6 +11,20 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- `onSearchChange` on `Root` and the Viewer, and `clover-search-change` on `<clover-root>`
+  and `<clover-viewer>`: the search's query as it changes, and `""` once it is cleared or
+  another Manifest opens.
+
+### Changed
+
+- **Budgets.** `onSearchChange`, heard in the Root's own listener, takes nine pages past
+  their budgets by 3 to 63 bytes, each raised to the next 50: the Default template
+  82.35 kB and to first view 101.2 kB, Gallery 33.15 kB and to first view 57.7 kB, the Map
+  alone to first view 30.35 kB, the labels alone 37.5 kB, the four parts 110.55 kB,
+  `<clover-canvas>` 97.15 kB and the Viewer's own entry 113.15 kB.
+
 ## [4.9.3] - 2026-11-11
 
 ### Fixed

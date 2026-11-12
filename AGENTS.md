@@ -529,7 +529,10 @@ deadline.
     an `h3`), so the page's outline stays true. Move a demo, and check its level. The DC
     item mock's Explore Further rows take 3.
   - The homepage is Clover 4's demo (Mat, 2026-10-20): its playground opens what
-    `?iiif-content=` names. iiif.io's recipe pages link to
+    `?iiif-content=` names, and searches it for `?q=` (Mat, 2026-11-12: "helpful for
+    sharing link examples"). Each search in its Viewer (`onSearchChange`) is written back
+    to the address, never to state, so the Viewer is not drawn again, and a template
+    switch keeps it while another resource drops it. iiif.io's recipe pages link to
     `…/docs/viewer/demo?iiif-content=<manifest>`, the demo's old address, which the 404
     table forwards to the homepage with its query: never drop that forward. The
     Cookbook's recipes are listed on the homepage, in its Viewing field, tucked away at
