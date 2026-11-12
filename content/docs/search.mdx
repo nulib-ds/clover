@@ -65,7 +65,9 @@ element.
 
 Use `searchQuery`, on the Viewer or a `Root`, to search as the Manifest opens and again
 whenever it changes. The Viewer draws the hits on the Canvas and lists them in its Panel's
-Search section.
+Search section. `onSearchChange` hears each query as it changes, one typed in the Search
+field too, and `""` once it is cleared, so a page can keep it in its address, as the
+homepage does with `?q=`.
 
 <ViewerExample resource="search" props={{ searchQuery: "Moskau" }}>
 

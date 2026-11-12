@@ -37,6 +37,7 @@ export interface RootStateOptions {
   onManifestChange?: (manifestId: string) => void;
   onStatusChange?: (status: CloverStatus, error: Error | null) => void;
   searchQuery?: string;
+  onSearchChange?: (query: string) => void;
   request?: CloverRequest;
   language?: string;
   renderers?: BodyRenderer[];
@@ -63,6 +64,7 @@ export function useRootState<Props extends RootStateOptions>({
   defaultManifestId,
   onManifestChange,
   searchQuery,
+  onSearchChange,
   request,
   language,
   renderers,
@@ -83,6 +85,7 @@ export function useRootState<Props extends RootStateOptions>({
     onCanvasChange,
     onStatusChange,
     onManifestChange,
+    onSearchChange,
   });
   latest.current = {
     controlled,
@@ -90,6 +93,7 @@ export function useRootState<Props extends RootStateOptions>({
     onCanvasChange,
     onStatusChange,
     onManifestChange,
+    onSearchChange,
   };
 
   const [clover] = useState<Clover>(() =>
@@ -105,13 +109,20 @@ export function useRootState<Props extends RootStateOptions>({
 
   /*
    * Its status, heard from before the first load begins (a layout effect, declared before
-   * it), so a load that finishes before the page's passive effects run still says so.
+   * it), so a load that finishes before the page's passive effects run still says so. Its
+   * search's query too, in the same listener: one run, `searchQuery`'s or the Search
+   * field's, and `""` as one is cleared or another Manifest opens.
    */
   const [status, setStatus] = useState<CloverStatus>(clover.store.get().status);
   useIsomorphicLayoutEffect(() => {
     let last = clover.store.get().status;
+    let query = clover.store.get().search.query;
     return clover.store.subscribe(() => {
-      const { status: next, error } = clover.store.get();
+      const { status: next, error, search } = clover.store.get();
+      if (search.query !== query) {
+        query = search.query;
+        latest.current.onSearchChange?.(query);
+      }
       if (next === last) return;
       last = next;
       setStatus(next);

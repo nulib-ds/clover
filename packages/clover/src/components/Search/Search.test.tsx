@@ -237,6 +237,30 @@ describe("Search", () => {
     expect(fetch.mock.calls[0][0]).toBe(`${SEARCH_V2}?q=bird`);
   });
 
+  it("tells the Root's onSearchChange each query: searchQuery's, the field's, and none once cleared", async () => {
+    const heard = vi.fn();
+    render(
+      <Clover.Root
+        iiifContent={withSearch}
+        request={{ fetch: mockFetch() }}
+        searchQuery="bird"
+        onSearchChange={heard}
+      >
+        <Clover.Search />
+      </Clover.Root>,
+    );
+    expect(await screen.findByText("3 results")).toBeInTheDocument();
+    expect(heard.mock.calls).toEqual([["bird"]]);
+    const field = screen.getByRole("searchbox");
+    fireEvent.change(field, { target: { value: "" } });
+    await waitFor(() => expect(heard).toHaveBeenLastCalledWith(""));
+    fireEvent.change(field, { target: { value: "bird" } });
+    fireEvent.submit(field);
+    await waitFor(() =>
+      expect(heard.mock.calls).toEqual([["bird"], [""], ["bird"]]),
+    );
+  });
+
   it("says when nothing matched, or the service failed", async () => {
     const fetch = vi.fn(async (url: string) =>
       url.includes("q=none")

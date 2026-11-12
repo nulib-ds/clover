@@ -12,6 +12,7 @@ import { defineCloverElements } from "../define";
 import type { HostedProps } from "../host";
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
 import tocJson from "../../fixtures/iiif-cookbook/0024-book-4-toc.json";
+import { SEARCH_V2, manifest } from "../../fixtures/search";
 import { stubViewport } from "../../components/Canvas/testing/viewport";
 import { initCloverI18n } from "../../i18n";
 
@@ -469,6 +470,26 @@ describe("Clover's elements", () => {
     await waitFor(() =>
       expect(moved).toHaveBeenCalledWith({ canvasId: book.items[1].id }),
     );
+  });
+
+  it("tells the page its root's search query, as an event", async () => {
+    const element = document.createElement("clover-root") as WithContent & {
+      request: unknown;
+    };
+    element.setAttribute("search-query", "bird");
+    element.request = {
+      fetch: vi.fn(
+        async () =>
+          new Response(JSON.stringify({ type: "AnnotationPage", items: [] })),
+      ),
+    };
+    element.iiifContent = manifest([{ id: SEARCH_V2, type: "SearchService2" }]);
+    const heard = vi.fn();
+    element.addEventListener("clover-search-change", (event) =>
+      heard((event as CustomEvent).detail),
+    );
+    document.body.append(element);
+    await waitFor(() => expect(heard).toHaveBeenCalledWith({ query: "bird" }));
   });
 
   it("never leaves lang=\"\" where Clover's words come to match the page's", async () => {

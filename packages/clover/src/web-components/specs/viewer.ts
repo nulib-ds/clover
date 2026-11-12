@@ -63,6 +63,7 @@ export const viewer: ElementSpec = {
       prop: "onContentStateChange",
       detail: "first",
     },
+    "clover-search-change": { prop: "onSearchChange", detail: ["query"] },
   },
 };
 
@@ -246,6 +247,11 @@ export const viewerDocs: ElementDocs = {
       detail: "{ json: Record<string, unknown>; encoded: string }",
       description:
         "The current view, as a IIIF content state, as it changes: at most every 100ms while it moves, and always its last place.",
+    },
+    "clover-search-change": {
+      detail: "{ query: string }",
+      description:
+        'The search\'s query changed: a search run, from search-query or the Search field, and "" as it is cleared or another Manifest opens.',
     },
   },
 };
