@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.9.5] - 2026-11-12
+
 ### Added
 
 - A content state can target one Content Search result: its annotation, by `id`, with
