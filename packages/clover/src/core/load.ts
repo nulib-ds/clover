@@ -105,6 +105,13 @@ export interface Loaded {
   annotationSets?: AnnotationSet[];
   /** The annotation to pick on arrival: the first of those, on the Canvas opened. */
   pick?: string;
+  /**
+   * The annotation a content state targets (a search's result, by its `id`), as a set of
+   * its own, held for the search to come: its result where the answer has it, else listed
+   * with the content's own (`searchInto`). With no query to search for, `follow` lists it
+   * from the start, as `annotationSets`.
+   */
+  sought?: AnnotationSet;
   /** A content state's several targets, opened on the first (Cookbook 0540). */
   targets?: ContentTargets;
 }
@@ -178,6 +185,8 @@ export interface LoadContentOptions extends LoadOptions {
   manifestId?: string;
   /** How many content states have been followed to reach this content (`follow`). */
   follows?: number;
+  /** Whether the host has a query to search for once the Manifest shows. */
+  searching?: boolean;
 }
 
 /** A resource as JSON: fetched if it is only a reference. */

@@ -62,3 +62,42 @@ describe("buildContentState", () => {
     });
   });
 });
+
+describe("resolveContentState", () => {
+  // Mat, 2026-11-12: one Content Search hit, by its annotation's `id`.
+  it("goes where an annotation it targets targets, and picks that annotation", () => {
+    const hit = "https://example.org/search/hit/22-w148";
+    const resolved = resolveContentState({
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      type: "Annotation",
+      motivation: ["contentState"],
+      target: {
+        id: hit,
+        type: "Annotation",
+        motivation: "highlighting",
+        target: {
+          type: "SpecificResource",
+          source: {
+            id: canvasId,
+            type: "Canvas",
+            partOf: [{ id: manifestId, type: "Manifest" }],
+          },
+          selector: {
+            type: "FragmentSelector",
+            value: "xywh=661,3125,304,100",
+          },
+        },
+      },
+    });
+    expect(resolved).toMatchObject({
+      id: manifestId,
+      type: "Manifest",
+      target: { canvasId, region: { x: 661, y: 3125, w: 304, h: 100 } },
+      pick: hit,
+      // The annotation itself, to list where no search answers with it.
+      sought: { id: hit, type: "Annotation" },
+    });
+    // No note: the content state carries no body of its own.
+    expect(resolved?.annotation).toBeUndefined();
+  });
+});

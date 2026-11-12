@@ -11,6 +11,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- A content state can target one Content Search result: its annotation, by `id`, with
+  the annotation's own target. With `searchQuery`, Clover selects that result instead of
+  the first on its Canvas. Where no search response has that annotation, or there is no
+  query, Annotations lists it as an annotation of its own.
+
+### Changed
+
+- **Budgets.** Holding a content state's annotation until its search answers adds about
+  55 bytes to every Root, and takes eleven pages past their budgets by 1 to 167 bytes, each
+  raised to the next 50: the Default template 82.4 kB and to first view 101.25 kB, Gallery
+  33.2 kB and to first view 57.75 kB, `<clover-viewer>` 134.2 kB, in Document 151.8 kB and
+  in Gallery 137.7 kB, the labels alone 37.6 kB, the four parts 110.7 kB, a layout of
+  containers 129.6 kB and `<clover-canvas>` 97.25 kB.
+
 ## [4.9.4] - 2026-11-12
 
 ### Added

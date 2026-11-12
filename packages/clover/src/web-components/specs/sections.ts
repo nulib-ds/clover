@@ -150,17 +150,16 @@ export const search: ElementSpec = {
 export const searchDocs: ElementDocs = {
   name: "CloverSearchElement",
   description:
-    "A Content Search of the Manifest, where it offers one: a field, and its hits by Canvas, each going to its place, with Previous and Next through them.",
+    "Renders the search responses for the Manifest's IIIF Content Search service: a search field, and a list of results that walks the user through its Canvases. It renders nothing when the Manifest has no service.",
   attributes: {
-    ...headingLevelDocs("each Canvas's group of hits"),
+    ...headingLevelDocs("each Canvas's group of results"),
     size: {
-      description:
-        "The field's size: large, its submit a round control's, or small, a tad smaller, for a narrow column.",
+      description: "The field's size. Use small for a narrow column.",
       default: "large",
     },
     sticky: {
       description:
-        "The field held in view as the hits scroll under it: at the top of the box that scrolls them, or under a panel accordion's stuck headings.",
+        "Keeps the field in view while the results scroll: at the top of the box that scrolls them, or under a panel accordion's stuck headings.",
     },
   },
 };

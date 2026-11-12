@@ -1378,6 +1378,17 @@ e2e:docs`.
   Languages), the browser's or the system's settings, or what is pressed or chosen; "user"
   only where a person must act (an agent's tools speak of "the user"). "Screen reader"
   stays, and the 3.x pages keep their own words.
+- Docs prose says what a thing does, in whole sentences (Mat, 2026-11-12: "these do not
+  appear to be concise or conversational and still use generic language"): a component
+  page's lede opens on its verb ("Renders the search responses for a IIIF Content Search
+  service, which searches the text of a Manifest, and provides a list of results that walks
+  the user through its Canvases."), never a colon and a list of nouns ("IIIF Content
+  Search of the Manifest: a field, then the hits by Canvas…"). A heading says what it
+  means ("Open a Content Search response to a specific result", never "Open on one hit"),
+  and so does a name in an example's code (`targetSpecificResult`, never `tenth`). A
+  search's matches are "results", as the interface says, never "hits". Search's page
+  (`content/docs/search.mdx`) is written so; the other component pages keep their earlier
+  wording until Mat asks for the same.
 - Paths: TS path aliases enabled via `vite-tsconfig-paths`.
 
 ## Testing Guidelines

@@ -1222,6 +1222,34 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   (closures in `createClover`), so `loadAnnotations` never drops the note. Its body is
   read by its declared `format`: Digital Collections' links write `<em>` in a
   `text/plain` body, which shows as written.
+- **A content state's search result** (Mat, 2026-11-12: "target the tenth result for
+  Pedals on page 21"; "if that's the case, it should just relegate to an annotation in
+  the annotation pane"). A target that is an annotation, by its `id`, holding its own
+  target (a Content Search result, as the search answers with it) goes where that target
+  is (`resolveTarget`: `pick`, and the annotation itself as `sought`). What becomes of the
+  annotation is decided in the two chunks that load for it, never in the store, which
+  only holds it between them (`sought`, `settle`): decided in the store, it cost the
+  Default template 136 B; held, 56.
+  - `follow` (`follow-content.ts`) makes it a set of its own (`${id}#content-state`, made
+    there, as `readPage` leaves out an annotation without a body). With a query to search
+    for (the Root's `searchQuery`, handed down as `Initial.searching` and
+    `LoadContentOptions.searching`) it hands the set on as `Loaded.sought`, for the store
+    to hold. With no query it lists it from the start, as `annotationSets`, and picks it.
+  - `searchInto` (`search.ts`) settles it as the answer comes: where a response has an
+    annotation with its `id`, that result is chosen with the answer (`annotationId`, in
+    the same `store.set`), so Search keeps it ("10 / 10", where the page's first result
+    would be "9 / 10") and it is listed nowhere else. Where none has, it joins
+    `stateSets` (`settle`), listed by Annotations as a note is, and the search goes to its
+    first result as ever; where the search found nothing, or failed, it is chosen there.
+    Settled once: a later search never moves it.
+  - A search with nothing to ask (`clover.search`: no service, an empty query) lists it
+    too, the one decision the store makes.
+  - `follow` imports neither `readBodies` nor `searchServiceOf`, though it could use both:
+    either moves its module into a chunk every Map and element page loads (500 B on a Map
+    alone, measured). It reads the annotation's text bodies itself, and leaves the
+    service to `clover.search`.
+    Clover's own content state output never names the annotation chosen, so none leaks
+    into a link.
 - **Sanitizer.** `core/sanitize.ts` runs on its own DOMPurify instance
   (`DOMPurify(window)`, made on first use). `dompurify` is external, so a host that
   imports it gets the same default instance. Never call `addHook` or `setConfig` on the
@@ -1419,7 +1447,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   hit as results arrive (Mat, 2026-10-26: as find in a page does, the Canvas moving and
   never focus, once per answer, a hit already chosen kept), from where the reader is: the
   first on the Canvas shown where it has hits, else the first of all, so a content state
-  with a `searchQuery` (a host's search result, opened at its page) keeps its page.
+  with a `searchQuery` (a host's search result, opened at its page) keeps its page, and
+  one that targets a hit by its `id` keeps that hit (the content state's search hit,
+  above).
   None found is "No results"
   in the pill. The status under the field is for assistive technology alone, but while
   loading or failed. (`pager="heading"`, the count beside the section's heading, was

@@ -1,4 +1,4 @@
-import type { AnnotationEntry } from "./annotation-sets";
+import type { AnnotationEntry, AnnotationSet } from "./annotation-sets";
 import type { CloverState } from "./clover";
 import type { Store } from "./store";
 import { parseAnnotationTarget } from "./annotations";
@@ -32,15 +32,38 @@ export async function searchInto(
   query: string,
   request: CloverRequest | undefined,
   signal: AbortSignal,
+  /** The annotation a content state targets, held for this answer (`clover.ts`). */
+  sought?: AnnotationSet | null,
+  /** Settles it: listed with the content's own annotations where given. */
+  settle?: (listed?: AnnotationSet | null) => void,
 ): Promise<void> {
   const manifestId = store.get().manifest?.id;
+  const soughtId = sought?.entries[0]?.id;
   try {
     const { hits, set } = await search(service, query, { request, signal });
     if (signal.aborted || store.get().manifest?.id !== manifestId) return;
-    store.set({ search: { query, status: "ready", hits, set } });
+    /*
+     * A content state's annotation (Mat, 2026-11-12): where a response has an annotation
+     * with its `id`, that result is the one chosen, with the answer, so Search keeps it
+     * ("10 / 10"); where none has, it is listed with the content's own annotations, an
+     * annotation like any other, and chosen there only where the search found nothing.
+     */
+    const found = set.entries.some((entry) => entry.id === soughtId);
+    store.set({
+      search: { query, status: "ready", hits, set },
+      ...(soughtId && (found || !hits.length)
+        ? { annotationId: soughtId }
+        : {}),
+    });
+    if (sought) settle?.(found ? null : sought);
   } catch {
     if (signal.aborted) return;
     store.set({ search: { query, status: "error", hits: [], set: null } });
+    // No answer to hold it: listed, and chosen.
+    if (sought) {
+      settle?.(sought);
+      store.set({ annotationId: soughtId });
+    }
   }
 }
 
