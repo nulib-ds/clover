@@ -11,6 +11,28 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **A link to Allmaps Viewer.** `allmaps` on `Map` (`allmaps` on `<clover-map>`) adds a
+  link, "View in Allmaps" (the string `mapViewInAllmaps`, in every locale), that opens
+  what the map shows in [Allmaps Viewer](https://viewer.allmaps.org/) in a new tab:
+  Allmaps' mark on a round control at the map's lower corner, on the controls' fill. It
+  is offered only where Allmaps can open it by an address: georeference annotations given
+  as the content (the address of the Annotation or AnnotationPage), or an annotation
+  Allmaps hosts (`https://annotations.allmaps.org/…`). An AnnotationCollection, and an
+  annotation held in a Manifest, get no link. Off by default; no Allmaps code is loaded.
+
+### Changed
+
+- **Budgets.** The link to Allmaps takes the Map before MapLibre to 24.4 kB and a page
+  with a Map alone, to its first view, to 47.5 kB: the link itself and Allmaps' mark load
+  only where `allmaps` is on, and what every map carries of it (where the link goes, and
+  its styles) is about 0.36 kB. Its string, which every page loads, takes six more pages
+  past their budgets by 6 to 22 bytes: a Scene's first load to 19.4 kB and to first view
+  30.15 kB, a Timeline to first view 56.75 kB, Gallery to first view 58.3 kB,
+  `<clover-canvas>` to 97.55 kB and Gallery's element to 138.15 kB; the link's control
+  takes base.css to 15.15 kB. Each raised to the next 50.
+
 ## [4.10.0] - 2026-11-12
 
 ### Added

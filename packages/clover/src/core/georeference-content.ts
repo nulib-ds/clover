@@ -292,8 +292,15 @@ export async function georeferenceContent(
   const { manifest, first } = laidOn(loaded.manifest, placed, pageId);
   return {
     ...loaded,
-    // Its maps lay every sheet (`isGeoreferencedContent`).
-    manifest: markGeoreferencedContent(manifest),
+    // Its maps lay every sheet (`isGeoreferencedContent`), and know where one document
+    // holds them all (`georeferencedContentAddress`, `geo.ts`): never a Collection's, of
+    // pages.
+    manifest: markGeoreferencedContent(
+      manifest,
+      /Collection/.test(String(about.type ?? about["@type"] ?? ""))
+        ? undefined
+        : about.id,
+    ),
     ...(first ? { target: { canvasId: first } } : {}),
   };
 }

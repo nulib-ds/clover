@@ -2,7 +2,12 @@ import React, { forwardRef, useMemo } from "react";
 
 import { MapList } from "./MapList";
 import { type Forwarded, type MapProps, MapView } from "./MapView";
-import { type Georeference, georeferencesOf, navPlaceOf } from "../../core/geo";
+import {
+  type Georeference,
+  georeferencedContentAddress,
+  georeferencesOf,
+  navPlaceOf,
+} from "../../core/geo";
 import { selectShownId, selectVisibleCanvases } from "../../core/selectors";
 import { isGeoreferencedContent } from "../../core/geo-detect";
 import {
@@ -63,6 +68,11 @@ export function ConnectedMap({
   );
   const every =
     scope === "all" || whose === "all" || (atlas && whose !== "view");
+  // Where they were read from, for a link to them (`allmaps`).
+  const source = useOptionalCloverSelector(
+    (state) => georeferencedContentAddress(state.manifest),
+    undefined,
+  );
   const overlays = useMemo(
     () =>
       every
@@ -103,6 +113,7 @@ export function ConnectedMap({
     <MapView
       {...rest}
       List={MapList}
+      source={source}
       features={features}
       overlays={overlays}
       current={current}

@@ -225,7 +225,8 @@
   box-shadow: none !important;
 }
 
-.clover-geomap .maplibregl-ctrl-group button {
+/* A link among them (`a.clover-geomap-allmaps`) is a control as they are. */
+.clover-geomap .maplibregl-ctrl-group :is(button, a) {
   position: relative !important;
   display: flex !important;
   align-items: center;
@@ -242,7 +243,9 @@
   transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
 }
 
-.clover-geomap .maplibregl-ctrl-group button:is(:hover, :focus-visible) {
+.clover-geomap
+  .maplibregl-ctrl-group
+  :is(button, a):is(:hover, :focus-visible) {
   background-color: var(--clover-color-accent, #0065c3) !important;
   box-shadow: none !important;
 }
@@ -255,16 +258,41 @@
 :where([data-high-contrast])
   .clover-geomap
   .maplibregl-ctrl-group
-  button:is(:hover, :focus-visible) {
+  :is(button, a):is(:hover, :focus-visible) {
   background-color: var(--clover-accent-fill) !important;
 }
 
 :where([data-high-contrast])
   .clover-geomap
   .maplibregl-ctrl-group
-  button:hover:not(:focus-visible) {
+  :is(button, a):hover:not(:focus-visible) {
   outline: var(--clover-accent-ring-hover) !important;
   outline-offset: 1px !important;
+}
+
+/*
+ * The link to Allmaps Viewer (`allmaps`, `MapView.tsx`; Mat, 2026-11-12: its logo "within
+ * a map. never on white"): a control as the map's buttons are, round, on the controls'
+ * fill, at the map's lower corner at its start, Allmaps' mark in the glyph's color, so
+ * the mark is always over the map and on that fill, 3:1 and more over any basemap (WCAG
+ * 1.4.11). The accent under the pointer or focused, as theirs; the credits' words keep
+ * clear of it (`--clover-map-controls-start`).
+ */
+.clover-geomap:has(.clover-geomap-allmaps) {
+  --clover-map-controls-start: calc(
+    var(--clover-control) + var(--clover-space-s)
+  );
+}
+
+.clover-geomap .maplibregl-ctrl-group a {
+  outline: none;
+  text-decoration: none;
+}
+
+/* The mark is taller than wide, and fine: a little larger than a glyph. */
+.clover-geomap .clover-geomap-allmaps-mark {
+  flex: none;
+  height: 1.25rem;
 }
 
 /*
@@ -481,11 +509,17 @@
     border: 1px solid ButtonText !important;
   }
 
+  /* A link, in the system's link color, its mark with it. */
+  .clover-geomap .maplibregl-ctrl-group a {
+    border: 1px solid LinkText !important;
+    color: LinkText;
+  }
+
   /*
    * MapLibre's sheet takes the zoom buttons' outline away; forced colors drop the fill
    * that marks focus, so the ring is drawn here (WCAG 2.4.7).
    */
-  .clover-geomap .maplibregl-ctrl-group button:focus-visible {
+  .clover-geomap .maplibregl-ctrl-group :is(button, a):focus-visible {
     outline: 3px solid Highlight !important;
     outline-offset: 2px;
   }

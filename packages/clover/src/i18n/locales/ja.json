@@ -105,6 +105,7 @@
   "mapOptions": "地図のオプション",
   "mapExpandOptions": "地図のオプションを展開",
   "mapCollapseOptions": "地図のオプションを折りたたむ",
+  "mapViewInAllmaps": "Allmapsで表示",
   "informationPanelToggle": "詳細情報",
   "playerPlay": "再生",
   "playerPause": "一時停止",

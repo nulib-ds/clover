@@ -1709,6 +1709,25 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     however late) and under the places and the accent outline; Selection outline
     (`mapSelectionOutline`), on to start, takes the accent's outline away. A new map
     option joins the tray, offered by a prop of its own or `outlines`.
+  - `allmaps` (Mat, 2026-11-12: "a view in allmaps button", "integrate allmaps branding",
+    then "look at their packages for a logo. keep it an svg if possible and small. let's
+    not go the plugin route", "I'd like the logo to be within a map. never on white"): a
+    link, "View in Allmaps" (`mapViewInAllmaps`), to Allmaps Viewer
+    (`https://viewer.allmaps.org/?url=<address>`), in a new tab, off by default. It is no
+    option, so it is not in the gear's tray: a round control of its own at the map's
+    lower corner at its start, where a basemap's own mark sits (a MapLibre control group
+    React draws into, as the options'), so Allmaps' mark is always over the map and on
+    the controls' fill, never on the page's ground. The mark is the one-color logo
+    `@allmaps/ui` ships (`allmaps-logo-inverted.svg`, MIT), one path in `MapView.tsx`
+    (`AllmapsMark`), in the glyph's color; never Allmaps' two-tone logo, whose white would
+    meet a light basemap. Offered only where Allmaps can open what the map shows by an
+    address: the document georeference content was read from
+    (`georeferencedContentAddress`, `core/geo-detect.ts`: an Annotation's or an
+    AnnotationPage's, never an AnnotationCollection's, whose pages are several), else an
+    annotation Allmaps hosts (`https://annotations.allmaps.org/`), the one chosen, else
+    the first. Another annotation's `id` is no address to count on (mapsnap's answer 404),
+    and Allmaps Viewer fetches the address itself, so it must be public, with CORS.
+    `@allmaps/*` stays on the forbidden list: no plugin, no Allmaps code.
   - The overlays chosen are outlined in the accent (`OUTLINE`, Mat, 2026-11-12: "draw
     bounds on selected annotations, use accent … as an outline so it is slightly offset",
     then "make sure outline has higher z than other items"): 3px, its middle 2.5px
