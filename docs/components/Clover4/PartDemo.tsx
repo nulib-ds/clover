@@ -151,7 +151,13 @@ const Live = dynamic(
                       alignItems: "center",
                       gap: "1rem",
                     }
-                  : { display: "grid", gap: "1rem" }
+                  : {
+                      display: "grid",
+                      // One column no wider than the demo: a slider's row would
+                      // otherwise widen it past a narrow page (WCAG 1.4.10).
+                      gridTemplateColumns: "minmax(0, 1fr)",
+                      gap: "1rem",
+                    }
             }
           >
             {side && <div style={{ minHeight: 0 }}>{parts}</div>}
