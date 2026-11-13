@@ -246,34 +246,38 @@ test("without the stylesheet, the bar is a focus stop that can be seen: its name
 });
 
 /*
- * Document with the panel open beside the thumbnails: three panes and two bars. Each bar
+ * Document with its aside open beside the thumbnails: three panes and two bars. Each bar
  * steps its pane within the room it shares with the page, so neither squeezes the other
  * pane and each comes all the way round to its own size.
  */
 for (const across of [1280, 1000])
-  test(`Document at ${across}px, the panel open beside the thumbnails: each bar steps its pane all the way round (WCAG 2.5.7)`, async ({
+  test(`Document at ${across}px, the aside open beside the thumbnails: each bar steps its pane all the way round (WCAG 2.5.7)`, async ({
     page,
     isMobile,
   }) => {
     test.skip(isMobile, "on a phone the panes slide over the page: no bars");
     await page.setViewportSize({ width: across, height: 800 });
     await open(page, "scene=document&");
-    await page.getByRole("button", { name: "More information" }).click();
+    // A section's button in the toolbar opens it in the aside, beside the page.
+    await page
+      .locator(".clover-template-document-toolbar")
+      .getByRole("button", { name: "About" })
+      .click();
     const sidebar = page.locator(".clover-template-document-sidebar");
     const main = page.locator(".clover-template-document-main");
-    const panel = page.locator(".clover-template-document-panel");
+    const panel = page.locator(".clover-template-document-aside");
     const thumbnailsBar = page.locator(
       ".clover-template-document-sidebar + .clover-split-handle",
     );
-    // The panel's bar, which its toggle's spine follows while the panel is open.
+    // The aside's bar, there only while the aside is beside the page.
     const panelBar = page.locator(
-      ".clover-template-document-panes > .clover-split-handle[aria-controls$='-panel']",
+      ".clover-template-document-panes > .clover-split-handle[aria-controls$='-aside']",
     );
     await expect(panelBar).toBeVisible();
     await expect.poll(() => width(panel)).toBeCloseTo(384, 0);
     const pageMin = 256;
 
-    // The panel's bar: own, widest (the page down to its minimum), narrowest, own.
+    // The aside's bar: own, widest (the page down to its minimum), narrowest, own.
     const room = (await width(panel)) + (await width(main)) - pageMin;
     await panelBar.click();
     await expect.poll(() => width(panel)).toBeCloseTo(room, 0);
@@ -322,8 +326,28 @@ test("a double click on Document's thumbnails' bar steps them once, and the seco
   await expect(position).toHaveCount(1);
   const before = await position.textContent();
   const box = (await handle.boundingBox())!;
-  // Low on the bar, beside a thumbnail once the bar has moved off.
-  const at = { x: box.x + box.width / 2, y: box.y + box.height * 0.7 };
+  /*
+   * How far down the bar a thumbnail lies once the bar has moved off. Each browser lays
+   * the thumbnails at its own heights (a fixed height met the room between two in
+   * Firefox), so it is measured with them at their widest, and the bar stepped back round
+   * to its own size, each press past a double click's time from the last.
+   */
+  const step = async (to: number) => {
+    await handle.click();
+    await expect.poll(() => width(sidebar)).toBeCloseTo(to, 0);
+    await page.waitForTimeout(600);
+  };
+  await step(384);
+  const other = (await sidebar
+    .locator("[role='option'][aria-selected='false']")
+    .first()
+    .boundingBox())!;
+  const at = { x: box.x + box.width / 2, y: other.y + other.height / 2 };
+  expect(at.y).toBeGreaterThan(box.y);
+  expect(at.y).toBeLessThan(box.y + box.height);
+  await step(128);
+  await step(208);
+  await expect(position).toHaveText(before!);
   await page.mouse.dblclick(at.x, at.y);
   await expect.poll(() => width(sidebar)).toBeCloseTo(384, 0);
   expect(

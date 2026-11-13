@@ -89,23 +89,29 @@ test("a place is chosen from the keyboard, and named in its language", async ({
   await open(page, `/?scene=map&content=${PLACES}`);
   const label = page.getByTestId("canvas-label");
   await expect(label).toHaveText("Front of Bronze");
-  const bronze = page.getByRole("button", {
+  // The places are Items' list: a listbox, one stop, its options moved through by arrow.
+  const list = page.getByRole("listbox", { name: "On the map" });
+  const bronze = list.getByRole("option", {
     name: "Current Location of the Laocoön Bronze",
   });
-  const painting = page.getByRole("button", {
+  const painting = list.getByRole("option", {
     name: "Current Location of Painting",
   });
-  await expect(bronze).toHaveAttribute("aria-current", "true");
+  await expect(bronze).toHaveAttribute("aria-selected", "true");
 
-  // From the map, through its controls, to the places.
+  // From the map, through its controls, to the places: the current one first.
   await page.getByRole("region", { name: "Map" }).focus();
   for (let step = 0; step < 8; step++) {
-    if (await painting.evaluate((node) => node === document.activeElement))
-      break;
+    if (await bronze.evaluate((node) => node === document.activeElement)) break;
     await page.keyboard.press("Tab");
   }
+  await expect(bronze).toBeFocused();
+  // An arrow moves focus alone: nothing is chosen until Enter or Space.
+  await page.keyboard.press("ArrowDown");
   await expect(painting).toBeFocused();
   await expect(painting).toBeInViewport();
+  await expect(bronze).toHaveAttribute("aria-selected", "true");
+  await expect(label).toHaveText("Front of Bronze");
 
   await page.keyboard.press("Enter");
   const popup = page.locator(".clover-geomap-popup");
@@ -113,16 +119,17 @@ test("a place is chosen from the keyboard, and named in its language", async ({
   await expect(popup).toHaveText("Current Location of Painting");
   await expect(popup.locator('span[lang="en"]')).toHaveCount(1);
   await expect(label).toHaveText("Painting");
-  await expect(painting).toHaveAttribute("aria-current", "true");
-  await expect(bronze).not.toHaveAttribute("aria-current", "true");
+  await expect(painting).toHaveAttribute("aria-selected", "true");
+  await expect(bronze).not.toHaveAttribute("aria-selected", "true");
   // Focus stays on the list, and one popup shows at a time.
   await expect(painting).toBeFocused();
-  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("ArrowUp");
   await expect(bronze).toBeFocused();
   await page.keyboard.press("Space");
   await expect(popup).toHaveCount(1);
   await expect(popup).toHaveText("Current Location of the Laocoön Bronze");
   await expect(label).toHaveText("Front of Bronze");
+  await expect(bronze).toHaveAttribute("aria-selected", "true");
 });
 
 /** The Viewer on the places, its default basemap one color, its panel open. */
@@ -146,12 +153,15 @@ test("in the Viewer's Map tab, the places sit under the map", async ({
 }) => {
   await openViewer(page, isMobile, "panel=tabs&");
   await page.getByRole("tab", { name: "Map" }).click();
-  const painting = page.getByRole("button", {
-    name: "Current Location of Painting",
-  });
+  const painting = page
+    .getByRole("listbox", { name: "On the map" })
+    .getByRole("option", { name: "Current Location of Painting" });
   await expect(painting).toBeVisible();
-  const box = await page.locator(".clover-geomap > div").boundingBox();
-  const list = await page.locator(".clover-geomap-places").boundingBox();
+  // The map's box is the first child; its list, Items', is a `div` too.
+  const box = await page
+    .locator(".clover-geomap > div:first-child")
+    .boundingBox();
+  const list = await page.locator(".clover-geomap-items").boundingBox();
   expect(box!.height).toBeGreaterThan(100);
   expect(list!.y).toBeGreaterThanOrEqual(box!.y + box!.height);
   await painting.scrollIntoViewIfNeeded();
@@ -181,20 +191,21 @@ test("in the accordion's Map section, the map is no second region", async ({
   );
 });
 
-test("in forced colors, only the current place's edge shows", async ({
+test("in forced colors, only the current place's ring shows", async ({
   page,
   browserName,
 }) => {
   test.skip(browserName !== "chromium", "forced colors emulate in Chromium");
   await page.emulateMedia({ forcedColors: "active" });
   await open(page, `/?scene=map&content=${PLACES}`);
-  const bronze = page.getByRole("button", {
+  const list = page.getByRole("listbox", { name: "On the map" });
+  const bronze = list.getByRole("option", {
     name: "Current Location of the Laocoön Bronze",
   });
-  const painting = page.getByRole("button", {
+  const painting = list.getByRole("option", {
     name: "Current Location of Painting",
   });
-  await expect(bronze).toHaveAttribute("aria-current", "true");
+  await expect(bronze).toHaveAttribute("aria-selected", "true");
   // A system color, as the browser resolves it.
   const system = (name: string) =>
     page.evaluate((name) => {
@@ -205,12 +216,16 @@ test("in forced colors, only the current place's edge shows", async ({
       probe.remove();
       return value;
     }, name);
-  const edge = (button: typeof bronze) =>
-    button.evaluate((node) => getComputedStyle(node).borderInlineStartColor);
+  // The ring around an item's picture, as Items draws it.
+  const pictures = (option: typeof bronze) =>
+    option.locator(".clover-items-pictures");
+  const ring = (option: typeof bronze) =>
+    pictures(option).evaluate((node) => getComputedStyle(node).outlineColor);
   const ground = await system("Canvas");
   const highlight = await system("Highlight");
   expect(highlight).not.toBe(ground);
-  expect(await edge(painting)).toBe(ground);
-  expect(await edge(bronze)).toBe(highlight);
-  await expect(bronze).toHaveCSS("border-inline-start-width", "3px");
+  expect(await ring(painting)).toBe(ground);
+  expect(await ring(bronze)).toBe(highlight);
+  await expect(pictures(bronze)).toHaveCSS("outline-style", "solid");
+  await expect(pictures(bronze)).toHaveCSS("outline-width", "3px");
 });
