@@ -1605,7 +1605,12 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     has "Map, before MapLibre" and "MapLibre, on a map" (MapLibre's chunks only).
   - The panel offers the tab when `core/geo-detect.ts` `hasMapData` (a look, not a read)
     finds navPlace or a georeference, and lazy-loads `RootMap` from
-    `components/Map/MapView.tsx`. That module must never import `Root` (the standalone
+    `components/Map/ConnectedMap.tsx`, beside `ConnectedMap`, the maps that follow a Root
+    and list (`MapList`, handed to `MapView` as `List`). `MapView.tsx` (the view, and
+    `GivenMap`, which the Canvas's map box draws with) never reaches the list: a module a
+    first load holds keeps every export a reachable lazy chunk uses, so a Canvas that
+    could reach Items through it carried Items' needs up front (+0.6 kB, 2026-11-12).
+    Neither module may import `Root` (the standalone
     `iiifContent` wrapper is `LoadedMap.tsx`, lazy from `Map.tsx`, map entry only, so a
     map handed its places carries no loader): a lazy chunk importing `Root`
     made esbuild hoist `Root` and the core into a standalone Canvas (35.6 → 43.7 kB). It
@@ -1623,13 +1628,106 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     of the control points in Web Mercator (exact for three) maps the image's corners, and
     the image (about 2048 px, asked as its `info.json` allows, `overlayImage.ts`, clipped to the
     SvgSelector mask on a 2D canvas) is a MapLibre `canvas` source under the places.
+    A `transformation` of `helmert` is fitted as a similarity instead (`helmertTransform`,
+    exact for two points, the image's y read mirrored so a scan is never flipped; Mat,
+    2026-11-12, for mapsnap's fits); every other is the affine fit.
     Needs CORS on the image. No TPS, no tiled overlay: document, don't add.
+  - A map frames an overlay by its mask where it has one (`boundsOf`): a sheet of several
+    maps is fitted map by map, and the whole sheet by one inset's fit lands far away.
+    Overlays are framed whole, as close as zoom 19 (`OVERLAY_ZOOM`), places alone no
+    closer than 12; a `zoom` given caps both.
+  - Georeferences given as the content (an Annotation alone, or AnnotationPages or an
+    AnnotationCollection of them; Mat, 2026-11-12) are never notes or content states:
+    `core/georeference-content.ts`, a chunk of its own, reached from the chunks that
+    already read such content (`follow-content.ts` for one alone, `annotations-content.ts`
+    for pages; `core/load.ts`, which every Viewer loads, carries none of it), opens what
+    they target and lays
+    each on its Canvas in a page of its own (`#georeferencing-n`), so everything that
+    reads a Canvas's georeferences draws it. It opens the Manifest a target names (its
+    Canvas's `partOf`, or its image service's Canvas's, as Allmaps writes them), finding
+    the Canvas by id, else by the image service it paints; where none is named, or the
+    Manifest cannot be fetched, a Manifest made of the Canvases given whole, else of the
+    image services targeted (each a Canvas the size the annotation measured, its image the
+    full size at full size, which every level delivers, a fallback only). Other
+    annotations on the same pages stay sets, as before.
   - Inside a Root the Map overlays the view's Canvases only (memoized, or the map is
     re-framed under the reader on every render); standalone `iiifContent` wraps a Root
     with `annotationPages="all"`. Pressing a feature with a `canvasId` goes there.
-  - Under the map, `ul.clover-geomap-places` lists each feature and each overlay drawn,
-    as buttons that do what a click on the map does (frame, popup with the title's
-    `lang`, `onSelect`, `goTo`). It is the map's text alternative and the keyboard's way
+  - Under the map, Items lists each feature and each overlay drawn (`MapItems`, lazy
+    with Items' code; Mat, 2026-11-12: "Map wouldn't have `list` boolean. it would be
+    `items` and the enum or false", then "Items draws it all"): `items`, one of Items'
+    layouts (`list` by default, `grid`, `slider`, `masonry`) or `false` for none, as the
+    Viewer's `items` is; a listbox named "On the map" (`mapItemsLabel`), never a landmark
+    (`as="div"`: the map is the region), its options doing what a click on the map does
+    (frame, popup with the title's `lang`, `onSelect`, `goTo`). The one selected is the
+    one last chosen, else the first on a Canvas in view (only scope "view", a host's
+    Root, passes `current`). A place is named, dated and pictured as its popup is; an
+    overlay is named by its label alone, never its kind (Mat, 2026-11-12: "Georeferenced
+    image" taken out, its string with it), one with no label numbered after the places,
+    several of one name told apart by their place among it, as figures ("Sheet 21 2 / 3")
+    (`overlayItems`, which Items' `of="georeferences"` shares). The Canvas's map box
+    passes `items={false}`, naming its one place itself; Document's map hides the list
+    until focus is in it (`.clover-geomap-items`, Mat, 2026-11-09).
+  - `overlays="all"` (Mat, 2026-11-12) lays every Canvas's overlays in a Root, not only
+    the view's; standalone, every one already. Pointing is the Root's (`highlight`): an
+    overlay pointed at on the map or in its list is emitted, and one emitted elsewhere
+    (Items' `of="georeferences"`, a page's own list) is outlined at half strength and its
+    item lit; a place's annotation lights its item too. Choosing an overlay in the list
+    goes to its Canvas where the Root has it, and so does a press on an overlay on the map
+    (`chooseSheet`, the pointer a hand over one; Mat, 2026-11-12: "document how the user
+    would click to zoom"). Laying more than the view's, the map opens on them all, then
+    follows the view: as the overlays on the Canvas in view change, it eases to them
+    (`inViewKey`), so one chosen in Items beside it is framed; laying the view's alone, the
+    extent's change frames them already, so the templates' maps are unchanged. So a page
+    may list the sheets itself: `items={false}` beside `Items of="georeferences"`, or its
+    own list from `georeferencesOf`, `clover.goTo` and `clover.highlight` (the Map page's
+    first example, and its "Customize layout"). Where georeference annotations are the
+    content (`isGeoreferencedContent`, a symbol `georeferenceContent` sets on the
+    Manifest), the Root's maps lay every sheet by default, the Canvas's map box too
+    (`PlaceBox`, reading the Root's Manifest, its view's Canvases `current`);
+    `overlays="view"` keeps the view's (Mat, 2026-11-12: "in the map inset, we should see
+    all items, with the active one selected", "same for in the main view"). A choice made
+    on the map gives way as the
+    view moves elsewhere (`viewKey`; Mat, 2026-11-12: "clicking one and then hitting next
+    shows multiple"), so one sheet is outlined whole.
+  - `outlines` (Mat, 2026-11-12: "add ability to toggle on/off annotation outlines,
+    default it false. if true, it would show a control", then "can it be a pop out menu
+    like Controls are for image canvas? I want more options. maybe do a gear?", "do not
+    include the + - in this tray", "add ability to turn off the accent outline on
+    selected item as well"): the map's options, behind a gear after the zoom controls, a
+    MapLibre control group of its own that React draws into (a portal). The gear is a
+    disclosure (`mapExpandOptions`, `mapCollapseOptions`), its tray a group named
+    `mapOptions` before it, as a Canvas's tray before More (`Canvas/ImageControls.tsx`,
+    whose look `Map.css` repeats), so it never moves and keeps focus; Escape in the tray
+    closes it, after the focused option's Tip goes (one Escape closes one thing), and the
+    map's own Escape steps in only with a place named or picked. Its toggles take
+    `aria-pressed`, pressed drawn as Document's open section is (Mat, 2026-11-12: "treat
+    select like we handle the controls on Document top right menu. selected should be
+    accent"): the accent, ringed inside in the glyph's white (the ring the cue beside the
+    hue, WCAG 1.4.1), focused a two-tone ring round it besides: Outlines (`mapOutlines`), off to start, draws every overlay's edge
+    (`OUTLINES`) in the controls' dark color, 1.5px, over the images (each added under it
+    however late) and under the places and the accent outline; Selection outline
+    (`mapSelectionOutline`), on to start, takes the accent's outline away. A new map
+    option joins the tray, offered by a prop of its own or `outlines`.
+  - The overlays chosen are outlined in the accent (`OUTLINE`, Mat, 2026-11-12: "draw
+    bounds on selected annotations, use accent … as an outline so it is slightly offset",
+    then "make sure outline has higher z than other items"): 3px, its middle 2.5px
+    outside the mask (else the corners), as Items rings an item, the ring wound so
+    MapLibre's `line-offset` falls outside, and over every other layer, each overlay
+    added under the places however late its image arrives. Chosen: the last pressed in
+    the list, those on a Canvas in view (`current`), one whose annotation is picked.
+  - Each overlay's item shows its picture (Items' own, as an annotation's region shows:
+    Mat, 2026-11-12, "be responsible and get a small one"), cut to its mask's box as
+    shares, else, where the server cannot cut (mapsnap's level 0), the whole sheet at a
+    size it lists (`orWhole`, `core/thumbnail.ts`); never a full image without a service.
+  - Pointing lights both ways (Mat, 2026-11-12): a place or an overlay under the pointer
+    on the map lights its row (`data-highlighted`, the rows' tint; overlays found by
+    ray casting their ground, as they are rasters MapLibre cannot query), and an overlay
+    pointed at, on the map or at its row (or its row focused), is outlined at half
+    strength, as Items rings an item under the pointer (`--clover-accent-ring-hover`).
+  - More than four overlays drawn together ask smaller images (`overlaySize`: about four
+    at 2048px all told, never under 768px), so a sheet atlas never holds hundreds of MB
+    of textures. It is the map's text alternative and the keyboard's way
     to its places (WCAG 2.1.1, 1.1.1). Only scope "view" (a host's Root) passes
     `current`: a standalone `iiifContent` map has no view, so it marks no place current.
   - MapLibre's canvas is the map's one region, named `mapLabel`. Its `aria-describedby`

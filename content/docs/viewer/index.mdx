@@ -96,6 +96,11 @@ every template is built on.
   image. It opens as a content state does, at what it targets, and its body, where it
   has one, shows there as a note. [Content State](/docs/content-state#an-annotation-on-its-own)
   says what it reads.
+- **A georeference**: a [Georeference Extension](https://iiif.io/api/extension/georef/)
+  annotation, or an AnnotationPage or AnnotationCollection of them. It opens the Manifest
+  its target names, else the images it targets, with each map laid on its Canvas for the
+  Panel's Map section and the Canvas's Map control.
+  [Map](/docs/map#georeferencing-multiple-items) says how.
 - **An object** of any of these. It is known by its `id`, so a new object with the same
   `id` does not reload.
 
@@ -456,12 +461,12 @@ motion is asked for.
 ### Places
 
 A Manifest with a `navPlace`, or a Canvas with a georeference, gets a Map section: its
-places, or the sheet laid over the ground. See [Map](/docs/map).
+places, or the sheets laid over the ground. See [Map](/docs/map).
 
 <ViewerExample resource="map">
 
 ```jsx
-<Viewer iiifContent="https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json" />
+<Viewer iiifContent="https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation-page.json" />
 ```
 
 </ViewerExample>

@@ -1,6 +1,7 @@
 import React from "react";
 
-import { ConnectedMap, type Forwarded, type MapProps } from "./MapView";
+import { ConnectedMap } from "./ConnectedMap";
+import { type Forwarded, type MapProps } from "./MapView";
 import { Root } from "../Root/Root";
 
 /** A map of a resource it loads itself, standalone: every Canvas's overlays (`Map`). */

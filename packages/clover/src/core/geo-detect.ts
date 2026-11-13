@@ -41,16 +41,45 @@ export function canvasHasMapData(canvas: unknown): boolean {
 }
 
 /**
+ * Whether an annotation is a Georeference Extension annotation (motivation
+ * `georeferencing`): a map to lay on what it targets, never a note or a place to go.
+ */
+export const isGeoreferencing = (annotation: unknown): boolean =>
+  asArray((annotation as Json | null)?.motivation).includes("georeferencing");
+
+/**
  * Whether a Canvas's loaded annotation pages georeference it (a `georeferencing`
  * annotation): a look, as `hasMapData`'s, for the Canvas's map control.
  */
 export function isGeoreferenced(canvas: unknown): boolean {
   return (asArray((canvas as Json | null)?.annotations) as Json[]).some(
-    (page) =>
-      (asArray(page?.items) as Json[]).some((annotation) =>
-        asArray(annotation?.motivation).includes("georeferencing"),
-      ),
+    (page) => (asArray(page?.items) as Json[]).some(isGeoreferencing),
   );
 }
 
+/** Whether any Canvas of a Manifest is georeferenced, as far as its pages are loaded. */
+export const hasGeoreferences = (manifest: Manifest | null): boolean =>
+  Boolean(manifest) && selectSequence(manifest).canvases.some(isGeoreferenced);
+
 type Json = Record<string, any>;
+
+/**
+ * A Manifest Clover made from, or laid with, georeference annotations given as the content
+ * (an Annotation, AnnotationPage or AnnotationCollection, `georeference-content.ts`): its
+ * maps then lay every sheet, the one in view outlined (Mat, 2026-11-12: "because this is
+ * an annotation page / annotation collection resource. in the map inset, we should see all
+ * items, with the active one selected", then "same for in the main view"). A symbol, so it
+ * never leaves with the Manifest's JSON; a spread of the Manifest keeps it.
+ */
+const GEOREFERENCED_CONTENT = Symbol.for("clover.georeferencedContent");
+
+export function markGeoreferencedContent<T extends object>(manifest: T): T {
+  (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT] = true;
+  return manifest;
+}
+
+export const isGeoreferencedContent = (manifest: unknown) =>
+  Boolean(
+    manifest &&
+      (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT] === true,
+  );

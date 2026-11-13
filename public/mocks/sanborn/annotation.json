@@ -1,0 +1,120 @@
+{
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation.json",
+  "type": "Annotation",
+  "@context": [
+    "http://iiif.io/api/extension/georef/1/context.json",
+    "http://iiif.io/api/presentation/3/context.json"
+  ],
+  "label": "Evanston, Illinois | 1920 | sanborn01857_004 p115 [2]",
+  "metadata": [
+    {
+      "label": "streets",
+      "value": "0"
+    },
+    {
+      "label": "intersections",
+      "value": "0"
+    },
+    {
+      "label": "confidence",
+      "value": "0.24"
+    },
+    {
+      "label": "confidence_provisional",
+      "value": "true"
+    },
+    {
+      "label": "confidence_model",
+      "value": "corpus-v2"
+    },
+    {
+      "label": "split_canvas_x",
+      "value": "2266.0"
+    },
+    {
+      "label": "split_canvas_y",
+      "value": "1150.4"
+    },
+    {
+      "label": "split_canvas_w",
+      "value": "3362.0"
+    },
+    {
+      "label": "split_canvas_h",
+      "value": "7101.6"
+    }
+  ],
+  "created": "2026-10-17T21:38:45Z",
+  "modified": "2026-10-17T21:38:45Z",
+  "motivation": "georeferencing",
+  "target": {
+    "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115__2/selector",
+    "type": "SpecificResource",
+    "source": {
+      "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115",
+      "type": "ImageService3",
+      "width": 1407,
+      "height": 2063
+    },
+    "selector": {
+      "type": "SvgSelector",
+      "value": "<svg><polygon points=\"840.2,1782.5 1162.2,1891.3 1205.5,1912.5 1221.4,1935.2 1222.5,1949.8 1272.1,1917.5 1307.8,1907.8 1326.5,1890.3 1343.0,1895.9 1341.2,1802.5 1364.8,399.7 1317.1,360.9 1020.1,323.2 637.5,337.8 639.6,646.5 641.6,961.8 642.9,1653.7 642.5,1676.5 639.5,1694.5 684.2,1722.5 723.8,1741.9 792.9,1766.1 840.2,1782.5\" /></svg>"
+    }
+  },
+  "body": {
+    "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115__2/gcps",
+    "type": "FeatureCollection",
+    "transformation": {
+      "type": "helmert"
+    },
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "resourceCoords": [
+            644.5,
+            1717.1
+          ],
+          "type": "gcp"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -87.67726795681673,
+            42.05102155265735
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "resourceCoords": [
+            641.5,
+            312.6
+          ],
+          "type": "gcp"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -87.67714684808173,
+            42.0562640936786
+          ]
+        }
+      }
+    ]
+  },
+  "rights": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "requiredStatement": {
+    "label": {
+      "en": [
+        "Attribution"
+      ]
+    },
+    "value": {
+      "en": [
+        "<span>Maps: Library of Congress, Geography and Map Division, Sanborn Maps Collection. Georeferenced by <a href=\"https://mapsnap.org\">mapsnap</a>, under the Open Database License.</span>"
+      ]
+    }
+  }
+}

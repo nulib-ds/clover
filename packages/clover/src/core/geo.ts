@@ -1,4 +1,5 @@
 import { parseAnnotationTarget } from "./annotations";
+import { isGeoreferencing } from "./geo-detect";
 import { bodiesOf, isPainting } from "./painting";
 import type { Presentation4Collection, Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
@@ -65,6 +66,13 @@ export interface Georeference {
   canvasId?: string;
   /** Ground control points: image pixel [x, y] ↔ [longitude, latitude]. */
   points: Array<{ resource: Position; geo: Position }>;
+  /**
+   * How the points are fitted: `helmert` (scale, rotation and shift, from two points or
+   * more), as the annotation's `transformation` asks; else `polynomial`, a first-order
+   * polynomial (affine) from three or more, which also stands in for the transformations
+   * a basic overlay cannot warp (higher orders, thin plate spline). Left out, `polynomial`.
+   */
+  transformation?: "helmert" | "polynomial";
   /** The extent the points are measured in: the Canvas, or the image service. */
   width: number;
   height: number;
@@ -216,11 +224,6 @@ function flatten(
   };
 }
 
-const GEOREFERENCING = "georeferencing";
-
-const motivations = (annotation: Json) =>
-  asArray(annotation?.motivation) as string[];
-
 /** The annotations on a Canvas's pages that are loaded. */
 function annotationsOf(canvas: Json): Json[] {
   return (asArray(canvas.annotations) as Json[]).flatMap(
@@ -289,7 +292,7 @@ export function navPlaceOf(
       });
     }
     for (const annotation of annotationsOf(canvas)) {
-      if (motivations(annotation).includes(GEOREFERENCING)) continue;
+      if (isGeoreferencing(annotation)) continue;
       const canvasId =
         parseAnnotationTarget(asArray(annotation.target)[0] as never).id ||
         canvas.id;
@@ -356,17 +359,21 @@ function paintedImage(canvas: Json | undefined): Json | undefined {
 /**
  * One Georeference Extension annotation as an overlay: its control points, the extent
  * they are measured in, its mask, and the image to draw (the Canvas's painted image, or
- * the image service it targets directly). Null when it cannot be drawn: fewer than three
- * points, no extent, or nothing to draw.
+ * the image service it targets directly). Null when it cannot be drawn: too few points
+ * for its transformation (two for `helmert`, else three), no extent, or nothing to draw.
  */
 export function readGeoreference(
   annotation: Json,
   canvas?: Json,
 ): Georeference | null {
-  if (!motivations(annotation).includes(GEOREFERENCING)) return null;
+  if (!isGeoreferencing(annotation)) return null;
   const body = bodiesOf(annotation).find(
     (item) => item?.type === "FeatureCollection",
   );
+  const transformation =
+    (body?.transformation as Json | undefined)?.type === "helmert"
+      ? "helmert"
+      : "polynomial";
   const points: Georeference["points"] = [];
   for (const feature of featuresOf(body)) {
     const resource = (feature.properties as Json | undefined)?.resourceCoords;
@@ -381,7 +388,7 @@ export function readGeoreference(
       points.push(point);
     }
   }
-  if (points.length < 3) return null;
+  if (points.length < (transformation === "helmert" ? 2 : 3)) return null;
 
   const target = asArray(annotation.target)[0] as Json | string | undefined;
   const source = (
@@ -415,8 +422,15 @@ export function readGeoreference(
   const label = (annotation.label ?? canvas?.label) as LanguageMapLike;
   return {
     id: String(annotation.id ?? sourceId),
-    ...(isService || !sourceId ? {} : { canvasId: canvas?.id ?? sourceId }),
+    // The Canvas it was read from, even where it targets that Canvas's image service (as
+    // Allmaps writes them); else the Canvas it targets; none for a bare image service.
+    ...(canvas?.id
+      ? { canvasId: canvas.id }
+      : isService || !sourceId
+        ? {}
+        : { canvasId: sourceId }),
     points,
+    transformation,
     width,
     height,
     ...(mask && !whole ? { mask } : {}),
@@ -525,6 +539,49 @@ export function affineTransform(
 }
 
 /**
+ * The Helmert transform (scale, rotation and shift) that best fits the control points,
+ * image pixels to [longitude, latitude], by least squares in Web Mercator, which keeps
+ * angles, so a map drawn north up stays square. Exact for two points. The image's y runs
+ * down and northing up, so it is read mirrored, as a map scanned face up is. Null when
+ * the points are all one.
+ */
+export function helmertTransform(
+  points: Georeference["points"],
+): ((pixel: Position) => Position) | null {
+  if (points.length < 2) return null;
+  const from = points.map(({ resource: [x, y] }) => [x, -y]);
+  const to = points.map(({ geo }) => toMercator(geo));
+  const mean = (values: number[][], i: number) =>
+    values.reduce((sum, value) => sum + value[i], 0) / values.length;
+  const [u0, v0, x0, y0] = [
+    mean(from, 0),
+    mean(from, 1),
+    mean(to, 0),
+    mean(to, 1),
+  ];
+  let [ac, bc, spread] = [0, 0, 0];
+  for (let i = 0; i < points.length; i++) {
+    const [du, dv] = [from[i][0] - u0, from[i][1] - v0];
+    const [dx, dy] = [to[i][0] - x0, to[i][1] - y0];
+    ac += du * dx + dv * dy;
+    bc += du * dy - dv * dx;
+    spread += du * du + dv * dv;
+  }
+  if (spread < 1e-12) return null;
+  const [a, b] = [ac / spread, bc / spread];
+  return ([x, y]) => {
+    const [du, dv] = [x - u0, -y - v0];
+    return fromMercator([x0 + a * du - b * dv, y0 + b * du + a * dv]);
+  };
+}
+
+/** The transform a georeference's `transformation` asks for, fitted to its points. */
+const transformOf = (georeference: Georeference) =>
+  georeference.transformation === "helmert"
+    ? helmertTransform(georeference.points)
+    : affineTransform(georeference.points);
+
+/**
  * Where the image's corners land, in the order MapLibre's image and canvas sources take
  * them: top left, top right, bottom right, bottom left. Null when the points do not fix
  * a transform.
@@ -532,7 +589,7 @@ export function affineTransform(
 export function cornersOf(
   georeference: Georeference,
 ): [Position, Position, Position, Position] | null {
-  const transform = affineTransform(georeference.points);
+  const transform = transformOf(georeference);
   if (!transform) return null;
   const { width: w, height: h } = georeference;
   return [
@@ -561,6 +618,17 @@ function positionsOf(geometry: GeoGeometry | undefined): Position[] {
   return flat;
 }
 
+/**
+ * Where an overlay shows on the ground: its mask, the part of the image that is map,
+ * where it has one, else its corners. A sheet of several maps is fitted map by map, so
+ * the whole sheet by one map's fit can land far from where that map is.
+ */
+export function groundOf(overlay: Georeference): Position[] {
+  if (!overlay.mask) return cornersOf(overlay) ?? [];
+  const transform = transformOf(overlay);
+  return transform ? overlay.mask.map(transform) : [];
+}
+
 /** The [[west, south], [east, north]] that holds the features and the overlays. */
 export function boundsOf(
   features: MapFeature[],
@@ -568,7 +636,7 @@ export function boundsOf(
 ): [Position, Position] | null {
   const positions = [
     ...features.flatMap((feature) => positionsOf(feature.geometry)),
-    ...overlays.flatMap((overlay) => cornersOf(overlay) ?? []),
+    ...overlays.flatMap(groundOf),
   ].filter(([lng, lat]) => Number.isFinite(lng) && Number.isFinite(lat));
   if (!positions.length) return null;
   const lngs = positions.map(([lng]) => lng);

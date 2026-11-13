@@ -489,8 +489,14 @@
 
 /* ---------- state ---------- */
 
-/* Hover: the selection's ring, at half strength, so it previews a choice. */
-:is(.clover-items-item[role="option"], .clover-items-link):hover {
+/*
+ * Hover: the selection's ring, at half strength, so it previews a choice; the same for
+ * one pointed at elsewhere (`pointed`: a sheet under the pointer on a map).
+ */
+:is(.clover-items-item[role="option"], .clover-items-link):is(
+  :hover,
+  [data-highlighted]
+) {
   --ring-color: color-mix(
     in srgb,
     var(--clover-color-accent, #0065c3) 50%,

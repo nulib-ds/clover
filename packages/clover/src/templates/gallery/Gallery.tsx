@@ -43,8 +43,7 @@ export type GalleryProps = Omit<RootProps, "children"> & {
   summary?: boolean;
   /**
    * How the lightbox moves on from the view it shows: a short strip of thumbnails
-   * (`slider`, Items' carousel), or `pager`, Previous, the position and Next. Default
-   * `slider`.
+   * (Items' `slider`), or `pager`, Previous, the position and Next. Default `slider`.
    */
   lightboxItems?: "slider" | "pager";
   /**

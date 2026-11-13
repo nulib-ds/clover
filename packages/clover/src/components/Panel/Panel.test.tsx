@@ -853,12 +853,12 @@ describe("About, for a Canvas shown on its own", () => {
     });
     expect(open).toHaveAccessibleDescription("The whole letter");
     expect(screen.getByText("The first page.")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "IIIF Canvas" }),
-    ).toBeInTheDocument();
+    // Its address, named "IIIF", as every resource's is.
+    expect(screen.getByRole("heading", { name: "IIIF" })).toBeInTheDocument();
+    expect(screen.getByText(canvas.id)).toBeInTheDocument();
     open.focus();
     fireEvent.click(open);
-    await screen.findByRole("heading", { name: "IIIF Manifest" });
+    await screen.findByText(MANIFEST);
     expect(
       screen.queryByRole("button", { name: "Open the full Manifest" }),
     ).toBeNull();

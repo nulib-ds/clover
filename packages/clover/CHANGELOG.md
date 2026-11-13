@@ -11,14 +11,100 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Georeference annotations as the content.** `iiifContent` on the Viewer, `Root`, `Map`
+  and a standalone `Canvas` (and their elements' `iiif-content`) takes a Georeference
+  Extension annotation on its own, or an AnnotationPage or AnnotationCollection of them,
+  as Allmaps and other georeferencing tools publish them. Each opens the Manifest its
+  target names (through its Canvas, or its image service's Canvas), with every map laid on
+  its Canvas for the Map, the Panel's Map section and the Canvas's Map control. Where the
+  target names no Manifest, or its Manifest cannot be fetched, the image services
+  targeted are shown, each a Canvas of its own. Before, a lone georeference opened its
+  image with no map laid on it, and a page of them failed ("The annotations name no
+  Manifest").
+- **The Map's list, by Items.** `items` on `Map` (`items` on `<clover-map>`) lists its
+  places and georeferenced images through Items, in one of its layouts: `list` (the
+  default), `grid`, `slider` or `masonry`; `false` lists none, for a page that lists them
+  itself. The list is a listbox named "On the map" (the string `mapItemsLabel`, in every
+  locale), its items pictured: a place by its owner's picture, a georeferenced image cut
+  to the map it is, asked small as its server's `info.json` allows, or the whole sheet at
+  a size it lists where the server cannot cut (`resolveThumbnail` takes `orWhole: true`
+  for that). It replaces the list of buttons, `.clover-geomap-places`; its class is
+  `.clover-geomap-items`.
+- **Every sheet at once.** `overlays="all"` on `Map` lays every Canvas's georeferenced
+  images inside a `Root`, not only those of the Canvases in view. It opens on them all,
+  then follows the view: as the Canvas in view changes, the map eases to its sheets, so
+  one chosen in `Items` beside it is framed as one chosen in the map's own list is. Where
+  georeference annotations are the content, a Root's maps, the Panel's and the Canvas's
+  own map too, lay every sheet by default, the one in view outlined; `overlays="view"`
+  keeps the view's.
+- **Outline options.** `outlines` on `Map` (`outlines` on `<clover-map>`) offers the
+  map's options behind a gear after its zoom controls, which stay in sight: pressed, its
+  tray opens on one ground, as a Canvas's controls do behind More, the gear its close.
+  In it, Outlines, off to start, outlines every georeferenced image on the map in the
+  controls' dark color; Selection outline, on to start, takes away the accent's outline
+  round the one chosen. It is off by default. Its strings, in every locale: `mapOptions`,
+  `mapExpandOptions`, `mapCollapseOptions`, `mapOutlines` and `mapSelectionOutline`.
+- **Items of georeferences.** `of="georeferences"` on `Items` lists the Root's
+  georeferenced images, each the map it is. Choosing one goes to its Canvas; pointing at
+  one, there or on a `Map` beside it, lights it in both, through the Root's `highlight`,
+  which a page's own list may use too.
+- **Helmert fits.** A georeference whose `transformation` is `helmert` is laid by scale,
+  rotation and shift, from two control points or more; before, it needed three and was
+  fitted as affine. `Georeference` has an optional `transformation`, `"helmert"` or
+  `"polynomial"`.
+
 ### Changed
 
-- **Sizes.** Reading types and contexts together, and `Painting`, take the Default
-  template to 82.45 kB and to first view 101.33 kB, Gallery to 33.25 kB and to first view
-  57.81 kB, a Timeline's initial JS to 29.26 kB, a Canvas alone to first view 51.91 kB, a
-  Timeline 56.66 kB, a Scene 30 kB and a Map 30.47 kB, a page of labels to 37.62 kB and
-  the Viewer's own entry to 113.17 kB. Each budget crossed is raised to the next 50.
-  `<clover-viewer>` is 63 B lighter, as Presentation 2's copy now loads only for it.
+- A map frames a georeferenced image whole, however small its ground (a fire insurance
+  sheet's few blocks), where places alone still stop at zoom 12; `zoom` still caps both.
+  `boundsOf` bounds an overlay by its mask, the part of the image that is map, where it
+  has one, so a sheet holding several maps frames the maps, not the whole sheet as each
+  one's fit would place it.
+- The map's list names a georeferenced image by its label alone, with no "Georeferenced
+  image" under it (the `mapOverlay` string is gone from every locale); one with no label
+  is numbered after the places, as an unnamed place is; and images of one name are told
+  apart by their place among it ("Sheet 21 2 / 3").
+- A georeferenced image chosen is outlined in the accent, a little clear of its edge and
+  over everything else on the map: the one last chosen from the map's list or on the map,
+  until the view moves elsewhere, those on a Canvas in view, and one whose annotation is
+  picked.
+- A georeferenced image pressed on the map is chosen, as its item in the map's list is:
+  the map zooms to it and, inside a `Root`, the view goes to its Canvas. The pointer is a
+  hand over one. Before, a press on an image did nothing.
+- Pointing at a georeferenced image, on the map or at its item, outlines it at half
+  strength, as Items rings an item under the pointer, and lights its item; a place under
+  the pointer lights its item too, as does an annotation a place is, pointed at
+  elsewhere.
+- Where more than four georeferenced images are drawn together, each image is asked
+  smaller (never under 768 px on its longer side), so an atlas of sheets holds about as
+  much memory as four would.
+- About names the resource's address "IIIF", whatever it is, in place of "IIIF Manifest"
+  or "IIIF Canvas" (the strings `aboutIiif`, in place of `aboutManifest` and
+  `aboutCanvas`), and names it for a Manifest Clover made of the images georeferences
+  target too.
+- A georeference on a Canvas's own pages that targets that Canvas's image service, as
+  Allmaps writes them, belongs to that Canvas, so a map of the view lays it; before, only
+  the Canvas's map control did.
+- **Budgets.** Items drawing the Map's list takes a page with a Map alone, to its first
+  view, from 30.35 kB to 47.15 kB: Items' code, loaded with the list wherever the map
+  lists something (a map that lists nothing, as a Canvas's map box, never reaches it), and
+  the map's options, which every map carries for now, though `outlines` is off by default.
+  The outline, pointing, `overlays`, a press on a sheet, following the view, the options
+  and the helmert fit take the Map before MapLibre to 24.05 kB. A Canvas's map box laying
+  every sheet of georeference content, with reading types and contexts together and
+  `Painting` (Fixed, below), takes a Canvas's first load to 44.75 kB and to first view
+  52.1 kB, a Timeline's first load to 29.4 kB and to first view 56.7 kB, and a Scene's
+  first load to 19.35 kB and to first view 30.1 kB. With those, Items' pointing and
+  `of="georeferences"` and the options' strings, which every template loads, take the
+  Default template to 82.85 kB and to first view 101.7 kB, Gallery to 33.75 kB and to
+  first view 58.25 kB, the translator to 3.65 kB, `<clover-viewer>` to 134.6 kB,
+  Document's element to 152.2 kB, Gallery's to 138.1 kB, `<clover-canvas>` to 97.5 kB,
+  the elements' entry to 6.35 kB, a page of labels to 37.75 kB, the Viewer's own entry to
+  113.4 kB, the four parts to 111.15 kB and a layout to 130.05 kB; the rows' layout and
+  the options' tray take base.css to 15.1 kB. Each raised to the next 50. Presentation 2's
+  copy now loads only for `<clover-viewer>`.
 
 ### Fixed
 

@@ -9,7 +9,8 @@ export const ENTRY_THUMBNAIL_SIZE = 52;
 
 /**
  * A chapter's picture, large: as wide as `--clover-picture` (`styles/scale.css`), fetched
- * at about twice that.
+ * at about twice that. The map's place pictures are the same size (`Map/MapView`'s own
+ * copy, so a map never loads this module up front).
  */
 export const PICTURE_SIZE = 336;
 

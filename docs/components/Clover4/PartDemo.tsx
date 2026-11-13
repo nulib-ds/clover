@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import React from "react";
 
 import { type PartDemoResource, RESOURCES } from "docs/lib/part-demo-resources";
+import { useMapWorker } from "docs/lib/map-worker";
 import { MOCK_SEARCH } from "docs/lib/mock-search";
 import { useMock } from "docs/lib/useMock";
 
@@ -35,6 +36,7 @@ const PARTS = [
   "Homepage",
   "Id",
   "Items",
+  "Map",
   "Label",
   "Logo",
   "Metadata",
@@ -186,7 +188,10 @@ export function PartDemo({
   const url = remote ? address : mock;
   // The mocks' searches are answered here, as the static site cannot read `?q=`.
   const request = MOCK_SEARCH;
-  const ready = url;
+  // A map draws its places only once the docs' MapLibre worker is set (`map-worker.ts`).
+  const shown = parts ?? (part ? [{ part }] : []);
+  const mapReady = useMapWorker(shown.some((each) => each.part === "Map"));
+  const ready = url && (mapReady || !shown.some((each) => each.part === "Map"));
   return (
     // Its own box (`layout.css`), given up inside an example's frame.
     <div className="docs-part-demo">

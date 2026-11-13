@@ -77,6 +77,14 @@ import {
   manifest as linesManifest,
   pageKeys as linePageKeys,
 } from "../docs/mocks/annotation-collection/index.mjs";
+import {
+  PUBLIC_BASE as SANBORN_BASE,
+  YEARS as SANBORN_YEARS,
+  annotation as sanbornAnnotation,
+  annotationPage as sanbornPage,
+  collection as sanbornCollection,
+  evanstonPage,
+} from "../docs/mocks/sanborn/index.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/mocks/content-search");
@@ -216,6 +224,24 @@ for (const key of linePageKeys())
   writeLines(`lines/${key}.json`, linesPage(LINES_BASE, key));
 console.log(
   `annotation-collection: manifest.json, collection.json, lines/ (${linePageKeys().length} pages)`,
+);
+
+// Sanborn's maps, georeferenced: one Annotation, an AnnotationPage of three, and an
+// AnnotationCollection of two pages, each given alone, apart from any Manifest.
+const sanborn = join(root, "public/mocks/sanborn");
+rmSync(sanborn, { recursive: true, force: true });
+const writeSanborn = (path, json) => {
+  const file = join(sanborn, path);
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, `${JSON.stringify(json, null, 2)}\n`);
+};
+writeSanborn("annotation.json", sanbornAnnotation(SANBORN_BASE));
+writeSanborn("annotation-page.json", sanbornPage(SANBORN_BASE));
+writeSanborn("annotation-collection.json", sanbornCollection(SANBORN_BASE));
+for (const year of SANBORN_YEARS)
+  writeSanborn(`evanston/${year}.json`, evanstonPage(SANBORN_BASE, year));
+console.log(
+  `sanborn: annotation.json, annotation-page.json, annotation-collection.json, evanston/ (${SANBORN_YEARS.join(", ")})`,
 );
 
 // The film with its captions and its transcript: one static Manifest.

@@ -1,4 +1,5 @@
 import { type AnnotationSet, pageLabel, readPage } from "./annotation-sets";
+import type { LanguageMapLike } from "./value";
 import { upgradePage } from "./pages";
 import { type CloverRequest, fetchJson } from "./request";
 import { asArray } from "../lib/asArray";
@@ -57,29 +58,47 @@ async function pagesOf(
   return pages;
 }
 
-export async function loadAnnotationSets(
+/** A page loaded: as published (`raw`), as Clover holds it (`page`), and its name. */
+export interface LoadedPage {
+  raw: Json;
+  page: Json;
+  label?: LanguageMapLike;
+}
+
+/** Every page of the input, each followed, fetched and upgraded once. */
+export async function loadAnnotationPages(
   input: AnnotationsInput,
   { request, signal }: { request?: CloverRequest; signal?: AbortSignal } = {},
-): Promise<AnnotationSet[]> {
-  const sets: AnnotationSet[] = [];
+): Promise<LoadedPage[]> {
+  const pages: LoadedPage[] = [];
   for (const item of asArray(input)) {
     const json = await resolve(item, request, signal);
     for (const raw of await pagesOf(json, request, signal)) {
       const page = (await upgradePage(raw)) as Json;
-      const id = page.id ?? `added-${sets.length}`;
-      const entries = readPage(page, id);
-      if (entries.length) {
-        sets.push({
-          id,
-          // Its own name, its Collection's (from the reference too), or the content's.
-          label:
-            pageLabel(page, raw === json ? (item as Json) : undefined) ??
-            json.label,
-          source: "added",
-          entries,
-        });
-      }
+      // Its own name, its Collection's (from the reference too), or the content's.
+      const label =
+        pageLabel(page, raw === json ? (item as Json) : undefined) ??
+        json.label;
+      pages.push({ raw, page, label });
     }
   }
+  return pages;
+}
+
+/** The pages as sets, one a page with something to list. */
+export function setsOf(pages: LoadedPage[]): AnnotationSet[] {
+  const sets: AnnotationSet[] = [];
+  for (const { page, label } of pages) {
+    const id = page.id ?? `added-${sets.length}`;
+    const entries = readPage(page, id);
+    if (entries.length) sets.push({ id, label, source: "added", entries });
+  }
   return sets;
+}
+
+export async function loadAnnotationSets(
+  input: AnnotationsInput,
+  options: { request?: CloverRequest; signal?: AbortSignal } = {},
+): Promise<AnnotationSet[]> {
+  return setsOf(await loadAnnotationPages(input, options));
 }

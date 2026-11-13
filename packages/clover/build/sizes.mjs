@@ -155,7 +155,11 @@ const FIRST_VIEW = {
     /\/core\/thumbnail\.mjs$/,
   ],
   Scene: [/\/components\/Scene\/Loaded\.mjs$/, /\/Scene\/cloverEngine\.mjs$/],
-  Map: [/\/components\/Map\/LoadedMap\.mjs$/],
+  // Its list too, drawn by Items as the map shows anything to list (`MapItems`).
+  Map: [
+    /\/components\/Map\/LoadedMap\.mjs$/,
+    /\/components\/Map\/MapItems\.mjs$/,
+  ],
 };
 
 /** What is measured: `[name, budget key, exports, entry, options]`. */

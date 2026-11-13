@@ -98,6 +98,33 @@ describe("resolveThumbnail", () => {
     });
   });
 
+  it("gives the whole image where a level 0 server cannot cut the region, if asked to", async () => {
+    const info = {
+      ...level2("https://example.org/sheet", 1400, 2000),
+      profile: "level0",
+      sizes: [
+        { width: 175, height: 250 },
+        { width: 350, height: 500 },
+      ],
+    };
+    const region = { x: 0.1, y: 0.1, width: 0.5, height: 0.5 };
+    // Asked only for the region, nothing: the server cannot cut it.
+    expect(
+      await resolveThumbnail(
+        { service: "https://example.org/sheet", region },
+        52,
+        { fetch: serving(info) },
+      ),
+    ).toBeUndefined();
+    expect(
+      await resolveThumbnail(
+        { service: "https://example.org/sheet", region, orWhole: true },
+        52,
+        { fetch: serving(info) },
+      ),
+    ).toBe("https://example.org/sheet/full/175,250/0/default.jpg");
+  });
+
   it("asks for the whole image at its size, never more, as info.json gives it", async () => {
     // The University of Washington's pages: 500 by 741, and a server that refuses to
     // scale past 200%. The manifest calls it level 1; info.json, level 2.

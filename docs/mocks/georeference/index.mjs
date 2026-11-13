@@ -1,7 +1,9 @@
 /**
  * A georeferenced map as a IIIF Manifest: Northwestern University Libraries' scan of the
  * "Map of the Township of Evanston, Cook County, Illinois", with the Georeference
- * Extension annotation its Meadow authoring tool stored, and a navPlace naming the town.
+ * Extension annotation its Meadow authoring tool stored. It has no navPlace (Mat,
+ * 2026-11-12: "remove nav place from fixture"), so it shows the georeference alone; the
+ * `navplace` mock has a place.
  *
  * Static only (it answers no query): `scripts/build-mocks.mjs` writes it to
  * `public/mocks/georeference/`, published at
@@ -37,7 +39,6 @@ export function manifest(base = PUBLIC_BASE) {
   const canvas = `${base}/canvas/1`;
   return {
     "@context": [
-      "http://iiif.io/api/extension/navplace/context.json",
       "http://iiif.io/api/extension/georef/1/context.json",
       "http://iiif.io/api/presentation/3/context.json",
     ],
@@ -46,7 +47,7 @@ export function manifest(base = PUBLIC_BASE) {
     label: { en: ["Map of the Township of Evanston, Cook County, Illinois"] },
     summary: {
       en: [
-        "A mock for the IIIF Georeference and navPlace extensions: a scanned map, its control points, and the town it shows. Published by Clover IIIF for testing viewers.",
+        "A mock for the IIIF Georeference Extension: a scanned map and its control points. Published by Clover IIIF for testing viewers.",
       ],
     },
     requiredStatement: {
@@ -63,18 +64,6 @@ export function manifest(base = PUBLIC_BASE) {
         format: "text/html",
       },
     ],
-    navPlace: {
-      id: `${base}/feature-collection/1`,
-      type: "FeatureCollection",
-      features: [
-        {
-          id: `${base}/feature/1`,
-          type: "Feature",
-          properties: { label: { en: ["Evanston, Illinois"] } },
-          geometry: { type: "Point", coordinates: [-87.6877, 42.0451] },
-        },
-      ],
-    },
     items: [
       {
         id: canvas,

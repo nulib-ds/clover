@@ -522,12 +522,14 @@ function importersOf() {
  * The part sheets a page of a part needs besides core's and its own, for the parts it
  * draws inside it, where it draws them: a Canvas's recordings, animations and map of a
  * place, and a Body's Scene; the Panel's Collection and Views sections' items, and its Map
- * section. Styling's table says the same. `build/styles.test.mjs` fails on a part that
+ * section; and a Map's list of places, drawn by Items. Styling's table says the same. `build/styles.test.mjs` fails on a part that
  * draws what another part's sheet styles unnamed here, and on a name here it never needs.
  */
 export const DRAWN_INSIDE = {
   core: ["media", "scene", "map"],
   panel: ["items", "map"],
+  // Its list of places and images, drawn by Items (`MapItems`).
+  map: ["items"],
 };
 
 /**

@@ -1,3 +1,4 @@
+import sanbornPage from "../../fixtures/mocks/sanborn/annotation-page.json";
 import {
   act,
   fireEvent,
@@ -11,6 +12,7 @@ import { resolve } from "node:path";
 import React from "react";
 
 import {
+  DC_CANVAS_ID,
   DC_GEOREF_ANNOTATION_CANVAS,
   DC_IMAGE_SERVICE_V3_ID,
   evanston,
@@ -23,7 +25,12 @@ import colosseumJson from "../../fixtures/iiif-cookbook/0318-navPlace-navDate-ma
 import { initCloverI18n } from "../../i18n";
 import { clearInfoCache } from "../../lib/renderer/sources/imageService";
 import * as Clover from "../../index";
-import { Map as CloverMap } from "../../map";
+import {
+  Map as CloverMap,
+  boundsOf,
+  georeferencesOf,
+  readGeoreference,
+} from "../../map";
 import { stubViewport } from "../Canvas/testing/viewport";
 
 /** A MapLibre that records what is asked of it, and loads at once. */
@@ -92,8 +99,13 @@ class FakeMap {
   removeSource(id: string) {
     delete this.sources[id];
   }
-  addLayer(layer: any) {
-    this.layers.push(layer);
+  // Laid before the layer named, as MapLibre lays it, else over the rest.
+  addLayer(layer: any, before?: string) {
+    const at = before
+      ? this.layers.findIndex((each) => each.id === before)
+      : -1;
+    if (at >= 0) this.layers.splice(at, 0, layer);
+    else this.layers.push(layer);
   }
   getLayer(id: string) {
     return this.layers.find((layer) => layer.id === id);
@@ -101,7 +113,14 @@ class FakeMap {
   removeLayer(id: string) {
     this.layers = this.layers.filter((layer) => layer.id !== id);
   }
-  addControl() {}
+  // A control of Clover's own (Outlines) is laid in the map's box, as MapLibre lays it.
+  addControl(control: any) {
+    const element = control?.onAdd?.(this);
+    if (element) this.options.container?.append?.(element);
+  }
+  removeControl(control: any) {
+    control?.onRemove?.(this);
+  }
   // The handlers whose rotation Clover turns off (WCAG 2.5.1).
   touchZoomRotate = { disableRotation: vi.fn() };
   keyboard = { disableRotation: vi.fn() };
@@ -237,7 +256,9 @@ describe("Map", () => {
       ids.indexOf("geomap-navplace-line") - 1,
     );
     // A place with no name is listed by its number.
-    expect(screen.getByRole("button", { name: "Place 1" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("option", { name: "Place 1" }),
+    ).toBeInTheDocument();
   });
 
   it("keeps north up: no two-finger twist or Shift+arrow turns it (WCAG 2.5.1)", async () => {
@@ -404,8 +425,10 @@ describe("Map", () => {
     );
     await waitFor(() => expect(maps).toHaveLength(1));
     await waitFor(() => expect(placeData(maps[0])?.features).toHaveLength(1));
-    const list = await screen.findByRole("list");
-    fireEvent.click(within(list).getByRole("button", { name: /Evanston/ }));
+    const list = await screen.findByRole("listbox", { name: "On the map" });
+    fireEvent.click(
+      await within(list).findByRole("option", { name: /Evanston/ }),
+    );
     const named = popups.at(-1)!.node!;
     expect(named).toHaveTextContent("Evanston");
     // Decorative, as its name says what it is; shown once it has loaded.
@@ -564,18 +587,22 @@ describe("Map", () => {
       </Clover.Root>,
     );
     await screen.findByRole("heading", { name: "Castel Sant'Angelo, Rome" });
-    const list = await screen.findByRole("list");
-    const places = within(list).getAllByRole("button");
-    // Each named, its member's date under the name.
-    expect(places.map((place) => place.textContent)).toEqual(
-      romeJson.items.map(
-        (member) => member.label.en[0] + member.navDate.slice(0, 4),
+    const list = await screen.findByRole("listbox", { name: "On the map" });
+    await waitFor(() =>
+      expect(within(list).getAllByRole("option")).toHaveLength(
+        romeJson.items.length,
       ),
     );
+    const places = within(list).getAllByRole("option");
+    // Each named, its member's date under the name.
+    for (const [index, member] of romeJson.items.entries()) {
+      expect(places[index]).toHaveTextContent(member.label.en[0]);
+      expect(places[index]).toHaveTextContent(member.navDate.slice(0, 4));
+    }
     expect(places[2].querySelector("time")).toHaveAttribute("datetime", "1725");
-    // The member open is the current place.
-    expect(places[0]).toHaveAttribute("aria-current", "true");
-    expect(places[1]).not.toHaveAttribute("aria-current");
+    // The member open is the place selected.
+    expect(places[0]).toHaveAttribute("aria-selected", "true");
+    expect(places[1]).toHaveAttribute("aria-selected", "false");
 
     places[1].focus();
     fireEvent.click(places[1]);
@@ -587,12 +614,12 @@ describe("Map", () => {
       named.querySelector("time.clover-geomap-popup-date"),
     ).toHaveTextContent(/^1776$/);
     await screen.findByRole("heading", { name: "The Colosseum" });
-    // The same list, so focus stays on the place pressed (WCAG 2.4.3), now current.
-    const after = within(list).getAllByRole("button");
+    // The same list, so focus stays on the place pressed (WCAG 2.4.3), now selected.
+    const after = within(list).getAllByRole("option");
     expect(after[1]).toBe(places[1]);
     expect(after[1]).toHaveFocus();
-    expect(after[1]).toHaveAttribute("aria-current", "true");
-    expect(after[0]).not.toHaveAttribute("aria-current");
+    expect(after[1]).toHaveAttribute("aria-selected", "true");
+    expect(after[0]).toHaveAttribute("aria-selected", "false");
   });
 
   it("lets go of a name and a pick as its places change, keeping one still there", async () => {
@@ -604,7 +631,7 @@ describe("Map", () => {
     const [map] = maps;
     await waitFor(() => expect(placeData(map)?.features).toHaveLength(1));
     fireEvent.click(
-      screen.getByRole("button", {
+      await screen.findByRole("option", {
         name: arch.features[0].properties.label.en[0],
       }),
     );
@@ -626,7 +653,9 @@ describe("Map", () => {
       features: [...castel.features, ...colosseum.features],
     };
     rerender(<CloverMap navPlace={both} />);
-    fireEvent.click(screen.getByRole("button", { name: "The Colosseum" }));
+    fireEvent.click(
+      await screen.findByRole("option", { name: "The Colosseum" }),
+    );
     const kept = popups.at(-1)!;
     rerender(
       <CloverMap
@@ -657,15 +686,18 @@ describe("Map", () => {
     const [map] = maps;
     await waitFor(() => expect(map.fitBounds).toHaveBeenCalledTimes(1));
 
-    const list = screen.getByRole("list");
-    const [bronze, painting] = within(list).getAllByRole("button");
-    expect(bronze).toHaveAccessibleName(
-      "Current Location of the Laocoön Bronze",
-    );
-    expect(bronze).toHaveAttribute("lang", "en");
-    // The first Canvas is in view, so its place is the current one.
-    expect(bronze).toHaveAttribute("aria-current", "true");
-    expect(painting).not.toHaveAttribute("aria-current");
+    const list = await screen.findByRole("listbox", { name: "On the map" });
+    const bronze = await within(list).findByRole("option", {
+      name: "Current Location of the Laocoön Bronze",
+    });
+    const [, painting] = within(list).getAllByRole("option");
+    // Named in its own language, marked on its name.
+    expect(
+      within(bronze).getByText("Current Location of the Laocoön Bronze"),
+    ).toHaveAttribute("lang", "en");
+    // The first Canvas is in view, so its place is the one selected.
+    expect(bronze).toHaveAttribute("aria-selected", "true");
+    expect(painting).toHaveAttribute("aria-selected", "false");
 
     fireEvent.click(painting);
     expect(map.jumpTo).toHaveBeenLastCalledWith({
@@ -686,8 +718,8 @@ describe("Map", () => {
         canvasesJson.items[1].label.en[0],
       ),
     );
-    expect(painting).toHaveAttribute("aria-current", "true");
-    expect(bronze).not.toHaveAttribute("aria-current");
+    expect(painting).toHaveAttribute("aria-selected", "true");
+    expect(bronze).toHaveAttribute("aria-selected", "false");
     // The view it opened draws nothing new, so the place stays framed.
     expect(map.fitBounds).toHaveBeenCalledTimes(1);
 
@@ -710,9 +742,9 @@ describe("Map", () => {
       </Clover.Root>,
     );
     await waitFor(() => expect(maps).toHaveLength(1));
-    const list = await screen.findByRole("list");
+    const list = await screen.findByRole("listbox", { name: "On the map" });
     fireEvent.click(
-      within(list).getByRole("button", {
+      await within(list).findByRole("option", {
         name: "Targeted Map from Chesapeake and Ohio Canal Pamphlet",
       }),
     );
@@ -735,7 +767,7 @@ describe("Map", () => {
       </Clover.Root>,
     );
     await waitFor(() => expect(maps).toHaveLength(1));
-    await screen.findByRole("list");
+    const list = await screen.findByRole("listbox", { name: "On the map" });
     const [map] = maps;
     const id = placeJson.items[0].annotations[0].items[0].id;
     act(() => root.clover.highlight.emit(id));
@@ -744,6 +776,11 @@ describe("Map", () => {
         { source: "geomap-navplace", id: 0 },
         { linked: true },
       ),
+    );
+    // Its item lit too, as the pointer lights one.
+    expect((await within(list).findAllByRole("option"))[0]).toHaveAttribute(
+      "data-highlighted",
+      "true",
     );
     act(() => root.clover.highlight.emit(null));
     await waitFor(() =>
@@ -757,19 +794,20 @@ describe("Map", () => {
   it("standalone, marks no place current: nothing shows a Canvas", async () => {
     const onSelect = vi.fn();
     render(<CloverMap iiifContent={canvasesJson} onSelect={onSelect} />);
-    const painting = await screen.findByRole("button", {
+    const painting = await screen.findByRole("option", {
       name: "Current Location of Painting",
     });
     await waitFor(() => expect(maps[0]?.fitBounds).toHaveBeenCalled());
-    const buttons = within(screen.getByRole("list")).getAllByRole("button");
-    for (const button of buttons)
-      expect(button).not.toHaveAttribute("aria-current");
-    // Nor once one is chosen: its popup names it, and nothing goes to a view.
+    const options = within(
+      screen.getByRole("listbox", { name: "On the map" }),
+    ).getAllByRole("option");
+    for (const option of options)
+      expect(option).toHaveAttribute("aria-selected", "false");
+    // Once one is chosen, it alone: its popup names it, and nothing goes to a view.
     fireEvent.click(painting);
     expect(onSelect).toHaveBeenCalledTimes(1);
     expect(popups.at(-1)?.text).toBe("Current Location of Painting");
-    for (const button of buttons)
-      expect(button).not.toHaveAttribute("aria-current");
+    expect(painting).toHaveAttribute("aria-selected", "true");
   });
 
   it("names places in their own language, in the list and the popup", async () => {
@@ -778,10 +816,14 @@ describe("Map", () => {
         <CloverMap />
       </Clover.Root>,
     );
-    const bronze = await screen.findByRole("button", {
+    const bronze = await screen.findByRole("option", {
       name: "Ubicazione attuale del Bronzo Laocoonte e i suoi figli",
     });
-    expect(bronze).toHaveAttribute("lang", "it");
+    expect(
+      within(bronze).getByText(
+        "Ubicazione attuale del Bronzo Laocoonte e i suoi figli",
+      ),
+    ).toHaveAttribute("lang", "it");
     await waitFor(() => expect(maps[0].fitBounds).toHaveBeenCalled());
     fireEvent.click(bronze);
     expect(popups.at(-1)?.node?.lang).toBe("it");
@@ -816,8 +858,12 @@ describe("Map", () => {
     )!;
     expect(about).not.toBeVisible();
     expect(
-      within(screen.getByRole("list")).getAllByRole("button"),
+      within(
+        await screen.findByRole("listbox", { name: "On the map" }),
+      ).getAllByRole("option"),
     ).toHaveLength(2);
+    // The list is no landmark of its own: the map is the one region.
+    expect(screen.getAllByRole("region")).toHaveLength(1);
 
     // A new language renames MapLibre's own controls, title and all.
     act(() => {
@@ -847,8 +893,8 @@ describe("Map", () => {
     );
     // Listed once its georeference loads, on demand: past a second on CI.
     const button = await screen.findByRole(
-      "button",
-      { name: "Township map Georeferenced image" },
+      "option",
+      { name: "Township map" },
       { timeout: 4000 },
     );
     expect(within(button).getByText("Township map")).toHaveAttribute(
@@ -864,6 +910,461 @@ describe("Map", () => {
     expect(east).toBeLessThan(-87.5);
     expect(south).toBeGreaterThan(41.9);
     expect(north).toBeLessThan(42.2);
+  });
+
+  it("tells apart maps of one name by their place among it", async () => {
+    // A sheet of three maps, each georeferenced on its own, none named but by the sheet.
+    const sheet = { en: ["Sheet 21"] };
+    const three = [1, 2, 3].map((n) => ({
+      ...georeferenceOnService(),
+      id: `https://example.org/sheet-21/map-${n}`,
+      label: sheet,
+    }));
+    render(<CloverMap georeferences={three} />);
+    for (const n of [1, 2, 3])
+      expect(
+        await screen.findByRole(
+          "option",
+          { name: `Sheet 21 ${n} / 3` },
+          { timeout: 4000 },
+        ),
+      ).toBeInTheDocument();
+  });
+
+  it("pictures a georeferenced image's row by the map it is, small, as its info.json allows", async () => {
+    const one = {
+      ...georeferenceOnService(),
+      label: { en: ["Township map"] },
+      target: {
+        ...georeferenceOnService().target,
+        selector: {
+          type: "SvgSelector",
+          value:
+            '<svg><polygon points="1000,2000 5000,2000 5000,8000 1000,8000" /></svg>',
+        },
+      },
+    };
+    render(<CloverMap georeferences={[one]} />);
+    const row = await screen.findByRole(
+      "option",
+      { name: "Township map" },
+      { timeout: 4000 },
+    );
+    const picture = await waitFor(() => {
+      const found = row.querySelector(".clover-items-picture img");
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    // Decorative, as its name says what it is; cut to its mask's box, asked small.
+    expect(picture).toHaveAttribute("alt", "");
+    const src = picture.getAttribute("src")!;
+    expect(
+      src.startsWith(`${DC_IMAGE_SERVICE_V3_ID}/1000,2000,4000,6000/`),
+    ).toBe(true);
+    const [width] = src.split("/").at(-3)!.split(",").map(Number);
+    expect(width).toBeLessThanOrEqual(104);
+  });
+
+  it("outlines a georeferenced image at half strength while its row is pointed at, whole once chosen", async () => {
+    const one = { ...georeferenceOnService(), label: { en: ["Township map"] } };
+    render(<CloverMap georeferences={[one]} />);
+    const row = await screen.findByRole(
+      "option",
+      { name: "Township map" },
+      { timeout: 4000 },
+    );
+    const [map] = maps;
+    const outline = () =>
+      map.sources["geomap-overlay-outline"]?.setData.mock.calls.at(-1)?.[0] ??
+      map.sources["geomap-overlay-outline"]?.data;
+    fireEvent.mouseEnter(row);
+    await waitFor(() =>
+      expect(outline().features).toMatchObject([
+        { properties: { hover: true } },
+      ]),
+    );
+    fireEvent.mouseLeave(row);
+    await waitFor(() => expect(outline().features).toEqual([]));
+    fireEvent.click(row);
+    await waitFor(() =>
+      expect(outline().features).toMatchObject([
+        { properties: { hover: false } },
+      ]),
+    );
+  });
+
+  it("lights a georeferenced image's row while the pointer is over it on the map", async () => {
+    const one = { ...georeferenceOnService(), label: { en: ["Township map"] } };
+    render(<CloverMap georeferences={[one]} />);
+    const row = await screen.findByRole(
+      "option",
+      { name: "Township map" },
+      { timeout: 4000 },
+    );
+    const [map] = maps;
+    const [[west, south], [east, north]] = boundsOf(
+      [],
+      [readGeoreference(one)!],
+    )!;
+    const point = (lng: number, lat: number) =>
+      act(() =>
+        map.fire("mousemove", { point: { x: 0, y: 0 }, lngLat: { lng, lat } }),
+      );
+    map.under = [];
+    point((west + east) / 2, (south + north) / 2);
+    expect(row).toHaveAttribute("data-highlighted", "true");
+    point(east + 1, north + 1);
+    expect(row).not.toHaveAttribute("data-highlighted");
+  });
+
+  it("lists nothing with items={false}, and is then described by no count", async () => {
+    render(
+      <CloverMap
+        navPlace={{ type: "Point", coordinates: [0, 0] }}
+        items={false}
+      />,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    await waitFor(() => expect(placeData(maps[0])?.features).toHaveLength(1));
+    expect(screen.queryByRole("listbox")).toBeNull();
+    // Its text is the page's own list, then: the map points to no count of its own.
+    expect(maps[0].canvas).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("lays out its list as Items does: list by default, or another of its layouts", async () => {
+    const place = { type: "Point", coordinates: [0, 0] };
+    const { rerender } = render(<CloverMap navPlace={place} />);
+    const list = await screen.findByRole("listbox", { name: "On the map" });
+    expect(list.closest(".clover-items")).toHaveAttribute(
+      "data-layout",
+      "list",
+    );
+    rerender(<CloverMap navPlace={place} items="grid" />);
+    await waitFor(() =>
+      expect(
+        screen
+          .getByRole("listbox", { name: "On the map" })
+          .closest(".clover-items"),
+      ).toHaveAttribute("data-layout", "grid"),
+    );
+  });
+
+  it("lays every Canvas's georeferenced images inside a Root with overlays=\"all\", the view's otherwise", async () => {
+    const drawn = () =>
+      Object.values(maps[0].sources).filter(
+        (source: any) => source.type === "canvas",
+      ).length;
+    const { unmount: gone } = render(
+      <Clover.Root iiifContent={twoSheets()}>
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(drawn()).toBe(1), { timeout: 4000 });
+    gone();
+    maps.length = 0;
+    render(
+      <Clover.Root iiifContent={twoSheets()}>
+        <CloverMap overlays="all" />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(drawn()).toBe(2), { timeout: 4000 });
+  });
+
+  it("links to Items of georeferences beside it, through the Root: pointing lights both, choosing goes to its Canvas", async () => {
+    let root: any;
+    const Spy = () => {
+      root = Clover.useClover("test");
+      return null;
+    };
+    render(
+      <Clover.Root iiifContent={twoSheets()}>
+        <Spy />
+        <CloverMap overlays="all" items={false} />
+        <Clover.Items of="georeferences" layout="list" />
+      </Clover.Root>,
+    );
+    const [first, second] = await waitFor(
+      () => {
+        const options = screen.getAllByRole("option");
+        expect(options).toHaveLength(2);
+        return options;
+      },
+      { timeout: 4000 },
+    );
+    expect(first).toHaveAccessibleName("First sheet");
+    // The sheet on the Canvas in view is the one selected; the map lists none of its own.
+    expect(first).toHaveAttribute("aria-selected", "true");
+    expect(screen.queryByRole("listbox", { name: "On the map" })).toBeNull();
+    const [map] = maps;
+    const outline = () =>
+      map.sources["geomap-overlay-outline"]?.setData.mock.calls.at(-1)?.[0] ??
+      map.sources["geomap-overlay-outline"]?.data;
+    await waitFor(
+      () =>
+        expect(
+          Object.values(map.sources).filter(
+            (source: any) => source.type === "canvas",
+          ),
+        ).toHaveLength(2),
+      { timeout: 4000 },
+    );
+
+    // Pointing at an item: the Root hears of it, and the map outlines it at half strength.
+    fireEvent.mouseEnter(second);
+    expect(root.clover.highlight.get()).toBe(SECOND_SHEET);
+    await waitFor(() =>
+      expect(outline().features).toContainEqual(
+        expect.objectContaining({ properties: { hover: true } }),
+      ),
+    );
+    fireEvent.mouseLeave(second);
+    expect(root.clover.highlight.get()).toBeNull();
+
+    // Pointing at a sheet on the map: its item lights.
+    const [[west, south], [east, north]] = boundsOf(
+      [],
+      georeferencesOf(twoSheets()).slice(0, 1),
+    )!;
+    map.under = [];
+    act(() =>
+      map.fire("mousemove", {
+        point: { x: 0, y: 0 },
+        lngLat: { lng: (west + east) / 2, lat: (south + north) / 2 },
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getAllByRole("option")[0]).toHaveAttribute(
+        "data-highlighted",
+        "true",
+      ),
+    );
+    act(() => map.fire("mouseout", {}));
+
+    // Choosing one goes to its Canvas, which outlines it whole.
+    fireEvent.click(second);
+    await waitFor(() =>
+      expect(root.clover.store.get().canvasId).toBe(`${DC_CANVAS_ID}/2`),
+    );
+    await waitFor(() =>
+      expect(screen.getAllByRole("option")[1]).toHaveAttribute(
+        "aria-selected",
+        "true",
+      ),
+    );
+  });
+
+  it("zooms to a sheet chosen in Items beside it, or pressed on the map, and opens its Canvas", async () => {
+    let root: any;
+    const Spy = () => {
+      root = Clover.useClover("test");
+      return null;
+    };
+    render(
+      <Clover.Root iiifContent={twoSheets()}>
+        <Spy />
+        <CloverMap overlays="all" items={false} />
+        <Clover.Items of="georeferences" layout="list" />
+      </Clover.Root>,
+    );
+    const [, second] = await waitFor(
+      () => {
+        const options = screen.getAllByRole("option");
+        expect(options).toHaveLength(2);
+        return options;
+      },
+      { timeout: 4000 },
+    );
+    const [map] = maps;
+    await waitFor(
+      () =>
+        expect(
+          Object.values(map.sources).filter(
+            (source: any) => source.type === "canvas",
+          ),
+        ).toHaveLength(2),
+      { timeout: 4000 },
+    );
+    const [firstSheet, secondSheet] = georeferencesOf(twoSheets()).map(
+      (sheet) => boundsOf([], [sheet])!,
+    );
+    // The box the map last framed, as near as rounding allows.
+    const framedOn = (bounds: number[][]) =>
+      bounds.every((corner, i) =>
+        corner.every(
+          (value, j) =>
+            Math.abs(map.fitBounds.mock.calls.at(-1)?.[0]?.[i]?.[j] - value) <
+            1e-9,
+        ),
+      );
+    // It opens on every sheet, not the one in view.
+    expect(framedOn(secondSheet)).toBe(false);
+
+    // Chosen in Items: the view goes to its Canvas, and the map follows it there.
+    fireEvent.click(second);
+    await waitFor(() =>
+      expect(root.clover.store.get().canvasId).toBe(`${DC_CANVAS_ID}/2`),
+    );
+    await waitFor(() => expect(framedOn(secondSheet)).toBe(true));
+
+    // Pressed on the map: chosen as its row would be, framed, and its Canvas opened.
+    const [[west, south], [east, north]] = firstSheet;
+    map.under = [];
+    act(() =>
+      map.fire("click", {
+        point: { x: 0, y: 0 },
+        lngLat: { lng: (west + east) / 2, lat: (south + north) / 2 },
+      }),
+    );
+    await waitFor(() =>
+      expect(root.clover.store.get().canvasId).toBe(DC_CANVAS_ID),
+    );
+    expect(framedOn(firstSheet)).toBe(true);
+    await waitFor(() =>
+      expect(screen.getAllByRole("option")[0]).toHaveAttribute(
+        "aria-selected",
+        "true",
+      ),
+    );
+
+    // The view moved on elsewhere: the sheet pressed on the map gives way to the view's,
+    // the one sheet outlined whole.
+    fireEvent.click(screen.getAllByRole("option")[1]);
+    await waitFor(() =>
+      expect(root.clover.store.get().canvasId).toBe(`${DC_CANVAS_ID}/2`),
+    );
+    const whole = () =>
+      (
+        map.sources["geomap-overlay-outline"]?.setData.mock.calls.at(-1)?.[0] ??
+        map.sources["geomap-overlay-outline"]?.data
+      ).features.filter((feature: any) => !feature.properties.hover);
+    await waitFor(() => expect(whole()).toHaveLength(1));
+    await waitFor(() => expect(framedOn(secondSheet)).toBe(true));
+  });
+
+  it("offers its outline options behind a gear where asked: Outlines draws every sheet's edge, Selection outline puts the accent's away", async () => {
+    const { unmount: gone } = render(
+      <Clover.Root iiifContent={twoSheets()}>
+        <CloverMap overlays="all" />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2), {
+      timeout: 4000,
+    });
+    // Not offered by default.
+    expect(
+      screen.queryByRole("button", { name: "Expand map options" }),
+    ).toBeNull();
+    gone();
+    maps.length = 0;
+
+    render(
+      <Clover.Root iiifContent={twoSheets()}>
+        <CloverMap overlays="all" outlines />
+      </Clover.Root>,
+    );
+    const gear = await screen.findByRole(
+      "button",
+      { name: "Expand map options" },
+      { timeout: 4000 },
+    );
+    const [map] = maps;
+    const edges = () =>
+      map.sources["geomap-overlay-outlines"]?.setData.mock.calls.at(-1)?.[0] ??
+      map.sources["geomap-overlay-outlines"]?.data;
+    // Closed, its tray is out of sight and reach.
+    expect(gear).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("button", { name: "Outlines" })).toBeNull();
+
+    // Open: the tray, named, holds Outlines; the gear is its close.
+    fireEvent.click(gear);
+    expect(gear).toHaveAttribute("aria-expanded", "true");
+    expect(gear).toHaveAccessibleName("Collapse map options");
+    const tray = screen.getByRole("group", { name: "Map options" });
+    expect(gear).toHaveAttribute("aria-controls", tray.id);
+    const toggle = within(tray).getByRole("button", { name: "Outlines" });
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+    expect(edges()).toBeUndefined();
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await waitFor(() => expect(edges().features).toHaveLength(2));
+    // Over the images, under the outline of those chosen.
+    const order = map.layers.map((layer) => layer.id);
+    expect(order.indexOf("geomap-overlay-outlines")).toBeLessThan(
+      order.indexOf("geomap-overlay-outline"),
+    );
+
+    // Selection outline, on to start: pressed, the accent's ring round the one chosen goes.
+    const selection = within(tray).getByRole("button", {
+      name: "Selection outline",
+    });
+    expect(selection).toHaveAttribute("aria-pressed", "true");
+    const whole = () =>
+      (
+        map.sources["geomap-overlay-outline"]?.setData.mock.calls.at(-1)?.[0] ??
+        map.sources["geomap-overlay-outline"]?.data
+      ).features.filter((feature: any) => !feature.properties.hover);
+    await waitFor(() => expect(whole()).toHaveLength(1));
+    fireEvent.click(selection);
+    expect(selection).toHaveAttribute("aria-pressed", "false");
+    await waitFor(() => expect(whole()).toHaveLength(0));
+    fireEvent.click(selection);
+    await waitFor(() => expect(whole()).toHaveLength(1));
+
+    // Escape in the tray: the first puts the focused option's Tip away, the next closes
+    // the tray, focus to the gear; the outlines stay (one Escape closes one thing).
+    toggle.focus();
+    fireEvent.keyDown(toggle, { key: "Escape" });
+    expect(gear).toHaveAttribute("aria-expanded", "true");
+    fireEvent.keyDown(toggle, { key: "Escape" });
+    expect(gear).toHaveAttribute("aria-expanded", "false");
+    expect(gear).toHaveFocus();
+    expect(edges().features).toHaveLength(2);
+
+    // Pressed again, they are put away.
+    fireEvent.click(gear);
+    fireEvent.click(screen.getByRole("button", { name: "Outlines" }));
+    await waitFor(() => expect(edges().features).toHaveLength(0));
+  });
+
+  it("lays every sheet where georeference annotations are the content, the one in view outlined", async () => {
+    let root: any;
+    const Spy = () => {
+      root = Clover.useClover("test");
+      return null;
+    };
+    const { unmount: gone } = render(
+      <Clover.Root iiifContent={sanbornPage}>
+        <Spy />
+        <CloverMap items={false} />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps[0]?.fitBounds).toHaveBeenCalled(), {
+      timeout: 4000,
+    });
+    const sheets = georeferencesOf(root.clover.store.get().manifest);
+    expect(sheets).toHaveLength(sanbornPage.items.length);
+    const framed = () => maps.at(-1)!.fitBounds.mock.calls[0][0];
+    // Framed on them all, not the view's one.
+    expect(framed()).toEqual(boundsOf([], sheets));
+    const outline = () =>
+      maps
+        .at(-1)!
+        .sources["geomap-overlay-outline"]?.setData.mock.calls.at(-1)?.[0] ??
+      maps.at(-1)!.sources["geomap-overlay-outline"]?.data;
+    await waitFor(() => expect(outline().features).toHaveLength(1));
+    gone();
+
+    // Asked for the view's, the view's.
+    render(
+      <Clover.Root iiifContent={sanbornPage}>
+        <CloverMap items={false} overlays="view" />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps.at(-1)!.fitBounds).toHaveBeenCalled(), {
+      timeout: 4000,
+    });
+    expect(framed()).toEqual(boundsOf([], sheets.slice(0, 1)));
   });
 
   it("warps a georeferenced image onto the map by its control points", async () => {
@@ -914,7 +1415,9 @@ describe("Map", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "The map could not be shown.",
     );
-    expect(screen.getByRole("button", { name: "Place 1" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("option", { name: "Place 1" }),
+    ).toBeInTheDocument();
   });
 
   it("draws a popup as Clover's popover, over MapLibre's unlayered white", () => {
@@ -962,7 +1465,7 @@ describe("the Map tab", () => {
     fireEvent.click(await screen.findByRole("tab", { name: "Map" }));
     // The places, under the map in its tab.
     expect(
-      await screen.findByRole("button", {
+      await screen.findByRole("option", {
         name: "Current Location of Painting",
       }),
     ).toBeInTheDocument();
@@ -992,6 +1495,37 @@ describe("the Map tab", () => {
     );
   });
 });
+
+const SECOND_SHEET = "https://example.org/evanston/georef/2";
+
+/**
+ * The township map twice over, as an atlas of two sheets: two Canvases, each with its own
+ * georeference on the same image, named apart, the second laid a degree east.
+ */
+function twoSheets() {
+  const manifest = JSON.parse(JSON.stringify(evanston())) as any;
+  const [canvas] = manifest.items;
+  canvas.label = { en: ["First sheet"] };
+  const second = JSON.parse(JSON.stringify(canvas));
+  second.id = `${DC_CANVAS_ID}/2`;
+  second.label = { en: ["Second sheet"] };
+  for (const page of second.annotations ?? [])
+    for (const annotation of page.items ?? []) {
+      annotation.id = SECOND_SHEET;
+      delete annotation.label;
+      // A degree east, so the two sheets lie apart.
+      for (const body of [annotation.body].flat())
+        for (const feature of body?.features ?? [])
+          feature.geometry.coordinates[0] += 1;
+    }
+  for (const page of second.items ?? [])
+    for (const annotation of page.items ?? []) {
+      annotation.id = `${annotation.id}/2`;
+      annotation.target = second.id;
+    }
+  manifest.items = [canvas, second];
+  return manifest;
+}
 
 function georeferenceOnService() {
   return {

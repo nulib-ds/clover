@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useContext, useEffect, useRef } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
-import { isImageServiceManifest, isLoneCanvas } from "../../core/load";
+import { isLoneCanvas } from "../../core/load";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useCloverSelector } from "../../react/context";
@@ -297,12 +297,9 @@ function AboutContent({
           />
         </Suspense>,
       )}
-      {/* An image service is neither a Manifest nor a Canvas: its address is not named. */}
-      {section(
-        isLoneCanvas(manifest) ? "aboutCanvas" : "aboutManifest",
-        !isImageServiceManifest(manifest) && manifest.id,
-        <Id />,
-      )}
+      {/* Its address, named "IIIF" whatever it is: a Manifest, a Canvas, an image
+          service, or the annotations Clover made a Manifest of (Mat, 2026-11-12). */}
+      {section("aboutIiif", manifest.id, <Id />)}
     </div>
   );
 }

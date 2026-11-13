@@ -116,17 +116,19 @@ describe("structureOf", () => {
     });
   });
 
-  it("finds captions, plain-text transcripts, georeferencing and a search service", () => {
+  it("finds captions, plain-text transcripts, georeferencing, a place and a search service", () => {
     expect(structureOf(mock("transcripts"))).toMatchObject({
       painting: { video: 1 },
       captions: 1,
       transcripts: 1,
       renderings: 1,
     });
+    // The township map has no navPlace (Mat, 2026-11-12); the bus's slide has one.
     expect(structureOf(mock("georeference"))).toMatchObject({
-      navPlace: true,
+      navPlace: false,
       annotations: { motivations: ["georeferencing"] },
     });
+    expect(structureOf(mock("navplace"))).toMatchObject({ navPlace: true });
     expect(structureOf(mock("content-search"))).toMatchObject({
       services: expect.arrayContaining(["search-2"]),
       annotations: { referenced: 2 },

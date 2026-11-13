@@ -18,6 +18,7 @@ import {
   itemsOfManifest,
 } from "../../core/items";
 import { selectAnnotationCollection } from "../../core/annotation-sets";
+import { hasGeoreferences } from "../../core/geo-detect";
 import type { IIIFContent } from "../../core/load";
 import type { CloverRequest } from "../../core/request";
 import {
@@ -87,9 +88,10 @@ export interface ItemsProps
    * more (Cookbook 0540), each opening its Manifest at its place, or annotations walked as
    * one whole: the AnnotationPage or AnnotationCollection given as the content, else the
    * AnnotationCollection its annotation pages are part of (Cookbook 0309), each picked
-   * and framed on its Canvas.
+   * and framed on its Canvas; or its georeferenced images, each the map it is, choosing
+   * one going to its Canvas, and pointing at one lighting it on a `Map` beside it.
    */
-  of?: "views" | "members" | "targets" | "annotations";
+  of?: "views" | "members" | "targets" | "annotations" | "georeferences";
   /**
    * Standalone: a Collection (its members), a Manifest (its views) or a URL to one. Inside
    * a `Root`, leave it out to list the Root's views.
@@ -186,6 +188,8 @@ function ConnectedItems({ of = "views", ...props }: ItemsProps & Forwarded) {
     <SomeTargets {...props} />
   ) : of === "annotations" ? (
     <SomeAnnotations {...props} />
+  ) : of === "georeferences" ? (
+    <SomeGeoreferences {...props} />
   ) : of === "members" ? (
     <MemberItems {...props} />
   ) : (
@@ -223,6 +227,21 @@ function SomeAnnotations(props: ItemsProps & Forwarded) {
   return named ? (
     <Suspense fallback={null}>
       <AnnotationItems {...props} />
+    </Suspense>
+  ) : null;
+}
+
+/*
+ * The Manifest's georeferenced images: their own chunk, loaded only where a Canvas is
+ * georeferenced, so a Root opened on anything else carries none of it.
+ */
+const GeoreferenceItems = lazy(() => import("./GeoreferenceItems"));
+
+function SomeGeoreferences(props: ItemsProps & Forwarded) {
+  const any = useCloverSelector((state) => hasGeoreferences(state.manifest));
+  return any ? (
+    <Suspense fallback={null}>
+      <GeoreferenceItems {...props} />
     </Suspense>
   ) : null;
 }
@@ -394,6 +413,21 @@ interface ItemsViewProps extends Omit<ItemsProps, "navigation" | "items"> {
   };
   onActivate: (item: ItemModel, event: React.SyntheticEvent) => void;
   /**
+   * The option pointed at elsewhere (a sheet under the pointer on a map), by its index:
+   * ringed as the pointer rings one, at half strength.
+   */
+  pointed?: number;
+  /**
+   * An option is under the pointer or focused, and `null` as it leaves: for what lights
+   * it elsewhere (a map's outline of the sheet it is).
+   */
+  onPoint?: (item: ItemModel | null) => void;
+  /**
+   * The key of the string that names the list where it has no title of its own, in
+   * Clover's interface language. Default `itemsLabel`.
+   */
+  nameKey?: string;
+  /**
    * Selects the option focus moves to by an arrow, Home or End, as a radio group does.
    * `onActivate` (Enter, a click) still says the reader chose it: a Gallery opens it. Not
    * for a Collection's members, where each selection loads a Manifest.
@@ -465,6 +499,9 @@ function DrawnItems({
   headingLevel = 2,
   renderItem,
   onActivate,
+  pointed,
+  onPoint,
+  nameKey = "itemsLabel",
   followFocus,
   as: Tag = "section",
   className,
@@ -599,8 +636,8 @@ function DrawnItems({
    */
   const titled = ariaLabel === undefined && Boolean(headingLabel?.text);
   const fallbackName = useContainerName(
-    t("itemsLabel"),
-    langOf("itemsLabel"),
+    t(nameKey),
+    langOf(nameKey),
     ariaLabel !== undefined || titled,
     root.hostLanguage,
   );
@@ -807,6 +844,7 @@ function DrawnItems({
               >
                 {items.map((item, index) => {
                   const isSelected = index === selected;
+                  const roved = roving.itemProps(index);
                   return (
                     <div
                       key={item.id}
@@ -817,9 +855,19 @@ function DrawnItems({
                       {...languageProps(positionLang(item))}
                       className="clover-items-item"
                       data-track-index={index}
+                      data-highlighted={index === pointed || undefined}
                       style={slideStyle}
-                      {...roving.itemProps(index)}
+                      {...roved}
                       onClick={(event) => onActivate(item, event)}
+                      {...(onPoint && {
+                        onMouseEnter: () => onPoint(item),
+                        onMouseLeave: () => onPoint(null),
+                        onFocus: () => {
+                          roved.onFocus();
+                          onPoint(item);
+                        },
+                        onBlur: () => onPoint(null),
+                      })}
                     >
                       {figure(item, isSelected)}
                     </div>

@@ -117,6 +117,105 @@
   margin: 0 !important;
 }
 
+/* The zoom row, then Outlines where offered (`outlines`), in one row, `xs` apart. */
+.clover-geomap .maplibregl-ctrl-top-right {
+  display: flex;
+  gap: var(--clover-space-xs);
+}
+
+/*
+ * The map's options (`MapView.tsx`): a gear, and its tray to the gear's start when open,
+ * as a Canvas's controls wait behind More (`Canvas.css`): on one ground between them, the
+ * page's at 60%, blurred a little, no edge, standing out from its controls by `3xs`, so
+ * it stands as near the zoom row as the row's own gap less that; the gear its close at
+ * the tray's end. Opening, the ground comes out of the gear, swiftly, its controls fading
+ * in, never where less motion is asked for.
+ */
+.clover-geomap .clover-geomap-options {
+  --tray: var(--clover-space-3xs);
+  display: flex;
+  gap: var(--clover-space-xs);
+  border-radius: var(--clover-radius-pill, 2rem);
+}
+
+.clover-geomap .clover-geomap-options-list:not([hidden]) {
+  display: flex;
+  gap: var(--clover-space-xs);
+}
+
+.clover-geomap .clover-geomap-options[data-open] {
+  position: relative;
+  margin: calc(-1 * var(--tray));
+  padding: var(--tray);
+  isolation: isolate;
+  -webkit-backdrop-filter: blur(var(--clover-space-3xs));
+  backdrop-filter: blur(var(--clover-space-3xs));
+  animation: clover-geomap-options-open 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clover-geomap .clover-geomap-options[data-open]:dir(rtl) {
+  animation-name: clover-geomap-options-open-rtl;
+}
+
+.clover-geomap .clover-geomap-options[data-open]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--clover-color-secondary, #fff);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.clover-geomap
+  .clover-geomap-options[data-open]
+  .clover-geomap-options-list
+  > * {
+  animation: clover-geomap-options-in 220ms cubic-bezier(0.16, 1, 0.3, 1)
+    backwards;
+}
+
+@keyframes clover-geomap-options-open {
+  from {
+    clip-path: inset(
+      0 0 0 calc(100% - var(--clover-control) - 2 * var(--tray)) round
+        var(--clover-radius-pill, 2rem)
+    );
+  }
+  to {
+    clip-path: inset(0 round var(--clover-radius-pill, 2rem));
+  }
+}
+
+@keyframes clover-geomap-options-open-rtl {
+  from {
+    clip-path: inset(
+      0 calc(100% - var(--clover-control) - 2 * var(--tray)) 0 0 round
+        var(--clover-radius-pill, 2rem)
+    );
+  }
+  to {
+    clip-path: inset(0 round var(--clover-radius-pill, 2rem));
+  }
+}
+
+@keyframes clover-geomap-options-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-geomap .clover-geomap-options[data-open],
+  .clover-geomap
+    .clover-geomap-options[data-open]
+    .clover-geomap-options-list
+    > * {
+    animation: none;
+  }
+}
+
 /* `xs` apart, as the Canvas's controls are (`Canvas.css`; Mat, 2026-11-08). */
 .clover-geomap .maplibregl-ctrl-group {
   display: flex;
@@ -166,6 +265,44 @@
   button:hover:not(:focus-visible) {
   outline: var(--clover-accent-ring-hover) !important;
   outline-offset: 1px !important;
+}
+
+/*
+ * A map option pressed (Outlines, Selection outline): the accent, ringed inside in the
+ * glyph's white, as Document's open section is (`Document.css`; Mat, 2026-11-12: "treat
+ * select like we handle the controls on Document top right menu. selected should be
+ * accent"): the ring, 16:1 against the dark fill, says so beside the hue (WCAG 1.4.1).
+ * Focused, a ring round it besides, in the page's ground and the controls' fill, which
+ * holds over any map (WCAG 2.4.7, 1.4.11). In the higher-contrast mode, the mode's dark
+ * fill, its ring saying it; in forced colors, the system's highlight.
+ */
+.clover-geomap .maplibregl-ctrl-group button[aria-pressed="true"] {
+  background-color: var(--clover-color-accent, #0065c3) !important;
+  box-shadow: inset 0 0 0 2px var(--clover-color-control-glyph, #fff) !important;
+}
+
+.clover-geomap
+  .maplibregl-ctrl-group
+  button[aria-pressed="true"]:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px var(--clover-color-control-glyph, #fff),
+    0 0 0 2px var(--clover-color-secondary, #fff),
+    0 0 0 4px var(--clover-color-primary, #1a1d1e) !important;
+}
+
+:where([data-high-contrast])
+  .clover-geomap
+  .maplibregl-ctrl-group
+  button[aria-pressed="true"] {
+  background-color: var(--clover-accent-fill) !important;
+}
+
+@media (forced-colors: active) {
+  .clover-geomap .maplibregl-ctrl-group button[aria-pressed="true"] {
+    forced-color-adjust: none;
+    background-color: Highlight !important;
+    color: HighlightText;
+  }
 }
 
 /*
@@ -429,9 +566,3 @@
  * place's: its name, and under it so, its owner's date (Cookbook 0318). One caption's
  * lines, `3xs` apart.
  */
-.clover-geomap-places :is(span + span, .clover-geomap-place-date) {
-  display: block;
-  margin-block-start: var(--clover-space-3xs);
-  color: var(--clover-color-primary-muted, #26292b);
-  font-size: var(--clover-text-s);
-}

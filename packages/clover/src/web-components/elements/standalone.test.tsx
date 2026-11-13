@@ -217,7 +217,7 @@ describe("Items and a Map, alone", () => {
     expect(link).toHaveAttribute("href", MEMBER);
   });
 
-  it("maps the places of what it is given, each a button under it", async () => {
+  it("maps the places of what it is given, each an item under it", async () => {
     const map = document.createElement("clover-map") as HTMLElement & {
       iiifContent: unknown;
     };
@@ -226,10 +226,26 @@ describe("Items and a Map, alone", () => {
     await waitFor(
       () =>
         expect(
-          map.querySelectorAll(".clover-geomap-places button").length,
+          map.querySelectorAll('.clover-geomap-items [role="option"]').length,
         ).toBeGreaterThan(0),
       { timeout: 4000 },
     );
+  });
+
+  it('lists none with items="false"', async () => {
+    const map = document.createElement("clover-map") as HTMLElement & {
+      iiifContent: unknown;
+    };
+    map.setAttribute("items", "false");
+    map.iiifContent = placesJson;
+    document.body.append(map);
+    await waitFor(
+      () => expect(map.querySelector(".clover-geomap")).not.toBeNull(),
+      {
+        timeout: 4000,
+      },
+    );
+    expect(map.querySelector(".clover-geomap-items")).toBeNull();
   });
 });
 

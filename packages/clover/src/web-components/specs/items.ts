@@ -13,7 +13,10 @@ export const items: ElementSpec = {
     secondary: { prop: "secondary", type: ["summary", "navDate", "none"] },
     labels: { prop: "labels", type: "boolean" },
     size: { prop: "size", type: ["large", "small"] },
-    of: { prop: "of", type: ["views", "members", "targets", "annotations"] },
+    of: {
+      prop: "of",
+      type: ["views", "members", "targets", "annotations", "georeferences"],
+    },
     navigation: { prop: "navigation", type: ["id", "homepage"] },
     "iiif-content": { prop: "iiifContent", type: "string" },
     header: { prop: "header", type: "boolean" },
@@ -61,7 +64,7 @@ export const itemsDocs: ElementDocs = {
     },
     of: {
       description:
-        "Inside a root: its views, the members of the Collection it belongs to, a content state's targets, where it names two or more, each opening its Manifest at its place, or annotations walked as one whole (the AnnotationPage or AnnotationCollection given as the content, else the AnnotationCollection its annotation pages are part of), each picked and framed on its Canvas.",
+        "Inside a root: its views, the members of the Collection it belongs to, a content state's targets, where it names two or more, each opening its Manifest at its place, annotations walked as one whole (the AnnotationPage or AnnotationCollection given as the content, else the AnnotationCollection its annotation pages are part of), each picked and framed on its Canvas, or its georeferenced images, each the map it is, choosing one going to its Canvas and pointing at one lighting it on a clover-map beside it.",
       default: "views",
     },
     navigation: {
