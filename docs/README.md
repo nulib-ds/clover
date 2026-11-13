@@ -55,8 +55,9 @@ This site's container is `GTM-NFKN3GMX` and its GA4 measurement ID is
 this container.
 
 For this property, [tag-manager.json](./tag-manager.json) contains six tags,
-five triggers, and thirteen variables for page views, resource opens, template changes,
-reaching the install section, and section CTA clicks. In Tag Manager, open the
+five triggers, and fifteen variables for page views, resource opens, template changes,
+reaching the install section, section CTA clicks, and tagging
+[bot traffic](#bot-traffic). In Tag Manager, open the
 container, then **Admin → Import Container**, select the file and an existing
 workspace, and choose **Merge → Overwrite conflicting tags, triggers and
 variables**. The entries are named with `Clover -`; merging by these names also
@@ -85,9 +86,10 @@ file, or configure the tags manually:
 5. Add a **Google tag** for the stream's measurement ID (`G-…`), triggered on
    **Initialization — All Pages**. In its configuration parameters, set
    `send_page_view` to the boolean `false` (use a Custom JavaScript variable
-   returning `false`), and `page_location`, `page_title`, and `page_referrer`
-   to the matching Data Layer Variables. No separate Analytics script is needed
-   in this repository.
+   returning `false`), `page_location`, `page_title`, and `page_referrer`
+   to the matching Data Layer Variables, and `traffic_type` to the Custom
+   JavaScript variable under [Bot traffic](#bot-traffic). No separate Analytics
+   script is needed in this repository.
 6. Add a **Custom Event** trigger named `clover_page_view`. Add a **Google
    Analytics: GA4 Event** tag for the same measurement ID, with event name
    `page_view`. Set its event parameters `page_location`, `page_title`, and
@@ -219,6 +221,44 @@ per activation in Realtime or DebugView. Register `cta_section` and `cta_label`
 as event-scoped custom dimensions under **Admin → Data display → Custom
 definitions**. In an Exploration, filter **Event name** to `cta_click`, then use
 **CTA section** and **CTA label** with **Event count** to compare the links.
+
+### Bot traffic
+
+A crawler loads the homepage thousands of times a month, most of it from
+Singapore and much of it by way of old `samvera-labs.github.io` links that
+open a resource from Texas A&M's digital collections. It never engages with the
+page. Every visit reports a screen of exactly 1280 × 1200 on Windows 10, with a
+different, mostly outdated Chrome version each time. From October 16 to
+November 12, 2026, that screen accounted for 6,909 of the property's 7,346
+users. Of the 6,857 sessions with it, 9 were engaged, none outside Singapore.
+Country, referrer and resource are not used to identify it:
+real readers arrive by the same links and open the same resources.
+
+`Clover - traffic_type`, a Custom JavaScript variable, returns `bot` for that
+screen, and the Google tag sends it as `traffic_type` with every event. Other
+visits send no `traffic_type`:
+
+```js
+function () {
+  return screen.width === 1280 && screen.height === 1200 ? "bot" : undefined;
+}
+```
+
+To leave these visits out of reports:
+
+1. Import the container and publish it, as above.
+2. In Analytics, open **Admin → Data collection and modification → Data
+   filters**, create an **Internal traffic** filter named `Bots`, set its
+   **Parameter value** to `bot`, and leave it in **Testing**.
+3. After a few days, add the **Test data filter name** dimension to an
+   Exploration. Rows named `Bots` are what the filter would remove; check that
+   they have no engagement.
+4. Set the filter to **Active**. GA4 then discards matching events for good,
+   from that time on; it never filters data collected earlier. For earlier
+   reports, exclude **Screen resolution** `1280x1200` in a filter or segment.
+
+To tag another crawler, add its condition to the variable and record its
+figures here.
 
 The container ID and verification token are public identifiers embedded in the
 exported site. Set them as Actions variables, not account credentials. For a

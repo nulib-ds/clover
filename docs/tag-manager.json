@@ -3,7 +3,7 @@
   "containerVersion": {
     "containerVersionId": "0",
     "name": "Clover Analytics",
-    "description": "GA4 page views, IIIF resource opens, template changes, install-section reach and section CTA clicks from Clover documentation. Enhanced measurement must be off in the GA4 stream. Imports do not publish tags.",
+    "description": "GA4 page views, IIIF resource opens, template changes, install-section reach and section CTA clicks from Clover documentation, with known bot traffic tagged for a GA4 data filter. Enhanced measurement must be off in the GA4 stream. Imports do not publish tags.",
     "container": {
       "name": "clover.iiif.library.northwestern.edu",
       "publicId": "GTM-NFKN3GMX",
@@ -81,6 +81,21 @@
                     "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "{{Clover - page_referrer}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "traffic_type"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{Clover - traffic_type}}"
                   }
                 ]
               }
@@ -1020,6 +1035,18 @@
             "type": "BOOLEAN",
             "key": "setDefaultValue",
             "value": "false"
+          }
+        ]
+      },
+      {
+        "variableId": "15",
+        "name": "Clover - traffic_type",
+        "type": "jsm",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "javascript",
+            "value": "function () {\n  // A crawler fleet reports this screen on every visit (docs/README.md, \"Bot traffic\").\n  // Other visits send no traffic_type.\n  return screen.width === 1280 && screen.height === 1200 ? \"bot\" : undefined;\n}"
           }
         ]
       }
