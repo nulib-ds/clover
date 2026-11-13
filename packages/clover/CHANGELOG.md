@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.10.1] - 2026-11-12
+
 ### Added
 
 - **A link to Allmaps Viewer.** `allmaps` on `Map` (`allmaps` on `<clover-map>`) adds a
