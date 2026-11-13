@@ -47,20 +47,25 @@ function isContentState(json: unknown): boolean {
 }
 
 /**
- * Whether JSON is an Image API service's `info.json`, rather than a Presentation resource:
- * by its `type` (Image 3, `ImageService3`), its `protocol` or its `@context` (Image 2 and
- * 3, `…/api/image/…`), none of which a Presentation resource declares.
+ * Whether JSON is an Image API service's `info.json`, rather than a Presentation resource,
+ * by its types and contexts together (#423): its `type` (Image 3, `ImageService3`), its
+ * `protocol` or its `@context` (Image 2 and 3, `…/api/image/…`), unless a context or type
+ * says it is a Presentation resource. A Manifest may list the Image API's context beside
+ * its own, as JSON-LD allows, where its bodies' services are Image 2.
  */
-export const isImageService = (json: unknown): boolean =>
-  Boolean(json) &&
-  typeof json === "object" &&
-  /ImageService[123]|iiif\.io\/api\/image/.test(
-    JSON.stringify(
-      ["@context", "type", "@type", "protocol"].map(
-        (key) => (json as Json)[key],
-      ),
+export const isImageService = (json: unknown): boolean => {
+  const said = JSON.stringify(
+    ["@context", "type", "@type", "protocol"].map(
+      (key) => json && (json as Json)[key],
     ),
   );
+  return (
+    /ImageService[123]|iiif\.io\/api\/image/.test(said) &&
+    !/presentation\/\d|"(sc:)?(Manifest|Collection|Canvas|Range|Timeline|Scene)"/.test(
+      said,
+    )
+  );
+};
 
 /**
  * A URL's JSON. An image service's base URI need not answer with its `info.json` (the

@@ -6,6 +6,7 @@ import { isGeoreferencing } from "./geo-detect";
 import type { Json } from "./json";
 import {
   CloverContentError,
+  isImageServiceManifest,
   type LoadContentOptions,
   type Loaded,
   type loadContent,
@@ -301,11 +302,10 @@ export function placeTarget(loaded: Loaded): Loaded {
   if (!target) return loaded;
   const canvases = asArray((manifest as Json).items) as Json[];
   if (canvases.some((canvas) => canvas?.id === target.canvasId)) return loaded;
-  // An image service is shown as one Canvas (`isImageServiceManifest`), whatever it named.
-  const service =
-    canvases.length === 1 && canvases[0]?.id === `${manifest.id}/canvas`
-      ? { canvasId: canvases[0].id as string }
-      : null;
+  // An image service is shown as one Canvas, whatever it named.
+  const service = isImageServiceManifest(manifest as Json)
+    ? { canvasId: canvases[0].id as string }
+    : null;
   const place: ReturnType<typeof rangeStart> =
     service ?? rangeStart(manifest as Json, target.canvasId);
   if (!place) return loaded;

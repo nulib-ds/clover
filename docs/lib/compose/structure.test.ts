@@ -135,6 +135,22 @@ describe("structureOf", () => {
     });
   });
 
+  it("reads a resource by its type and Presentation's context, whatever other APIs it lists", () => {
+    const api = (path: string) => `http://iiif.io/api/${path}/context.json`;
+    const navPlace = api("extension/navplace");
+    for (const [context, version] of [
+      [[api("presentation/3"), api("image/2")], 3],
+      [[api("image/2"), api("presentation/3")], 3],
+      [[navPlace, api("presentation/3")], 3],
+      [[api("presentation/2"), api("image/2")], 2],
+      [[api("search/1"), api("presentation/2")], 2],
+      [[navPlace, api("presentation/4")], 4],
+    ] as const)
+      expect(
+        structureOf({ "@context": context, type: "Manifest", items: [] }),
+      ).toMatchObject({ type: "Manifest", version });
+  });
+
   it("counts a Collection's members by type, unread", () => {
     expect(structureOf(mock("cookbook", "collection.json"))).toMatchObject({
       type: "Collection",

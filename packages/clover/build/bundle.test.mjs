@@ -75,6 +75,8 @@ const LAZY_MODULES = [
   "/lib/gltf/renderer.ts",
   // The upgrader's fix for fragmented targets, loaded with the upgrader.
   "/core/keep-fragments.ts",
+  // Presentation 2, read as 3, only for a resource in it.
+  "/core/upgrade-2.ts",
   // About's "Part of", for a Canvas shown on its own.
   "/components/Panel/PartOfManifest.tsx",
   // The hotspots' layer, the DOM layer and Canvas2D, made when first needed.

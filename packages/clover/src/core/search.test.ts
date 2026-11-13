@@ -48,6 +48,27 @@ describe("searchServiceOf", () => {
     expect(service).toEqual({ id: SEARCH_V1, version: 1 });
   });
 
+  it("never takes autocomplete for search, though they share a context", () => {
+    const autocomplete = "https://example.org/autocomplete";
+    const service = searchServiceOf({
+      ...p4(manifest([])),
+      service: [
+        {
+          "@context": "http://iiif.io/api/search/1/context.json",
+          "@id": autocomplete,
+          profile: "http://iiif.io/api/search/1/autocomplete",
+        },
+        { id: autocomplete, type: "AutoCompleteService2" },
+        {
+          "@context": "http://iiif.io/api/search/1/context.json",
+          "@id": SEARCH_V1,
+          profile: "http://iiif.io/api/search/1/search",
+        },
+      ],
+    } as never);
+    expect(service).toEqual({ id: SEARCH_V1, version: 1 });
+  });
+
   it("is null without a search service", () => {
     expect(searchServiceOf(p4(manifest([])))).toBeNull();
   });

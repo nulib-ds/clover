@@ -5,18 +5,26 @@ import { upgradeToPresentation4 } from "@iiif/parser/presentation-4/upgrader";
 
 import { keepFragments } from "./keep-fragments";
 import { isPresentation4, toPresentation4 } from "./presentation";
+import { isPresentation2 } from "./upgrade";
+import { forReader } from "./upgrade-2";
 
 /*
  * Clover upgrades in two steps, so a page reading Presentation 3 never loads the reader of
  * 2 (Mat, 2026-10-30): `upgradePresentation3To4`, after `convertPresentation2` for
  * Presentation 2 alone. The upgrader is what every part reads, so this holds the two steps
  * to the one `@iiif/parser` takes (`upgradeToPresentation4`) for every resource there is
- * here: the same Presentation 4 out, and the caller's own object never changed.
+ * here: the same Presentation 4 out, and the caller's own object never changed. Each is
+ * given Presentation 2 as Clover gives the reader of 2 (`forReader`), which would read a
+ * resource whose contexts list the Image API's as an image service (#423).
  */
 const before = (resource: unknown) =>
   isPresentation4(resource)
     ? resource
-    : upgradeToPresentation4(keepFragments(resource));
+    : upgradeToPresentation4(
+        keepFragments(
+          isPresentation2(resource) ? forReader(resource) : resource,
+        ),
+      );
 
 /** Every JSON file under `folder`. */
 const jsonUnder = (folder: string): string[] =>

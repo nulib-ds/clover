@@ -88,20 +88,43 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Allmaps writes them, belongs to that Canvas, so a map of the view lays it; before, only
   the Canvas's map control did.
 - **Budgets.** Items drawing the Map's list takes a page with a Map alone, to its first
-  view, from 30.35 kB to 47 kB: Items' code, loaded with the list wherever the map lists
-  something (a map that lists nothing, as a Canvas's map box, never reaches it), and the
-  map's options, which every map carries for now, though `outlines` is off by default. The
-  outline, pointing, `overlays`, a press on a sheet, following the view, the options and
-  the helmert fit take the Map before MapLibre to 24.05 kB. A Canvas's map box laying
-  every sheet of georeference content takes a Canvas's first load to 44.7 kB and to first
-  view 51.95 kB, and a Timeline's to 29.35 kB. Items' pointing and `of="georeferences"`,
-  and the options' strings, which every template loads, take the Default template to
-  82.8 kB and to first view 101.55 kB, Gallery to 33.65 kB and to first view 58.15 kB, a
-  Scene to first view 30 kB, the translator to 3.65 kB, `<clover-viewer>` to 134.5 kB,
-  Document's element to 152.1 kB, Gallery's to 138 kB, `<clover-canvas>` to 97.45 kB, the
-  elements' entry to 6.35 kB, a page of labels to 37.65 kB, the Viewer's own entry to
-  113.4 kB, the four parts to 111.05 kB and a layout to 129.9 kB; the rows' layout and the
-  options' tray take base.css to 15.1 kB. Each raised to the next 50.
+  view, from 30.35 kB to 47.15 kB: Items' code, loaded with the list wherever the map
+  lists something (a map that lists nothing, as a Canvas's map box, never reaches it), and
+  the map's options, which every map carries for now, though `outlines` is off by default.
+  The outline, pointing, `overlays`, a press on a sheet, following the view, the options
+  and the helmert fit take the Map before MapLibre to 24.05 kB. A Canvas's map box laying
+  every sheet of georeference content, with reading types and contexts together and
+  `Painting` (Fixed, below), takes a Canvas's first load to 44.75 kB and to first view
+  52.1 kB, a Timeline's first load to 29.4 kB and to first view 56.7 kB, and a Scene's
+  first load to 19.35 kB and to first view 30.1 kB. With those, Items' pointing and
+  `of="georeferences"` and the options' strings, which every template loads, take the
+  Default template to 82.85 kB and to first view 101.7 kB, Gallery to 33.75 kB and to
+  first view 58.25 kB, the translator to 3.65 kB, `<clover-viewer>` to 134.6 kB,
+  Document's element to 152.2 kB, Gallery's to 138.1 kB, `<clover-canvas>` to 97.5 kB,
+  the elements' entry to 6.35 kB, a page of labels to 37.75 kB, the Viewer's own entry to
+  113.4 kB, the four parts to 111.15 kB and a layout to 130.05 kB; the rows' layout and
+  the options' tray take base.css to 15.1 kB. Each raised to the next 50. Presentation 2's
+  copy now loads only for `<clover-viewer>`.
+
+### Fixed
+
+- **A Manifest that lists the Image API's context opens.** A Presentation resource whose
+  `@context` lists the Image API's context beside its own (valid JSON-LD, where its
+  images' services are Image 2) was taken for an image service's `info.json` and failed
+  with "info.json is missing id, width or height". Its types and contexts are now read
+  together: a Presentation context or type decides, and an `info.json` is still known by
+  its `type`, `protocol` or `@context`, whatever extension's context it lists too (#423).
+- **The same for Presentation 2.** A Presentation 2 Manifest whose `@context` lists the
+  Image API's was read as an image service by `@iiif/parser`, which names a resource by
+  its context before its type, and failed with "Cannot show a ImageService2". Clover now
+  gives the parser Presentation 2's context alone.
+- **A search service, never its autocomplete.** A Manifest that lists Content Search's
+  autocomplete service among its own services, ahead of its search service, no longer
+  has the autocomplete taken for search. They share a context, so a service's `type` or
+  `profile` now decides.
+- **`Painting` paints.** An annotation whose motivation is written `Painting`, which IIIF
+  does not define, is read as `painting`, as a workaround: the Manifest in #423 writes
+  it so, and its image was not drawn. Motivations are read so in `isPainting` alone.
 
 ## [4.9.5] - 2026-11-12
 
