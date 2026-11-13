@@ -148,13 +148,17 @@ describe("templates", () => {
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     // The Manifest's label once, as the template's heading, and About's one level under
-    // it, at the levels `headingLevel` gives, as a docs demo's are.
+    // it, at the levels `headingLevel` gives, as a docs demo's are. The label comes with
+    // the Manifest, after the panel's own button: waited for, not read at once.
+    expect(
+      await screen.findByRole("heading", {
+        level: 5,
+        name: "Simple Manifest - Book",
+      }),
+    ).toBeInTheDocument();
     expect(
       screen.getAllByRole("heading", { name: "Simple Manifest - Book" }),
     ).toHaveLength(1);
-    expect(
-      screen.getByRole("heading", { level: 5, name: "Simple Manifest - Book" }),
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 6, name: "About" }),
     ).toBeInTheDocument();
@@ -700,15 +704,23 @@ describe("templates", () => {
 
     const toggle = () =>
       screen.getByRole("button", { name: "More information" });
+    /*
+     * The Viewer, drawn: its title, then its toggle, which sits among the Body's controls
+     * and so comes with the Body's view, a moment after the title (a race CI lost once).
+     */
+    const drawn = async () => {
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
+      await screen.findByRole("button", { name: "More information" });
+    };
     const panel = () =>
       document.querySelector<HTMLElement>(".clover-template-default-panel")!;
 
     it("never stacks: it starts closed, then slides over the Body when asked", async () => {
       render(<Templates.Default iiifContent={bookJson} />);
-      await screen.findByRole("heading", {
-        level: 2,
-        name: "Simple Manifest - Book",
-      });
+      await drawn();
       const panes = document.querySelector(".clover-template-default-panes");
       expect(panes).toHaveAttribute("data-panel", "over");
       expect(panel()).not.toBeVisible();
@@ -725,10 +737,7 @@ describe("templates", () => {
 
     it("closes from the uncovered strip, from Escape, and from its close button", async () => {
       render(<Templates.Default iiifContent={bookJson} />);
-      await screen.findByRole("heading", {
-        level: 2,
-        name: "Simple Manifest - Book",
-      });
+      await drawn();
       const open = async () => {
         fireEvent.click(toggle());
         await waitFor(() =>
@@ -757,10 +766,7 @@ describe("templates", () => {
 
     it("puts the panel away on Escape from under it, leaving focus there", async () => {
       render(<Templates.Default iiifContent={bookJson} />);
-      await screen.findByRole("heading", {
-        level: 2,
-        name: "Simple Manifest - Book",
-      });
+      await drawn();
       fireEvent.click(toggle());
       await waitFor(() =>
         expect(toggle()).toHaveAttribute("aria-expanded", "true"),
@@ -775,10 +781,7 @@ describe("templates", () => {
 
     it("starts closed over the Body even when the host asks it open, focus left where it was", async () => {
       render(<Templates.Default iiifContent={bookJson} defaultPanelOpen />);
-      await screen.findByRole("heading", {
-        level: 2,
-        name: "Simple Manifest - Book",
-      });
+      await drawn();
       expect(panel()).not.toBeVisible();
       expect(toggle()).toHaveAttribute("aria-expanded", "false");
       // Nothing over the Body on arrival, nor a moment later.
@@ -790,10 +793,7 @@ describe("templates", () => {
 
     it("takes focus into the panel as the reader opens it", async () => {
       render(<Templates.Default iiifContent={bookJson} />);
-      await screen.findByRole("heading", {
-        level: 2,
-        name: "Simple Manifest - Book",
-      });
+      await drawn();
       fireEvent.click(toggle());
       await waitFor(() =>
         expect(screen.getByRole("button", { name: "About" })).toHaveFocus(),

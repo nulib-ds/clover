@@ -1,4 +1,11 @@
-import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { useUniqueId } from "../../ui/useUniqueId";
 import {
@@ -70,6 +77,13 @@ export interface MapProps
    * pressed to put away the accent's outline round the one chosen. Default false.
    */
   outlines?: boolean;
+  /**
+   * Offers a link to Allmaps Viewer, Allmaps' mark on a control in the map's lower
+   * corner, where Allmaps can open what the map shows by an address: georeference
+   * annotations given as the content (an Annotation's or an AnnotationPage's own
+   * address), or an annotation Allmaps hosts. It opens in a new tab. Default false.
+   */
+  allmaps?: boolean;
   /** The overlays' opacity, 0 to 1. Default 1: a georeferenced map shows whole. */
   overlayOpacity?: number;
   /** A MapLibre style URL, used as it is. Default: Clover's relief basemap (OpenFreeMap). */
@@ -241,6 +255,11 @@ interface ViewProps
   current?: string[];
   /** The language to name overlays in. */
   language?: string;
+  /**
+   * Where the overlays were read from, where one document holds them (georeference
+   * annotations given as the content): what `allmaps` links to.
+   */
+  source?: string;
   /** A region of its own. Default true; false in a panel, whose section is one. */
   landmark?: boolean;
   /** The annotations pointed at or picked beside it: their places show active. */
@@ -284,6 +303,8 @@ export function MapView({
   reframe,
   items = "list",
   outlines = false,
+  allmaps = false,
+  source,
   credits = true,
   language,
   highContrast,
@@ -1200,6 +1221,27 @@ export function MapView({
       setOptionsOpen(false);
     };
   }, [map, offered]);
+  /*
+   * A link to Allmaps Viewer (`allmaps`; Mat, 2026-11-12: "a view in allmaps button", its
+   * logo "within a map. never on white", and no plugin): Allmaps' mark on a control of
+   * Clover's, in the map's lower corner at its start, where a basemap's own mark sits, so
+   * it is always over the map and on the controls' fill (`AllmapsLink.tsx`, a chunk of
+   * its own, so a map that offers none carries none of it). Offered only where Allmaps can
+   * read what the map shows by an address: the document the georeferences came from, else
+   * an annotation Allmaps hosts (the one chosen, else the first in view). Another
+   * annotation's `id` is no address to count on (mapsnap's answer 404).
+   */
+  const allmapsUrl = useMemo(() => {
+    if (!allmaps) return null;
+    const hosted = [
+      chosenKey?.replace(/^overlay-/, ""),
+      ...overlays.map((item) => item.id),
+    ].find((id) => id?.startsWith(ALLMAPS_ANNOTATIONS));
+    const address = source ?? hosted;
+    return address
+      ? `${ALLMAPS_VIEWER}?url=${encodeURIComponent(address)}`
+      : null;
+  }, [allmaps, source, overlays, chosenKey]);
   const [edgesShown, setEdgesShown] = useState(false);
   const edges = outlines && edgesShown && overlay;
   useEffect(() => {
@@ -1357,6 +1399,16 @@ export function MapView({
               </div>,
               optionsSlot,
             )}
+          {map && allmapsUrl && (
+            <Suspense fallback={null}>
+              <AllmapsLink
+                map={map}
+                href={allmapsUrl}
+                label={t("mapViewInAllmaps")}
+                lang={langOf("mapViewInAllmaps")}
+              />
+            </Suspense>
+          )}
           {map &&
             tips.map(({ element, key }) =>
               createPortal(
@@ -1752,6 +1804,13 @@ const Close = () => (
     d="M154 154L358 358M358 154L154 358"
   />
 );
+
+/** Allmaps Viewer, which opens a georeference annotation by its address (`?url=`). */
+const ALLMAPS_VIEWER = "https://viewer.allmaps.org/";
+/** Where Allmaps hosts annotations: each `id` there is its address. */
+const ALLMAPS_ANNOTATIONS = "https://annotations.allmaps.org/";
+/** The link and Allmaps' mark, loaded only for a map that offers it (`allmaps`). */
+const AllmapsLink = lazy(() => import("./AllmapsLink"));
 
 const GLYPHS: Record<string, () => React.ReactElement> = {
   imageZoomIn: ZoomIn,

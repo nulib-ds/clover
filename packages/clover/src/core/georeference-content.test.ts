@@ -1,5 +1,10 @@
 import { createClover } from "./clover";
-import { canvasGeoreferences, cornersOf, georeferencesOf } from "./geo";
+import {
+  canvasGeoreferences,
+  cornersOf,
+  georeferencedContentAddress,
+  georeferencesOf,
+} from "./geo";
 import { isGeoreferencedContent } from "./geo-detect";
 import annotation from "../fixtures/mocks/sanborn/annotation.json";
 import collection from "../fixtures/mocks/sanborn/annotation-collection.json";
@@ -113,6 +118,8 @@ describe("a georeference Annotation as the content", () => {
     const { state } = await open(annotation);
     expect(state.status).toBe("ready");
     const manifest = state.manifest as Json;
+    // One document holds it: its address, for a link to it (the Map's `allmaps`).
+    expect(georeferencedContentAddress(manifest)).toBe(annotation.id);
     const [canvas, ...rest] = manifest.items;
     expect(rest).toEqual([]);
     expect(canvas).toMatchObject({
@@ -181,8 +188,9 @@ describe("an AnnotationPage of georeferences as the content", () => {
     const manifest = state.manifest as Json;
     expect(manifest.id).toBe(page.id);
     expect(manifest.label).toEqual(page.label);
-    // Marked, so its maps lay every sheet.
+    // Marked, so its maps lay every sheet, with the page's address.
     expect(isGeoreferencedContent(manifest)).toBe(true);
+    expect(georeferencedContentAddress(manifest)).toBe(page.id);
     // Its summary too, as a Manifest's.
     expect(page.summary).toBeDefined();
     expect(manifest.summary).toEqual(page.summary);
@@ -231,6 +239,9 @@ describe("an AnnotationCollection of georeferences as the content", () => {
     const manifest = state.manifest as Json;
     expect(manifest.id).toBe(collection.id);
     expect(manifest.label).toEqual(collection.label);
+    // Marked, but its sheets are on several pages: no one address holds them.
+    expect(isGeoreferencedContent(manifest)).toBe(true);
+    expect(georeferencedContentAddress(manifest)).toBeUndefined();
     // What the Collection says of itself: mapsnap's license and its attribution.
     expect(manifest.rights).toBe(collection.rights);
     expect(manifest.requiredStatement).toEqual(collection.requiredStatement);

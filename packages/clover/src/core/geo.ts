@@ -1,5 +1,5 @@
 import { parseAnnotationTarget } from "./annotations";
-import { isGeoreferencing } from "./geo-detect";
+import { GEOREFERENCED_CONTENT, isGeoreferencing } from "./geo-detect";
 import { bodiesOf, isPainting } from "./painting";
 import type { Presentation4Collection, Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
@@ -645,4 +645,20 @@ export function boundsOf(
     [Math.min(...lngs), Math.min(...lats)],
     [Math.max(...lngs), Math.max(...lats)],
   ];
+}
+
+/**
+ * The address the georeferences given as the content were read from, where one document
+ * holds them: an Annotation or an AnnotationPage, which another viewer of georeferences
+ * can open by it (the Map's `allmaps`). None for an AnnotationCollection, whose pages are
+ * several, nor for an address that is not the web's.
+ */
+export function georeferencedContentAddress(
+  manifest: unknown,
+): string | undefined {
+  const mark =
+    manifest && (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT];
+  return typeof mark === "string" && /^https?:\/\//.test(mark)
+    ? mark
+    : undefined;
 }

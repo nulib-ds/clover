@@ -106,6 +106,7 @@ test("leaves the host's own content in a Root in the page's language", async ({
 
 test("speaks a French visitor's French on an English page, and offers the page's English", async ({
   page,
+  isMobile,
 }) => {
   // The browser is French (`locale` above); the page declares English and sets nothing.
   await page.goto(`/?scene=viewer&content=${manifest.id}`);
@@ -113,6 +114,12 @@ test("speaks a French visitor's French on an English page, and offers the page's
   const next = page.getByRole("button", { name: "Suivant" });
   await expect(next).toBeVisible();
   await expect(next).toHaveAttribute("lang", "fr");
+  // On a phone the information panel is closed until asked for, by its French name.
+  if (isMobile) {
+    const toggle = page.getByRole("button", { name: "Plus d’informations" });
+    await expect(toggle).toHaveAttribute("lang", "fr");
+    await toggle.click();
+  }
   // About's one language toggle (`readingLanguage`), offering the page's English too.
   const choice = page.getByRole("group", { name: "Langue", exact: true });
   await expect(choice.getByRole("radio")).toHaveCount(2);

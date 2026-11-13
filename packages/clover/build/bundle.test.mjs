@@ -47,6 +47,8 @@ const LAZY_MODULES = [
   "/core/sanitize.ts",
   "/core/svg-shape.ts",
   "/components/Canvas/FrameAnimation.tsx",
+  // The Map's link to Allmaps and its mark, only for a map that offers it (`allmaps`).
+  "/components/Map/AllmapsLink.tsx",
   "/components/Canvas/panClearOfControls.ts",
   // Hotspots and the Canvas's menus, for a Canvas with annotations or a Choice.
   "/components/Canvas/Annotations.tsx",

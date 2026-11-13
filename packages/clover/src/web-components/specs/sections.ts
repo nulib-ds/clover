@@ -342,6 +342,7 @@ export const map: ElementSpec = {
       type: ["list", "grid", "slider", "masonry", "false"],
     },
     outlines: { prop: "outlines", type: "boolean" },
+    allmaps: { prop: "allmaps", type: "boolean" },
     "style-url": { prop: "styleUrl", type: "string" },
     "scroll-zoom": { prop: "scrollZoom", type: "boolean" },
     zoom: { prop: "zoom", type: "number", min: 0 },
@@ -381,6 +382,11 @@ export const mapDocs: ElementDocs = {
     outlines: {
       description:
         "Adds a gear beside the zoom buttons with two options. Outlines draws the edge of every georeferenced image; Selection outline hides the accent outline around the chosen one.",
+      default: "false",
+    },
+    allmaps: {
+      description:
+        "Adds a link to Allmaps Viewer, Allmaps' mark on a control at the map's lower corner, where Allmaps can open what the map shows by its address: georeference annotations given as the content (an Annotation or an AnnotationPage), or an annotation Allmaps hosts. It opens in a new tab.",
       default: "false",
     },
     "style-url": {

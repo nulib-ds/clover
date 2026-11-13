@@ -34,6 +34,8 @@ const PROPER_NAMES = [
   /^(?:Collection|Manifest|Canvas|Range)(?:e?s)?$/,
   /^(?:Shift\+)?(?:[A-Z]|Escape|Shift|Space|Enter|Tab|Home|End)$/,
   /^[A-Z0-9]{2,}$/,
+  // Allmaps Viewer, where the Map's `allmaps` link goes.
+  /^Allmaps$/,
 ];
 
 it("writes English in sentence case: a capital opens a sentence or a proper name", () => {

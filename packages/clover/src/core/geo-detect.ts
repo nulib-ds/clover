@@ -71,15 +71,19 @@ type Json = Record<string, any>;
  * items, with the active one selected", then "same for in the main view"). A symbol, so it
  * never leaves with the Manifest's JSON; a spread of the Manifest keeps it.
  */
-const GEOREFERENCED_CONTENT = Symbol.for("clover.georeferencedContent");
+export const GEOREFERENCED_CONTENT = Symbol.for("clover.georeferencedContent");
 
-export function markGeoreferencedContent<T extends object>(manifest: T): T {
-  (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT] = true;
+export function markGeoreferencedContent<T extends object>(
+  manifest: T,
+  /** Where one document holds the georeferences (`georeferencedContentAddress`). */
+  address?: string,
+): T {
+  (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT] =
+    address || true;
   return manifest;
 }
 
 export const isGeoreferencedContent = (manifest: unknown) =>
   Boolean(
-    manifest &&
-      (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT] === true,
+    manifest && (manifest as Record<symbol, unknown>)[GEOREFERENCED_CONTENT],
   );

@@ -1367,6 +1367,57 @@ describe("Map", () => {
     expect(framed()).toEqual(boundsOf([], sheets.slice(0, 1)));
   });
 
+  it("links to Allmaps Viewer where asked, and only by an address Allmaps can open", async () => {
+    const link = () => screen.queryByRole("link", { name: "View in Allmaps" });
+    // Georeference annotations as the content: not offered unless asked for.
+    const { unmount: plain } = render(
+      <Clover.Root iiifContent={sanbornPage}>
+        <CloverMap items={false} />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps[0]?.fitBounds).toHaveBeenCalled(), {
+      timeout: 4000,
+    });
+    expect(link()).toBeNull();
+    plain();
+
+    // Asked for: the page's own address, in a new tab, on a control of the map's.
+    const { unmount: asked } = render(
+      <Clover.Root iiifContent={sanbornPage}>
+        <CloverMap items={false} allmaps />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(link()).not.toBeNull(), { timeout: 4000 });
+    expect(link()).toHaveAttribute(
+      "href",
+      `https://viewer.allmaps.org/?url=${encodeURIComponent(sanbornPage.id)}`,
+    );
+    expect(link()).toHaveAttribute("target", "_blank");
+    expect(link()).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link()!.closest(".maplibregl-ctrl-group")).not.toBeNull();
+    // Its mark is Allmaps', drawn, and no part of its name.
+    expect(link()!.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    asked();
+
+    // An annotation handed in: its `id` is no address to count on, so no link…
+    const one = georeferenceOnService();
+    const { unmount: given } = render(
+      <CloverMap georeferences={[one]} allmaps />,
+    );
+    await waitFor(() => expect(maps.at(-1)!.fitBounds).toHaveBeenCalled());
+    expect(link()).toBeNull();
+    given();
+
+    // …unless Allmaps hosts it.
+    const hosted = "https://annotations.allmaps.org/maps/135dfd2d58dc26ec";
+    render(<CloverMap georeferences={[{ ...one, id: hosted }]} allmaps />);
+    await waitFor(() => expect(link()).not.toBeNull());
+    expect(link()).toHaveAttribute(
+      "href",
+      `https://viewer.allmaps.org/?url=${encodeURIComponent(hosted)}`,
+    );
+  });
+
   it("warps a georeferenced image onto the map by its control points", async () => {
     render(<CloverMap georeferences={[georeferenceOnService()]} />);
     await waitFor(() => expect(maps).toHaveLength(1));

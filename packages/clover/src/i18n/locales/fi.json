@@ -105,6 +105,7 @@
   "mapOptions": "Kartan asetukset",
   "mapExpandOptions": "Laajenna kartan asetukset",
   "mapCollapseOptions": "Supista kartan asetukset",
+  "mapViewInAllmaps": "Näytä Allmapsissa",
   "informationPanelToggle": "Lisätiedot",
   "playerPlay": "Toista",
   "playerPause": "Keskeytä",
