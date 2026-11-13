@@ -1,14 +1,14 @@
 {
-  "canvasInitialGzip": 44750,
+  "canvasInitialGzip": 44800,
   "timelineInitialGzip": 29400,
   "sceneInitialGzip": 19350,
   "sceneOnDemandGzip": 160000,
   "sceneCloverOnDemandGzip": 8300,
   "viewerShellGzip": 1150,
-  "defaultTemplateGzip": 82850,
+  "defaultTemplateGzip": 82900,
   "documentTemplateGzip": 85150,
   "galleryTemplateGzip": 33750,
-  "defaultTemplateFirstViewGzip": 101700,
+  "defaultTemplateFirstViewGzip": 101750,
   "documentTemplateFirstViewGzip": 107550,
   "galleryTemplateFirstViewGzip": 58250,
   "canvasFirstViewGzip": 52100,
@@ -31,5 +31,5 @@
   "canvasElementGzip": 97500,
   "documentElementGzip": 152200,
   "galleryElementGzip": 138100,
-  "viewerEntryGzip": 113400
+  "viewerEntryGzip": 113450
 }

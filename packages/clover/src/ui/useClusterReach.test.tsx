@@ -117,6 +117,44 @@ describe("useClusterReach", () => {
     expect(reach(canvas)).toEqual({ width: "", height: "" });
   });
 
+  it("measures again as the playback controls come, and not for a loading mark", async () => {
+    const one = [{ left: 0, top: 0 }];
+    const { getByTestId } = render(
+      <Figure width={36} controls={one} height={220} />,
+    );
+    const canvas = getByTestId("canvas");
+    const reads = vi.mocked(
+      Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetTop")!.get!,
+    );
+    const settle = () => new Promise((resolve) => setTimeout(resolve));
+    expect(canvas).not.toHaveAttribute("data-popups");
+
+    // A loading mark coming and going leaves the measure alone.
+    reads.mockClear();
+    const mark = document.createElement("div");
+    mark.className = "clover-loading";
+    canvas.append(mark);
+    await settle();
+    mark.remove();
+    await settle();
+    expect(reads).not.toHaveBeenCalled();
+
+    // Media with its playback controls, 48px tall, leaves too little room below.
+    const media = document.createElement("div");
+    media.className = "clover-canvas-media";
+    const transport = document.createElement("div");
+    transport.className = "clover-canvas-transport";
+    transport.dataset.height = "48";
+    media.append(transport);
+    canvas.append(media);
+    await settle();
+    expect(canvas).toHaveAttribute("data-popups", "beside");
+    // Gone again: room below.
+    media.remove();
+    await settle();
+    expect(canvas).not.toHaveAttribute("data-popups");
+  });
+
   // A short Body: below the controls, a popup would have nothing to show.
   it("puts its popups beside it in a short Body, where there is room", () => {
     const one = [{ left: 0, top: 0 }];

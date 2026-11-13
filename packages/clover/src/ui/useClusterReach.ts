@@ -23,6 +23,12 @@ export function useClusterReach(cluster: HTMLElement | null) {
   useLayoutEffect(() => {
     const canvas = cluster?.closest<HTMLElement>(".clover-canvas");
     if (!cluster || !canvas) return;
+    // The playback controls, as last measured.
+    let transport: HTMLElement | null = null;
+    const playback = () =>
+      canvas.querySelector<HTMLElement>(
+        ":scope > .clover-canvas-media > .clover-canvas-transport",
+      );
     const write = (gone = false) => {
       let start = cluster.offsetWidth;
       let bottom = 0;
@@ -41,9 +47,7 @@ export function useClusterReach(cluster: HTMLElement | null) {
         else canvas.style.removeProperty(property);
       }
       const inset = cluster.offsetTop;
-      const transport = canvas.querySelector<HTMLElement>(
-        ":scope > .clover-canvas-media > .clover-canvas-transport",
-      );
+      transport = playback();
       const below =
         canvas.clientHeight -
         2 * inset -
@@ -59,9 +63,17 @@ export function useClusterReach(cluster: HTMLElement | null) {
     const resize = new ResizeObserver(() => write());
     resize.observe(cluster);
     resize.observe(canvas);
-    const mutation = new MutationObserver(() => write());
+    /*
+     * The playback controls arriving take room below. Nothing else coming or going in
+     * the Canvas moves the cluster, and its loading mark comes and goes on every move to
+     * another Canvas, where measuring would lay the page out in the middle of the change
+     * (some 25 ms a move beside Items' 1,000 Canvases).
+     */
+    const mutation = new MutationObserver((records) => {
+      if (records.some((r) => r.target === cluster) || playback() !== transport)
+        write();
+    });
     mutation.observe(cluster, { childList: true });
-    // The playback controls arriving take room below.
     mutation.observe(canvas, { childList: true });
     return () => {
       resize.disconnect();
