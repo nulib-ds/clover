@@ -104,10 +104,18 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the elements' entry to 6.35 kB, a page of labels to 37.75 kB, the Viewer's own entry to
   113.4 kB, the four parts to 111.15 kB and a layout to 130.05 kB; the rows' layout and
   the options' tray take base.css to 15.1 kB. Each raised to the next 50. Presentation 2's
-  copy now loads only for `<clover-viewer>`.
+  copy now loads only for `<clover-viewer>`. Measuring the control cluster only as the
+  playback controls come or go (Fixed, below) adds some 30 B to 40 B, taking a Canvas's
+  first load to 44.8 kB, the Default template to 82.9 kB and to first view 101.75 kB and
+  the Viewer's own entry to 113.45 kB, each raised to the next 50.
 
 ### Fixed
 
+- **Moving between Canvases no longer lays the page out twice.** The control cluster
+  measured its reach again whenever anything came or went in the Canvas, and the loading
+  mark does on every move, so each move laid the page out in the middle of its change.
+  It now measures again only as its playback controls come or go. Next through a
+  Manifest of 1,000 Canvases is about 25 ms faster in the Default template.
 - **A Manifest that lists the Image API's context opens.** A Presentation resource whose
   `@context` lists the Image API's context beside its own (valid JSON-LD, where its
   images' services are Image 2) was taken for an image service's `info.json` and failed
