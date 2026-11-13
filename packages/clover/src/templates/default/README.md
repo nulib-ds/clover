@@ -42,11 +42,12 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 
 | Prop               | Default                     | What it does                                                                                          |
 | ------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `header`           | `true`                      | The title and provider over the Body.                                                                 |
+| `header`           | `true`                      | The title and provider over the Body; `"collection"` keeps a Collection's line alone, with no title.  |
 | `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.                                            |
 | `panel`            | `true`                      | The information panel and its toggle.                                                                 |
 | `download`         | `true`                      | The downloads, from a Download button beside the panel's About heading, where there is a `rendering`. |
 | `defaultPanelOpen` | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                       |
+| `panelToggle`      | `true`                      | The toggle while the panel is open beside the Body; shut or over it, it always shows.                 |
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.                                                   |
 | `panelSections`    | All                         | Which of the panel's sections it may have; none with data, and there is no panel at all.              |
 | `items`            | `"slider"`                  | The thumbnails: `"slider"`, `"list"`, `"grid"`, or `false`.                                           |

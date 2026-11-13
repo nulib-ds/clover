@@ -14,11 +14,17 @@ import { BESIDE_REM, PAGE_MIN, useWideEnough } from "../shared/useSlide";
 import { useFollowFocus } from "../shared/useFollowFocus";
 
 export type DefaultProps = Omit<RootProps, "children"> & {
-  /** The header over the Body: the resource's title and provider. Default `true`. */
-  header?: boolean;
+  /**
+   * The header over the Body: the resource's title and provider. `"collection"` keeps
+   * only the Collection's line, where the Viewer is opened on a Collection (its title and
+   * a pager among its members), or an AnnotationCollection's, with no title and no
+   * provider of the Manifest's; elsewhere there is no header, as with `false`. 3.x drew
+   * its Collection's browser whatever `showTitle` said. Default `true`.
+   */
+  header?: boolean | "collection";
   /**
    * The title's heading level, to fit the outline of the page around the layout (under
-   * an `h2`, 3). The panel's sections are a level below it, or at it with no header,
+   * an `h2`, 3). The panel's sections are a level below it, or at it with no title,
    * taking the title's place. Default 2.
    */
   headingLevel?: number;
@@ -29,6 +35,13 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * there and would slide over the Body, it starts closed.
    */
   defaultPanelOpen?: boolean;
+  /**
+   * Whether the panel's toggle shows while the panel is open beside the Body. `false`
+   * leaves it open there with nothing to close it, as 3.x's `renderToggle: false` did.
+   * Wherever the panel is shut, or slides over the Body where there is no room beside
+   * it, the toggle still shows: the one way to open it. Default `true`.
+   */
+  panelToggle?: boolean;
   /**
    * How the information panel lays out its sections: `"accordion"` (the default),
    * stacked boxes each opened by its heading, or `"tabs"`.
@@ -110,6 +123,7 @@ export function Default({
   headingLevel = 2,
   panel = true,
   defaultPanelOpen,
+  panelToggle = true,
   panelLayout = "accordion",
   panelSections,
   panelLabels,
@@ -150,13 +164,16 @@ export function Default({
   });
   const over = pane.over;
   const docked = panel && pane.docked;
+  // The Collection's line alone (`"collection"`), or the whole header with the title.
+  const lineOnly = header === "collection";
+  const titled = Boolean(header) && !lineOnly;
   return (
     <Clover.Root
       className={["clover-template-default", className]
         .filter(Boolean)
         .join(" ")}
       data-fill={fill || undefined}
-      {...(header ? title.group : null)}
+      {...(titled ? title.group : null)}
       {...root}
     >
       <Clover.Split
@@ -172,7 +189,8 @@ export function Default({
           // A minimum only while the Panel is docked beside it: over it, none.
           min={over ? undefined : PAGE_MIN}
         >
-          {header && (
+          {lineOnly && <CollectionHeader />}
+          {titled && (
             <header className="clover-template-default-header">
               <HeaderTitle title={title} />
               {/*
@@ -214,7 +232,8 @@ export function Default({
         </Clover.SplitPane>
         {panel && (
           <PanelPane
-            pane={pane}
+            // Open beside the Body, its toggle left off the spine (`panelToggle`).
+            pane={panelToggle ? pane : { ...pane, toggle: <></> }}
             className="clover-template-default-panel"
             layout={panelLayout}
             sections={panelSections}
@@ -223,7 +242,7 @@ export function Default({
             languages={languages}
             interfaceLanguages={interfaceLanguages}
             // With no title over them, the sections take its place in the outline.
-            headingLevel={header ? below(headingLevel) : headingLevel}
+            headingLevel={titled ? below(headingLevel) : headingLevel}
           />
         )}
       </Clover.Split>
@@ -240,16 +259,7 @@ export function Default({
  * the collection title under the manifest title", "collection title first. then pager".
  */
 function HeaderTitle({ title }: { title: ReturnType<typeof Clover.titled> }) {
-  const collection = Clover.useCloverSelector((state) =>
-    state.throughCollection ? state.collection?.label : undefined,
-  );
-  /*
-   * An AnnotationCollection the Manifest's pages are part of (Cookbook 0309), walked as a
-   * Collection's members are: its name, then its annotations stepped, the count opening
-   * their list (Mat, 2026-10-29).
-   */
-  const annotations = Clover.useAnnotationCollection();
-  usePickFirst(annotations?.entries[0]);
+  const lines = useCollectionLines();
   return (
     <>
       {/* Its line kept while the next member loads, so the header holds still. */}
@@ -259,40 +269,74 @@ function HeaderTitle({ title }: { title: ReturnType<typeof Clover.titled> }) {
         keep
         {...title.title}
       />
-      {collection && (
-        <div className="clover-template-default-collection-row">
-          <Clover.Label
-            as="p"
-            label={collection as Clover.LabelProps["label"]}
-            className="clover-template-default-collection"
-          />
-          <Clover.Items
-            of="members"
-            layout="pager"
-            size="small"
-            className="clover-template-default-pager"
-          />
-        </div>
-      )}
-      {/* Named from the Manifest at once; its steps come as its pages are fetched. */}
-      {annotations && (
-        <div className="clover-template-default-collection-row">
-          {annotations.label && (
+      {lines}
+    </>
+  );
+}
+
+/**
+ * The header with no title (`header="collection"`): the Collection's line alone, so the
+ * reader still moves among its members (as 3.x's header did, whatever `showTitle` said);
+ * no header at all where there is no line to show.
+ */
+function CollectionHeader() {
+  const lines = useCollectionLines();
+  return lines ? (
+    <header className="clover-template-default-header">{lines}</header>
+  ) : null;
+}
+
+/**
+ * The lines under the header's title of what the reader moves through: the Collection's,
+ * where the Root was opened on one, and an AnnotationCollection the Manifest's pages are
+ * part of (Cookbook 0309), walked as a Collection's members are: its name, then its
+ * annotations stepped, the count opening their list (Mat, 2026-10-29). Nothing where
+ * there is neither.
+ */
+function useCollectionLines() {
+  const collection = Clover.useCloverSelector((state) =>
+    state.throughCollection ? state.collection?.label : undefined,
+  );
+  const annotations = Clover.useAnnotationCollection();
+  usePickFirst(annotations?.entries[0]);
+  return (
+    (collection || annotations) && (
+      <>
+        {collection && (
+          <div className="clover-template-default-collection-row">
             <Clover.Label
               as="p"
-              label={annotations.label as Clover.LabelProps["label"]}
+              label={collection as Clover.LabelProps["label"]}
               className="clover-template-default-collection"
             />
-          )}
-          <Clover.Items
-            of="annotations"
-            layout="pager"
-            size="small"
-            className="clover-template-default-pager"
-          />
-        </div>
-      )}
-    </>
+            <Clover.Items
+              of="members"
+              layout="pager"
+              size="small"
+              className="clover-template-default-pager"
+            />
+          </div>
+        )}
+        {/* Named from the Manifest at once; its steps come as its pages are fetched. */}
+        {annotations && (
+          <div className="clover-template-default-collection-row">
+            {annotations.label && (
+              <Clover.Label
+                as="p"
+                label={annotations.label as Clover.LabelProps["label"]}
+                className="clover-template-default-collection"
+              />
+            )}
+            <Clover.Items
+              of="annotations"
+              layout="pager"
+              size="small"
+              className="clover-template-default-pager"
+            />
+          </div>
+        )}
+      </>
+    )
   );
 }
 

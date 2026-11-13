@@ -15,7 +15,8 @@ import { ContentStateExample } from "docs/components/Clover4/ContentStateExample
 
 Clover reads and writes content states as the
 [IIIF Content State API](https://iiif.io/api/content-state/) defines them: an annotation
-whose motivation is `contentState`, as JSON, or the same encoded for a URL.
+whose motivation is `contentState`, as JSON, or the same encoded for a URL. It also reads
+one given as [only its target](#a-target-on-its-own).
 
 ## Where it is, as a content state
 
@@ -389,6 +390,32 @@ of, at the Canvas it names, framed on its region or at its time.
 
 `buildContentState`, `encodeContentState` and `decodeContentState` make, encode and read
 one of your own, as [Helpers](/docs/composing/helpers#iiif-resources) describes.
+
+## A target on its own
+
+A content state may be only its annotation's target, as the Content State API allows
+where a short link matters. Clover opens what such a target names, given as JSON or
+encoded, or answered by a URL. A Canvas opens in the Manifest it is `partOf`, framed on
+the region its `id`'s fragment gives, and a Range in its `partOf` Manifest at its first
+Canvas; a Manifest or a Collection is fetched from its `id`. This one opens the catalog
+at Page 4, framed on the small picture at its top right:
+
+```json
+{
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/5#xywh=2705,66,1419,1518",
+  "type": "Canvas",
+  "partOf": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
+      "type": "Manifest"
+    }
+  ]
+}
+```
+
+Only a reference is read this way: a resource named by its `id` and `type`, with no
+`items` of its own. A Canvas given whole, with its `items`, is shown on its own, outside
+its Manifest.
 
 ## An annotation on its own
 

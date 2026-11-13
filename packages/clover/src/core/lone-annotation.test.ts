@@ -1,4 +1,5 @@
 import { createClover } from "./clover";
+import { encodeContentState } from "./content-state";
 
 /*
  * A single Annotation given as the content, of any motivation, read as a content state
@@ -544,5 +545,116 @@ describe("a single Annotation as the content", () => {
       target: "https://example.org/missing/canvas",
     });
     expect(state.status).toBe("error");
+  });
+});
+
+/*
+ * A content state's target given on its own (IIIF Content State 2.2.3, the target body),
+ * as Canopy's docs give one: a resource only named, by its `id` and `type`, is followed to
+ * what it names, never drawn as the empty resource it is.
+ */
+describe("a content state's target on its own", () => {
+  async function openTarget(
+    content: Record<string, unknown> | string,
+    request = { fetch: fetch() },
+  ) {
+    const clover = createClover({ request });
+    await clover.load(content);
+    const fetched = request.fetch.mock.calls.map(([url]) => url);
+    return { state: clover.store.get(), fetched };
+  }
+
+  it("opens the Manifest a Canvas is `partOf`, at the Canvas", async () => {
+    const { state, fetched } = await openTarget(inBook(PAGE_2));
+    expect(state.status).toBe("ready");
+    expect(state.manifest?.id).toBe(MANIFEST);
+    expect(state.canvasId).toBe(PAGE_2);
+    expect(state.addedSets).toEqual([]);
+    expect(fetched).toEqual([MANIFEST]);
+  });
+
+  it("frames the region its id's fragment gives", async () => {
+    const { state } = await openTarget({
+      ...inBook(PAGE_2),
+      id: `${PAGE_2}#xywh=10,20,30,40`,
+    });
+    expect(state.canvasId).toBe(PAGE_2);
+    expect(state.target).toEqual({
+      canvasId: PAGE_2,
+      region: { x: 10, y: 20, w: 30, h: 40 },
+    });
+  });
+
+  it("reads one encoded, as a link carries it", async () => {
+    const { state } = await openTarget(encodeContentState(inBook(PAGE_2)));
+    expect(state.manifest?.id).toBe(MANIFEST);
+    expect(state.canvasId).toBe(PAGE_2);
+  });
+
+  it("fetches a Manifest named by its id and type alone", async () => {
+    const { state } = await openTarget({ id: FILM, type: "Manifest" });
+    expect(state.manifest?.id).toBe(FILM);
+    expect(state.canvasId).toBe(REEL);
+  });
+
+  it("opens a Collection named alone at its first Manifest", async () => {
+    const { state } = await openTarget({ id: COLLECTION, type: "Collection" });
+    expect(state.collection?.id).toBe(COLLECTION);
+    expect(state.manifest?.id).toBe(MANIFEST);
+  });
+
+  it("opens a Range named alone at its first Canvas, and that Canvas's region", async () => {
+    const { state } = await openTarget({
+      id: "https://example.org/book/range/plate-2",
+      type: "Range",
+      partOf: [{ id: MANIFEST, type: "Manifest" }],
+    });
+    expect(state.canvasId).toBe(PAGE_2);
+    expect(state.target?.region).toEqual({ x: 100, y: 100, w: 200, h: 200 });
+  });
+
+  it("fetches a Canvas named alone, with no Manifest, from its id", async () => {
+    const { state, fetched } = await openTarget({ id: PAGE_1, type: "Canvas" });
+    expect(state.status).toBe("ready");
+    expect(state.canvasId).toBe(PAGE_1);
+    expect(fetched).toEqual([PAGE_1]);
+  });
+
+  it("follows the target a URL answers with", async () => {
+    const link = "https://example.org/shared/plate.json";
+    const { state, fetched } = await openTarget(link, {
+      fetch: mockFetch({ [link]: inBook(PAGE_2), [MANIFEST]: book }),
+    });
+    expect(state.manifest?.id).toBe(MANIFEST);
+    expect(state.canvasId).toBe(PAGE_2);
+    expect(fetched).toEqual([link, MANIFEST]);
+  });
+
+  // Content State 2.2.4: a target's own id, which answers with its `partOf`.
+  it("follows a Canvas answering at its own id to the Manifest it names", async () => {
+    const { state } = await openTarget(PAGE_2, {
+      fetch: mockFetch({ [PAGE_2]: inBook(PAGE_2), [MANIFEST]: book }),
+    });
+    expect(state.manifest?.id).toBe(MANIFEST);
+    expect(state.canvasId).toBe(PAGE_2);
+  });
+
+  it("never fetches one again from the id it answered at", async () => {
+    const empty = "https://example.org/empty/manifest";
+    const { fetched } = await openTarget(empty, {
+      fetch: mockFetch({ [empty]: { id: empty, type: "Manifest" } }),
+    });
+    expect(fetched).toEqual([empty]);
+  });
+
+  // Mat, 2026-10-19: a Canvas given as the content is shown on its own.
+  it("shows a resource given with its items as it is, fetching nothing", async () => {
+    const canvas = { "@context": P3, ...inBook(PAGE_1), ...book.items[0] };
+    for (const content of [book, canvas]) {
+      const { state, fetched } = await openTarget(content);
+      expect(state.status).toBe("ready");
+      expect(state.manifest?.id).toBe(content.id);
+      expect(fetched).toEqual([]);
+    }
   });
 });

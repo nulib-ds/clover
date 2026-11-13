@@ -1,6 +1,10 @@
+import { createRequire } from "node:module";
+
 import { expect, type Page, test } from "@playwright/test";
 
 import { serveIIIF } from "./fixtures";
+
+const axePath = createRequire(__filename).resolve("axe-core/axe.min.js");
 
 /*
  * A Collection of three books, served as `https://collection.test/shelf.json`: its
@@ -189,4 +193,73 @@ test.describe("A Collection", () => {
       }
     });
   }
+});
+
+/*
+ * Default's `header="collection"`: the Collection's line alone over the Body, as 3.x's
+ * header drew its Collection's browser whatever `showTitle` said. No title or provider,
+ * the members stepped by keyboard with focus kept, the panel's sections taking the
+ * title's level, and nothing axe calls serious. Its members are generated Manifests,
+ * whose ids are the addresses they answer at, so the pager knows which one is shown.
+ */
+test('header="collection": the Collection\'s line alone, stepped by keyboard', async ({
+  page,
+  isMobile,
+}) => {
+  const shelf = "https://collection.test/generated.json";
+  await serveIIIF(page);
+  await page.route(shelf, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({
+        "@context": "http://iiif.io/api/presentation/3/context.json",
+        id: shelf,
+        type: "Collection",
+        label: { en: ["The family papers"] },
+        items: [2, 3, 4].map((count) => ({
+          id: `https://fixtures.test/generated/${count}.json`,
+          type: "Manifest",
+          label: { en: [`${count} Canvases`] },
+        })),
+      }),
+    }),
+  );
+  await page.goto(`/?content=${shelf}&header=collection`);
+  const header = page.locator(".clover-template-default-header");
+  const members = header.getByRole("navigation", { name: "Collection" });
+  await expect(
+    members.getByRole("button", { name: "Item 1 of 3" }),
+  ).toBeVisible();
+  await expect(header).toContainText("The family papers");
+  await expect(
+    header.locator(
+      ".clover-template-default-title, .clover-template-default-provider",
+    ),
+  ).toHaveCount(0);
+  // The panel's sections take the title's level (on a phone it starts shut).
+  if (!isMobile)
+    await expect(
+      page.getByRole("heading", { level: 2, name: "About" }),
+    ).toBeVisible();
+
+  const next = members.getByRole("button", { name: "Next" });
+  await next.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    members.getByRole("button", { name: "Item 2 of 3" }),
+  ).toBeVisible();
+  await expect(next).toBeFocused();
+
+  await page.addScriptTag({ path: axePath });
+  const violations = await page.evaluate(async () => {
+    const result = await (window as any).axe.run(document, {
+      resultTypes: ["violations"],
+    });
+    return result.violations
+      .filter((v: any) => v.impact === "serious" || v.impact === "critical")
+      .map((v: any) => v.id);
+  });
+  expect(violations).toEqual([]);
 });

@@ -23,11 +23,15 @@
  *   &model=<glTF url>                      (scene, compare) a Scene of this one model
  *   &navigator=1                           (composed) show the Canvas's navigator
  *   &content=<url or content state>        its iiifContent
+ *   &perView=<n>                           (items) a slider of n items to a view, in
+ *                                          place of the list
  *   &css=0                                 leave the stylesheet out (the plain layout)
  *   &css=base|spacing                      base.css alone, or base.css then spacing.css
  *                                          (`build/tiers.mjs`), in place of styles.css
  *   &headers=1                             send `X-Clover: e2e` and credentials
  *   &panel=tabs|accordion                  the information panel's sections as tabs or boxes
+ *   &header=false|collection               (viewer) Default's `header`: none, or the
+ *                                          Collection's line alone
  *   &debug=1                               a fixed readout of the media element and the
  *                                          controls, for devices with no console at hand
  */
@@ -46,6 +50,14 @@ const params = new URLSearchParams(location.search);
 if (params.get("lng"))
   void Clover.initCloverI18n().chooseInterfaceLanguage(params.get("lng")!);
 const scene = params.get("scene") ?? "viewer";
+const perView = Number(params.get("perView")) || undefined;
+const headerParam = params.get("header");
+const header =
+  headerParam === "false"
+    ? false
+    : headerParam === "collection"
+      ? "collection"
+      : undefined;
 const content =
   params.get("content") ?? "https://fixtures.test/0009-book-1.json";
 const panelLayout = (["tabs", "accordion"] as const).find(
@@ -156,7 +168,10 @@ function Scene() {
         <Clover.Root iiifContent={content} request={request}>
           <Clover.Label as="h1" />
           <Clover.Label of="canvas" as="p" data-testid="canvas-label" />
-          <Clover.Items layout="list" />
+          <Clover.Items
+            layout={perView ? "slider" : "list"}
+            perView={perView}
+          />
           <button type="button">After the items</button>
         </Clover.Root>
       );
@@ -260,6 +275,7 @@ function Scene() {
           iiifContent={content}
           request={request}
           panelLayout={panelLayout}
+          header={header}
         />
       );
   }

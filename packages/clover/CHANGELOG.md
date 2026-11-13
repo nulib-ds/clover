@@ -11,6 +11,80 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **A part at a time, for esbuild.** `@nulib/clover/viewer`, `@nulib/clover/canvas`,
+  `@nulib/clover/timeline`, `@nulib/clover/scene`, `@nulib/clover/items` and
+  `@nulib/clover/primitives` export what `@nulib/clover` exports of each, from the same
+  modules, so a page can import from both and has one copy and one React context. Their
+  types are `@nulib/clover`'s. esbuild's code splitting counts a module's re-exports as
+  used, so through `@nulib/clover` it loads up front every part a lazy chunk shares with
+  the page: the Default template's whole set. Measured with esbuild, minified, gzip, up
+  front: `Items` alone 126.8 kB through `@nulib/clover`, 25.0 kB through
+  `@nulib/clover/items`; `Canvas` 127.4 kB, 50.9 kB; the Viewer's shell 127.0 kB,
+  0.2 kB; `Label`, `Summary` and `Metadata` 126.9 kB, 6.9 kB. Vite and webpack keep
+  only what is used either way, so nothing changes for them.
+- **`@nulib/clover/helpers`, without React.** The functions that read IIIF, the Helpers
+  page's and those of Search, Contents and Transcript, with their types, from an entry
+  that imports no React: a server, a build script, a worker or a React Server Component
+  can call them. Through esbuild, a page using three of them loads 1.1 kB gzip up front,
+  where `@nulib/clover` loaded 126.9 kB.
+- **Items to a view.** `perView` on `Items` (`per-view` on `<clover-items>`) fits so
+  many items to a horizontal slider's row: each takes its share of the width, less the
+  gaps between them, and its pictures are square and contained, as a grid's are. The
+  shades at the slider's ends stay as tall as the pictures. A page that shows more items
+  as the window widens passes another number as it does. Without it, each item is as
+  wide as its pictures, as before.
+- **The panel's toggle, beside the Body.** `panelToggle={false}` on the Default template
+  (`panel-toggle="false"` on `<clover-viewer>`) leaves the panel open beside the Body
+  with no toggle there, as 3.x's `renderToggle: false` did. Wherever the panel is shut,
+  or slides over the Body where there is no room beside it, the toggle still shows, as
+  the one way to open it (WCAG 1.4.10). Opening the panel from it, or widening the
+  layout with focus on it, puts focus in the panel.
+- **The Collection's line, without the title.** `header="collection"` on the Default
+  template (`header="collection"` on `<clover-viewer>`) keeps only the header's
+  Collection line, where the Viewer is opened on a Collection: its title and a pager
+  among its members, or an AnnotationCollection's, with no title or provider of the
+  Manifest's. The panel's sections take `headingLevel`, as with `header={false}`, and
+  anywhere else there is no header. 3.x's header drew its Collection's browser whatever
+  `showTitle` said, so a page that leaves the title out can still step through the
+  members. On `<clover-viewer>`, `header` reads as before for every other value.
+
+### Changed
+
+- **`"use client"` only where React is.** Every module that reaches React, at once or on
+  demand, starts with `"use client"` as before. A module that reaches none (the helpers,
+  the IIIF reading under them, and `@nulib/clover/three`) no longer says it, so a React
+  Server Component can call it. A client's bundle is unchanged, and a Server Component
+  that imports `@nulib/clover` still gets client components.
+- **Budgets.** Together, reading a content state's bare target (on every page that loads
+  content), focus following a pane's toggle as the layout widens (every template),
+  `perView`, `panelToggle` and `header="collection"` take the Default template to 83.1
+  kB and to first view 102.1 kB, the Gallery to 33.85 kB and 58.5 kB, a Canvas alone to
+  first view 52.15 kB, a Scene 30.2 kB, a Map 47.6 kB, and a Timeline's first load to
+  29.45 kB. `perView`'s rules take styles.css to 15.95 kB and base.css to 15.25 kB. The
+  elements, which carry them, go up by 0.08 to 0.36 kB: `<clover-viewer>` to 135.0 kB,
+  its own entry 113.8 kB, in Document 152.55 kB and in Gallery 138.5 kB,
+  `<clover-canvas>` 97.7 kB, and the label, composed and layout pages 37.8, 111.35 and
+  130.25 kB. Each raised to the next 50.
+
+### Fixed
+
+- **Focus as the layout widens.** Widening a template's layout with focus on a pane's
+  toggle (the information panel's, among the Body's controls, or Document's thumbnails',
+  over the page) moved the toggle onto its spine and left focus on the page (WCAG 2.4.3).
+  Focus now goes with it.
+- **A content state's target on its own.** `iiifContent` on the Viewer, `Root` and a
+  standalone `Canvas`, `Timeline` or `Scene` (and their elements' `iiif-content`) opens a
+  content state given as only its target, as the Content State API's target body form
+  allows: a Canvas by its `id` and `type` with the Manifest it is `partOf`, which opens
+  the Manifest at the Canvas, framed on the region its `id`'s fragment gives; a Manifest
+  or Collection by its `id` and `type`, fetched from its `id`; a Range with its `partOf`
+  Manifest, at its first Canvas. It is read as JSON or encoded, and where a URL answers
+  with one. Before, such a reference was drawn as the resource itself, with nothing
+  fetched: a Manifest with nothing in it, or an empty Canvas. A Canvas given with its
+  `items` is shown on its own, as before.
+
 ## [4.10.1] - 2026-11-12
 
 ### Added

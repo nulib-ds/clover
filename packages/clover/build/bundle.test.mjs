@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { build } from "vite";
 
 import { bundleAsConsumer } from "./consumer-bundle.mjs";
+import { ENTRIES, PART_ENTRIES } from "./entries.mjs";
 import { measure } from "./sizes.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -150,15 +151,28 @@ function closure(chunks, start, dynamic = false) {
   return seen;
 }
 
-test("four entries, only package source, externals within dependencies and peers", async () => {
+/** Every entry's file, as `build/entries.mjs` names them. */
+const ENTRY_FILES = Object.keys(ENTRIES).map((name) => `${name}.mjs`);
+
+/** React, as a module reaches it: the package, its client and its JSX runtime. */
+const REACT = /^react(-dom)?(\/|$)/;
+
+test("the entries, only package source, externals within dependencies and peers", async () => {
   const chunks = await emitted();
   const entries = [...chunks.values()].filter((chunk) => chunk.isEntry);
-  assert.deepEqual(entries.map((chunk) => chunk.fileName).sort(), [
-    "index.mjs",
-    "map/index.mjs",
-    "templates/index.mjs",
-    "three/index.mjs",
-  ]);
+  assert.deepEqual(
+    entries.map((chunk) => chunk.fileName).sort(),
+    [...ENTRY_FILES].sort(),
+  );
+  for (const name of Object.keys(ENTRIES)) {
+    const subpath =
+      name === "index" ? "." : `./${name.replace(/\/index$/, "")}`;
+    assert.equal(
+      pkg.exports[subpath]?.import,
+      `./dist/${name}.mjs`,
+      `package.json's exports must name ${subpath}`,
+    );
+  }
 
   const allowed = new Set([
     ...Object.keys(pkg.dependencies ?? {}),
@@ -209,7 +223,9 @@ test("media, caption details, hotspots, the Canvas's menus, the navigator, langu
 
 test("MapLibre loads only on demand; a page reaches the map only lazily, unless it draws one", async () => {
   const chunks = await emitted();
-  for (const entry of ["index.mjs", "templates/index.mjs", "map/index.mjs"]) {
+  for (const entry of ENTRY_FILES.filter(
+    (file) => file !== "three/index.mjs",
+  )) {
     for (const fileName of closure(chunks, entry)) {
       for (const id of chunks.get(fileName).imports) {
         assert.ok(
@@ -260,13 +276,63 @@ test("three.js only through the opt-in entry, and only on demand", async () => {
     ),
   );
   assert.ok(engine, "the three.js engine must be emitted");
-  for (const entry of ["index.mjs", "templates/index.mjs", "map/index.mjs"])
+  for (const entry of ENTRY_FILES.filter((file) => file !== "three/index.mjs"))
     assert.ok(
       !closure(chunks, entry, true).has(engine.fileName),
       `${entry} reaches the three.js engine`,
     );
   assert.ok(!closure(chunks, "three/index.mjs").has(engine.fileName));
   assert.ok(closure(chunks, "three/index.mjs", true).has(engine.fileName));
+});
+
+/*
+ * The helpers read IIIF without React (`src/helpers/index.ts`): no module they reach, up
+ * front or on demand, imports it, and none says `"use client"`, so a React Server
+ * Component can call them. Every module that does reach React says it.
+ */
+test("the helpers reach no React and are no client component; every module that reaches React is", async () => {
+  const chunks = await emitted();
+  const reachesReact = (fileName) =>
+    [...closure(chunks, fileName, true)].some((each) =>
+      [...chunks.get(each).imports, ...chunks.get(each).dynamicImports].some(
+        (id) => REACT.test(id),
+      ),
+    );
+  const client = (fileName) =>
+    chunks.get(fileName).code.startsWith('"use client";');
+  for (const fileName of closure(chunks, "helpers/index.mjs", true)) {
+    assert.ok(!reachesReact(fileName), `${fileName} reaches React`);
+    assert.ok(!client(fileName), `${fileName} says "use client"`);
+  }
+  for (const fileName of chunks.keys())
+    if (reachesReact(fileName))
+      assert.ok(client(fileName), `${fileName} reaches React unmarked`);
+  assert.ok(client("index.mjs"));
+});
+
+/*
+ * An entry a part at a time (`PART_ENTRIES`) reaches that part's modules, up front, and
+ * no template; the Viewer's, the shell alone, its templates on demand.
+ */
+test("a part's own entry loads no template up front, and the Viewer's only its shell", async () => {
+  const chunks = await emitted();
+  for (const entry of PART_ENTRIES) {
+    const upFront = closure(chunks, `${entry}.mjs`);
+    for (const fileName of upFront)
+      assert.ok(
+        !fileName.startsWith("templates/"),
+        `${entry} loads ${fileName} up front`,
+      );
+  }
+  assert.deepEqual([...closure(chunks, "viewer/index.mjs")].sort(), [
+    "components/Viewer/Viewer.mjs",
+    "viewer/index.mjs",
+  ]);
+  assert.ok(
+    closure(chunks, "viewer/index.mjs", true).has(
+      "templates/default/Default.mjs",
+    ),
+  );
 });
 
 /*

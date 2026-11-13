@@ -135,6 +135,14 @@ React 18 and 19 are supported. Import the components from `@nulib/clover`, by na
 component's props are exported beside it (`ViewerProps`, `RootProps`, `BodyProps`…), with
 the types its props and hooks use.
 
+Through `@nulib/clover`, a bundler that counts a module's re-exports as used, as
+esbuild's code splitting does, loads every component the Default template uses before the
+page shows anything. With such a bundler, import a component that stands alone from its
+own entry: `@nulib/clover/canvas`, `@nulib/clover/timeline`, `@nulib/clover/scene`,
+`@nulib/clover/items` and `@nulib/clover/primitives`, and the Viewer from
+`@nulib/clover/viewer`. Each exports what `@nulib/clover` exports, from the same modules,
+so a page can import from both. Vite and webpack keep only what is used either way.
+
 </div>
 
 <div data-code-flavor="web-components">

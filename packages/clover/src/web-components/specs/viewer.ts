@@ -21,13 +21,15 @@ export const viewer: ElementSpec = {
       type: ["slider", "list", "grid", "masonry", "false"],
     },
     "single-item": { prop: "singleItem", type: "boolean" },
-    header: { prop: "header", type: "boolean" },
+    // A boolean, but for "collection" (`elements/viewer.tsx`).
+    header: { prop: "header", type: "string" },
     panel: { prop: "panel", type: "boolean" },
     download: { prop: "download", type: "boolean" },
     languages: { prop: "languages", type: "boolean" },
     "interface-languages": { prop: "interfaceLanguages", type: "boolean" },
     // The templates' own (`templates/`): each one's, where it has it.
     "panel-open": { prop: "defaultPanelOpen", type: "boolean" },
+    "panel-toggle": { prop: "panelToggle", type: "boolean" },
     "panel-layout": { prop: "panelLayout", type: ["accordion", "tabs"] },
     "panel-sections": { prop: "panelSections", type: "data" },
     "panel-labels": { prop: "panelLabels", type: "data" },
@@ -115,7 +117,7 @@ export const viewerDocs: ElementDocs = {
     },
     header: {
       description:
-        'Default: "false" leaves out the title and provider over the Body.',
+        'Default: "false" leaves out the title and provider over the Body. "collection" keeps only the Collection\'s line, where the Viewer is opened on a Collection (its title and a pager among its members), or an AnnotationCollection\'s, with no title or provider of the Manifest\'s; elsewhere there is no header.',
       default: "true",
     },
     panel: {
@@ -141,6 +143,11 @@ export const viewerDocs: ElementDocs = {
     "panel-open": {
       description:
         "Default, Document and Gallery: whether the information panel starts open beside the page (the Gallery's, beside its lightbox's view). Default's and the Gallery's do, by default; Document's aside, on About, starts shut. Where it would slide over the page (a phone), it starts shut.",
+    },
+    "panel-toggle": {
+      description:
+        'Default: whether the panel\'s toggle shows while the panel is open beside the Body. "false" leaves it open there with nothing to close it. Wherever the panel is shut, or slides over the Body where there is no room beside it, the toggle still shows: the one way to open it.',
+      default: "true",
     },
     "panel-layout": {
       description:

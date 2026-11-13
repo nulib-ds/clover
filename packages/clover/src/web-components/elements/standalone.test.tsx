@@ -290,6 +290,8 @@ describe("<clover-viewer template>", () => {
       template: "gallery",
       size: "12rem",
       items: "grid",
+      // Default's alone.
+      "panel-toggle": "",
     });
     await waitFor(
       () =>
@@ -303,6 +305,7 @@ describe("<clover-viewer template>", () => {
     ) as HTMLElement;
     expect(box.style.getPropertyValue("--clover-items-size")).toBe("12rem");
     expect(box).not.toHaveAttribute("items");
+    expect(gallery.querySelector("[paneltoggle]")).toBeNull();
 
     const plain = viewer({ size: "12rem" });
     await within(plain).findByRole("heading", {

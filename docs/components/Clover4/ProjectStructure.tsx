@@ -60,6 +60,34 @@ const PACKAGE: Entry = {
       ),
     },
     {
+      name: "helpers",
+      note: (
+        <>
+          The <Link href="/docs/composing/helpers#iiif-resources">helpers</Link>{" "}
+          that read IIIF, without React, for a server, a build script or a
+          worker.
+        </>
+      ),
+    },
+    ...(
+      [
+        ["viewer", "The Viewer", "/docs/viewer"],
+        ["canvas", code("Canvas"), "/docs/canvas"],
+        ["timeline", code("Timeline"), "/docs/timeline"],
+        ["scene", code("Scene"), "/docs/scene"],
+        ["items", code("Items"), "/docs/items"],
+        ["primitives", "The primitives", "/docs/primitives"],
+      ] as const
+    ).map(([name, what, href]) => ({
+      name,
+      note: (
+        <>
+          <Link href={href}>{what}</Link> on its own, for a bundler that counts
+          re-exports as used, as esbuild does.
+        </>
+      ),
+    })),
+    {
       name: "web-components",
       note: (
         <>

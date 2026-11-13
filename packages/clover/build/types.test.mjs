@@ -14,10 +14,12 @@ import { dirname, join, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { ENTRIES as PACKAGE_ENTRIES } from "./entries.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(resolve(root, "package.json"));
-const ENTRIES = ["index", "templates/index", "map/index", "three/index"].map(
-  (entry) => resolve(root, `dist/${entry}.d.mts`),
+const ENTRIES = Object.keys(PACKAGE_ENTRIES).map((entry) =>
+  resolve(root, `dist/${entry}.d.mts`),
 );
 
 test("every entry's declarations compile with skipLibCheck off", () => {

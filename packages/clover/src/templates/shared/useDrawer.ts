@@ -40,8 +40,8 @@ export interface DrawerOptions {
 
 /**
  * A pane beside the page where there is room, and a drawer over it where there is not:
- * Document's panel and thumbnails. One rule (Mat, 2026-10-27), which Default's panel
- * follows in its own code (one drawer; through this hook it would weigh more):
+ * every template's information panel (`usePanelPane`) and Document's thumbnails. One
+ * rule (Mat, 2026-10-27):
  *
  * - Beside the page it opens as the host asks, then as the reader chooses.
  * - Over the page it starts closed, whatever the host asks, and closes as the layout
@@ -87,7 +87,16 @@ export function useDrawer({
   const toggle = () =>
     findToggle?.() ??
     document.querySelector<HTMLElement>(`button[aria-controls~="${id}"]`);
-  const follow = () => followFocus(toggle);
+  /*
+   * Focus follows the toggle to its new place; where it has none (a panel open beside the
+   * page with no toggle there, Default's `panelToggle`), into the pane while it shows.
+   */
+  const follow = () =>
+    followFocus(
+      () =>
+        toggle() ??
+        (pane.current && !pane.current.hidden ? focus(pane.current) : null),
+    );
   // Focus in the pane as it goes is handed to its toggle, never left on what is hidden.
   const handBack = () => {
     if (!pane.current?.contains(document.activeElement)) return;
@@ -115,16 +124,23 @@ export function useDrawer({
 
   /*
    * Narrowed under it open beside the page: focus in the pane, or on its toggle, goes to
-   * the toggle in its new place, before paint. Where focus was is read as the render
-   * begins, while the toggle is still on its spine: the commit takes it away, and focus
-   * with it, and another drawer's toggle may have had it.
+   * the toggle in its new place, before paint. Widened, focus on its toggle follows it
+   * there (onto its spine, or into the pane where none is drawn beside the page). Where
+   * focus was is read as the render begins, while the toggle is still where it was: the
+   * commit takes it away, and focus with it, and another drawer's toggle may have had it.
    */
   const was = useRef(measured);
   const held = useRef(false);
-  if (was.current === true && measured === false) {
+  if (
+    was.current !== undefined &&
+    measured !== undefined &&
+    was.current !== measured
+  ) {
     const active = document.activeElement;
     held.current = Boolean(
-      active && (pane.current?.contains(active) || toggle()?.contains(active)),
+      active &&
+        (toggle()?.contains(active) ||
+          (!measured && pane.current?.contains(active))),
     );
   }
   useIsomorphicLayoutEffect(() => {

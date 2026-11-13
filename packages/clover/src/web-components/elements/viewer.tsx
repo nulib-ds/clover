@@ -33,6 +33,7 @@ const ONLY: Record<string, readonly Named[]> = {
   items: ["default", "gallery"],
   singleItem: ["default", "document"],
   fill: ["default"],
+  panelToggle: ["default"],
   defaultPanelOpen: ["default", "document", "gallery"],
   panelLayout: ["default", "document", "gallery"],
   panelSections: ["default", "document", "gallery"],
@@ -49,10 +50,15 @@ const ONLY: Record<string, readonly Named[]> = {
   lightboxItems: ["gallery"],
 };
 
+/** An attribute's word as an author might write it: any case, spaces around it. */
+const wordOf = (value: string) => value.trim().toLowerCase();
+
 /**
  * `<clover-viewer>` (`specs/viewer.ts`): Clover's Viewer in the template it names,
  * Default's by default, with that template's own attributes. `storage-key="false"`
- * forgets the reader's widths, as `storageKey={false}` does.
+ * forgets the reader's widths, as `storageKey={false}` does. `header` reads as a boolean
+ * does (present, its header; `"false"`, none), but for `"collection"`, Default's
+ * `header="collection"`.
  */
 export function ViewerElement({ props }: HostedProps) {
   const named: Named =
@@ -73,9 +79,12 @@ export function ViewerElement({ props }: HostedProps) {
   given.renderers = renderers;
   if (typeof given.storageKey === "string")
     given.storageKey =
-      given.storageKey.trim().toLowerCase() === "false"
-        ? false
-        : given.storageKey;
+      wordOf(given.storageKey) === "false" ? false : given.storageKey;
+  if (typeof given.header === "string") {
+    const word = wordOf(given.header);
+    given.header =
+      word === "false" ? false : word === "collection" ? word : true;
+  }
   // The template itself, as the Viewer draws a template it is given.
   const Template = TEMPLATES[named] as React.ComponentType<
     Partial<ViewerProps>

@@ -37,7 +37,10 @@ import {
 ## IIIF resources
 
 These come from `@nulib/clover`, for code you bundle. The web components' script from a
-CDN leaves them out.
+CDN leaves them out. They come from `@nulib/clover/helpers` too, which imports no React,
+so a server, a build script, a worker or a React Server Component can call them. The
+helpers of [Search](/docs/search), [Contents](/docs/contents) and
+[Transcript](/docs/transcript) come from it as well.
 
 | Helper                                    | Description                                                                                                                                                                                                                                                                                     |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -106,7 +109,8 @@ const { encoded } = Clover.buildContentState({
 ## Maps
 
 These read where a IIIF resource is, for a [Map](/docs/map) or a map of your own. They
-come from `@nulib/clover/map` and `@nulib/clover`.
+come from `@nulib/clover/map` and `@nulib/clover`, and from `@nulib/clover/helpers`
+without React.
 
 | Helper                                       | Description                                                                                                                                                                                    |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
