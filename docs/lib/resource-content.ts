@@ -36,6 +36,9 @@ export const loadable = (value: string) => {
 
 const ROOTS = ["Manifest", "Collection", "sc:Manifest", "sc:Collection"];
 
+/** Whether a resource is a Manifest or Collection, by its `type`, or 2's `@type`. */
+const isRoot = (value: any) => ROOTS.includes(value?.type ?? value?.["@type"]);
+
 /** A content state's first target, and the selectors that say where in it. */
 const firstTarget = (state: Record<string, any>) => {
   const targets = state.target ?? state;
@@ -58,11 +61,9 @@ export const rootAddress = (content: string) => {
   const { target } = firstTarget(state);
   if (typeof target === "string") return webAddress(target.split("#")[0]);
   const parents = target?.partOf;
-  const root = ROOTS.includes(target?.type)
+  const root = isRoot(target)
     ? target
-    : (Array.isArray(parents) ? parents : [parents]).find((part: any) =>
-        ROOTS.includes(part?.type),
-      );
+    : (Array.isArray(parents) ? parents : [parents]).find(isRoot);
   const id = root?.id ?? root?.["@id"];
   return typeof id === "string" ? webAddress(id.split("#")[0]) : undefined;
 };

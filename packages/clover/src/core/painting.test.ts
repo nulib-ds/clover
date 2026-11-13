@@ -41,6 +41,15 @@ describe("isPainting", () => {
     expect(isPainting({})).toBe(true);
     expect(isPainting({ motivation: "supplementing" })).toBe(false);
   });
+
+  it("reads `painting` in any case, as a resource may write it (#423)", () => {
+    expect(isPainting({ motivation: "Painting" })).toBe(true);
+    expect(isPainting({ motivation: ["Commenting", "PAINTING"] })).toBe(true);
+    expect(isPainting({ motivation: "Paintings" })).toBe(false);
+    expect(
+      paintedBodies(canvas(image("https://example.org/a.jpg"), "Painting")),
+    ).toHaveLength(1);
+  });
 });
 
 describe("bodiesOf", () => {

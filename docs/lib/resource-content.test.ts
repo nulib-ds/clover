@@ -56,6 +56,21 @@ describe("homepage resource addresses", () => {
     expect(
       rootAddress(encode({ target: "https://example.org/manifest#selection" })),
     ).toBe("https://example.org/manifest");
+    // Presentation 2 names its kind by `@type`.
+    expect(
+      rootAddress(
+        encode({
+          target: {
+            "@id": "https://example.org/canvas/1",
+            "@type": "sc:Canvas",
+            partOf: {
+              "@id": "https://example.org/manifest",
+              "@type": "sc:Manifest",
+            },
+          },
+        }),
+      ),
+    ).toBe("https://example.org/manifest");
   });
 
   it("reads the Manifest of a content state Clover writes for a time or a region", () => {

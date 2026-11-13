@@ -19,8 +19,15 @@ export function bodiesOf(annotation: Json): Json[] {
   );
 }
 
-/** Whether an annotation paints: `painting` among its motivations, or none said. */
+/**
+ * Whether an annotation paints: `painting` among its motivations, or none said. Read in
+ * any case, a workaround for a resource that writes `Painting` (#423), which IIIF does not
+ * define, but which can mean nothing else.
+ */
 export function isPainting(annotation: Json | undefined): boolean {
   const motivations = asArray(annotation?.motivation);
-  return !motivations.length || motivations.includes("painting");
+  return (
+    !motivations.length ||
+    motivations.some((motivation) => /^painting$/i.test(String(motivation)))
+  );
 }
