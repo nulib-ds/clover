@@ -10,6 +10,7 @@ export const items: ElementSpec = {
       type: ["slider", "list", "grid", "masonry", "pager"],
     },
     orientation: { prop: "orientation", type: ["horizontal", "vertical"] },
+    "per-view": { prop: "perView", type: "number", min: 1 },
     secondary: { prop: "secondary", type: ["summary", "navDate", "none"] },
     labels: { prop: "labels", type: "boolean" },
     size: { prop: "size", type: ["large", "small"] },
@@ -46,6 +47,10 @@ export const itemsDocs: ElementDocs = {
       description:
         "The slider's direction: a row, or a column that fills the height of what holds it, its pictures as wide as the column.",
       default: "horizontal",
+    },
+    "per-view": {
+      description:
+        "A horizontal slider's items to a view: each takes its share of the row, less the gaps between them, its pictures as tall as it is wide and contained in it, as a grid's cells are. By default, each item is as wide as its pictures, at their own aspect.",
     },
     secondary: {
       description:

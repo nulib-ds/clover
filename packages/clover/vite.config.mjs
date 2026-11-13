@@ -3,6 +3,7 @@ import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { lazySheets } from "./build/clover-sheets.mjs";
+import { ENTRIES } from "./build/entries.mjs";
 import { inlineMapLibreWorker } from "./build/maplibre-worker.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,49 @@ const allowed = new Set([
 const packageName = (id) =>
   id.startsWith("@") ? id.split("/").slice(0, 2).join("/") : id.split("/")[0];
 
+/** React, as a module reaches it: the package, its client and its JSX runtime. */
+const REACT = /^react(-dom)?(\/|$)/;
+
+/**
+ * `"use client"` atop every module that reaches React, statically or on demand, as React
+ * Server Components read it: the parts are client components. A module that reaches none
+ * (the helpers, and the IIIF reading under them) says nothing, so a server can call it.
+ * Read from the module graph, once it is built, and written as each module's chunk is
+ * (`preserveModules`: a chunk a module).
+ */
+function useClient() {
+  const client = new Set();
+  return {
+    name: "clover-use-client",
+    buildEnd() {
+      const importers = new Map();
+      for (const id of this.getModuleIds()) {
+        const info = this.getModuleInfo(id);
+        for (const imported of [
+          ...info.importedIds,
+          ...info.dynamicallyImportedIds,
+        ]) {
+          if (!importers.has(imported)) importers.set(imported, []);
+          importers.get(imported).push(id);
+        }
+      }
+      const reached = [...importers.keys()].filter((id) => REACT.test(id));
+      while (reached.length) {
+        for (const by of importers.get(reached.pop()) ?? []) {
+          if (client.has(by)) continue;
+          client.add(by);
+          reached.push(by);
+        }
+      }
+    },
+    renderChunk(code, chunk) {
+      return chunk.moduleIds.some((id) => client.has(id))
+        ? { code: `"use client";\n${code}`, map: null }
+        : null;
+    },
+  };
+}
+
 /**
  * @nulib/clover — one ES module per source module, so `import * as Clover` tree-shakes in
  * the consumer's bundler. ES only: a CommonJS build beside it would let an app load two
@@ -30,7 +74,7 @@ export default defineConfig({
    * MapLibre's worker, bundled, so a consumer's bundler need not find it; and the part
    * sheets styles.css leaves out, brought by the code that draws what they style.
    */
-  plugins: [inlineMapLibreWorker(), lazySheets()],
+  plugins: [inlineMapLibreWorker(), lazySheets(), useClient()],
   esbuild: { jsx: "automatic" },
   json: { stringify: true },
   build: {
@@ -39,15 +83,12 @@ export default defineConfig({
     minify: false,
     sourcemap: false,
     lib: {
-      // The parts, and the ready-made layouts built from them (one module graph).
-      entry: {
-        index: resolve(root, "src/index.ts"),
-        "templates/index": resolve(root, "src/templates/index.ts"),
-        // The map: navPlace and georeferences, MapLibre loaded on demand.
-        "map/index": resolve(root, "src/map/index.ts"),
-        // The Scene's three.js engine, opt-in: `three` a page installs to use it.
-        "three/index": resolve(root, "src/three/index.ts"),
-      },
+      entry: Object.fromEntries(
+        Object.entries(ENTRIES).map(([name, path]) => [
+          name,
+          resolve(root, path),
+        ]),
+      ),
       formats: ["es"],
     },
     rollupOptions: {
@@ -74,7 +115,6 @@ export default defineConfig({
         preserveModules: true,
         preserveModulesRoot: "src",
         entryFileNames: "[name].mjs",
-        banner: '"use client";',
       },
     },
   },

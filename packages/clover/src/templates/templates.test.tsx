@@ -278,7 +278,8 @@ describe("templates", () => {
   });
 
   // Cookbook 0032: a Collection as the content, its members moved between.
-  it("Default: opened on a Collection, its title over the Manifest's and its members stepped in the header", async () => {
+  /** A Collection of two Manifests, the book and a letter, and a fetch that answers both. */
+  function shelfOfTwo() {
     const letter = {
       "@context": "http://iiif.io/api/presentation/3/context.json",
       id: "https://example.org/letter",
@@ -316,6 +317,11 @@ describe("templates", () => {
             headers: { "Content-Type": "application/json" },
           }),
     );
+    return { shelf, fetch };
+  }
+
+  it("Default: opened on a Collection, its title over the Manifest's and its members stepped in the header", async () => {
+    const { shelf, fetch } = shelfOfTwo();
     render(<Templates.Default iiifContent={shelf} request={{ fetch }} />);
     const title = await screen.findByRole("heading", {
       level: 2,
@@ -346,6 +352,50 @@ describe("templates", () => {
     expect(
       screen.getByRole("button", { name: "Collection" }),
     ).toBeInTheDocument();
+  });
+
+  // 3.x's header drew its Collection's browser whatever `showTitle` said.
+  it('Default: header="collection" keeps the Collection\'s line alone, its members still stepped', async () => {
+    const { shelf, fetch } = shelfOfTwo();
+    render(
+      <Templates.Default
+        iiifContent={shelf}
+        request={{ fetch }}
+        header="collection"
+      />,
+    );
+    const members = await screen.findByRole("navigation", {
+      name: "Collection",
+    });
+    const header = document.querySelector(".clover-template-default-header")!;
+    // The Collection's line alone: no title, no provider, no targets' pager.
+    expect([...header.children].map((child) => child.className)).toEqual([
+      "clover-template-default-collection-row",
+    ]);
+    expect(header.firstElementChild!.firstElementChild).toHaveTextContent(
+      "Shelf",
+    );
+    // With no title over them, the panel's sections take its level, as with no header.
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "About" }),
+    ).toBeInTheDocument();
+    fireEvent.click(within(members).getByRole("button", { name: "Next" }));
+    expect(
+      await within(members).findByRole("button", { name: "Item 2 of 2" }),
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector(".clover-template-default-title"),
+    ).not.toBeInTheDocument();
+  });
+
+  it('Default: header="collection" on a Manifest alone draws no header', async () => {
+    render(<Templates.Default iiifContent={bookJson} header="collection" />);
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "About" }),
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector(".clover-template-default-header"),
+    ).not.toBeInTheDocument();
   });
 
   it("Default: an AnnotationCollection named in the header, its annotations stepped there (Cookbook 0309)", async () => {
@@ -690,6 +740,106 @@ describe("templates", () => {
     });
     width.mockRestore();
     vi.unstubAllGlobals();
+  });
+
+  /** jsdom lays nothing out: Default's layout measured as `width` says, re-measured on `measure()`. */
+  function measuredDefault(width: number) {
+    const panes: Array<() => void> = [];
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(private callback: () => void) {}
+        observe(node: Element) {
+          if (node.classList.contains("clover-template-default-panes"))
+            panes.push(this.callback);
+        }
+        disconnect() {}
+      },
+    );
+    const spy = vi
+      .spyOn(HTMLElement.prototype, "clientWidth", "get")
+      .mockReturnValue(width);
+    return {
+      resize(next: number) {
+        spy.mockReturnValue(next);
+        act(() => panes.forEach((measure) => measure()));
+      },
+      restore() {
+        spy.mockRestore();
+        vi.unstubAllGlobals();
+      },
+    };
+  }
+
+  // WCAG 2.4.3: the toggle moves onto the spine, and focus on it goes with it.
+  it("Default: widening with focus on the panel's toggle, focus follows it onto the spine", async () => {
+    const layout = measuredDefault(390);
+    render(<Templates.Default iiifContent={bookJson} />);
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    });
+    (await screen.findByRole("button", { name: "More information" })).focus();
+    layout.resize(1280);
+    await waitFor(() => {
+      const toggle = screen.getByRole("button", { name: "More information" });
+      expect(toggle.closest(".clover-template-spine")).not.toBeNull();
+      expect(toggle).toHaveFocus();
+    });
+    layout.restore();
+  });
+
+  // 3.x's `renderToggle: false`: open beside the Body, with nothing there to close it.
+  it("Default: panelToggle={false} leaves the open panel beside the Body without its toggle", async () => {
+    const layout = measuredDefault(1280);
+    render(<Templates.Default iiifContent={bookJson} panelToggle={false} />);
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    });
+    const panel = document.querySelector(".clover-template-default-panel")!;
+    expect(panel).not.toHaveAttribute("hidden");
+    expect(
+      screen.queryByRole("button", { name: "More information" }),
+    ).toBeNull();
+    // Over the Body, where there is no room beside it, its toggle is the way to open it.
+    layout.resize(390);
+    const toggle = await screen.findByRole("button", {
+      name: "More information",
+    });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    // Focus on it as the layout widens goes into the panel, open beside the Body again.
+    toggle.focus();
+    layout.resize(1280);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "About" })).toHaveFocus(),
+    );
+    expect(
+      screen.queryByRole("button", { name: "More information" }),
+    ).toBeNull();
+    layout.restore();
+  });
+
+  it("Default: panelToggle={false} still draws the toggle while the panel is shut, focus going into the panel it opens", async () => {
+    render(
+      <Templates.Default
+        iiifContent={bookJson}
+        panelToggle={false}
+        defaultPanelOpen={false}
+      />,
+    );
+    const toggle = await screen.findByRole("button", {
+      name: "More information",
+    });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    toggle.focus();
+    fireEvent.click(toggle);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "About" })).toHaveFocus(),
+    );
+    expect(
+      screen.queryByRole("button", { name: "More information" }),
+    ).toBeNull();
   });
 
   describe("Default, with no room for the panel beside the Body", () => {

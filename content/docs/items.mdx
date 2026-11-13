@@ -78,6 +78,7 @@ arrow keys and the pager's steps with it.
 | --------------- | ----------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `layout`        | `"slider" \| "list" \| "grid" \| "masonry" \| "pager"`                  | `"slider"`                      | Thumbnails in a row, a column, a grid, or masonry (a grid whose pictures keep their proportions, in reading order), or one at a time.                                                                                                                                                                                                                                                                                                                                                                  |
 | `orientation`   | `"horizontal" \| "vertical"`                                            | `"horizontal"`                  | The slider's direction: a row, or a column that fills the height of what holds it, its pictures as wide as the column.                                                                                                                                                                                                                                                                                                                                                                                 |
+| `perView`       | `number`                                                                | —                               | A horizontal slider's items to a view, each its share of the row, its pictures square and contained.                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `secondary`     | `"summary" \| "navDate" \| "none"`                                      | `"summary"`                     | The line under an item's label, where it has one (a Collection's members do): its summary, its date, or none.                                                                                                                                                                                                                                                                                                                                                                                          |
 | `labels`        | `boolean`                                                               | `true`                          | Each item's label, and the line under it, beside its picture. `false` shows the pictures alone: the labels are hidden from sight but kept as each item's name for assistive technology.                                                                                                                                                                                                                                                                                                                |
 | `of`            | `"views" \| "members" \| "targets" \| "annotations" \| "georeferences"` | `"views"`                       | In a `Root`: its views, its Collection's members, a content state's targets (two or more), each opening its Manifest at its place, or annotations walked as one whole: an AnnotationPage or AnnotationCollection given as the content, else an AnnotationCollection the Manifest's pages are part of, each picked on its Canvas, or its georeferenced images, each the map it is, choosing one going to its Canvas and pointing at one lighting it on a [`Map`](/docs/map#customize-layout) beside it. |
@@ -201,6 +202,21 @@ first and last items rest clear of its arrows.
 
 </Example>
 
+### Items to a view
+
+Use `perView` to fit a number of items to a slider's row, each its share of the width less
+the gaps, its pictures square and contained, as a grid's are. To show more as the window
+widens, pass a larger number at each width.
+
+<Example>
+<PartDemo part="Items" props={{ perView: 3 }} body />
+
+```jsx
+<Clover.Items perView={3} />
+```
+
+</Example>
+
 ### A Collection
 
 Give it a Collection on its own, and it lists the members as links to each one's
@@ -221,5 +237,6 @@ summary; `secondary="navDate"` shows its date instead, and `secondary="none"` ne
 [Clover 3.x › Slider](/docs/deprecated-versions/slider)
 
 - `Items` replaces both the Slider and the Viewer's thumbnail strip.
-- Sizes and breakpoints are CSS: `--clover-items-height`, `--clover-items-gap`.
+- Sizes are CSS: `--clover-items-height`, `--clover-items-gap`.
+- `breakpoints`' `slidesPerView` is `perView`, which a page changes as the window does.
 - `onItemInteraction` is `onSelect`.

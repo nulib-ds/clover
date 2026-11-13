@@ -67,6 +67,14 @@ export interface ItemsProps
    */
   orientation?: "horizontal" | "vertical";
   /**
+   * A horizontal slider's items to a view, 1 or more: each takes its share of the row,
+   * less the gaps between them, and its pictures are as tall as it is wide, contained in
+   * it, as a grid's cells are. A page that shows more items as the window widens passes
+   * another number as it does. Default: none, each item as wide as its pictures, at their
+   * own aspect.
+   */
+  perView?: number;
+  /**
    * The line under an item's label, where it has one (a Collection's members do): its
    * `summary` (the default), its `navDate`, or `none`. Default `"summary"`.
    */
@@ -489,6 +497,7 @@ function DrawnItems({
   upward: bottomToTop = false,
   layout = "slider",
   orientation = "horizontal",
+  perView,
   thumbnailSize = 200,
   request,
   language,
@@ -524,6 +533,8 @@ function DrawnItems({
 
   const slider = layout === "slider";
   const vertical = slider && orientation === "vertical";
+  // A row of so many items to a view, each its share (`Items.css`): one at least.
+  const perRow = slider && !vertical && perView! >= 1 ? perView : undefined;
   // A column read from its foot up: item 1 at the bottom, Up stepping forward.
   const upward = vertical && bottomToTop;
   const listbox = navigation === "id";
@@ -778,8 +789,17 @@ function DrawnItems({
         data-orientation={vertical ? "vertical" : undefined}
         data-upward={upward || undefined}
         data-navigation={navigation}
+        data-per-view={perRow}
         {...highContrastProps(contrast)}
         {...rest}
+        style={
+          perRow
+            ? ({
+                "--clover-items-per-view": perRow,
+                ...rest.style,
+              } as React.CSSProperties)
+            : rest.style
+        }
       >
         {heading && (headingLabel?.text || headingSummary?.text) && (
           <header className="clover-items-header">

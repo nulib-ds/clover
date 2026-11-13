@@ -11,6 +11,8 @@
  *   --clover-items-inset   room at a slider's ends, so its first and last items rest
  *                          clear of its arrows (default 0)
  *
+ * `--clover-items-per-view`, a slider's items to a view, is Items' own, from `perView`.
+ *
  * The scroll container, its flex row and each item's snap point are set inline (by the
  * component and `useScrollTrack`), so a slider still scrolls without this file.
  */
@@ -403,9 +405,41 @@
   height: var(--clover-items-picture-height);
 }
 
+/*
+ * A slider of so many items to a view (`perView`): each item its share of the row, less
+ * the gaps between them, its pictures as tall as it is wide and contained in it, as a
+ * grid's cells are (whose figure and picture rules, below, it shares). The share is of
+ * the frame's width (`cqi`, the frame a container for it), less the slider's ends, so
+ * the shades at its ends stay as tall as the pictures.
+ */
+.clover-items[data-per-view] {
+  --clover-items-picture-height: calc(
+    (
+        100cqi - 2 * var(--clover-items-inset, 0px) -
+          (var(--clover-items-per-view) - 1) *
+          var(--clover-items-gap, var(--clover-space-m))
+      ) /
+      var(--clover-items-per-view)
+  );
+}
+
+.clover-items[data-per-view] .clover-items-frame {
+  container-type: inline-size;
+}
+
+.clover-items[data-per-view] .clover-items-item {
+  width: var(--clover-items-picture-height);
+}
+
+.clover-items[data-per-view] .clover-items-picture[data-empty],
+.clover-items[data-per-view] .clover-items-picture img {
+  width: 100%;
+  object-fit: contain;
+}
+
 /* Grid: square cells, the picture contained. */
 /* Square cells. Not `visible`: an aspect-ratio box grows to a tall picture's height otherwise. */
-.clover-items:is([data-layout="grid"], [data-layout="masonry"])
+.clover-items:is([data-layout="grid"], [data-layout="masonry"], [data-per-view])
   .clover-items-figure {
   grid-template-columns: repeat(var(--parts, 1), 1fr);
 }
@@ -416,7 +450,7 @@
   overflow: hidden;
 }
 
-.clover-items:is([data-layout="grid"], [data-layout="masonry"])
+.clover-items:is([data-layout="grid"], [data-layout="masonry"], [data-per-view])
   .clover-items-picture {
   min-width: 0;
 }

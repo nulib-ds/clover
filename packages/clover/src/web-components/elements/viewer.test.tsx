@@ -255,6 +255,58 @@ describe("<clover-viewer>", () => {
     ).toBeNull();
   });
 
+  it("header reads as a boolean does, present or any word but false", async () => {
+    for (const value of ["", "true", " TRUE "]) {
+      const element = mount({ header: value });
+      expect(
+        await within(element).findByRole("heading", {
+          level: 2,
+          name: "Simple Manifest - Book",
+        }),
+      ).toBeInTheDocument();
+      element.remove();
+    }
+  });
+
+  it('header="collection", in any case, keeps the Collection\'s line alone', async () => {
+    const LETTER = "https://example.org/letter";
+    const letter = {
+      ...bookJson,
+      id: LETTER,
+      label: { en: ["A letter"] },
+      items: [bookJson.items[0]],
+    };
+    // Two members, so there is a pager to step between them.
+    const shelf = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/shelf",
+      type: "Collection",
+      label: { en: ["Shelf"] },
+      items: [
+        { id: bookJson.id, type: "Manifest", label: { en: ["The book"] } },
+        { id: LETTER, type: "Manifest", label: { en: ["A letter"] } },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async (url: string) =>
+          new Response(JSON.stringify(url === LETTER ? letter : bookJson), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+      ),
+    );
+    const element = mount({ header: " Collection " }, shelf);
+    expect(
+      await within(element).findByRole("navigation", { name: "Collection" }),
+    ).toBeInTheDocument();
+    const header = element.querySelector(".clover-template-default-header")!;
+    expect(header).toHaveTextContent("Shelf");
+    expect(element.querySelector(".clover-template-default-title")).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
   it("heading-level sets the title's level, and the panel's a level below", async () => {
     const element = mount({ "heading-level": "4" });
     expect(

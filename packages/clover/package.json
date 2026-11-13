@@ -56,6 +56,41 @@
       "import": "./dist/three/index.mjs",
       "default": "./dist/three/index.mjs"
     },
+    "./viewer": {
+      "types": "./dist/viewer/index.d.mts",
+      "import": "./dist/viewer/index.mjs",
+      "default": "./dist/viewer/index.mjs"
+    },
+    "./canvas": {
+      "types": "./dist/canvas/index.d.mts",
+      "import": "./dist/canvas/index.mjs",
+      "default": "./dist/canvas/index.mjs"
+    },
+    "./timeline": {
+      "types": "./dist/timeline/index.d.mts",
+      "import": "./dist/timeline/index.mjs",
+      "default": "./dist/timeline/index.mjs"
+    },
+    "./scene": {
+      "types": "./dist/scene/index.d.mts",
+      "import": "./dist/scene/index.mjs",
+      "default": "./dist/scene/index.mjs"
+    },
+    "./items": {
+      "types": "./dist/items/index.d.mts",
+      "import": "./dist/items/index.mjs",
+      "default": "./dist/items/index.mjs"
+    },
+    "./primitives": {
+      "types": "./dist/primitives/index.d.mts",
+      "import": "./dist/primitives/index.mjs",
+      "default": "./dist/primitives/index.mjs"
+    },
+    "./helpers": {
+      "types": "./dist/helpers/index.d.mts",
+      "import": "./dist/helpers/index.mjs",
+      "default": "./dist/helpers/index.mjs"
+    },
     "./web-components": {
       "types": "./dist/web-components/index.d.mts",
       "import": "./dist/web-components/index.mjs",
@@ -93,7 +128,7 @@
     "test:ci": "vitest run && vitest run --config vitest.preact.config.mjs",
     "test:build": "node --test build/*.test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/three/index.d.mts src/three/index.ts --no-check",
+    "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/three/index.d.mts src/three/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/helpers/index.d.mts src/helpers/index.ts --no-check && node build/entry-types.mjs",
     "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js && vite build --config build/web-components-viewer.config.mjs && node build/dedupe-viewer.mjs && cp build/web-components-loader.js dist/web-components/viewer/index.umd.js && node build/custom-elements.mjs",
     "build:sizes": "node build/sizes.mjs",
     "check:first-view": "node build/first-view.mjs",

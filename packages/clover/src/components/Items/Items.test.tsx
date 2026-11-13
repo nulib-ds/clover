@@ -359,6 +359,35 @@ describe("Items in a Root", () => {
     );
   });
 
+  it("fits so many items to a horizontal slider's view with perView", async () => {
+    const { container } = renderInRoot({
+      perView: 3,
+      style: { color: "red" },
+    });
+    await screen.findAllByRole("option");
+    const items = container.querySelector(".clover-items") as HTMLElement;
+    expect(items).toHaveAttribute("data-per-view", "3");
+    expect(items.style.getPropertyValue("--clover-items-per-view")).toBe("3");
+    // The host's own style stays.
+    expect(items.style.color).toBe("red");
+  });
+
+  it("takes perView for a horizontal slider only", async () => {
+    for (const props of [
+      { layout: "grid", perView: 3 },
+      { orientation: "vertical", perView: 3 },
+      { perView: 0 },
+      { perView: 0.5 },
+    ] as Partial<Clover.ItemsProps>[]) {
+      const { container, unmount } = renderInRoot(props);
+      await screen.findAllByRole("option");
+      const items = container.querySelector(".clover-items") as HTMLElement;
+      expect(items).not.toHaveAttribute("data-per-view");
+      expect(items.style.getPropertyValue("--clover-items-per-view")).toBe("");
+      unmount();
+    }
+  });
+
   it("lays out as a list or a grid", async () => {
     const { container } = renderInRoot({ layout: "grid" });
     await screen.findAllByRole("option");
@@ -423,6 +452,22 @@ describe("Items standalone", () => {
       credentials: "include",
     });
     expect(screen.queryByRole("listbox")).toBeNull();
+  });
+
+  it("fits so many members to a view with perView, as in a Root", async () => {
+    const fetch = vi.fn(async () => new Response(JSON.stringify(collection)));
+    const { container } = render(
+      <Clover.Items
+        iiifContent={collection.id}
+        request={{ fetch }}
+        perView={2}
+      />,
+    );
+    await screen.findByRole("link", { name: /First book/ });
+    expect(container.querySelector(".clover-items")).toHaveAttribute(
+      "data-per-view",
+      "2",
+    );
   });
 
   it("titles its header at headingLevel, to fit the page's outline", async () => {

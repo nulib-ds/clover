@@ -95,19 +95,21 @@ If you serve Clover's files yourself, copy the whole `dist/web-components` folde
 
 ## Entry points
 
-| Import                                | What it is                                                                            |
-| ------------------------------------- | ------------------------------------------------------------------------------------- |
-| `@nulib/clover`                       | The Viewer (the default export), and every part, hook and helper (named).             |
-| `@nulib/clover/templates`             | The templates: `Default`, `Document` and `Gallery`.                                   |
-| `@nulib/clover/map`                   | `Map` and its helpers, as `@nulib/clover` exports them (`Clover.Map`).                |
-| `@nulib/clover/three`                 | `registerThreeEngine`, to draw a Scene with three.js, which you install.              |
-| `@nulib/clover/web-components`        | `<clover-viewer>`, and every part as an element.                                      |
-| `@nulib/clover/web-components/viewer` | `<clover-viewer>` alone, for a page that shows a Viewer and nothing else of Clover's. |
-| `@nulib/clover/web-components/three`  | three.js for the elements' Scene, bundled.                                            |
-| `@nulib/clover/styles.css`            | Every part's styles, and the `Default` template's.                                    |
-| `@nulib/clover/templates.css`         | The other templates' styles.                                                          |
-| `@nulib/clover/base.css`              | For a look of your own, in place of both: the structure of every part and template.   |
-| `@nulib/clover/spacing.css`           | Clover's margins, paddings and gaps, after `base.css`.                                |
+| Import                                | What it is                                                                                                                                            |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@nulib/clover`                       | The Viewer (the default export), and every part, hook and helper (named).                                                                             |
+| `@nulib/clover/templates`             | The templates: `Default`, `Document` and `Gallery`.                                                                                                   |
+| `@nulib/clover/map`                   | `Map` and its helpers, as `@nulib/clover` exports them (`Clover.Map`).                                                                                |
+| `@nulib/clover/three`                 | `registerThreeEngine`, to draw a Scene with three.js, which you install.                                                                              |
+| `@nulib/clover/helpers`               | The helpers that read IIIF, without React, for a server, a build script or a worker.                                                                  |
+| `@nulib/clover/<part>`                | One part on its own, `viewer`, `canvas`, `timeline`, `scene`, `items` or `primitives`, for a bundler that counts re-exports as used, as esbuild does. |
+| `@nulib/clover/web-components`        | `<clover-viewer>`, and every part as an element.                                                                                                      |
+| `@nulib/clover/web-components/viewer` | `<clover-viewer>` alone, for a page that shows a Viewer and nothing else of Clover's.                                                                 |
+| `@nulib/clover/web-components/three`  | three.js for the elements' Scene, bundled.                                                                                                            |
+| `@nulib/clover/styles.css`            | Every part's styles, and the `Default` template's.                                                                                                    |
+| `@nulib/clover/templates.css`         | The other templates' styles.                                                                                                                          |
+| `@nulib/clover/base.css`              | For a look of your own, in place of both: the structure of every part and template.                                                                   |
+| `@nulib/clover/spacing.css`           | Clover's margins, paddings and gaps, after `base.css`.                                                                                                |
 
 ## Learn more
 

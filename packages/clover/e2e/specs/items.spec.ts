@@ -193,3 +193,53 @@ for (const [scene, url] of SCENES) {
     });
   }
 }
+
+/*
+ * `perView`: a horizontal slider of so many items to a view. Each item's pictures take its
+ * share of the row, square, and the shades at the slider's ends are as tall as they are:
+ * the frame is the container its own `::before` and `::after` measure (`cqi`), in every
+ * engine. The shades are drawn only where scroll-driven animation is supported.
+ */
+test("Items: perView fits so many square items to a row, the shades as tall", async ({
+  page,
+}) => {
+  await serveIIIF(page);
+  await page.setViewportSize({ width: 1000, height: 800 });
+  await page.goto(
+    "/?scene=items&perView=3&content=https://fixtures.test/0011-book-3-behavior-individuals.json",
+  );
+  await expect(page.getByRole("option").first()).toBeVisible();
+  const items = page.locator(".clover-items[data-per-view]");
+  await expect(items).toHaveAttribute("data-per-view", "3");
+  const measured = await items.evaluate((root) => {
+    const track = root.querySelector(".clover-items-track")!;
+    const frame = root.querySelector(".clover-items-frame")!;
+    const viewport = root
+      .querySelector(".clover-items-viewport")!
+      .getBoundingClientRect();
+    const gap = parseFloat(getComputedStyle(track).columnGap);
+    const cells = [...root.querySelectorAll(".clover-items-pictures")].map(
+      (pictures) => pictures.getBoundingClientRect(),
+    );
+    return {
+      share: (track.getBoundingClientRect().width - 2 * gap) / 3,
+      cells: cells.map(({ width, height }) => ({ width, height })),
+      inView: cells.filter(
+        (cell) =>
+          cell.left >= viewport.left - 1 && cell.right <= viewport.right + 1,
+      ).length,
+      shaded: CSS.supports("timeline-scope", "--a"),
+      shade: parseFloat(getComputedStyle(frame, "::before").height),
+    };
+  });
+  expect(measured.cells.length).toBeGreaterThan(3);
+  for (const cell of measured.cells) {
+    expect(Math.abs(cell.width - measured.share)).toBeLessThan(1.5);
+    expect(Math.abs(cell.height - cell.width)).toBeLessThan(1.5);
+  }
+  expect(measured.inView).toBe(3);
+  if (measured.shaded)
+    expect(Math.abs(measured.shade - measured.cells[0].height)).toBeLessThan(
+      1.5,
+    );
+});

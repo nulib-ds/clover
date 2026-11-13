@@ -13,9 +13,11 @@ import type { AnnotationSet } from "./annotation-sets";
  *
  * `iiifContent` may be a URL, a IIIF resource object (Presentation 2, 3 or 4), or a content
  * state (JSON or base64url). The resource may be a Manifest, a Collection (its first
- * Manifest is shown), a lone Canvas (its `partOf` Manifest, or a Manifest made around
- * it), or annotations, an AnnotationPage or AnnotationCollection (the Manifest their first
- * annotation's Canvas is `partOf`, at that Canvas). A single Annotation, of any motivation,
+ * Manifest is shown), a lone Canvas (a Manifest made around it), or annotations, an
+ * AnnotationPage or AnnotationCollection (the Manifest their first annotation's Canvas is
+ * `partOf`, at that Canvas). A resource only named, by its `id` and `type`, as a content
+ * state's target may be on its own, is followed to what it names (`isContentState`): a
+ * Canvas's `partOf` Manifest, at the Canvas. A single Annotation, of any motivation,
  * is read as a content state is: what it targets is opened, at its region and time, its
  * body shown there as a note. A Georeference Extension annotation, alone or on pages, is
  * the exception: what it targets is opened with the map laid on it (`georeferenceContent`).
@@ -29,20 +31,37 @@ export type IIIFContent = string | Record<string, unknown>;
 /** The content-state reader, loaded only for one: a URL to show needs none. */
 const readContentState = () => import("./content-state-reader");
 
+/** What a content state's target names, where it is given on its own. */
+const REFERENCED = /^(Manifest|Collection|Canvas|Timeline|Scene|Range)$/;
+
 /**
  * Whether JSON is read as a content state, rather than a IIIF resource to show: one (an
- * annotation with the `contentState` motivation, or its bare target, a SpecificResource),
- * or any other annotation given alone (Presentation 2's `oa:Annotation` too), whose
- * target is where to go. Here, beside the one that asks, not with content state's writer
+ * annotation with the `contentState` motivation, or its bare target), or any other
+ * annotation given alone (Presentation 2's `oa:Annotation` too), whose target is where to
+ * go. Here, beside the one that asks, not with content state's writer
  * (`content-state.ts`), which a Canvas loads only where its page asks for content states.
+ *
+ * A bare target is a SpecificResource, or a resource only named (IIIF Content State
+ * 2.2.3, the target body): a Manifest, Collection, Canvas, Timeline, Scene or Range by its
+ * `id` and `type`, with no `items` (nor a paged Collection's `first`), so nothing of its
+ * own to draw. Followed, it loads what it names, never drawn as the empty resource it is:
+ * a Canvas's `partOf` Manifest, at the Canvas, or what its `id` answers with. A Canvas
+ * given with its `items` is shown on its own, as ever. One that answered from its own
+ * `id` (`given`) is what its server gives there, so it is followed only to where it says
+ * it is found (`partOf`): asked again, the server would answer the same.
  */
-function isContentState(json: unknown): boolean {
-  const value = json as Record<string, unknown> | null;
+function isContentState(json: unknown, given?: string): boolean {
+  const value = json as Record<string, any> | null;
   if (!value || typeof value !== "object") return false;
   return (
     value.type === "Annotation" ||
     value["@type"] === "oa:Annotation" ||
-    value.type === "SpecificResource"
+    value.type === "SpecificResource" ||
+    (REFERENCED.test(value.type) &&
+      value.id &&
+      !value.items &&
+      !value.first &&
+      (value.id !== given || value.partOf))
   );
 }
 
@@ -313,9 +332,11 @@ export async function loadContent(
   void preloadUpgrader();
 
   let json: unknown = input;
+  let given: string | undefined;
   if (typeof input === "string") {
-    json = isUrl(input.trim())
-      ? await fetchContent(request, input.trim(), signal)
+    given = input.trim();
+    json = isUrl(given)
+      ? await fetchContent(request, given, signal)
       : (await readContentState()).decodeContentState(input);
     if (!json) throw new CloverContentError("Unreadable iiifContent");
   }
@@ -325,7 +346,7 @@ export async function loadContent(
    * it: followed in a chunk of its own, which loads what it names. A URL may answer with
    * a content state of its own, so two are followed, and no more.
    */
-  if (isContentState(json) && (options.follows ?? 0) < 2) {
+  if (isContentState(json, given) && (options.follows ?? 0) < 2) {
     const { follow } = await import("./follow-content");
     return follow(json as Json, options, loadContent);
   }

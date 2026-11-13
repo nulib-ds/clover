@@ -669,10 +669,25 @@ every rule below.
 
 ## Build and test
 
-- `npm run build -w @nulib/clover` builds `dist/` (Vite with four entries: the parts,
-  `templates/index`, `map/index` and `three/index`; then `build/styles.mjs` for
-  `styles.css` and `templates.css`, then `dts-bundle-generator` for each entry's
-  `.d.mts`). The root `npm run build` runs it.
+- `npm run build -w @nulib/clover` builds `dist/` (Vite, with the entries
+  `build/entries.mjs` names: the parts, `templates/index`, `map/index`, `three/index`, a
+  part at a time (`PART_ENTRIES`: `viewer`, `canvas`, `timeline`, `scene`, `items`,
+  `primitives`) and the helpers; then `build/styles.mjs` for `styles.css` and
+  `templates.css`, then `dts-bundle-generator` for each entry's `.d.mts` but a part's,
+  whose declarations re-export `index`'s (`build/entry-types.mjs`), so a type is one type
+  from either). The root `npm run build` runs it. A new entry goes in `ENTRIES`,
+  `package.json`'s `exports` and `build:types`; `bundle.test.mjs` fails on one `exports`
+  does not name, and `types.test.mjs` on declarations not written.
+- **A part at a time** (2026-11-13, for Canopy, bundled by esbuild): each part entry
+  re-exports what `index` exports of its part, from the same modules, so a page importing
+  from both has one copy and one React context (`consumer.test.mjs` holds each value to
+  `index`'s). `@nulib/clover/helpers` is the functions that read IIIF, React nowhere in
+  what it reaches, up front or on demand: a helper it exports never imports React.
+- **`"use client"` only where React is** (`useClient` in `vite.config.mjs`): every module
+  that reaches React, at once or on demand, starts with it, as React Server Components
+  read it; a module that reaches none (the helpers, the IIIF reading under them, and
+  `three/index`) does not, so a server can call it. `bundle.test.mjs` holds both, and `consumer.test.mjs`
+  imports the helpers in plain Node with React refused.
 - `npm run test -w @nulib/clover`, or the root `npm test`, which runs every Vitest
   project (`vitest.workspace.mjs`): the docs', the package's, the package's again on
   React 18 (`vitest.react18.config.mjs`), and the web components' under Preact. The
@@ -683,7 +698,7 @@ every rule below.
   (`.github/workflows/test.yml`); a checkout without it runs the rest, and says so.
   `src/react.test.tsx` checks each project runs the React it names (`provide`).
 - `npm run test:build -w @nulib/clover` checks the built package, so build first.
-  `build/bundle.test.mjs` checks the emitted graph (four entries, only package source,
+  `build/bundle.test.mjs` checks the emitted graph (the entries, only package source,
   externals within dependencies and peers, a forbidden list, lazy modules) and the size a
   consumer ships against `build/size-budget.json`. Raise a budget only on purpose, and
   say so in the changelog. Lower one a change shrinks to its measured size and about 250 B
@@ -726,7 +741,9 @@ every rule below.
   modules it shares up front. Measured that way, every import from `@nulib/clover`,
   even a lone `Canvas`, is the whole Default template (62 kB). Rollup and webpack (Next)
   split by what is used. It is a real cost for apps bundled with esbuild, not only a
-  measuring artifact.
+  measuring artifact: such an app imports a part from its own entry
+  (`@nulib/clover/canvas`, `/items`…), which reaches that part alone
+  (`consumer.test.mjs`'s esbuild app).
 - **Share code only where both copies load on one page** (the DRY pass before 4.x,
   measured 2026-10-27). gzip folds a copy within one chunk, and within the one
   stylesheet, so merging there saves tens of bytes; bytes come back by removing logic no
@@ -793,7 +810,7 @@ every rule below.
   plain layout), `&headers=1` (request settings), `&panel=tabs|accordion` and `&lng=`
   (a host's `initCloverI18n({ lng })`, set before anything renders). `composed`
   puts the viewport channel on `window.__viewport`, for gesture specs, and takes
-  `&navigator=1`.
+  `&navigator=1`; `items` takes `&perView=`, a slider of so many items to a view.
 - `specs/fixtures.ts` serves everything from disk, so nothing reaches the network:
   - Cookbook fixtures as `https://fixtures.test/<name>.json`, with the request's Origin
     echoed so credentials work.
