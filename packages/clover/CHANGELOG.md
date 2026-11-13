@@ -11,6 +11,35 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Sizes.** Reading types and contexts together, and `Painting`, take the Default
+  template to 82.45 kB and to first view 101.33 kB, Gallery to 33.25 kB and to first view
+  57.81 kB, a Timeline's initial JS to 29.26 kB, a Canvas alone to first view 51.91 kB, a
+  Timeline 56.66 kB, a Scene 30 kB and a Map 30.47 kB, a page of labels to 37.62 kB and
+  the Viewer's own entry to 113.17 kB. Each budget crossed is raised to the next 50.
+  `<clover-viewer>` is 63 B lighter, as Presentation 2's copy now loads only for it.
+
+### Fixed
+
+- **A Manifest that lists the Image API's context opens.** A Presentation resource whose
+  `@context` lists the Image API's context beside its own (valid JSON-LD, where its
+  images' services are Image 2) was taken for an image service's `info.json` and failed
+  with "info.json is missing id, width or height". Its types and contexts are now read
+  together: a Presentation context or type decides, and an `info.json` is still known by
+  its `type`, `protocol` or `@context`, whatever extension's context it lists too (#423).
+- **The same for Presentation 2.** A Presentation 2 Manifest whose `@context` lists the
+  Image API's was read as an image service by `@iiif/parser`, which names a resource by
+  its context before its type, and failed with "Cannot show a ImageService2". Clover now
+  gives the parser Presentation 2's context alone.
+- **A search service, never its autocomplete.** A Manifest that lists Content Search's
+  autocomplete service among its own services, ahead of its search service, no longer
+  has the autocomplete taken for search. They share a context, so a service's `type` or
+  `profile` now decides.
+- **`Painting` paints.** An annotation whose motivation is written `Painting`, which IIIF
+  does not define, is read as `painting`, as a workaround: the Manifest in #423 writes
+  it so, and its image was not drawn. Motivations are read so in `isPainting` alone.
+
 ## [4.9.5] - 2026-11-12
 
 ### Added

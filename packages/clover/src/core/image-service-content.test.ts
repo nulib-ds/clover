@@ -1,6 +1,6 @@
 import { parseInfo } from "../lib/renderer/sources/imageService";
 import { fittedSize } from "./image-service-content";
-import { isImageService, loadContent } from "./load";
+import { isImageService, isImageServiceManifest, loadContent } from "./load";
 
 /** The Image 3 service of the example, as its server answers (trimmed). */
 const SERVICE = "https://ndeiiif.adlibhosting.com/iiif/3/Q1852477.648";
@@ -66,6 +66,92 @@ describe("isImageService", () => {
     ).toBe(false);
     expect(isImageService(null)).toBe(false);
   });
+
+  it("reads a Presentation resource listing the Image API's context as Presentation (#423)", () => {
+    const contexts = [
+      "http://iiif.io/api/presentation/3/context.json",
+      "http://iiif.io/api/image/2/context.json",
+    ];
+    for (const type of ["Manifest", "Collection", "Canvas"])
+      expect(isImageService({ "@context": contexts, type })).toBe(false);
+    expect(
+      isImageService({
+        "@context": [
+          "http://iiif.io/api/presentation/2/context.json",
+          "http://iiif.io/api/image/2/context.json",
+        ],
+        "@type": "sc:Manifest",
+      }),
+    ).toBe(false);
+    // An info.json with no `protocol` is still known by its context.
+    expect(
+      isImageService({
+        "@context": "http://iiif.io/api/image/2/context.json",
+        "@id": "https://example.org/iiif/2/abc",
+        width: 10,
+        height: 10,
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("loadContent: a Manifest listing the Image API's context", () => {
+  it("opens as the Manifest, not an image service (#423)", async () => {
+    const url = "https://example.org/manifest.json";
+    const fetch = mockFetch({
+      [url]: {
+        "@context": [
+          "http://iiif.io/api/presentation/3/context.json",
+          "http://iiif.io/api/image/2/context.json",
+        ],
+        id: url,
+        type: "Manifest",
+        label: { en: ["A book"] },
+        items: [
+          {
+            id: `${url}/canvas/1`,
+            type: "Canvas",
+            width: 100,
+            height: 100,
+            items: [
+              {
+                id: `${url}/page/1`,
+                type: "AnnotationPage",
+                items: [
+                  {
+                    id: `${url}/annotation/1`,
+                    type: "Annotation",
+                    motivation: "painting",
+                    target: `${url}/canvas/1`,
+                    body: {
+                      id: "https://example.org/iiif/2/abc/full/full/0/default.jpg",
+                      type: "Image",
+                      format: "image/jpeg",
+                      width: 100,
+                      height: 100,
+                      service: [
+                        {
+                          "@id": "https://example.org/iiif/2/abc",
+                          "@type": "ImageService2",
+                          profile: "http://iiif.io/api/image/2/level2.json",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const { manifest } = await loadContent(url, { request: { fetch } });
+    const m = manifest as any;
+    expect(m.id).toBe(url);
+    expect(m.label).toEqual({ en: ["A book"] });
+    expect(m.items).toHaveLength(1);
+    expect(m.items[0].id).toBe(`${url}/canvas/1`);
+  });
 });
 
 describe("loadContent: an image service", () => {
@@ -91,6 +177,18 @@ describe("loadContent: an image service", () => {
       id: SERVICE,
       type: "ImageService3",
     });
+  });
+
+  it("is known as an image service shown as its image, by its base URI or info.json", async () => {
+    const fetch = mockFetch({
+      [SERVICE]: INFO_3,
+      [`${SERVICE}/info.json`]: INFO_3,
+    });
+    for (const address of [SERVICE, `${SERVICE}/info.json`]) {
+      const { manifest } = await loadContent(address, { request: { fetch } });
+      expect(isImageServiceManifest(manifest as any)).toBe(true);
+    }
+    expect(isImageServiceManifest(null)).toBe(false);
   });
 
   it("tries the base URI's info.json where the base URI itself fails", async () => {

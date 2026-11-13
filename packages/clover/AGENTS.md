@@ -914,9 +914,14 @@ every rule below.
   its `upgradeToPresentation4()` does, in the steps that function takes
   (`core/upgrade.ts`, loaded with the upgrader; Mat, 2026-10-30, "the upgrader
   normalizes our paradigm"): `keepFragments`, then for Presentation 2 alone
-  `convertPresentation2` (its reader of 2, 19.7 kB, loaded only for it), then
+  `convertPresentation2` (its reader of 2, 19.7 kB, loaded only for it, by
+  `core/upgrade-2.ts`, which imports nothing of `upgrade.ts`), then
   `upgradePresentation3To4`. Splitting them took 5.1 kB gzip off every template's first
-  view. `core/presentation.test.ts` holds the two to the same Presentation 4, and the
+  view. The reader of 2 names a resource by its `profile` and `@context` before its
+  `@type`, so it is given 2's context alone (`forReader`; #423). In `upgrade.ts` itself,
+  the copy that work needs cost every page that upgrades more than its own chunk does
+  (2026-11-12: the web components 138 B, the Viewer's entry 70 B).
+  `core/presentation.test.ts` holds the two to the same Presentation 4, and the
   caller's object unchanged, for every resource the repository holds;
   `build/upgrade-resources.mjs` fetches Mirador's fixtures and the Universal Viewer's
   examples (Mat: "we should be testing against real world presentation 2 resources too")
@@ -925,7 +930,12 @@ every rule below.
   upgrade. Every part and `Canvas` read P4 only (`placeholderContainer`,
   `accompanyingContainer`, `Timeline` for sound, `motivation` arrays, `{ id, type }`
   targets). Never add a P2/P3 branch to a part; upgrade at the boundary instead.
-  `selectSequence` holds Canvases, Timelines and Scenes, each drawn by its own part
+  Raw JSON is told apart only there, by its types and contexts together (#423): a type
+  IIIF defines (`type`, or Presentation 2's `@type`) decides, and `profile`, `protocol`
+  or `@context` count only where the type says nothing. A list of contexts is ordinary
+  JSON-LD, never a conflict: a Manifest may list the Image API's for its images'
+  services, and an `info.json` an extension's. `core/contexts.test.ts` opens each such
+  pairing; a new one goes there. Once upgraded, read `type` alone. `selectSequence` holds Canvases, Timelines and Scenes, each drawn by its own part
   (below, "Timeline and Scene"). Look one up by id with `selectCanvas(manifest, id)` (a
   map made once per Manifest), never a search of the sequence. The React hooks and the
   elements' API read the same selectors (`core/selectors.ts`), and `navigationOf`
@@ -1007,6 +1017,9 @@ every rule below.
   (`GROUPS`, `bodiesOf`, `isPainting`) and the walk in `core/painted-bodies.ts`
   (`paintedBodies`: groups, a `Choice`'s first, a `SpecificResource`'s source), apart so
   a Canvas alone defers the walk with its thumbnail. One `asArray`, `lib/asArray.ts`.
+  `isPainting` reads `painting` in any case (Mat, 2026-11-12: "lowercase the motivation
+  as a workaround"), for a resource that writes `Painting` (#423); every other motivation
+  is read as IIIF writes it.
   - The `Panel` lists every annotation (Mat, 2026-10-19), as `Annotations` does by
     default (`scope="all"`, since 2026-10-21: handled at the part, so one placed alone
     lists what the panel would, and no template passes it): `AnnotationLayers`, by layer (`layersOf`: sets sharing a localized label
@@ -1426,8 +1439,8 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   pointer returns or focus leaves (1.4.13). Keep the copy out of the item's name, and
   the item's box the same whether it shows or not.
 - **Content Search.** `core/search-service.ts` finds the Manifest's service (type
-  `SearchService1`/`2`, or a `search/N/` profile or context, as Presentation 2 has it;
-  version 2 preferred). `core/search.ts` asks it (following `next`, at most 10 pages)
+  `SearchService1`/`2`, or a `search/N/` profile or context, as Presentation 2 has it,
+  never autocomplete, which shares search's context; version 2 preferred). `core/search.ts` asks it (following `next`, at most 10 pages)
   and reads both versions into `SearchHit`s and one `AnnotationSet` (`source: "search"`,
   id `SEARCH_SET_ID`) whose annotations are rewritten as Presentation 4 highlighting
   annotations, so the Canvas reads one shape. The store's `search` holds query, status,

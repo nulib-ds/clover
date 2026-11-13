@@ -48,7 +48,11 @@ type Json = Record<string, any>;
 
 const VERSION = /\/search\/([0-2])\//;
 
-/** The Manifest's Content Search service (2 preferred over 1), or null. */
+/**
+ * The Manifest's Content Search service (2 preferred over 1), or null: by its `type`,
+ * `profile` and `@context` together. Search and its autocomplete share a context, so one
+ * whose type or profile names autocomplete is never taken for search.
+ */
 export function searchServiceOf(
   manifest: Manifest | null,
 ): SearchService | null {
@@ -62,6 +66,7 @@ export function searchServiceOf(
       .flat()
       .map((value) => String(value ?? ""))
       .join(" ");
+    if (/autocomplete/i.test(type + hint)) continue;
     const version =
       type === "SearchService2"
         ? 2
