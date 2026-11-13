@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.10.0] - 2026-11-12
+
 ### Added
 
 - **Georeference annotations as the content.** `iiifContent` on the Viewer, `Root`, `Map`
