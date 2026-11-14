@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.10.2] - 2026-11-14
+
 ### Added
 
 - **A part at a time, for esbuild.** `@nulib/clover/viewer`, `@nulib/clover/canvas`,
