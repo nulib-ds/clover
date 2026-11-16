@@ -276,7 +276,25 @@ Worked examples, from the top of the Viewer down:
   inside it, 2px each), so it shows on any picture and by more than color.
 - **The Map**: the map's box (`--clover-map-height`), and its places `s` under it as
   rows of the panel. An overlay's row is its Canvas's name, with "Georeferenced image"
-  `3xs` under it in `text-s`.
+  `3xs` under it in `text-s`. On the map, a place is marked as an item is (Mat,
+  2026-11-15: "we should be consistent"): at rest a dark edge and a light line, 3px in
+  all; pointed at (on the map, its row, or its annotation beside it) 7px, the accent's
+  3px between light lines at half strength; the place of a Canvas in view, the accent
+  whole, as its images are outlined and the Annotations list marks the Canvases in view;
+  chosen, whole and its area tinted with the accent (8%), as a row chosen in a panel is.
+  A point at rest is filled as an inactive control is, with the controls' dark fill
+  (`--clover-color-control`) in a light ring and a dark edge, and so is a point on an
+  image or on the seek bar (Mat, 2026-11-16: "inactive ones should be more of the dark
+  token, look more like inactive buttons"): pointed at, the accent's band round it at
+  half strength; current or chosen, the dot the accent, as a control takes it, and its
+  band whole. Each Canvas has one mark: while its image is on the map, the image's
+  outline marks it, and its own place stays at rest.
+- **An annotation's line**: picked, pointed at or focused, a hotspot has, from the outside
+  in, a dark edge (3px), the accent's band (2px) and a light line (1px), and the picture
+  around it dims a little. An annotation on a whole Canvas has the same line round that
+  Canvas, one page of a spread, only while pointed at or picked, drawn within the
+  Canvas's edge so the view's edge never cuts it, wherever a Body shows that Canvas, in
+  any template or layout (Mat, 2026-11-16).
 
 When a new part does not fit a row of the table, place it by asking what it belongs to,
 not by eye.

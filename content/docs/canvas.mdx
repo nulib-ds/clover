@@ -93,17 +93,17 @@ unless `options.gestures.scrollToZoom` is on.
 
 ### Annotations
 
-| Prop                     | Type                                                 | Default                            | Description                                                                         |
-| ------------------------ | ---------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------- |
-| `annotations`            | `{ annotation, targetIndex, pageLabel?, pageId? }[]` | The loaded Canvas's, or the Root's | Hotspots on regions, points and shapes; whole-Canvas ones go to its information.    |
-| `hiddenPages`            | `string[]`                                           | —                                  | AnnotationPages (`pageId`) not drawn; its menu still lists them.                    |
-| `onPageVisibilityChange` | `(pageIds: string[], visible: boolean) => void`      | —                                  | Pages were hidden, or shown, from the menu.                                         |
-| `selectedAnnotation`     | `string \| null`                                     | —                                  | The picked annotation, controlled; `null` picks none.                               |
-| `onAnnotationSelect`     | `(id: string \| null) => void`                       | —                                  | A hotspot or the menu picked one, or `null` let it go.                              |
-| `highlightedAnnotation`  | `string \| null`                                     | —                                  | One to highlight, as hovering it in a list does.                                    |
-| `onAnnotationActive`     | `(id: string \| null) => void`                       | —                                  | The hotspot hovered or focused, or `null`.                                          |
-| `onAnnotationLink`       | `(link: { id, canvasId?, manifestId? }) => void`     | —                                  | A linking hotspot was pressed; in a `Root` or with `iiifContent`, followed for you. |
-| `animateAnnotations`     | `boolean`                                            | `false`                            | Glide to a picked annotation, rather than cut to it.                                |
+| Prop                     | Type                                                 | Default                            | Description                                                                                                                                                             |
+| ------------------------ | ---------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `annotations`            | `{ annotation, targetIndex, pageLabel?, pageId? }[]` | The loaded Canvas's, or the Root's | Hotspots on regions, points and shapes; whole-Canvas ones go to its information, are outlined round their Canvas while pointed at or picked, and zoomed to when picked. |
+| `hiddenPages`            | `string[]`                                           | —                                  | AnnotationPages (`pageId`) not drawn; its menu still lists them.                                                                                                        |
+| `onPageVisibilityChange` | `(pageIds: string[], visible: boolean) => void`      | —                                  | Pages were hidden, or shown, from the menu.                                                                                                                             |
+| `selectedAnnotation`     | `string \| null`                                     | —                                  | The picked annotation, controlled; `null` picks none.                                                                                                                   |
+| `onAnnotationSelect`     | `(id: string \| null) => void`                       | —                                  | A hotspot or the menu picked one, or `null` let it go.                                                                                                                  |
+| `highlightedAnnotation`  | `string \| null`                                     | —                                  | One to highlight, as hovering it in a list does.                                                                                                                        |
+| `onAnnotationActive`     | `(id: string \| null) => void`                       | —                                  | The hotspot hovered or focused, or `null`.                                                                                                                              |
+| `onAnnotationLink`       | `(link: { id, canvasId?, manifestId? }) => void`     | —                                  | A linking hotspot was pressed; in a `Root` or with `iiifContent`, followed for you.                                                                                     |
+| `animateAnnotations`     | `boolean`                                            | `false`                            | Glide to a picked annotation, rather than cut to it.                                                                                                                    |
 
 ### Video
 

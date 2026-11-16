@@ -19,6 +19,7 @@ export default function SectionContent({
   pages = [],
   expandMapId,
   onExpandMap,
+  places = false,
 }: {
   section: PanelSection;
   /**
@@ -32,6 +33,11 @@ export default function SectionContent({
   expandMapId?: string;
   /** Expands the map over the pages (`ExpandedMap`). */
   onExpandMap?: () => void;
+  /**
+   * Whether Annotations lists the georeferenced images: only where the Map section is not
+   * offered.
+   */
+  places?: boolean;
 }) {
   switch (section) {
     case "about":
@@ -83,32 +89,79 @@ export default function SectionContent({
     case "transcript":
       return <Clover.Transcript sticky size="small" />;
     case "annotations":
-      return <Clover.Annotations headingLevel={headingLevel} />;
+      // Its georeferenced images are the Map section's, where Document offers one.
+      return <Clover.Annotations headingLevel={headingLevel} places={places} />;
     default:
       return null;
   }
 }
 
 /**
- * The aside's map, expanded over the pages' column (`Document.tsx`): the whole column,
- * its zoom row then Collapse map and Close at its top end, as the Canvas's map box is
- * when it fills its Body (`Caption.css`). Collapse map puts it back in the aside; Close,
- * or Escape in it, puts it away.
+ * The map over the pages' column (`Document.tsx`), shown for a place asked for (`asked`:
+ * About's places, Annotations' georeferenced images), which it frames, as it follows the
+ * Root's `place`, or expanded from the aside's Map section, where `panelSections` names
+ * one. It and the page trade places (Mat, 2026-11-13: "in the top right corner, show the
+ * image inset into a box. like we do on default viewer for the map control overlaying the
+ * image. one should be able to swap between the two"): filling the column, its zoom row
+ * centered at its foot, it has the page's picture in a box at its top end, Collapse map,
+ * which puts it in a box of its own over the pages there instead (`inset`), as the
+ * Canvas's map box sits over the Body in Default, with Expand map, to trade them back, and
+ * Close. Its map is one map throughout, so it keeps its place. Escape in it puts it away.
  */
 export function ExpandedMap({
-  collapseId,
-  onCollapse,
+  id,
+  swapId,
+  container,
+  inset,
+  onSwap,
   onClose,
+  asked = false,
 }: {
-  collapseId: string;
-  onCollapse: () => void;
+  /** Its id, for the Map control that shows it (`aria-controls`). */
+  id: string;
+  /** Its swap's id, Collapse map's or Expand map's, which focus follows. */
+  swapId: string;
+  /** Where it lies: its Body in the full viewer (`"body"`), else over the pages. */
+  container: HTMLElement | "body";
+  /** In a box over the pages, as the Canvas's map box is over the Body. */
+  inset: boolean;
+  /** Trades the map and the page. */
+  onSwap: () => void;
   onClose: () => void;
+  /** Shown for a place asked for: a phone's aside hands focus to it (`useAwayForPlaces`). */
+  asked?: boolean;
 }) {
+  const t = Clover.useT();
+  const langOf = Clover.useLangOf();
+  // Its Close, in whichever box is shown: the map's, or the page's picture's over it.
+  const closer = (
+    <MapButton label="commonClose" onClick={onClose}>
+      <path
+        fill="none"
+        strokeLinecap="round"
+        strokeWidth="45"
+        d="M154 154L358 358M358 154L154 358"
+      />
+    </MapButton>
+  );
   return (
     // Escape in it, from wherever focus is in it.
 
-    <div
+    <Clover.Inset
+      id={id}
+      container={container}
+      // Not in its box, the map over the pages: what its class lays out.
+      expanded={!inset}
       className="clover-template-document-map"
+      label={t("mapExpand")}
+      lang={langOf("mapExpand")}
+      expandId={swapId}
+      onExpand={onSwap}
+      actions={closer}
+      // It waits out of sight until its map has drawn, then comes in (`Map.css`).
+      data-map-host
+      data-asked={asked ? "" : undefined}
+      data-inset={inset || undefined}
       onKeyDown={(event) => {
         if (event.key !== "Escape" || event.defaultPrevented) return;
         event.preventDefault();
@@ -116,23 +169,29 @@ export function ExpandedMap({
         onClose();
       }}
     >
-      <Clover.Map />
-      <div className="clover-template-document-map-actions">
-        <MapButton id={collapseId} label="mapCollapse" onClick={onCollapse}>
-          <path {...LINE} d={FRAME} />
-          <rect stroke="none" {...BOX} />
-          <path {...LINE} d="M328 72h112v112M429.77 82.2L312 200" />
-        </MapButton>
-        <MapButton label="commonClose" onClick={onClose}>
-          <path
-            fill="none"
-            strokeLinecap="round"
-            strokeWidth="45"
-            d="M154 154L358 358M358 154L154 358"
-          />
-        </MapButton>
-      </div>
-    </div>
+      {/*
+       * The map, its one child, so it stays the one map as the two trade places; over it,
+       * in its box (`children`), the page's picture in the same box, which trades them,
+       * hanging under its zoom row, whose Tips lie over it (Mat, 2026-11-14: "This is a
+       * little too far off the controls above it."), with Close after its Collapse map, as
+       * the map's box has after Expand map (Mat, 2026-11-16: "include close button here as
+       * well"); the map's Image control puts it away and brings it back.
+       */}
+      <Clover.Map navigable={!inset}>
+        {!inset && (
+          <Clover.Inset
+            className="clover-template-document-map-page"
+            label={t("mapCollapse")}
+            lang={langOf("mapCollapse")}
+            expandId={swapId}
+            onExpand={onSwap}
+            actions={closer}
+          >
+            <Clover.Thumbnail of="canvas" alt="" size={720} />
+          </Clover.Inset>
+        )}
+      </Clover.Map>
+    </Clover.Inset>
   );
 }
 

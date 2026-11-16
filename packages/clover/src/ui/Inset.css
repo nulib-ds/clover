@@ -1,0 +1,117 @@
+/*
+ * Inset (`Inset.tsx`): a thumb in a small box, a press on it expanding what it is a thumb
+ * of (Mat, 2026-11-14: "it holds a thumb, and expands targeted content"). No wider than
+ * 14rem, its thumb no taller than 10rem (a picture at its own shape, a map kept small),
+ * `xs` round it, on the ground as the Canvas's popups are (`ControlMenu.css`), ringed
+ * under the pointer as Items rings an item, but not while the pointer is on a button of
+ * its own; its expand button and controls in its top end corner, `xs` in from its thumb's,
+ * their Tips under them (`Tip.css`). Where it sits is its host's.
+ */
+.clover-inset {
+  position: relative;
+  box-sizing: border-box;
+  max-width: min(14rem, 100%);
+  padding: var(--clover-space-xs);
+  border-radius: var(--clover-radius, 6px);
+  background: var(--clover-color-secondary, #fff);
+  box-shadow: 0 4px 16px #0001;
+  cursor: pointer;
+}
+
+.clover-inset > img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 10rem;
+}
+
+.clover-inset .clover-geomap {
+  --clover-map-height: 10rem;
+}
+
+.clover-inset:hover:not(:has(button:hover)) {
+  outline: 3px solid
+    color-mix(in srgb, var(--clover-color-accent, #0065c3) 50%, transparent);
+  outline-offset: 1px;
+}
+
+/*
+ * And its expand button lit as one under the pointer is (`Button.css`), since a press there
+ * does what it does (Mat, 2026-11-16: "hovering the inset pane to expand should also make
+ * focus/hover state the expand button"): the accent; in the higher-contrast mode, the
+ * controls' dark fill ringed in the accent at half strength.
+ */
+.clover-inset:hover:not(:has(button:hover))
+  > .clover-inset-actions
+  > button:first-child {
+  background-color: var(--clover-color-accent, #0065c3);
+}
+
+:where([data-high-contrast])
+  .clover-inset:hover:not(:has(button:hover))
+  > .clover-inset-actions
+  > button:first-child {
+  background-color: var(--clover-accent-fill);
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
+/*
+ * In a Body (`container="body"`, or drawn there, as the Canvas's place box is), in the box
+ * its renderer draws in, else its own: at its top end, `s` under its controls, which lie
+ * over it, their Tips too, as over the Canvas's own popups (`ControlMenu.css`), never over
+ * them (WCAG 2.4.11); over the view, under those popups (Mat, 2026-11-14: "This is a
+ * little too far off the controls above it.").
+ */
+:is(.clover-body, .clover-canvas) > .clover-inset,
+:is(.clover-body, .clover-canvas) > .clover-inset-host > .clover-inset {
+  position: absolute;
+  inset-block: calc(
+      var(--clover-canvas-controls-inset, var(--clover-inset)) +
+        var(--clover-control) + var(--clover-space-s)
+    )
+    auto;
+  /* Its end the controls' row's, where a template moves it (`--clover-canvas-controls-end`). */
+  inset-inline: auto
+    var(
+      --clover-canvas-controls-end,
+      var(--clover-canvas-controls-inset, var(--clover-inset))
+    );
+  z-index: 1;
+}
+
+/*
+ * In a map's box (the Map's `children`), the same under its zoom row, over the map and
+ * under MapLibre's controls: the page's picture over its map, which trades them back
+ * (Document's, the Canvas's place box's). At the right, as the zoom row is in every
+ * direction (`Map.css`), and where that is moved.
+ */
+.clover-geomap > :first-child > .clover-inset {
+  position: absolute;
+  top: calc(
+    var(--clover-map-controls-inset, var(--clover-inset)) +
+      var(--clover-control) + var(--clover-space-s)
+  );
+  right: var(
+    --clover-map-controls-right,
+    var(--clover-map-controls-inset, var(--clover-inset))
+  );
+  bottom: auto;
+  left: auto;
+  z-index: 1;
+}
+
+.clover-inset-actions {
+  position: absolute;
+  z-index: 3;
+  top: calc(2 * var(--clover-space-xs));
+  inset-inline-end: calc(2 * var(--clover-space-xs));
+  display: flex;
+  gap: var(--clover-space-xs);
+}
+
+/* Right to left, its glyph points to the bottom end. */
+.clover-inset-actions:dir(rtl) > button:first-child svg {
+  scale: -1 1;
+}

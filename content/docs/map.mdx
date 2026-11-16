@@ -41,7 +41,7 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
     'import "@nulib/clover/styles.css";',
   ]}
   knobs={[
-    { prop: "outlines", value: false, on: "before-0" },
+    { prop: "outlines", value: true, on: "before-0" },
     { prop: "allmaps", value: true, on: "before-0" },
     {
       prop: "layout",
@@ -72,28 +72,31 @@ Its other props, and its `ref`, go to its element.
 
 <ApiReference elements="clover-map">
 
-| Prop             | Type                                                 | Default                           | Description                                                                                                                                                                                                                                                                                                                                                       |
-| ---------------- | ---------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `iiifContent`    | `string \| object`                                   | —                                 | On its own: the resource to map. Leave it out inside a `Root`.                                                                                                                                                                                                                                                                                                    |
-| `navPlace`       | `object`                                             | —                                 | GeoJSON to draw: a FeatureCollection, Feature or geometry.                                                                                                                                                                                                                                                                                                        |
-| `georeferences`  | `object[]`                                           | —                                 | Georeference Extension annotations to lay over the map.                                                                                                                                                                                                                                                                                                           |
-| `overlay`        | `boolean`                                            | `true`                            | Shows georeferenced images over the map.                                                                                                                                                                                                                                                                                                                          |
-| `overlayOpacity` | `number`                                             | `1`                               | The images' opacity, from 0 to 1. Lower it to see the streets underneath.                                                                                                                                                                                                                                                                                         |
-| `overlays`       | `"view" \| "all"`                                    | `"view"`                          | Inside a `Root`, whose georeferenced images to show: the Canvases' in view (`view`), or every Canvas's (`all`), the map then zooming to the one in view as it changes. Content that is georeference annotations shows `all` unless set. On its own, every image shows.                                                                                            |
-| `items`          | `"list" \| "grid" \| "slider" \| "masonry" \| false` | `"list"`                          | How Items lists the places and images under the map. `false` lists none, and your page must then give a list of its own: the list is the map in words, and how a keyboard reaches each place.                                                                                                                                                                     |
-| `outlines`       | `boolean`                                            | `false`                           | Adds a gear beside the zoom buttons with two options. Outlines draws the edge of every georeferenced image; Selection outline hides the accent outline around the chosen one.                                                                                                                                                                                     |
-| `allmaps`        | `boolean`                                            | `false`                           | Adds a link to [Allmaps Viewer](https://viewer.allmaps.org/), shown as the Allmaps logo on a control in the map's lower corner. The link appears only where Allmaps can open what the map shows by its address: georeference annotations given as `iiifContent` (an Annotation or an AnnotationPage), or an annotation that Allmaps hosts. It opens in a new tab. |
-| `styleUrl`       | `string`                                             | Clover's basemap                  | A MapLibre style to use instead of Clover's basemap.                                                                                                                                                                                                                                                                                                              |
-| `workerUrl`      | `string`                                             | Clover's own                      | Where to load MapLibre's worker from, when you serve it yourself.                                                                                                                                                                                                                                                                                                 |
-| `scrollZoom`     | `boolean`                                            | `false`                           | Zooms with the mouse wheel or trackpad. Off by default, so scrolling the page never gets caught in the map.                                                                                                                                                                                                                                                       |
-| `zoom`           | `number`                                             | `8` for a point, `12` for several | How close the map frames its places: a single point at this zoom, several no closer. `15` shows a point's streets.                                                                                                                                                                                                                                                |
-| `credits`        | `boolean`                                            | `true`                            | Shows the basemap's credits behind an ⓘ in the map's corner. The basemap's license may require them, so credit it on the page yourself before turning them off.                                                                                                                                                                                                   |
-| `onSelect`       | `(feature) => void`                                  | —                                 | Called when a place is chosen, on the map or in its list.                                                                                                                                                                                                                                                                                                         |
-| `request`        | `{ credentials, headers, fetch }`                    | —                                 | With `iiifContent`: used for every request.                                                                                                                                                                                                                                                                                                                       |
-| `language`       | `string`                                             | The page's, or the browser's      | With `iiifContent`: the language to read IIIF text in.                                                                                                                                                                                                                                                                                                            |
-| `highContrast`   | `boolean`                                            | `false`                           | Turns on Clover's higher-contrast mode, which keeps the accent to rings, outlines and marks, never behind words or icons. Inside a `Root`, it follows the Root's, and it turns on wherever the system asks for more contrast.                                                                                                                                     |
-| `as`             | element type                                         | `"div"`                           | The element to render.                                                                                                                                                                                                                                                                                                                                            |
-| `className`      | `string`                                             | —                                 | Added to `clover-geomap`.                                                                                                                                                                                                                                                                                                                                         |
+| Prop                | Type                                                 | Default                           | Description                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------- | ---------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iiifContent`       | `string \| object`                                   | —                                 | On its own: the resource to map. Leave it out inside a `Root`.                                                                                                                                                                                                                                                                                                              |
+| `navPlace`          | `object`                                             | —                                 | GeoJSON to draw: a FeatureCollection, Feature or geometry.                                                                                                                                                                                                                                                                                                                  |
+| `georeferences`     | `object[]`                                           | —                                 | Georeference Extension annotations to lay over the map.                                                                                                                                                                                                                                                                                                                     |
+| `overlay`           | `boolean`                                            | `true`                            | Shows georeferenced images over the map.                                                                                                                                                                                                                                                                                                                                    |
+| `overlayOpacity`    | `number`                                             | `1`                               | The images' opacity, from 0 to 1. Lower it to see the streets underneath.                                                                                                                                                                                                                                                                                                   |
+| `overlays`          | `"view" \| "all"`                                    | `"view"`                          | Inside a `Root`, whose georeferenced images to show: the Canvases' in view (`view`), or every Canvas's (`all`), the map then zooming to the one in view as it changes. Content that is georeference annotations shows `all` unless set. On its own, every image shows.                                                                                                      |
+| `items`             | `"list" \| "grid" \| "slider" \| "masonry" \| false` | `"list"`                          | How Items lists the places and images under the map. `false` lists none, and your page must then give a list of its own: the list is the map in words, and how a keyboard reaches each place.                                                                                                                                                                               |
+| `outlines`          | `boolean`                                            | `true`                            | Shows a gear beside the zoom buttons with two options, wherever the map lays georeferenced images and can be moved. Outlines draws the edge of every georeferenced image; Selection outline hides the accent outline around the chosen one. `false` shows no gear.                                                                                                          |
+| `allmaps`           | `boolean`                                            | `false`                           | Adds a link to [Allmaps Viewer](https://viewer.allmaps.org/), shown as the Allmaps logo on a control in the map's lower corner. The link appears only where Allmaps can open what the map shows by its address: georeference annotations given as `iiifContent` (an Annotation or an AnnotationPage), or an annotation that Allmaps hosts. It opens in a new tab.           |
+| `styleUrl`          | `string`                                             | Clover's basemap                  | A MapLibre style to use instead of Clover's basemap.                                                                                                                                                                                                                                                                                                                        |
+| `workerUrl`         | `string`                                             | Clover's own                      | Where to load MapLibre's worker from, when you serve it yourself.                                                                                                                                                                                                                                                                                                           |
+| `scrollZoom`        | `boolean`                                            | `false`                           | Zooms with the mouse wheel or trackpad. Off by default, so scrolling the page never gets caught in the map.                                                                                                                                                                                                                                                                 |
+| `zoom`              | `number`                                             | `8` for a point, `12` for several | How close the map frames its places: a single point at this zoom, several no closer. `15` shows a point's streets.                                                                                                                                                                                                                                                          |
+| `animationDuration` | `number`                                             | `0.6`                             | Seconds the map takes to glide from what it frames to the next: another Canvas, a place or an image chosen, as the Canvas's `options.animationDuration` is for its camera. `0` goes there at once, as it always does where less motion is asked for.                                                                                                                        |
+| `navigable`         | `boolean`                                            | `true`                            | Whether the map can be moved at all: dragged, pinched, wheeled, double-clicked or keyed, with its zoom buttons, and its places named as they are pointed at or pressed, as the Canvas's `options.gestures.navigable` is for its view. `false` keeps it where it frames, its places marked, a press left to what holds it; turned `false`, it lets go of the place it named. |
+| `children`          | `ReactNode`                                          |                                   | Drawn over the map, in its box, under its controls, whose Tips lie over it: an `Inset` of what the map is the place of, say, placed by its own styles. While the map can be moved, an Image control at the end of its zoom row puts it away and brings it back.                                                                                                             |
+| `credits`           | `boolean`                                            | `true`                            | Shows the basemap's credits behind an ⓘ in the map's corner. The basemap's license may require them, so credit it on the page yourself before turning them off.                                                                                                                                                                                                             |
+| `onSelect`          | `(feature) => void`                                  | —                                 | Called when a place is chosen, on the map or in its list.                                                                                                                                                                                                                                                                                                                   |
+| `request`           | `{ credentials, headers, fetch }`                    | —                                 | With `iiifContent`: used for every request.                                                                                                                                                                                                                                                                                                                                 |
+| `language`          | `string`                                             | The page's, or the browser's      | With `iiifContent`: the language to read IIIF text in.                                                                                                                                                                                                                                                                                                                      |
+| `highContrast`      | `boolean`                                            | `false`                           | Turns on Clover's higher-contrast mode, which keeps the accent to rings, outlines and marks, never behind words or icons. Inside a `Root`, it follows the Root's, and it turns on wherever the system asks for more contrast.                                                                                                                                               |
+| `as`                | element type                                         | `"div"`                           | The element to render.                                                                                                                                                                                                                                                                                                                                                      |
+| `className`         | `string`                                             | —                                 | Added to `clover-geomap`.                                                                                                                                                                                                                                                                                                                                                   |
 
 </ApiReference>
 
@@ -133,18 +136,30 @@ scroll zoom and list in its code.
   ]}
 />
 
+Map marks a place as Items marks an item. Pointed at, on the map or in its list, a place's
+outline takes the accent at half strength. The place of the Canvas in view takes it whole, and
+the place chosen is tinted with it too. A point at rest is dark, as an inactive control is,
+and takes the accent the same way once it is marked. While a Canvas's georeferenced image is on
+the map, the image's outline marks that Canvas in place of its own place, so each Canvas is
+marked once.
+
 ### Georeferenced images
 
 A [Georeference Extension](https://iiif.io/api/extension/georef/) annotation pins an
 image to the ground with control points: spots on the image matched to spots on the map.
-Clover fits the image to those points and trims it to its mask, the part of the image that
-is map. Set `overlayOpacity` to see the streets underneath. The image server must allow
+Clover fits the image to those points and lays it whole: its mask, the part of the image
+that is map, at full strength, and the rest of it, a sheet's margins and title, faded so
+the streets show through. The faded part leaves out every other georeferenced map, so it
+never covers one, and another map on the same sheet is laid where it is by its own
+annotation. Set `overlayOpacity` to see the streets underneath the map too. The image server must allow
 cross-origin requests (CORS), since the image is painted onto the map.
 
 In the [Canvas](/docs/canvas), a georeferenced Canvas gets a Map control even without a
-[navPlace](https://iiif.io/api/extension/navplace/). It opens a small map with the image
-laid over it, and Expand map puts the map in the Canvas's place until you press it again
-or close the map.
+[navPlace](https://iiif.io/api/extension/navplace/). It opens the map in a small box under
+the Canvas's controls, the image laid over it. A press on the box, or its Expand map, puts
+the map in the Canvas's place, and the page's picture, in a box under the map's zoom
+buttons, puts it back. Either way, the map keeps what it shows, fitted to its new size.
+Back in its box, it lets go of the place it named and of an annotation picked on it.
 
 <Example>
 <MapDemo mock="georeference/manifest.json" />
@@ -332,6 +347,71 @@ import * as Clover from "@nulib/clover";
   <Clover.Body />
   <Clover.Map />
 </Clover.Root>;
+```
+
+### Over other content
+
+A map laid over other content, as Document lays its map over the pages, can wait to be
+seen until it has drawn the view it frames. Mark what holds it `data-map-host`: it stays
+out of sight, what it covers still there and Clover's loading bar over its place, then
+fades in, already framed. Hide what it covers once the map's `data-status` is `ready`.
+Every map starts on the view it frames and, once that is drawn, glides to whatever it
+frames next, for `animationDuration` seconds.
+
+A map can be a thumb of itself, too. `navigable={false}` keeps it where it frames, with no
+zoom buttons, credits or names of places, and leaves a press to what holds it. In an
+`Inset` (`<clover-inset>`), a small box whose press expands what it holds, it opens to
+fill its place. With `container="body"`, the Inset lies in the Root's Body, at its top end just under its
+controls, whose Tips lie over it, and follows the Body from a Canvas to a Timeline or a
+Scene; given an element instead, it lies there. Moved from one container to another, it
+keeps the one map. Expanded, its place is yours: a `className` that sets
+`position: absolute; inset: 0` fills the Body. What the map holds, its `children`, lies in
+its box under its controls, as Document's page lies over its map, and the map's Image
+control, at the end of its zoom row, puts it away and brings it back:
+
+```jsx
+import { useState } from "react";
+import * as Clover from "@nulib/clover";
+
+function PlaceMap() {
+  const [small, setSmall] = useState(true);
+  return (
+    <Clover.Root iiifContent={url}>
+      <Clover.Body />
+      <Clover.Inset
+        container="body"
+        expanded={!small}
+        className="place-map"
+        label="Expand map"
+        expandId="expand-map"
+        onExpand={() => setSmall(false)}
+        data-map-host
+      >
+        <Clover.Map navigable={!small} />
+      </Clover.Inset>
+    </Clover.Root>
+  );
+}
+```
+
+```html twin
+<!-- The element is the box, where you write it, placed by your own styles. -->
+<clover-root
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/navplace/manifest.json"
+>
+  <clover-body></clover-body>
+  <clover-inset class="place-map" label="Expand map" data-map-host>
+    <clover-map navigable="false"></clover-map>
+  </clover-inset>
+</clover-root>
+
+<script type="module">
+  const inset = document.querySelector("clover-inset");
+  inset.addEventListener("clover-expand", () => {
+    inset.toggleAttribute("expanded", true);
+    inset.querySelector("clover-map").removeAttribute("navigable");
+  });
+</script>
 ```
 
 ### Size

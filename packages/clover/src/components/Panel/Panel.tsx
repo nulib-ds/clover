@@ -162,7 +162,8 @@ export interface PanelProps
    * Which of the default sections the panel may have, in Clover's own order: with
    * `["contents", "search"]` it has those two and no About. Each still shows only where
    * the resource has data for it, so a resource with none of them draws no panel at all.
-   * `Tab` children win over it. Default: every section.
+   * `Tab` children win over it. Default: every section but the Map, which shows only
+   * where named: About names the places, and Annotations lists the georeferenced images.
    */
   sections?: readonly PanelSection[];
   /**
@@ -380,8 +381,13 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
                   "annotations",
                   "informationPanelTabsAnnotations",
                 ),
-                // Every Canvas's, by Canvas, those in view kept in sight.
-                content: later(<Annotations headingLevel={inner} />),
+                /*
+                 * Every Canvas's, by Canvas, those in view kept in sight; and first, what
+                 * the resource puts on a map, where no Map section shows it.
+                 */
+                content: later(
+                  <Annotations headingLevel={inner} places={!has("map")} />,
+                ),
               },
             ]
           : []),

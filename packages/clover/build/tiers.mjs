@@ -154,6 +154,11 @@ export const SURFACES = [
   "clover-template-document-download-menu",
   "clover-template-document-map",
   "clover-geomap-items",
+  // The Canvas's map expanded over its Body, as Document's is over its pages.
+  "clover-canvas-place",
+  // A thumb in a small box, a press on it expanding what it is a thumb of (`Inset`), with
+  // its controls.
+  "clover-inset",
 ];
 
 /**
@@ -184,6 +189,8 @@ export const UNDERLAID = [
   // The lightbox's layer, see-through unless a page gives it a backdrop; its panel is a
   // surface.
   "clover-template-lightbox",
+  // The map's pin over a georeferenced image's picture in Annotations: a mark with no words.
+  "clover-annotations-place-glyph",
 ];
 
 const SURFACE_RULE = `:where(${SURFACES.map((name) => `.${name}`).join(",")}){background-color:Canvas;color:CanvasText}`;

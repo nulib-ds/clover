@@ -521,6 +521,71 @@ button.clover-about-open:focus-visible {
   border-radius: var(--clover-radius, 3px);
 }
 
+/*
+ * "Place" and its places, after the summary, read as Metadata's label and value are
+ * (`Primitives.css`): the label medium, over its value.
+ */
+.clover-about-place-of,
+.clover-about-place-of :is(dt, dd) {
+  margin: 0;
+}
+
+.clover-about-place-of dt {
+  font-weight: 500;
+}
+
+/*
+ * Its places (`NavPlaces`): each its name, a button that shows it on the map over the
+ * Body, at least 24px tall as About's Open is (`clover-about-open`), at the size of what
+ * About says and underlined as its links are, in every state (Mat, 2026-11-13: "don't
+ * bold this on click", "normalize"), then its coordinates. The one shown is pressed for
+ * assistive technology, and marked on the map.
+ */
+.clover-about-places > li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+button.clover-about-place {
+  font-size: inherit;
+  text-align: start;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: auto;
+}
+
+/*
+ * Its coordinates under its name, after the map control's pin, muted (Mat, 2026-11-13:
+ * "put the link on top. svg and coordinates below", "make it muted secondary"), the
+ * figures a step smaller, as a member's date is under its label in Items, and the pin
+ * close by them ("tighten the gap"), quieter still: the quieter text's color at half
+ * strength ("can this be more muted"), as a closed heading's line takes `secondary-alt`
+ * at half. It marks nothing the figures do not say.
+ */
+.clover-about-place-at {
+  display: flex;
+  align-items: center;
+  gap: var(--clover-space-2xs);
+  color: var(--clover-color-primary-muted, #26292b);
+}
+
+.clover-about-place-at > svg {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  fill: color-mix(in srgb, currentColor 50%, transparent);
+}
+
+.clover-about-place-at > bdi {
+  font-size: var(--clover-text-s);
+}
+
+@media (forced-colors: active) {
+  .clover-about-place-at > svg {
+    fill: currentColor;
+  }
+}
+
 .clover-about .clover-about-heading {
   margin: 0;
   font-size: inherit;

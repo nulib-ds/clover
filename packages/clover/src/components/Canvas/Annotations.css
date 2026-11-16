@@ -86,6 +86,22 @@
 }
 
 /*
+ * An annotation on a whole Canvas, pointed at or picked, has the same line round its
+ * Canvas, one page of a spread (`WholeOutline`; Mat, 2026-11-16: "draw the line around
+ * the whole canvas"), and the picture around it dimmed: within the Canvas's edge, so the
+ * view's edge never cuts it where the Canvas fills the view, over the hotspots, and
+ * taking nothing from the pointer.
+ */
+.clover-canvas-annotation-whole {
+  border-radius: var(--clover-radius, 3px);
+  box-shadow:
+    inset 0 0 0 3px var(--clover-color-primary, #1a1d1e),
+    inset 0 0 0 5px var(--clover-color-accent, #0065c3),
+    inset 0 0 0 6px var(--clover-color-secondary, #fff),
+    0 0 38vw 38vw #0002;
+}
+
+/*
  * A point: a marker of fixed size at its center. The button is the box framed on click;
  * only the marker shows, and only it takes the pointer. A shape likewise.
  */
@@ -104,7 +120,12 @@
   box-shadow: none;
 }
 
-/* An accent dot in a light ring, with a dark edge. */
+/*
+ * At rest, filled as an inactive control is (`ui/Button.css`), with the controls' dark
+ * fill, in a light ring with a dark edge, as a point on the map is (Mat, 2026-11-16:
+ * "inactive ones should be more of the dark token, look more like inactive buttons"; the
+ * accent before 2026-11-15, which looked active already).
+ */
 .clover-canvas-annotation-point {
   position: absolute;
   top: 50%;
@@ -113,7 +134,7 @@
   height: var(--clover-space-m);
   border: 2px solid var(--clover-color-secondary, #fff);
   border-radius: 50%;
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(--clover-color-control, #1a1d1e);
   box-shadow: 0 0 0 1px var(--clover-color-primary, #1a1d1e);
   transform: translate(-50%, -50%);
   pointer-events: auto;
@@ -134,12 +155,16 @@
   content: "";
 }
 
-/* Active, an accent band around the light ring, and the dark edge around that. */
+/*
+ * Active, the dot the accent, as a control under the pointer or focused is, an accent band
+ * around its light ring, and the dark edge around that.
+ */
 .clover-canvas-annotation[data-shape="point"]:is(
     [data-active="true"],
     :focus-visible
   )
   .clover-canvas-annotation-point {
+  background-color: var(--clover-color-accent, #0065c3);
   box-shadow:
     0 0 0 2px var(--clover-color-accent, #0065c3),
     0 0 0 3px var(--clover-color-primary, #1a1d1e);
@@ -226,6 +251,11 @@
   .clover-canvas-annotation:is([data-active="true"], :focus-visible) {
     outline: 2px solid Highlight;
     outline-offset: 0;
+  }
+
+  .clover-canvas-annotation-whole {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
   }
 
   .clover-canvas-annotation-shape > g:nth-child(1) > * {

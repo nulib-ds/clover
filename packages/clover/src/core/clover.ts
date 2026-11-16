@@ -160,6 +160,19 @@ export interface Clover {
    * moved the view away (Cookbook 0021).
    */
   found: Channel<string | null>;
+  /**
+   * A place asked for from a list (Annotations' places): shown on the map over the Body,
+   * filling it, and framed there. Keyed as a map's list keys its items, `overlay-<id>` for
+   * a georeferenced image and `place-<index>` for a place among the Root's (`navPlaceOf`);
+   * null as that map is put away, and as another Manifest loads.
+   */
+  place: Channel<string | null>;
+  /**
+   * The Body's box (`.clover-body`): what lies over its view, under its controls, goes in
+   * it, in the box its Canvas, Timeline or Scene draws in (an `Inset` whose `container` is
+   * `"body"`). The last to come, where a Root has several; null while there is none.
+   */
+  body: Channel<HTMLElement | null>;
   readonly request: CloverRequest | undefined;
   setRequest(request: CloverRequest | undefined): void;
   /** Load content. `canvasId` wins over everything; `defaultCanvasId` over `start`. */
@@ -308,6 +321,8 @@ export function createClover(options: CloverOptions = {}): Clover {
   const highlight = createChannel<string | null>(null);
   const chapter = createChannel<string | null>(null);
   const found = createChannel<string | null>(null);
+  const place = createChannel<string | null>(null);
+  const body = createChannel<HTMLElement | null>(null);
   let annotating: AbortController | null = null;
   let searching: AbortController | null = null;
   /*
@@ -552,6 +567,8 @@ export function createClover(options: CloverOptions = {}): Clover {
       stateSets = [];
       contentTargets = null;
     }
+    // The last Manifest's place, asked for from its list, goes with it.
+    place.emit(null);
     store.set({
       status: "loading",
       error: null,
@@ -712,6 +729,8 @@ export function createClover(options: CloverOptions = {}): Clover {
     highlight,
     chapter,
     found,
+    place,
+    body,
     get request() {
       return request;
     },

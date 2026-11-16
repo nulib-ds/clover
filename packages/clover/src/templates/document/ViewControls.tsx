@@ -9,17 +9,19 @@ import * as Clover from "../../parts";
  * (Mat, 2026-11-10: "don't show the expand button on hover/focus. just use the cursor"),
  * a keyboard's from its Canvas, whose zoom opens it, and a page that plays from its own
  * play button (`Sheets`; "I'm seeing an invisible small play button up in top left. this
- * should not be here"). In the full viewer, an arrow to the top left,
- * back to the scrolling pages, and beside it the pager's steps, Clover's `Previous` and
- * `Next` through the pages, in the book's reading order, with no count, the toolbar's
- * being in sight (Mat, 2026-11-10: "place a pager over here on the left. it should have 3
- * controls next/prev. and on the left an arrow pointing to top left", "it should
- * indicate back to a scrolling behavior"). The view's
+ * should not be here"). In the full viewer, a button back to the scrolling pages, its two
+ * arrows pointing at each other across its diagonal, as a player's full screen closes
+ * (Mat, 2026-11-13: "let's do a youtube still expand collapse two arrows pointing at or
+ * away from eachother diagonallly"), and beside it the pager's steps, Clover's
+ * `Previous` and `Next` through the pages, in the book's reading order, with no count,
+ * the toolbar's being in sight (Mat, 2026-11-10: "place a pager over here on the left.
+ * it should have 3 controls next/prev", "it should indicate back to a scrolling
+ * behavior"); one row centered at the foot of a picture's (`Document.css`). The view's
  * own controls are then the Canvas's, at its top end, as in Default ("don't try it
  * different than how we align it in default viewer"). Drawn as Clover's round controls
  * are, in Clover's interface language, each named by its words and its Tip.
  *
- * The arrow is named "Back to" the resource's label, as the Gallery's lightbox goes back
+ * The button is named "Back to" the resource's label, as the Gallery's lightbox goes back
  * (`shared/Lightbox.tsx`). It, or Escape, closes the full viewer, focus going to what
  * opened it: the page's Canvas, or Play.
  */
@@ -82,11 +84,9 @@ export function ViewControls({
           fill="currentColor"
           stroke="currentColor"
         >
-          {/* Back up to the pages, mirrored in a language written right to left. */}
-          <g className="clover-template-document-back">
-            <path {...SHAFT} d={BACK_SHAFT} />
-            <path {...HEAD} d={BACK_HEAD} />
-          </g>
+          {/* Two arrows pointing at each other: the pages, out of the full viewer. */}
+          <path {...SHAFT} d={BACK_SHAFTS} />
+          <path {...HEAD} d={BACK_HEADS} />
         </svg>
         <span style={Clover.visuallyHidden}>{label}</span>
         <Clover.Tip label={label} lang={langOf(key)} />
@@ -100,15 +100,19 @@ export function ViewControls({
 }
 
 /*
- * An arrow from the lower right to the top left, bold (Mat, 2026-11-11: "something more
- * bold and obvious"): a heavy shaft, rounded at its tail, into a solid head at the
- * corner, its corners rounded as Clover's glyphs' joins are (`ui/controlGlyphs.tsx`).
+ * Two arrows on the diagonal, from its corners in to its middle, bold as the arrow before
+ * them was (Mat, 2026-11-11: "something more bold and obvious"): each a heavy shaft,
+ * rounded at its tail, into a solid head, its corners rounded as Clover's glyphs' joins
+ * are, the two heads clear of each other. The Canvas's Full screen and Exit full screen
+ * draw four such arrows, one to each corner (`ui/controlGlyphs.tsx`; Mat, 2026-11-13:
+ * "use same arrows as expand/collapse for fullscreen", "it should be four arrows. all
+ * directions"): keep their arrows alike.
  */
 const SHAFT = {
   fill: "none",
   strokeLinecap: "round",
-  strokeWidth: 72,
+  strokeWidth: 56,
 } as const;
 const HEAD = { strokeLinejoin: "round", strokeWidth: 40 } as const;
-const BACK_SHAFT = "M396 396L200 200";
-const BACK_HEAD = "M104 104H344L104 344Z";
+const BACK_SHAFTS = "M440 72L368 144M72 440L144 368";
+const BACK_HEADS = "M304 208V80L432 208ZM208 304V432L80 304Z";

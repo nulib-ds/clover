@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useMemo } from "react";
+import React, { Suspense, lazy, useEffect, useMemo, useRef } from "react";
 
 import { type BodyRenderer, paintingBodies, pickRenderer } from "./renderers";
 import ConnectedCanvas from "../Canvas/Connected";
@@ -16,6 +16,8 @@ import { Loading } from "../../ui/Loading";
  * it arrives, the box shows the loading mark along its top, never nothing.
  */
 const ConnectedTimeline = lazy(() => import("../Timeline/Connected"));
+/** Each Root's Bodies in sight, by its `body` channel, the last told as its box. */
+const boxesOf = new WeakMap<object, HTMLElement[]>();
 const ConnectedScene = lazy(() => import("../Scene/Connected"));
 
 export type BodyProps = Omit<
@@ -67,8 +69,28 @@ export function Body({
     canvases.find(({ type }) => type === "Scene" || type === "Timeline")
       ?.type ?? "Canvas";
   const busy = useCloverSelector((state) => state.status === "loading");
+  /*
+   * Its box, told to its Root (`clover.body`): what lies over its view goes in it, in the
+   * box its renderer draws in (an `Inset` whose `container` is `"body"`).
+   */
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const own = box.current;
+    if (!own) return;
+    const { body } = root.clover;
+    const boxes = boxesOf.get(body) ?? [];
+    boxesOf.set(body, boxes);
+    boxes.push(own);
+    body.emit(own);
+    // Gone, the last still there is the Root's, where it has another.
+    return () => {
+      boxes.splice(boxes.indexOf(own), 1);
+      if (body.get() === own) body.emit(boxes[boxes.length - 1] ?? null);
+    };
+  }, [root.clover]);
   return (
     <div
+      ref={box}
       aria-busy={busy}
       className={join("clover-body", className)}
       data-renderer={Renderer ? "custom" : kind.toLowerCase()}

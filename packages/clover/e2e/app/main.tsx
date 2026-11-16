@@ -32,6 +32,7 @@
  *   &panel=tabs|accordion                  the information panel's sections as tabs or boxes
  *   &header=false|collection               (viewer) Default's `header`: none, or the
  *                                          Collection's line alone
+ *   &sections=about,map,…                  (viewer) the panel's sections it may have
  *   &debug=1                               a fixed readout of the media element and the
  *                                          controls, for devices with no console at hand
  */
@@ -63,6 +64,10 @@ const content =
 const panelLayout = (["tabs", "accordion"] as const).find(
   (layout) => layout === params.get("panel"),
 );
+/** The panel's sections it may have (`&sections=about,map`): the Map only when named. */
+const panelSections = params.get("sections")?.split(",") as
+  | Clover.PanelSection[]
+  | undefined;
 /** A Scene of one model, at its origin, for `&model=`. */
 const modelScene = (src: string) => ({
   id: `${src}#scene`,
@@ -276,6 +281,7 @@ function Scene() {
           request={request}
           panelLayout={panelLayout}
           header={header}
+          panelSections={panelSections}
         />
       );
   }

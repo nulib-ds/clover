@@ -118,6 +118,9 @@ function featuresOf(geo: unknown): Json[] {
   return [];
 }
 
+/** How many places a `navPlace` names: what `navPlaceOf` reads of it, counted. */
+export const countPlaces = (geo: unknown): number => featuresOf(geo).length;
+
 /**
  * A polygon's rings, each ending where it began, as GeoJSON asks: one written open (Cookbook
  * 0139 lists four corners) is closed, so its edge is drawn all the way round, as its fill
@@ -479,7 +482,8 @@ export { canvasHasMapData, hasMapData } from "./geo-detect";
 
 // ── The affine overlay ────────────────────────────────────────────────────────
 
-const toMercator = ([lng, lat]: Position): Position => [
+/** [longitude, latitude] in Web Mercator, as MapLibre lays an image by its corners. */
+export const toMercator = ([lng, lat]: Position): Position => [
   (lng * Math.PI) / 180,
   Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)),
 ];
@@ -629,15 +633,11 @@ export function groundOf(overlay: Georeference): Position[] {
   return transform ? overlay.mask.map(transform) : [];
 }
 
-/** The [[west, south], [east, north]] that holds the features and the overlays. */
-export function boundsOf(
-  features: MapFeature[],
-  overlays: Georeference[] = [],
-): [Position, Position] | null {
-  const positions = [
-    ...features.flatMap((feature) => positionsOf(feature.geometry)),
-    ...overlays.flatMap(groundOf),
-  ].filter(([lng, lat]) => Number.isFinite(lng) && Number.isFinite(lat));
+/** The [[west, south], [east, north]] that holds the positions, or null for none. */
+function extentOf(all: Position[]): [Position, Position] | null {
+  const positions = all.filter(
+    ([lng, lat]) => Number.isFinite(lng) && Number.isFinite(lat),
+  );
   if (!positions.length) return null;
   const lngs = positions.map(([lng]) => lng);
   const lats = positions.map(([, lat]) => lat);
@@ -645,6 +645,31 @@ export function boundsOf(
     [Math.min(...lngs), Math.min(...lats)],
     [Math.max(...lngs), Math.max(...lats)],
   ];
+}
+
+/** The [[west, south], [east, north]] that holds the features and the overlays. */
+export function boundsOf(
+  features: MapFeature[],
+  overlays: Georeference[] = [],
+): [Position, Position] | null {
+  return extentOf([
+    ...features.flatMap((feature) => positionsOf(feature.geometry)),
+    ...overlays.flatMap(groundOf),
+  ]);
+}
+
+/**
+ * Where a place is, as one position, [longitude, latitude]: a point's own, else the middle
+ * of what holds the shape (an area, a line, several points). Null for no position.
+ */
+export function middleOf(geometry: GeoGeometry | undefined): Position | null {
+  const extent = extentOf(positionsOf(geometry));
+  return (
+    extent && [
+      (extent[0][0] + extent[1][0]) / 2,
+      (extent[0][1] + extent[1][1]) / 2,
+    ]
+  );
 }
 
 /**

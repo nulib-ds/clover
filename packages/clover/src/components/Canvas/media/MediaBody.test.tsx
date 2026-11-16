@@ -1229,7 +1229,11 @@ describe("Canvas media", () => {
       expect(document.querySelector(".clover-canvas-annotation")).toBeNull();
     });
 
-    it("hides a set from the Root, so the menu and the list hide it together", async () => {
+    /*
+     * Mat, 2026-11-16: the list by sheet, one toggle hiding all it lists; the Canvas's
+     * menu, a page at a time. Both through the Root.
+     */
+    it("hides a page from the Canvas's menu, and all from the list's one toggle, through the Root", async () => {
       let hidden: string[] = [];
       const Spy = () => {
         const { clover } = Clover.useClover("Spy");
@@ -1249,9 +1253,9 @@ describe("Canvas media", () => {
           <Spy />
         </Clover.Root>,
       );
-      // The list's toggle, beside the page's heading.
+      // The list's one toggle, at its head, for every page it lists.
       const listed = await screen.findByRole("checkbox", {
-        name: "Hide Rudolf Hess",
+        name: "Hide annotations",
       });
       fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
       const menu = await screen.findByTestId("clover-canvas-annotation-menu");
@@ -1259,13 +1263,20 @@ describe("Canvas media", () => {
         within(menu).getByRole("checkbox", { name: "Hide Rudolf Hess" }),
       );
       expect(hidden).toEqual([page.id]);
-      expect(listed).toBeChecked();
+      // One page of several: the list's toggle stays as it was.
+      expect(listed).not.toBeChecked();
       // The page's items stay in the menu.
       expect(
         within(
           within(menu).getByRole("group", { name: "Rudolf Hess" }),
         ).getAllByRole("radio"),
       ).toHaveLength(3);
+      // The list's toggle hides every page it lists, the other defendants' too.
+      fireEvent.click(listed);
+      expect(listed).toBeChecked();
+      expect(hidden).toEqual(
+        expect.arrayContaining([page.id, film.annotations[1].id]),
+      );
     });
   });
 

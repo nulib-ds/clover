@@ -150,6 +150,13 @@ on its own, apart from any Manifest, as a georeferencing tool publishes it:
 - **An AnnotationCollection** of two pages: the 1899 volume's sheets of the same ground,
   21 of them, and those of 1920.
 
+And one inside a Manifest, for trying how a viewer lists georeferences beside other
+annotations:
+
+- **A Manifest** of four of the 1920 sheets, each a Canvas with a page of georeference
+  annotations and a page of notes, and places on the Manifest and the campus sheet
+  ([below](#the-manifest)).
+
 The sheets are those [mapsnap](https://mapsnap.org/) fitted by machine with a confidence
 of 0.9 or more, centered from downtown through the campus, between Ridge Avenue and the
 lake, and the campus sheet, fitted with a confidence of 0.24 (a campus has few streets to
@@ -165,6 +172,7 @@ control points by `helmert` (scale, rotation and shift).
 | AnnotationPage       | [`/mocks/sanborn/annotation-page.json`](https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation-page.json)              | `/api/mocks/sanborn/annotation-page.json`       |
 | AnnotationCollection | [`/mocks/sanborn/annotation-collection.json`](https://clover.iiif.library.northwestern.edu/mocks/sanborn/annotation-collection.json)  | `/api/mocks/sanborn/annotation-collection.json` |
 | A volume's sheets    | [`/mocks/sanborn/evanston/1899.json`](https://clover.iiif.library.northwestern.edu/mocks/sanborn/evanston/1899.json) (or `1920.json`) | `/api/mocks/sanborn/evanston/1899.json`         |
+| Manifest             | [`/mocks/sanborn/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/sanborn/manifest.json)                            | `/api/mocks/sanborn/manifest.json`              |
 
 In `npm run dev`, every file under `/mocks/sanborn/` opens live, so the Collection's pages
 load before they are deployed. Each annotation is kept as fetched (`evanston.json` beside
@@ -177,6 +185,57 @@ The Library of Congress's Sanborn maps are public domain. mapsnap's fits are und
 [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/), which asks for
 attribution, and that a database made from them be shared alike: every document carries
 both (`rights`, `requiredStatement`).
+
+### The Manifest
+
+Four sheets of the 1920 volume, from downtown Evanston to Northwestern University's
+campus, as one Manifest, "Sanborn Fire Insurance Maps of Evanston, Illinois, 1920,
+annotated". Each sheet is a Canvas with annotations of many kinds side by side,
+georeferences and places among them:
+
+- **Four Canvases**, Sheets 17, 24, 28 and 115, in the volume's order, each painting
+  mapsnap's copy of the Library's scan, a level 0 IIIF Image service (1407 × 2063, CORS
+  open), at the size its `info.json` gives.
+- **Georeferences**, a page on each Canvas: a `georeferencing` annotation for each map on
+  the sheet, as mapsnap fitted it, its body (two control points, by `helmert`) and its
+  SvgSelector as fetched, its target the Canvas, as the Georeference Extension allows.
+  Sheet 28 holds two maps, one above the other, so it has two.
+- **Notes**, the other page on each Canvas:
+  - Sheet 17: a `describing` note on the National W.C.T.U. Headquarters' lot, and the
+    Evanston Public Library tagged with a GeoJSON Feature, a point, as
+    [Cookbook recipe 0139](https://iiif.io/api/cookbook/recipe/0139-geolocate-canvas-fragment/)
+    tags part of a map;
+  - Sheet 24: a `commenting` note on the whole sheet, and "POST OFFICE" tagged where it is
+    printed;
+  - Sheet 28: a `commenting` note on the whole sheet, in English and Spanish, a Choice of
+    the two, as [Cookbook recipe 0346](https://iiif.io/api/cookbook/recipe/0346-multilingual-annotation-body/)
+    gives one;
+  - Sheet 115: "NORTHWESTERN UNIVERSITY" tagged where it is printed, across the sheet's
+    two maps of the campus, and a `linking` annotation from the sheet's title, "EVANSTON,
+    ILL." over "115", to [the volume at the Library of Congress](https://www.loc.gov/item/sanborn01857_004/),
+    as [Cookbook recipe 0022](https://iiif.io/api/cookbook/recipe/0022-linking-with-a-hotspot/)
+    links from a hotspot.
+- **navPlace** on the Manifest, "Evanston, Illinois": the box that holds every map on the
+  sheets where mapsnap's fits put them. And on Sheet 115's Canvas, "Northwestern
+  University": the outline of the sheet's map of the campus south of Garrett Place, the
+  one mapsnap placed, where its fit puts it.
+
+| Canvas    | Motivation   | Body                                                                     | Target (`xywh`)    |
+| --------- | ------------ | ------------------------------------------------------------------------ | ------------------ |
+| Sheet 17  | `describing` | "The National W.C.T.U. Headquarters on Chicago Avenue, …"                | `576,1334,272,94`  |
+| Sheet 17  | `tagging`    | A GeoJSON Feature, "Evanston Public Library", a point                    | `312,1668,204,267` |
+| Sheet 24  | `commenting` | "Downtown Evanston from Church Street to Grove Street, …"                | The whole Canvas   |
+| Sheet 24  | `tagging`    | "POST OFFICE"                                                            | `648,348,98,18`    |
+| Sheet 28  | `commenting` | "Two maps on one sheet, …", in English and Spanish                       | The whole Canvas   |
+| Sheet 115 | `tagging`    | "NORTHWESTERN UNIVERSITY"                                                | `330,1011,544,25`  |
+| Sheet 115 | `linking`    | "The 1920 volume, all 119 sheets, at the Library of Congress.", the page | `48,30,92,76`      |
+
+Every region was read from its sheet at full size, and every tag's words are as printed
+there. The GeoJSON point and the two navPlaces are worked out by its generator,
+`docs/mocks/sanborn/manifest.mjs`, from mapsnap's fits in `evanston.json`, as Clover reads
+a fit by `helmert`, so they move with the fits: run `npm run build:mocks` after changing
+either. It carries the mock's `rights` and `requiredStatement`, and the package's tests
+have it with the rest, in `packages/clover/src/fixtures/mocks/sanborn/`.
 
 ## Tagging: a photogravure
 

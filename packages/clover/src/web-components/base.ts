@@ -20,7 +20,7 @@ export type LoadPart = () => Promise<React.ComponentType<HostedProps>>;
  * an author's rule beats. In `@layer clover`, so any rule of the page's wins.
  */
 const ELEMENT_CSS =
-  "@layer clover{:is(clover-root,clover-items,clover-viewer,clover-panel,clover-read-more):not([hidden]){display:block}" +
+  "@layer clover{:is(clover-root,clover-items,clover-viewer,clover-panel,clover-read-more,clover-inset):not([hidden]){display:block}" +
   ":is(clover-body,clover-canvas,clover-timeline,clover-scene):not([hidden]){display:block;height:var(--clover-body-height,60vh)}" +
   "clover-split:not([hidden]){display:flex}" +
   ":is(clover-label,clover-panel-toggle):not([hidden]){display:contents}" +

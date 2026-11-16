@@ -13,7 +13,10 @@
  *   related sanborn maps that cover this region", the lakefront);
  * - `annotation-collection.json`, an AnnotationCollection of two pages,
  *   `evanston/1899.json` and `evanston/1920.json`: the 1899 volume's sheets of the same
- *   ground, and those of 1920.
+ *   ground, and those of 1920;
+ * - `manifest.json`, a Manifest of four of the 1920 sheets whose Canvases carry pages of
+ *   georeference annotations, with places and notes of many kinds beside them
+ *   (`manifest.mjs`, 2026-11-13).
  *
  * The sheets are the Library of Congress's, as mapsnap fitted them by machine
  * (`evanston.json`, as fetched from https://data.mapsnap.org/): those whose control points
@@ -40,6 +43,7 @@
  * pages load before they are deployed. Documented at /docs/mocks.
  */
 import evanston from "./evanston.json";
+import { sheetsManifest } from "./manifest.mjs";
 
 export const PUBLIC_BASE =
   "https://clover.iiif.library.northwestern.edu/mocks/sanborn";
@@ -167,7 +171,13 @@ export function evanstonPage(base, year) {
 }
 
 /** The document at a path under the base, for the live copy; null for none. */
+/** Four of the 1920 sheets as a Manifest, its Canvases' annotations georeferences among them. */
+export function manifest(base = PUBLIC_BASE) {
+  return sheetsManifest(base, RIGHTS, ATTRIBUTION);
+}
+
 export function respond(base, path) {
+  if (path === "manifest.json") return manifest(base);
   if (path === "annotation.json") return annotation(base);
   if (path === "annotation-page.json") return annotationPage(base);
   if (path === "annotation-collection.json") return collection(base);

@@ -11,6 +11,219 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Places are named in About, georeferenced images listed in Annotations, and each is
+  shown on the map over the Body.** A `Panel` no longer offers a Map section by default.
+  About names the resource's places (`navPlace`, the Manifest's and the Canvases' in
+  view) after its summary and before its metadata, under "Place" (the string
+  `aboutPlace`) as a metadata label is, each name a link-like button with its coordinates
+  under it, latitude then longitude to four places, after the map's pin; Annotations lists
+  its georeferenced images (Georeference Extension annotations) under their Canvas with its
+  other annotations, first, each by its name and picture, the map's pin over the picture's
+  corner, and is offered for them where the resource has no other annotations; its hide
+  toggle leaves them, and lights only what it hides, as the Canvas never shows them. Pressing a place or an image fills the Body with the
+  Root's map, framed on it and marked in the accent, going to its Canvas first: Collapse
+  map brings the Canvas back with the map over it, and Close puts the map away, focus
+  back on what was pressed. Where the panel lies over the Body, as on a phone, it is put
+  away as one is pressed, focus going on to the map, and back to the panel's toggle as
+  the map goes. A place an annotation tags (Cookbook 0139) is listed with its
+  annotation, as before. Name `map` in `sections` (`panelSections` on the templates) for
+  the map's own section, which then lists the georeferenced images that Annotations
+  lists otherwise. A new string, `annotationsShowPlace` ("Find on the map"), names each
+  place's and image's button, in every locale.
+- **Annotations lists every annotation by its Canvas alone.** Each Canvas's are under its
+  label, whatever page they were published on and whatever they are for, no longer by
+  layer (the pages sharing a label, an AnnotationCollection's among them), so no page's
+  label heads them. One toggle at the list's head hides them all from the Canvas, the
+  Canvas's annotations menu still hiding one page at a time, and the languages of words
+  given one per language are offered there too. One with no text is numbered by its place
+  among its Canvas's annotations, as its hotspot is. `scope="view"` lists the view's by
+  Canvas where it shows several, and `headingLevel` sets the level of each Canvas's label.
+- **An annotation on a whole Canvas is outlined while pointed at or picked.** With no
+  region to mark, it has a picked hotspot's line round the whole of its Canvas, drawn
+  within its edge, and the picture around it dims; in a spread, round the page it is on
+  alone. Picked, the view zooms to that page, the whole of it, as home frames a Canvas;
+  a Canvas shown alone goes home. It is the Body's, so every template and layout has it
+  wherever its Body shows the Canvas. It
+  is never a hotspot and takes nothing from the pointer
+  (`.clover-canvas-annotation-whole`, `aria-hidden`).
+- **Every annotation listed has a picture of what it marks.** One on a whole Canvas is
+  pictured by all of it, at a size the image's server lists. A region on an image whose
+  server cannot cut it (IIIF Image API level 0) is cut in the browser from the whole image,
+  at the smallest size the server lists that gives the region the picture's size on its
+  shorter side, rather than shown with no picture. A small region needs one of the larger
+  sizes, which every region on that image then shares (`.clover-entry-thumbnail[data-cut]`, clipped inline).
+- **A georeferenced image is laid on the map whole.** The map inside its mask (its
+  SvgSelector) at full strength, and the rest of the image, a sheet's margins and title,
+  faded so the streets show through, where it was trimmed to its mask; its outline draws
+  the line between. The faded part leaves out every other georeferenced map on the map,
+  where it lies, so it never covers one, and, on the same image, where it is printed,
+  since its own annotation lays it where it is.
+- **Document offers no Map section by default either.** A place pressed in its About, or
+  a georeferenced image in its Annotations, shows the Root's map over its pages, framed
+  on it, its zoom row at its top end and the page's picture in a box under it, which
+  trades the two: the map in a box over the pages, as the Canvas's map box is over the
+  Body in Default, with Expand map to trade them back and Close. Its full viewer's
+  controls end with Map where the page, or else the resource, has a place, which shows
+  the map in that box and puts it away. Either box hangs just under the controls at its
+  end, their Tips over it: the page's picture in the map's box, and in the full viewer
+  the map in the Canvas's. The aside stays
+  beside it, and on a phone goes, focus going on to the map. Close or Escape puts it
+  away, focus back on what was pressed; an annotation chosen in the aside puts it away
+  too. Where `panelSections` names the Map, the toolbar's Map button puts it back in the
+  aside. Its
+  toolbar marks About where the page in view has a place, and Annotations where it has a
+  georeferenced image.
+- **Document's full viewer has its way back and its pager centered at its foot**, where
+  they were over its top left; a recording's stay there, its player's controls being at
+  its foot. Its way back is two arrows pointing at each other on the diagonal, where it
+  was one arrow to the top left. The aside's close shows its Tip under it, where the
+  toolbar covered it.
+- **Full screen's arrows are bolder**: four on the diagonals, out to the corners to
+  enter and in from them to exit, each a heavy shaft and a solid head, as Document's way
+  back draws its two, where they were thin open corners: over a Canvas, over a Scene and
+  in a recording's player alike.
+- **A map comes in seamlessly.** It starts on what it frames, the place or image asked
+  for, else every place and image it has, and is ready only once that view is drawn, its
+  tiles in (MapLibre's first `idle` after framing, a few seconds at most): until then its
+  drawing, controls and credits are out of sight, Clover's loading bar over its top past a
+  moment, then it fades in (at once where less motion is asked for). A box that lays a
+  map over other content can wait for it: mark it `data-map-host`, and it stays out of
+  sight, what it covers still there, until its map comes in. The Canvas's map box filling
+  the Body does, the Canvas and its controls staying until then; so does Document's map
+  over its pages. Once its first view is drawn, a map glides to whatever it frames next:
+  another Canvas, a place or an image chosen, for `animationDuration`.
+- **The Canvas's map box is Document's, the one standard for maps.** Small (from the map
+  control, after the page's picture trades it back, or for a picked annotation's place), it
+  is an `Inset` hanging just under the Canvas's controls, 14rem wide, where it was a 22rem
+  popup: its map holds still, with no zoom buttons, credits or names of places as they are
+  pointed at, the controls' Tips lie over it, and a press anywhere but its Close expands
+  it. Expanded, the map fills the Body with its zoom row at the top end, where the
+  Canvas's controls were, which go away with the Canvas while it shows; under it the
+  page's picture, in an Inset, trades them back (Collapse map), and Escape puts the map
+  away, where a Collapse map and a Close sat at the Body's top start. Document's map over
+  its pages is the same, in the same `Inset`s, and one of Clover's popups (`useOneOpen`)
+  as the Canvas's box is, so the two take turns: a place picked on the page puts
+  Document's map away, and its Map control puts that place's box away. Focus follows each
+  swap to the control that trades them back, and returns as the map goes once the
+  Canvas's controls are back.
+- **The map over the Body follows the view.** With a Canvas's place or georeferenced
+  image shown on it, another Canvas chosen shows its own place, else its first image,
+  marked where About and Annotations list them; a place of the Manifest's, or a
+  member's, holds.
+- **A Canvas whose map control is off shows no map for a place asked for**
+  (`controls={{ map: false }}`): the layout around it shows one, as Document does over
+  its pages.
+- **A `Map` in a Root frames the place asked for** (the Root's `clover.place`), marking
+  it, as the map over the Body does; the last one asked stays framed.
+- **Expand map and Collapse map keep what the map shows.** The map in the Canvas's box,
+  swapped into the Body or back, is fitted to what it showed, where it framed every place
+  and sheet it had before: a place or sheet framed, or zoomed in on, stays in view. While
+  the map has the Body, the Canvas's notes go with the Canvas ("This image could not be
+  loaded.", the name of a Canvas that paints nothing), never over the map.
+- **A map marks its places as Items marks an item**, as it already marked its
+  georeferenced images, where a place pointed at, a place picked and a place whose
+  annotation was pointed at or picked all looked the same. A place pointed at (on the map,
+  its row in the map's list, or its annotation in Annotations or on the Canvas) takes the
+  accent at half strength in a wider outline; the place of the Canvas in view takes it
+  whole; and the place chosen takes it whole, its area faintly tinted with it. The
+  accent's band is 3px, as Items' ring is, between the dark and light lines that keep it
+  clear on any basemap. While a Canvas's georeferenced image is on the map, the image's
+  outline alone marks that Canvas and its own place stays at rest, so a sheet whose place
+  lies on its image's edge is marked once, not twice.
+- **A point at rest is filled as an inactive control is**, with the controls' dark fill
+  (`--clover-color-control`) inside its light ring and dark edge, on the map, on an image
+  (`.clover-canvas-annotation-point`) and on a recording's seek bar
+  (`.clover-canvas-transport-mark-point`), where it was a dot of the accent at rest and
+  so looked marked already. As a control does, it takes the accent once it is pointed at,
+  focused or picked, and on the map once it is the place of the Canvas in view, with the
+  accent's band round it as before (on the map, at half strength while pointed at). A
+  point whose feature gives a `marker-color` keeps that color at rest.
+- **A map offers its outline options by default.** `outlines` on `Map` (`outlines` on
+  `<clover-map>`) is now `true`: the gear after the zoom buttons, holding Outlines and
+  Selection outline, shows wherever the map lays georeferenced images and can be moved,
+  as the map over the Body can once expanded, and never in the Canvas's small map box. It
+  showed only where a page asked for it. Outlines still starts off. `outlines={false}`
+  (`outlines="false"`) shows no gear. Opening the gear no longer closes Clover's other
+  popups, which put away the map's own box, gear and all, in Default and Document.
+- **The expanded map's picture has Close, and Image puts it away.** Over the map that
+  fills the Body (Default) or the pages (Document), the page's picture in its box has
+  Close after Collapse map, as the map's own box has after Expand map, and an Image
+  control at the end of the map's zoom row puts the picture away and brings it back, as
+  the Canvas's Map control does the map's box. A `Map`'s `children` take the same control
+  wherever the map can be moved.
+- **An Inset under the pointer lights its expand button**, as the button lights when the
+  pointer is on it, since a press anywhere on the box does what the button does.
+- **Budgets.** Places in About and Annotations (every annotation listed by its Canvas,
+  georeferenced images among them, and the line round a whole Canvas), the map over the
+  Body and over Document's pages, a georeferenced image laid whole, the Map's arrival,
+  glide, `navigable`, the marks on its places and points and its Image control, `Inset`
+  and `<clover-inset>`, and the Body telling its Root its box took 26 budgets past
+  4.10.2's, each raised to the next 50, in gzip: to first view, the Default template to
+  103.3 kB (102.1), Document's to 109 kB (107.55), Gallery's to 59.05 kB (58.5), a Canvas
+  to 52.35 kB (52.15), a Timeline to 56.95 kB (56.75) and a Map alone to 49.05 kB (47.6);
+  first loads, the Default template to 83.95 kB (83.1), Document's to 86 kB (85.15),
+  Gallery's to 33.95 kB (33.85), a Canvas to 45 kB (44.8), a Timeline to 29.6 kB (29.45)
+  and the Map before MapLibre to 25.9 kB (24.4); styles.css to 16.3 kB (15.95),
+  templates.css to 5.45 kB (5), core.css to 9.65 kB (9.25), base.css to 15.65 kB (15.25)
+  and spacing.css to 3.95 kB (3.9); as elements, their entry to 6.5 kB (6.35), a
+  `<clover-viewer>` to 136.3 kB (135), its own entry to 115 kB (113.8), in Document
+  154.75 kB (152.55) and in Gallery 139.85 kB (138.5), a `<clover-canvas>` to 98.45 kB
+  (97.7), a page of labels to 37.95 kB (37.8), the four parts to 112.3 kB (111.35) and a
+  layout of containers to 131.35 kB (130.25).
+
+### Added
+
+- **`places` on `Annotations`** (`places` on `<clover-annotations>`), `true` by default:
+  `false` leaves out the resource's georeferenced images.
+- **The Root's `clover.place`**, a channel: a place's key, as a map's list keys it
+  (`overlay-<id>` or `place-<index>`), shows the Root's map over the Body, framed on it;
+  `null` puts it away.
+- **`animationDuration` on `Map`** (`animation-duration` on `<clover-map>`), in seconds,
+  as the Canvas's `options.animationDuration`: how long it glides from what it frames to
+  the next. Default 0.6; `0` goes there at once.
+- **`navigable` on `Map`** (`navigable` on `<clover-map>`), as the Canvas's
+  `options.gestures.navigable`: `false` keeps it where it frames, with no zoom buttons,
+  credits or names of places, a press left to what holds it. Default `true`.
+- **`Inset`**, a UI component: a thumb in a small box (a picture, or a map that is not
+  navigable), a press anywhere but its buttons expanding what it is a thumb of, its expand
+  button in its corner with any controls of its own after it; `expanded`, it holds its
+  content as it is, never remounting it. Given a `container`, it lies there and moves to
+  another keeping what it holds: `"body"`, inside a Root, lays it in the Body, at its top
+  end just under its controls, whose Tips lie over it, following the Body from a Canvas to
+  a Timeline or a Scene; or any element. As an element, `<clover-inset>` is the box itself,
+  where it is written, its children the thumb: `label` (its language `label-lang`, on its
+  button alone), `expand-id`, `controls` and `expanded` as attributes, your own controls
+  as `slot="actions"`, and `clover-expand` for a press; with no `label`, it is its
+  children alone.
+- **The Root's `clover.body`**, a channel: the Body's box, which the Body tells its Root
+  as it draws, for what lies over its view (an `Inset` whose `container` is `"body"`).
+- **`children` on `Map`**: drawn in the map's box, over the map and under its controls,
+  whose Tips lie over them (an `Inset`, say).
+- **`useAwayForPlaces(drawer)`** in `@nulib/clover/templates`, with its type
+  `AwayDrawer`: a template's drawer (`useDrawer`'s, with its `id`) put away as a place is
+  asked for while it lies over the view, focus going on to the map; it returns what had
+  focus as the place was asked for. The Default template's panel and Document's aside
+  use it.
+
+### Fixed
+
+- **Document's pages show no other page as the column scrolls after the full viewer
+  closes.** Closing the full viewer, or putting its map back, leaves focus on the page's
+  Canvas, which kept its picture in sight as it moved from page to page, so each page it
+  reached showed the last one in its place for a moment. Its picture now gives way to the
+  page's still while it moves, focus or not; the focus ring is the page's own.
+- **A map going back into its box lets go of its place.** As the page takes its place
+  again (Collapse map, in the Default template's map box and Document's map alike), the
+  place named on the map is put away, and an annotation picked on it, a place's or a
+  georeferenced image's, is unset, where both stayed: the place's name over the small
+  map, and the annotation picked on the page.
+- **A Body, Canvas or Scene given a control that is not shown** (`{shown && <Control />}`
+  while `shown` is false) behaves as one given none. It took the `false` for a control of
+  yours, so over a placeholder or a lone recording it kept a row of controls you had not
+  asked for.
+
 ## [4.10.2] - 2026-11-14
 
 ### Added

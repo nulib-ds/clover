@@ -7,6 +7,7 @@ import { useDrawer } from "./useDrawer";
 import type { useFollowFocus } from "./useFollowFocus";
 import { PANEL_MIN } from "./useSlide";
 import { useSpineTop } from "./useSpine";
+import { useAwayForPlaces } from "./useAwayForPlaces";
 
 export type PanelPart = React.ComponentType<PanelProps>;
 
@@ -177,6 +178,7 @@ export function PanelPane({
 >) {
   const { id, over, docked, side, Part } = pane;
   const offered = Clover.usePanelSections(panel.sections);
+  useAwayForPlaces(pane);
   if (!offered.length) return null;
   // Between the panel and the main pane: after the panel on the start side.
   const bar = docked && (

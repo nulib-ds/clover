@@ -41,16 +41,25 @@ languages where the resource comes in several, a button for each section the res
 Download where there is a `rendering`, and Search. A section's button opens it alone in an
 aside beside the pages, with its own bar, where there is room for both, and over them
 where there is not. A button carries a dot where the page in view has something of its own
-there: About where it describes itself, which About then shows, Contents where it has
-chapters, Annotations where it has some, and the Map where it has a place.
+there: About where it describes itself or has a place, which About then shows, Contents
+where it has chapters, and Annotations where it has some or a georeferenced image. A place
+named in About, or a georeferenced image listed in Annotations, shows the map over the
+pages as it is pressed, framed on it, the aside beside it, its zoom row at its top end and
+the page's picture in a box under it. The picture trades the two: the map
+in a box over the pages, as Default's map box is over the Body, with Expand map to trade
+them back and Close. Another page chosen moves it to that page's place. Escape puts it
+away. The Map is a section of its own only where `panelSections` names it.
 
 The pages run down one column, a spread to a sheet, the top of the next always in sight:
 they scroll freely, as a PDF reader's continuous view does, and PageUp and PageDown go a
 sheet at a time. Tab reaches the page in view, and from there Up and Down step to the
 previous page and the next, Home and End to the first and last, and Enter opens it. A press on a page, the pointer a magnifier over it, or a zoom on its
-Canvas opens it as the full viewer, the Canvas's own controls at its top end, and over
-its top left an arrow back to the pages, then Previous and Next; the arrow, or Escape,
-closes it. A video or a sound waits as its still on black, with a play button over it, until it
+Canvas opens it as the full viewer, the Canvas's own controls at its top end, with Map
+where the page, else the resource, has a place, which shows the map in a box under them
+and puts it away, and centered at its foot a button back to the pages, its two arrows
+pointing at each other,
+then Previous and Next (over its top left for a video or a
+sound, whose player's controls are at its foot); the button, or Escape, closes it. A video or a sound waits as its still on black, with a play button over it, until it
 is pressed into. A resource of one page has its thumbnail too, put away to start, unless
 `singleItem={false}` leaves it out.
 
@@ -66,7 +75,7 @@ page, and choosing one puts them away. Size it with `--clover-template-document-
 | `singleItem`         | `boolean`               | `true`                       | The page thumbnails and their toggle where the resource has one page too.                                                                                                                                           |
 | `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the aside starts open on About beside the page; over it, closed.                                                                                                                                            |
 | `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | Not read by Document: each section opens alone in its aside.                                                                                                                                                        |
-| `panelSections`      | `PanelSection[]`        | All                          | Which sections the toolbar offers; each still only where the resource has data for it.                                                                                                                              |
+| `panelSections`      | `PanelSection[]`        | All but the Map              | Which sections the toolbar offers; each still only where the resource has data for it.                                                                                                                              |
 | `panelLabels`        | `PanelSectionLabels`    | —                            | What a section's button and the aside call it, in place of its word in Clover's interface language: text, or text by language tag.                                                                                  |
 | `download`           | `boolean`               | `true`                       | The Download button, its links in a menu under it, where there is a `rendering`.                                                                                                                                    |
 | `languages`          | `boolean`               | `true`                       | A globe among the toolbar's controls, where the resource comes in several languages, that sets the one it reads in; `false` leaves it out.                                                                          |

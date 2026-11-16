@@ -1328,12 +1328,14 @@ function Room() {
 
 ### More SplitPanes
 
-| Helper               | Description                                                                                                                                                                                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useDrawer(options)` | Gives a SplitPane of your own the Panel's behavior, beside the Body or over it, as Document's thumbnails have. Give it an `id`, `beside`, `defaultOpen`, `followFocus`, and the `side` it slides in from (`"start"` or `"end"`). |
-| `useFollowFocus()`   | Moves focus with a button that's drawn somewhere new, as the PanelToggle is when the Panel opens beside the Body. Make one per template, and pass it to every `usePanelPane` and `useDrawer`.                                    |
-| `preloadDrag()`      | Starts loading the code that lets a touch drag a SplitPane closed while it's over the Body. Call it when the button that opens one is pointed at or focused.                                                                     |
-| `DrawerOptions`      | The type of what `useDrawer` takes.                                                                                                                                                                                              |
+| Helper                     | Description                                                                                                                                                                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useDrawer(options)`       | Gives a SplitPane of your own the Panel's behavior, beside the Body or over it, as Document's thumbnails have. Give it an `id`, `beside`, `defaultOpen`, `followFocus`, and the `side` it slides in from (`"start"` or `"end"`).                                       |
+| `useFollowFocus()`         | Moves focus with a button that's drawn somewhere new, as the PanelToggle is when the Panel opens beside the Body. Make one per template, and pass it to every `usePanelPane` and `useDrawer`.                                                                          |
+| `preloadDrag()`            | Starts loading the code that lets a touch drag a SplitPane closed while it's over the Body. Call it when the button that opens one is pointed at or focused.                                                                                                           |
+| `useAwayForPlaces(drawer)` | Puts a drawer away as a place is asked for while it's over the Body, as on a phone, and sends focus on to the map that opens (whatever is marked `data-asked`). Give it what `useDrawer` returns, with its `id`. It returns what had focus as the place was asked for. |
+| `DrawerOptions`            | The type of what `useDrawer` takes.                                                                                                                                                                                                                                    |
+| `AwayDrawer`               | The type of what `useAwayForPlaces` takes.                                                                                                                                                                                                                             |
 
 #### `useDrawer()` example
 

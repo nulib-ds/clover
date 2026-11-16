@@ -234,6 +234,11 @@ export const CAPABILITIES = {
     words: ["tooltip", "tip", "read more", "own controls", "custom button"],
     parts: ["Tip", "ReadMore"],
   },
+  inset: {
+    says: "A thumb in a small box, a picture or a map kept small, laid over a Body under its controls, a press on which expands what it is a thumb of.",
+    words: ["inset", "minimap", "picture in picture", "small map", "thumb box"],
+    parts: ["Inset"],
+  },
 } as const satisfies Record<string, Capability>;
 
 export type CapabilityName = keyof typeof CAPABILITIES;

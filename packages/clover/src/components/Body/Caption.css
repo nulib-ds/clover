@@ -106,87 +106,74 @@
 }
 
 /*
- * A picked annotation's place (`Canvas/PlaceBox.tsx`): a map of it, the whole box to its
- * inner padding, no wider than the information, as tall as its name and map were; its
- * name is out of sight (Mat, 2026-10-29: "don't show the label of manifest/canvas. extend
- * map to the top"). Its Expand map button and Close end the map's zoom row, in its top corner.
+ * A place on a map (`Canvas/PlaceBox.tsx`), as Document's map is (Mat, 2026-11-15: "default
+ * should be treated the same as document. this is the standard for maps now"). Small, an
+ * Inset hanging under the Canvas's controls (`ui/Inset.css`), as wide as an Inset may be,
+ * as a map has no width of its own.
  */
-.clover-canvas-place {
-  width: min(22rem, 100%);
-}
-
-/*
- * It never scrolls (its map is as tall as it is), so the wheel and a swipe over its map go
- * on to the page, as over the Canvas (Mat, 2026-11-08: "it's currently getting caught"),
- * rather than stopping at it as the popups' text does (`ControlMenu.css`, after this file:
- * hence the box's own two classes).
- */
-.clover-canvas-caption.clover-canvas-place {
-  overscroll-behavior: auto;
-}
-
-/*
- * Its Expand map button and Close at the end of the map's zoom row (Mat, 2026-11-08: "move
- * these to the left of the layer button"), one row `xs` apart, in the map's top corner.
- */
-.clover-canvas-place .clover-geomap {
-  --clover-map-height: 16rem;
-  --clover-map-controls-end: calc(
-    2 * var(--clover-control) + 2 * var(--clover-space-xs)
+.clover-canvas-place.clover-inset {
+  width: min(
+    14rem,
+    calc(100% - 2 * var(--clover-canvas-controls-inset, var(--clover-inset)))
   );
 }
 
-.clover-canvas-place > .clover-canvas-place-actions {
+/*
+ * Swapped (Mat, 2026-11-08: "flip the map and the canvas"): the map fills the Body, its zoom
+ * row at its top end, where the Canvas's controls were, the page's picture in an Inset
+ * under it (`Inset.css`), which trades them back.
+ */
+.clover-canvas-place[data-swapped] {
   position: absolute;
-  z-index: 3;
-  top: calc(var(--clover-space-m) + var(--clover-inset));
-  right: calc(var(--clover-space-m) + var(--clover-inset));
-  display: flex;
-  gap: var(--clover-space-xs);
-}
-
-/*
- * Swapped (Mat, 2026-11-08: "flip the map and the canvas", "this should close on swap in.
- * come back on swap out"): the map fills the Body, under the controls, its swap and Close
- * in its top corner on the start side, clear of them; the Canvas is put away as it is,
- * hidden (out of the tab order and the accessibility tree), never resized or reloaded,
- * and comes back as it was.
- */
-.clover-canvas[data-place="swapped"] > .clover-canvas-place {
   inset: 0;
-  width: auto;
-  max-width: none;
-  max-height: none;
-  padding: 0;
-  overflow: hidden;
   z-index: 1;
-  border-radius: 0;
-  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--clover-color-secondary, #fff);
 }
 
-/*
- * The same row, zoom then layers and Close, at the Body's top start, as the Canvas's own
- * controls hold its top end.
- */
-.clover-canvas[data-place="swapped"] > .clover-canvas-place .clover-geomap {
+.clover-canvas-place[data-swapped] > .clover-geomap {
   --clover-map-height: 100%;
   --clover-map-controls-inset: var(--clover-canvas-controls-inset);
-  --clover-map-controls-right: auto;
-  --clover-map-controls-left: var(--clover-canvas-controls-inset);
+  /* Its zoom row ending where the Canvas's row did (`--clover-canvas-controls-end`). */
+  --clover-map-controls-right: var(
+    --clover-canvas-controls-end,
+    var(--clover-canvas-controls-inset)
+  );
+  flex: 1 1 auto;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
   height: 100%;
 }
 
-.clover-canvas[data-place="swapped"]
-  > .clover-canvas-place
-  > .clover-canvas-place-actions {
-  top: var(--clover-canvas-controls-inset);
-  right: auto;
-  left: calc(
-    var(--clover-canvas-controls-inset) + 2 * var(--clover-control) + 2 *
-      var(--clover-space-xs)
-  );
+/*
+ * Put away once the map has come in over it (`data-map-host`, `Map.css`), the fade done
+ * first, never before: until the map has drawn, the Canvas stays (Mat, 2026-11-13: "it
+ * still feel a little jarring … there should be a transition"), and then everything of its
+ * own goes with it, its controls too, as under Document's (its notes, an image that could
+ * not load, its name where it paints nothing), kept as it was, out of the tab order and
+ * the accessibility tree.
+ */
+.clover-canvas[data-place="swapped"]:has(
+    > .clover-canvas-place[data-swapped]
+      > .clover-geomap:is([data-status="ready"], [data-status="error"])
+  ) {
+  visibility: hidden;
+  transition: visibility 0s 200ms;
 }
 
-.clover-canvas[data-place="swapped"] > .clover-canvas-viewport {
-  visibility: hidden;
+/*
+ * The box in sight in it, as what it holds inherits it (hiding the Canvas, never every
+ * child of it by a rule that every element on the page would be tested against: 45ms a
+ * move through a book of a thousand pages, 2026-11-15). Until its map has come in,
+ * `Map.css` holds it out of sight, by a rule that outweighs this.
+ */
+.clover-canvas-place[data-swapped] {
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-canvas[data-place="swapped"] {
+    transition: none;
+  }
 }

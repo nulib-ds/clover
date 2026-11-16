@@ -23,6 +23,7 @@ import {
   georeferencesOf,
   hasMapData,
   helmertTransform,
+  middleOf,
   navPlaceOf,
   readGeoreference,
 } from "./geo";
@@ -372,5 +373,41 @@ describe("the affine overlay", () => {
     expect(west).toBeLessThan(east);
     expect(south).toBeLessThan(north);
     expect(boundsOf([], [])).toBeNull();
+  });
+});
+
+describe("middleOf", () => {
+  it("is a point's own position, and the middle of what holds any other shape", () => {
+    expect(
+      middleOf({ type: "Point", coordinates: [-87.6245, 41.8833] }),
+    ).toEqual([-87.6245, 41.8833]);
+    const [lng, lat] = middleOf({
+      type: "Polygon",
+      coordinates: [
+        [
+          [-87.7, 42],
+          [-87.6, 42],
+          [-87.6, 42.1],
+          [-87.7, 42],
+        ],
+      ],
+    })!;
+    expect(lng).toBeCloseTo(-87.65);
+    expect(lat).toBeCloseTo(42.05);
+    expect(
+      middleOf({
+        type: "GeometryCollection",
+        geometries: [
+          { type: "Point", coordinates: [10, 0] },
+          { type: "Point", coordinates: [20, 10] },
+        ],
+      }),
+    ).toEqual([15, 5]);
+  });
+
+  it("is null where there is no position", () => {
+    expect(middleOf(undefined)).toBeNull();
+    expect(middleOf({ type: "Point", coordinates: [] })).toBeNull();
+    expect(middleOf({ type: "Point", coordinates: [Infinity, 0] })).toBeNull();
   });
 });

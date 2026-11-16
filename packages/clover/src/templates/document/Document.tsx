@@ -3,8 +3,10 @@ import React, {
   lazy,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 import * as Clover from "../../parts";
@@ -15,6 +17,7 @@ import type {
   PanelSectionLabels,
   RootProps,
 } from "../../parts";
+import { useAwayForPlaces } from "../shared/useAwayForPlaces";
 import { preloadDrag } from "../shared/useDragToClose";
 import { useDrawer } from "../shared/useDrawer";
 import { useFollowFocus } from "../shared/useFollowFocus";
@@ -69,7 +72,9 @@ export type DocumentProps = Omit<RootProps, "children"> & {
   /**
    * The sections the toolbar offers, each a button opening it alone in the aside, from
    * Clover's own: with `["contents", "search", "transcript", "annotations"]` those four,
-   * each still only where the resource has data for it. Default: every section.
+   * each still only where the resource has data for it. Default: every section but the
+   * Map, as a Panel's: About names the places and Annotations lists the georeferenced
+   * images, each shown on the map over the pages as it is pressed.
    */
   panelSections?: readonly PanelSection[];
   /**
@@ -316,7 +321,10 @@ function DocumentLayout({
    * is room for both, and where there is not, over the page, taking focus, put away by
    * its close button, Escape, or a press on the page beside it (`useDrawer`). Its
    * sections are those the resource has data for (`usePanelSections`), narrowed to
-   * `panelSections`; its content loads as it first opens (`SectionContent`).
+   * `panelSections`; its content loads as it first opens (`SectionContent`). As in a
+   * Panel, the Map is a section only where `panelSections` names it: About names the
+   * places, Annotations lists the georeferenced images, and either shows the map over the
+   * pages (below).
    */
   const { clover, language } = Clover.useClover("Document");
   const offered = Clover.usePanelSections(panelSections);
@@ -328,6 +336,13 @@ function DocumentLayout({
    */
   const showing = useRef(section);
   showing.current = section;
+  // A section's button in the toolbar.
+  const sectionButton = (key: PanelSection) =>
+    panes.current
+      ?.closest(".clover-template-document")
+      ?.querySelector<HTMLElement>(
+        `button[aria-controls~="${asideId}"][data-section="${key}"]`,
+      );
   const aside = useDrawer({
     id: asideId,
     beside: useWideEnough(panes, BESIDE_REM + (sidebarRoom ? SIDEBAR_REM : 0)),
@@ -335,16 +350,14 @@ function DocumentLayout({
     side: "end",
     focus: (pane) =>
       pane.querySelector<HTMLElement>(".clover-template-document-aside-close"),
-    toggle: () => {
-      const root = panes.current?.closest(".clover-template-document");
-      return showing.current === "search"
-        ? root?.querySelector<HTMLElement>(
-            ".clover-template-document-search input, .clover-template-document-search-toggle",
-          )
-        : root?.querySelector<HTMLElement>(
-            `button[aria-controls~="${asideId}"][data-section="${showing.current}"]`,
-          );
-    },
+    toggle: () =>
+      showing.current === "search"
+        ? panes.current
+            ?.closest(".clover-template-document")
+            ?.querySelector<HTMLElement>(
+              ".clover-template-document-search input, .clover-template-document-search-toggle",
+            )
+        : sectionButton(showing.current),
     followFocus,
   });
   const asideOpen = aside.open && offered.includes(section);
@@ -381,38 +394,106 @@ function DocumentLayout({
     aside.setOpen(true);
   };
   /*
-   * The aside's map, expanded over the pages, as the Canvas's map box expands into its
-   * Body (Mat, 2026-11-09: "someone should be able to do this from the sidebar panel
-   * map"): out of the aside, which it leaves, over the pages' column, which goes out of
-   * sight and out of reach meanwhile, with the view's controls; Collapse map puts it back
-   * in the aside, Close and Escape put it away. Focus goes with it each way (WCAG 2.4.3).
+   * The map over the pages' column, which goes out of sight and out of reach meanwhile,
+   * with the view's controls. A place asked for (Mat, 2026-11-13: "clicking the georef or
+   * navplace annotation opens the map over the body as expanded"), a place in About or a
+   * georeferenced image in Annotations (the Root's `place`), shows it there, framed on it
+   * (`Clover.Map` follows the Root's `place`), the aside staying beside it with what
+   * asked; where the aside lies over the page (a phone), it goes, and focus goes on to the
+   * map (`useAwayForPlaces`). The page's picture in a box at its top end trades the two:
+   * the map in a box over the pages, with Expand map and Close, as the Canvas's map box is
+   * in Default (`ExpandedMap`; "show the image inset into a box … one should be able to
+   * swap between the two"). Where `panelSections` names the Map, the aside's map expands
+   * over the pages too, out of the aside, which it leaves (Mat, 2026-11-09: "someone should
+   * be able to do this from the sidebar panel map"), and the toolbar's Map button puts it
+   * back. Close and Escape put it away, focus back to what asked, else to its section's
+   * button (WCAG 2.4.3).
    */
+  const asked = useSyncExternalStore(
+    clover.place.subscribe,
+    clover.place.get,
+    clover.place.get,
+  );
+  const asker = useAwayForPlaces({ ...aside, id: asideId });
   const [mapExpanded, setMapExpanded] = useState(false);
-  const mapShown = mapExpanded && offered.includes("map");
+  /*
+   * The map the full viewer's Map control shows (`mapControl`, below), in its box over
+   * the pages, framed on what it maps, until the control, Close or Escape puts it away;
+   * shown while the resource has anything to map, so another without leaves no empty
+   * map behind.
+   */
+  const [mapOn, setMapOn] = useState(false);
+  const mappable = useMemo(() => Clover.hasMapData(manifest), [manifest]);
+  const mapShown =
+    Boolean(asked) ||
+    (mapOn && mappable) ||
+    (mapExpanded && offered.includes("map"));
+  /*
+   * The map and the page trade places (Mat, 2026-11-13: "one should be able to swap
+   * between the two"): the map in a box over the pages (`ExpandedMap`'s `inset`), the
+   * pages back in sight, and its Expand map trades them back. Focus goes with the swap.
+   */
+  const [mapInset, setMapInset] = useState(false);
+  const mapFull = mapShown && !mapInset;
+  const swapMap = () => {
+    setMapInset(!mapInset);
+    followFocus(() => document.getElementById(`${id}-map-swap`));
+  };
   useEffect(() => {
     if (!offered.includes("map")) setMapExpanded(false);
     // The sections, by their names: a new array each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [offered.join(" ")]);
+  // Gone (another resource puts its place away), it comes back as it first comes.
+  useEffect(() => {
+    if (!mapShown) setMapInset(false);
+  }, [mapShown]);
+  useEffect(() => {
+    if (!mappable) setMapOn(false);
+  }, [mappable]);
+  // Put away, the place asked for with it.
+  const putMapAway = () => {
+    setMapExpanded(false);
+    setMapOn(false);
+    setMapInset(false);
+    if (clover.place.get()) clover.place.emit(null);
+  };
+  /*
+   * One box at a time, as the Canvas's own take turns (`PlaceBox`): the map shown is one
+   * of Clover's popups (`useOneOpen`), so a place picked on the page (Cookbook 0139) puts
+   * it away, and it puts that place's box away as it comes, focus left where it is. They
+   * lay one over the other, in the same place, the map's Close under the other box (Mat's
+   * preview, 2026-11-15; WCAG 2.4.11).
+   */
+  Clover.useOneOpen(mapShown, putMapAway);
+  // The Map control: the map in its box over the pages, or put away, focus kept on it.
+  const toggleMap = () => {
+    if (mapShown) return putMapAway();
+    asker.current = document.activeElement;
+    setMapOn(true);
+    setMapInset(true);
+  };
   const expandMap = () => {
     setMapExpanded(true);
+    setMapInset(false);
     aside.setOpen(false);
-    followFocus(() => document.getElementById(`${id}-map-collapse`));
+    followFocus(() => document.getElementById(`${id}-map-swap`));
   };
   const collapseMap = () => {
-    setMapExpanded(false);
+    putMapAway();
     setSection("map");
     aside.setOpen(true);
     followFocus(() => document.getElementById(`${id}-map-expand`));
   };
   const closeMap = () => {
-    setMapExpanded(false);
+    const from = (asked || mapOn) && asker.current;
+    putMapAway();
     followFocus(() =>
-      panes.current
-        ?.closest(".clover-template-document")
-        ?.querySelector<HTMLElement>(
-          `button[aria-controls~="${asideId}"][data-section="map"]`,
-        ),
+      from instanceof HTMLElement &&
+      from.isConnected &&
+      !from.closest("[hidden], [inert]")
+        ? from
+        : sectionButton(asked ? showing.current : "map"),
     );
   };
   const labelOf = (key: PanelSection) => {
@@ -521,8 +602,11 @@ function DocumentLayout({
   const choseInAside = useRef(false);
   const openOnIt = () => {
     setExpanded(true);
+    if (!choseInAside.current) return;
+    // Chosen in the aside, the map over the pages goes too, so the viewer shows it.
+    putMapAway();
     const drawer = asideNow.current;
-    if (drawer.over && drawer.open && choseInAside.current) drawer.close();
+    if (drawer.over && drawer.open) drawer.close();
   };
   const openNow = useRef(openOnIt);
   openNow.current = openOnIt;
@@ -546,10 +630,91 @@ function DocumentLayout({
   // What the active page plays, if anything: its toggle is then Play.
   const media = mediaOf(viewCanvases);
   const full = expanded;
+  /*
+   * Where the map lies (its `Inset`'s `container`, which it moves to and from, keeping
+   * the one map): in the full viewer, in its Body (`"body"`), so the Canvas's controls and
+   * their Tips lie over the map's box, which hangs `s` under them, as they lie over the
+   * Canvas's own popups (Mat, 2026-11-14: "This is a little too far off the controls
+   * above it.", then "Yes, add it", `container="body"`); among the pages, over their
+   * column, read only while a map shows, so the template draws no more often for it.
+   */
+  const [column, setColumn] = useState<HTMLElement | null>(null);
+  // Each render, as the pane is read from a ref; the check keeps it from setting it again.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    if (mapShown && aside.main.current !== column)
+      setColumn(aside.main.current);
+  });
+  const mapContainer: HTMLElement | "body" | null = full ? "body" : column;
   // The sections holding something of the page in sight, each marked in the toolbar.
-  const marked = usePageMarks(viewCanvases);
+  const marked = usePageMarks(viewCanvases, offered.includes("map"));
   // The pages in sight that describe themselves, which About shows after the resource.
   const described = viewCanvases.filter(hasInformation);
+  /*
+   * The full viewer's Map control, after the Canvas's own at its top end, where the page
+   * in sight has anything of its own to map (`canvasHasMapData`, as the toolbar's marks
+   * read it), else the resource has a place, as the Canvas's own map control shows in
+   * Default (Mat, 2026-11-14: "add the map icon back if canvas has geo data
+   * (navplace/georeferencing annotation) this should toggle the inset on/off"): the
+   * Canvas's map control, its pin, its name and its place, a child of the Body, which
+   * puts it in the row. It shows the map in its box, hanging under the row, and puts it
+   * away. Among the pages the Canvas still has none (Mat, 2026-11-09: "remove this from
+   * over here").
+   */
+  const placed =
+    Boolean((manifest as { navPlace?: unknown } | null)?.navPlace) ||
+    viewCanvases.some(Clover.canvasHasMapData);
+  const mapControl =
+    full && placed ? (
+      <button
+        type="button"
+        className="clover-canvas-button"
+        data-button="place"
+        aria-label={t("mapLabel")}
+        aria-expanded={mapShown}
+        aria-controls={mapShown ? `${id}-map` : undefined}
+        lang={langOf("mapLabel")}
+        onClick={toggleMap}
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 512 512"
+          fill="currentColor"
+        >
+          {/* Clover's map pin (`Body/glyphs.tsx`'s `Place`). */}
+          <path
+            fillRule="evenodd"
+            stroke="none"
+            d="M256 40C166 40 100 108 100 196C100 300 216 420 246 452A14 14 0 0 0 266 452C296 420 412 300 412 196C412 108 346 40 256 40Z M256 136A60 60 0 1 1 256 256A60 60 0 1 1 256 136Z"
+          />
+        </svg>
+        <Clover.Tip label={t("mapLabel")} lang={langOf("mapLabel")} />
+      </button>
+    ) : null;
+
+  /*
+   * The full viewer's own controls (`ViewControls`): the way back, and the pager, out of
+   * sight while the map is over the pages, once it shows (`Document.css`).
+   */
+  const viewControls = (handle || several || media) && (
+    <ViewControls
+      id={`${id}-view`}
+      open={expanded}
+      onOpenChange={setExpanded}
+      pages={several}
+      view={() =>
+        panes.current?.querySelector<HTMLElement>(
+          ".clover-template-document-live-play",
+        ) ??
+        panes.current?.querySelector<HTMLElement>(
+          ".clover-template-document-live :is(.clover-canvas-viewport, [tabindex='0'])",
+        )
+      }
+    />
+  );
 
   const toggle = pages && (
     <button
@@ -731,14 +896,15 @@ function DocumentLayout({
         <Clover.SplitPane
           ref={aside.main}
           className="clover-template-document-main"
-          data-map={mapShown || undefined}
+          data-map={mapFull || undefined}
           // A minimum only beside another pane: Items, or the Panel docked.
           min={(showSidebar && !sidebar.over) || docked ? PAGE_MIN : undefined}
         >
           {/*
            * Over the page's top left, the template's own controls there: the thumbnails'
-           * toggle while they are put away, then the view's (`ViewControls`), steering
-           * the active page, before the page in reading order as on the screen.
+           * toggle while they are put away, then, for a recording, the full viewer's
+           * (`ViewControls`), steering the active page, before the page in reading order
+           * as on the screen.
            */}
           <div ref={lead} className="clover-template-document-lead">
             {pages && !sidebar.open && (
@@ -746,22 +912,7 @@ function DocumentLayout({
                 {toggle}
               </div>
             )}
-            {(handle || several || media) && !mapShown && (
-              <ViewControls
-                id={`${id}-view`}
-                open={expanded}
-                onOpenChange={setExpanded}
-                pages={several}
-                view={() =>
-                  panes.current?.querySelector<HTMLElement>(
-                    ".clover-template-document-live-play",
-                  ) ??
-                  panes.current?.querySelector<HTMLElement>(
-                    ".clover-template-document-live :is(.clover-canvas-viewport, [tabindex='0'])",
-                  )
-                }
-              />
-            )}
+            {media && viewControls}
           </div>
           {/* The pages, a Body entry for each view, the one in view live. */}
           <Sheets
@@ -771,13 +922,25 @@ function DocumentLayout({
             onExpandedChange={setExpanded}
             onHandle={setHandle}
             labelledBy={`${id}-title`}
-          />
-          {mapShown && (
+          >
+            {mapControl}
+          </Sheets>
+          {/*
+           * A picture's full viewer has them centered at its foot, after it in reading
+           * order as on the screen (Mat, 2026-11-13: "maybe move these down to here.
+           * centered."); a recording's player has its own controls there.
+           */}
+          {!media && viewControls}
+          {mapShown && mapContainer && (
             <Suspense fallback={null}>
               <ExpandedMap
-                collapseId={`${id}-map-collapse`}
-                onCollapse={collapseMap}
+                id={`${id}-map`}
+                swapId={`${id}-map-swap`}
+                container={mapContainer}
+                inset={mapInset}
+                onSwap={swapMap}
                 onClose={closeMap}
+                asked={Boolean(asked)}
               />
             </Suspense>
           )}
@@ -866,6 +1029,7 @@ function DocumentLayout({
                   pages={described}
                   expandMapId={`${id}-map-expand`}
                   onExpandMap={expandMap}
+                  places={!offered.includes("map")}
                 />
               </Suspense>
             )}

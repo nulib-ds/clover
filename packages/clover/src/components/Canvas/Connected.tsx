@@ -134,6 +134,24 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
       }),
     [clover],
   );
+  /*
+   * A place asked for from Annotations (the Root's `place`): its map fills the Body, each
+   * ask counted, so the same place asked again is framed again.
+   */
+  const [askedPlace, setAskedPlace] = useState<{
+    key: string;
+    n: number;
+  } | null>(() => {
+    // One asked before it was drawn (a Timeline's page between): shown as it comes.
+    const key = clover.place.get();
+    return key ? { key, n: 1 } : null;
+  });
+  useEffect(() => {
+    let n = 1;
+    return clover.place.subscribe((key) =>
+      setAskedPlace(key ? { key, n: (n += 1) } : null),
+    );
+  }, [clover]);
   const highlighted = useSyncExternalStore(
     clover.highlight.subscribe,
     clover.highlight.get,
@@ -367,6 +385,8 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
       onChapterHighlight={(id) => clover.chapter.emit(id)}
       selectedAnnotation={selectedAnnotation}
       refind={refind}
+      askedPlace={askedPlace}
+      onAskedPlaceClose={() => clover.place.emit(null)}
       highlightedAnnotation={highlighted}
       onAnnotationSelect={(id) => clover.selectAnnotation(id)}
       onAnnotationLink={rest.onAnnotationLink ?? followLink}

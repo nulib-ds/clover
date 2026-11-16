@@ -30,6 +30,8 @@ export type { PanelPaneOptions, PanelPaneState } from "./shared/PanelPane";
 // Panes beside the page, or drawers over it.
 export { useDrawer } from "./shared/useDrawer";
 export type { DrawerOptions } from "./shared/useDrawer";
+export { useAwayForPlaces } from "./shared/useAwayForPlaces";
+export type { AwayDrawer } from "./shared/useAwayForPlaces";
 export { preloadDrag } from "./shared/useDragToClose";
 export { useFollowFocus } from "./shared/useFollowFocus";
 export {

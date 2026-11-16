@@ -4,7 +4,8 @@ import { respond } from "docs/mocks/sanborn/index.mjs";
 
 /**
  * Sanborn's georeferenced maps, live, in `npm run dev`: the Annotation, the
- * AnnotationPage, the AnnotationCollection and its pages, with ids under this server
+ * AnnotationPage, the AnnotationCollection and its pages, and the Manifest of four sheets
+ * with their annotations, with ids under this server
  * (http://localhost:3000/api/mocks/sanborn/…), so the Collection's pages load before they
  * are deployed. The published copy is static (`public/mocks/sanborn/`); both come from
  * `docs/mocks/sanborn`. See /docs/mocks.

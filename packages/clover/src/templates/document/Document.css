@@ -491,6 +491,24 @@
 }
 
 /*
+ * Its Tip under it, as a control's along the top of what it sits on (`ui/Tip.css`):
+ * over it, the Tip would reach up under the toolbar, which lies over the panes.
+ */
+.clover-template-document-aside
+  > button.clover-template-document-aside-close
+  > .clover-tip {
+  top: calc(100% + var(--clover-space-xs));
+  bottom: auto;
+}
+
+.clover-template-document-aside
+  > button.clover-template-document-aside-close
+  > .clover-tip::before {
+  top: auto;
+  bottom: 100%;
+}
+
+/*
  * Who provided it, in the toolbar, `m` before its controls (Mat, 2026-11-10: "move logo
  * to header. to the left of controls"), the logo a size under its own 1.618rem (Mat,
  * 2026-11-09: "make logo a tad smaller"). It gives way before the controls on a narrow
@@ -816,9 +834,9 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
 }
 
 /*
- * The view's control, the template's own (`ViewControls.tsx`): the magnifier, or in the
- * full viewer the arrow back to the pages and Clover's pager beside it, `xs` apart, as
- * the Canvas's controls are. The arrow mirrored right to left, pointing to the top start.
+ * The view's control, the template's own (`ViewControls.tsx`): in the full viewer the
+ * button back to the pages and Clover's pager beside it, `xs` apart, as the Canvas's
+ * controls are.
  */
 .clover-template-document-view {
   display: flex;
@@ -826,9 +844,17 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
   gap: var(--clover-space-xs);
 }
 
-.clover-template-document-view:dir(rtl) .clover-template-document-back {
-  transform: scaleX(-1);
-  transform-origin: center;
+/*
+ * A picture's full viewer has them in one row centered at its foot, the inset in (Mat,
+ * 2026-11-13: "maybe move these down to here. centered."), their Tips over them; a
+ * recording's stay at the top start (above), its player's controls being at its foot.
+ */
+.clover-template-document-main > .clover-template-document-view {
+  position: absolute;
+  bottom: var(--clover-inset);
+  left: 50%;
+  z-index: 3;
+  translate: -50% 0;
 }
 
 /*
@@ -1471,9 +1497,9 @@ button.clover-template-document-live-play:focus-visible {
 }
 
 /*
- * Expanded over the pages' column, the whole of it, under the template's controls at
- * its top start; its zoom row, Collapse map and Close at its top end. The pages out of
- * sight and reach meanwhile, and the view's controls with them (`Document.tsx`).
+ * Over the pages' column, the whole of it, under the template's controls at its top
+ * start, the page's picture in a box at its top end (below). The pages out of sight and
+ * reach meanwhile, and the view's controls with them (`Document.tsx`).
  */
 .clover-template-document-map {
   position: absolute;
@@ -1484,19 +1510,58 @@ button.clover-template-document-live-play:focus-visible {
   background-color: var(--clover-color-secondary, #fff);
 }
 
-.clover-template-document-map > :not(.clover-template-document-map-actions) {
+.clover-template-document-map > .clover-geomap {
   flex: 1 1 auto;
   min-height: 0;
 }
 
-/* The map the whole height (Mat, 2026-11-09: "the map should extend the height"). */
-.clover-template-document-map .clover-geomap {
+/*
+ * It waits out of sight until its map has drawn the view it frames, the pages still there
+ * and in reach, its map's loading bar over their top past a moment, then comes in over
+ * them, fading, as any box laying a map over other content does (`data-map-host`,
+ * `Map.css`; Mat, 2026-11-13: "make the load in seamless", "make the smooth load part of
+ * the Map component"); the pages go once it has (below).
+ */
+
+/*
+ * The map the whole height (Mat, 2026-11-09: "the map should extend the height"), its
+ * zoom row at its top end, where the Map has it and the full viewer has the Canvas's
+ * controls (Mat, 2026-11-14: "put map controls in top right. like we do for canvas
+ * controls."; centered at its foot from 2026-11-13).
+ */
+.clover-template-document-map:not(.clover-inset) .clover-geomap {
   --clover-map-height: 100%;
-  --clover-map-controls-end: calc(
-    2 * var(--clover-control) + 2 * var(--clover-space-xs)
-  );
   grid-template-rows: minmax(0, 1fr);
   height: 100%;
+}
+
+/*
+ * Its two Insets (`Clover.Inset`, `ui/Inset.css`), one at a time as the map and the page
+ * trade places (Mat, 2026-11-14: "make sure they are using the same component", "it holds
+ * a thumb, and expands targeted content"), each at its top end, hanging `s` under the
+ * controls there, never over them (WCAG 2.4.11), and under their Tips, as the Canvas's
+ * own popups hang (`ControlMenu.css`; "This is a little too far off the controls above
+ * it."): over the map, the page's picture, in the map's box (the Map's `children`), under
+ * its zoom row, where an Inset places itself there.
+ */
+
+/*
+ * Over the pages, the map, as wide as an Inset may be, its zoom buttons and credits away
+ * (`navigable`): among them at the column's top end, where nothing is over it; in the full
+ * viewer, in its Body (`container="body"`), where the Inset places itself, under the
+ * Canvas's controls (`ui/Inset.css`).
+ */
+.clover-template-document-map.clover-inset {
+  display: block;
+  width: min(14rem, calc(100% - 2 * var(--clover-inset)));
+}
+
+.clover-template-document-main
+  > .clover-inset-host
+  > .clover-template-document-map.clover-inset {
+  inset-block: var(--clover-inset) auto;
+  inset-inline: auto var(--clover-inset);
+  z-index: 3;
 }
 
 /*
@@ -1531,8 +1596,46 @@ button.clover-template-document-live-play:focus-visible {
   box-shadow: 0 0 0 1px var(--clover-color-secondary-muted, #e6e8eb);
 }
 
-.clover-template-document-main[data-map] > .clover-template-document-column {
+/*
+ * Under the map, once it has come in, the pages go out of sight and reach, with the full
+ * viewer's own controls, the fade done first; in the full viewer, where the map lies in
+ * the Canvas, the Canvas's own under it.
+ */
+.clover-template-document-main[data-map]:has(
+    > .clover-inset-host
+      > .clover-template-document-map
+      > .clover-geomap:is([data-status="ready"], [data-status="error"])
+  )
+  .clover-template-document-column,
+.clover-template-document-main[data-map]:has(
+    .clover-geomap:is([data-status="ready"], [data-status="error"])
+  )
+  .clover-template-document-view,
+.clover-template-document-main[data-map]:has(
+    .clover-canvas
+      > .clover-inset-host
+      > .clover-template-document-map
+      > .clover-geomap:is([data-status="ready"], [data-status="error"])
+  )
+  .clover-template-document-live
+  .clover-canvas {
   visibility: hidden;
+  transition: visibility 0s 200ms;
+}
+
+/* The map in sight in what it covers (`Map.css` holds it out of sight until it has come in). */
+.clover-inset-host > .clover-template-document-map {
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-template-document-main[data-map] .clover-template-document-column,
+  .clover-template-document-main[data-map] .clover-template-document-view,
+  .clover-template-document-main[data-map]
+    .clover-template-document-live
+    .clover-canvas {
+    transition: none;
+  }
 }
 
 /*
@@ -1659,6 +1762,21 @@ button.clover-template-document-live-play:focus-visible {
   > :not(.clover-canvas-controls, .clover-canvas-menu, .clover-canvas-caption) {
   opacity: 0;
   pointer-events: none;
+}
+
+/*
+ * With focus in it, its picture gives way all the same (Mat, 2026-11-16: "it happens if a
+ * user expands and then collapses the viewer and continues to scroll"): closing the full
+ * viewer, or the map put back, hands focus to the Canvas, and its picture, moved to the
+ * next sheet before it had drawn there, showed the last one in its place for a frame,
+ * over and over as the column scrolled. The ring of focus on the Canvas is the still's
+ * frame's (above), which shows meanwhile; a hotspot that has focus stays, and so do its
+ * controls, menus and the map's box.
+ */
+.clover-template-document-live[data-moved]
+  .clover-canvas-viewport
+  > :not(:focus-within) {
+  opacity: 0;
 }
 
 /*

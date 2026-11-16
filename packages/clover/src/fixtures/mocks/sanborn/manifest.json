@@ -1,0 +1,783 @@
+{
+  "@context": [
+    "http://iiif.io/api/extension/georef/1/context.json",
+    "http://iiif.io/api/extension/navplace/context.json",
+    "http://iiif.io/api/presentation/3/context.json"
+  ],
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Sanborn Fire Insurance Maps of Evanston, Illinois, 1920, annotated"]
+  },
+  "summary": {
+    "en": [
+      "Sheets of the 1920 volume, from downtown Evanston to Northwestern University's campus, annotated in many ways side by side: georeferences, places, tags, comments, a description and a link. Published by Clover IIIF for testing viewers."
+    ]
+  },
+  "rights": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "requiredStatement": {
+    "label": {
+      "en": ["Attribution"]
+    },
+    "value": {
+      "en": [
+        "<span>Maps: Library of Congress, Geography and Map Division, Sanborn Maps Collection. Georeferenced by <a href=\"https://mapsnap.org\">mapsnap</a>, under the Open Database License.</span>"
+      ]
+    }
+  },
+  "navPlace": {
+    "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/navplace",
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/navplace/1",
+        "type": "Feature",
+        "properties": {
+          "label": {
+            "en": ["Evanston, Illinois"]
+          }
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-87.68359, 42.04256],
+              [-87.67256, 42.04256],
+              [-87.67256, 42.0562],
+              [-87.68359, 42.0562],
+              [-87.68359, 42.04256]
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17",
+      "type": "Canvas",
+      "label": {
+        "en": ["Sheet 17"]
+      },
+      "width": 1407,
+      "height": 2063,
+      "thumbnail": [
+        {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017/full/352,516/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "width": 352,
+          "height": 516,
+          "service": [
+            {
+              "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017",
+              "type": "ImageService3",
+              "profile": "level0"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017/full/max/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "width": 1407,
+                "height": 2063,
+                "service": [
+                  {
+                    "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017",
+                    "type": "ImageService3",
+                    "profile": "level0"
+                  }
+                ]
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17"
+            }
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17/georeferences",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["Georeferences"]
+          },
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17/georeferences/1",
+              "type": "Annotation",
+              "label": {
+                "none": ["Evanston, Illinois | 1920 | sanborn01857_004 p17"]
+              },
+              "created": "2026-10-17T21:38:45Z",
+              "modified": "2026-10-17T21:38:45Z",
+              "motivation": "georeferencing",
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17",
+                  "type": "Canvas",
+                  "width": 1407,
+                  "height": 2063
+                },
+                "selector": {
+                  "type": "SvgSelector",
+                  "value": "<svg><polygon points=\"932.0,20.4 934.4,27.8 940.8,64.1 1044.2,87.3 1132.2,97.9 1279.3,97.8 1319.0,97.8 1318.0,1009.8 1310.2,1009.9 1330.0,1986.8 1301.4,1987.3 1203.4,1988.7 956.0,1992.0 165.0,1992.0 101.4,1992.3 57.4,1992.6 164.8,1956.7 158.8,1327.8 163.0,1161.9 184.0,1058.7 223.1,1015.2 189.2,996.4 85.7,312.6 932.0,20.4\" /></svg>"
+                }
+              },
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0017/gcps",
+                "type": "FeatureCollection",
+                "transformation": {
+                  "type": "helmert"
+                },
+                "features": [
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [956, 1992],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.6789367, 42.0477391]
+                    }
+                  },
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [165, 1992],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.6807916, 42.0482515]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17/notes",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["Notes"]
+          },
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17/notes/1",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "The National W.C.T.U. Headquarters on Chicago Avenue, between Clark and Church Streets, with a frame office at the front of its lot and a brick printing building at the rear.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17#xywh=576,1334,272,94"
+            },
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17/notes/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17/notes/2/feature",
+                "type": "Feature",
+                "properties": {
+                  "label": {
+                    "en": ["Evanston Public Library"]
+                  }
+                },
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [-87.680042, 42.048422]
+                }
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/17#xywh=312,1668,204,267"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24",
+      "type": "Canvas",
+      "label": {
+        "en": ["Sheet 24"]
+      },
+      "width": 1407,
+      "height": 2063,
+      "thumbnail": [
+        {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024/full/352,516/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "width": 352,
+          "height": 516,
+          "service": [
+            {
+              "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024",
+              "type": "ImageService3",
+              "profile": "level0"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024/full/max/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "width": 1407,
+                "height": 2063,
+                "service": [
+                  {
+                    "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024",
+                    "type": "ImageService3",
+                    "profile": "level0"
+                  }
+                ]
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24"
+            }
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24/georeferences",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["Georeferences"]
+          },
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24/georeferences/1",
+              "type": "Annotation",
+              "label": {
+                "none": ["Evanston, Illinois | 1920 | sanborn01857_004 p24"]
+              },
+              "created": "2026-10-17T21:38:45Z",
+              "modified": "2026-10-17T21:38:45Z",
+              "motivation": "georeferencing",
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24",
+                  "type": "Canvas",
+                  "width": 1407,
+                  "height": 2063
+                },
+                "selector": {
+                  "type": "SvgSelector",
+                  "value": "<svg><polygon points=\"849.0,232.4 968.1,238.7 1156.1,296.7 1208.8,314.6 1268.9,334.9 1056.8,985.0 1002.7,1172.4 872.3,1651.4 865.4,1845.2 731.5,1798.8 672.0,1788.3 399.4,1793.2 373.3,1809.6 247.1,1809.0 214.5,1792.3 188.2,1731.2 196.9,1023.0 230.0,1013.0 228.2,652.8 230.0,235.0 849.0,232.4\" /></svg>"
+                }
+              },
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0024/gcps",
+                "type": "FeatureCollection",
+                "transformation": {
+                  "type": "helmert"
+                },
+                "features": [
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [230, 1013],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.6834386, 42.0470343]
+                    }
+                  },
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [230, 235],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.6833921, 42.0484838]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24/notes",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["Notes"]
+          },
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24/notes/1",
+              "type": "Annotation",
+              "motivation": "commenting",
+              "body": {
+                "type": "TextualBody",
+                "value": "Downtown Evanston from Church Street to Grove Street, its blocks built up mostly in brick, with the railroad on an embankment along its west side.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24"
+            },
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24/notes/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "POST OFFICE",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/24#xywh=648,348,98,18"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28",
+      "type": "Canvas",
+      "label": {
+        "en": ["Sheet 28"]
+      },
+      "width": 1407,
+      "height": 2063,
+      "thumbnail": [
+        {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028/full/352,516/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "width": 352,
+          "height": 516,
+          "service": [
+            {
+              "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028",
+              "type": "ImageService3",
+              "profile": "level0"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028/full/max/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "width": 1407,
+                "height": 2063,
+                "service": [
+                  {
+                    "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028",
+                    "type": "ImageService3",
+                    "profile": "level0"
+                  }
+                ]
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28"
+            }
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28/georeferences",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["Georeferences"]
+          },
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28/georeferences/1",
+              "type": "Annotation",
+              "label": {
+                "none": ["Evanston, Illinois | 1920 | sanborn01857_004 p28 [1]"]
+              },
+              "created": "2026-10-17T21:38:45Z",
+              "modified": "2026-10-17T21:38:45Z",
+              "motivation": "georeferencing",
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28",
+                  "type": "Canvas",
+                  "width": 1407,
+                  "height": 2063
+                },
+                "selector": {
+                  "type": "SvgSelector",
+                  "value": "<svg><polygon points=\"1345.4,1944.1 1406.0,1943.8 1406.0,1870.2 1395.5,1838.3 1314.8,1838.7 1369.7,1618.3 1318.8,1202.4 1229.7,1123.4 1137.0,1120.6 1136.2,1164.2 390.8,1170.4 62.8,1173.8 54.7,1945.9 75.0,1946.0 462.0,1948.0 883.5,1946.2 1345.4,1944.1\" /></svg>"
+                }
+              },
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028__1/gcps",
+                "type": "FeatureCollection",
+                "transformation": {
+                  "type": "helmert"
+                },
+                "features": [
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [462, 1948.1],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.6749132, 42.0425856]
+                    }
+                  },
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [462, 1169.6],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.6748809, 42.0440216]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28/georeferences/2",
+              "type": "Annotation",
+              "label": {
+                "none": ["Evanston, Illinois | 1920 | sanborn01857_004 p28 [2]"]
+              },
+              "created": "2026-10-17T21:38:45Z",
+              "modified": "2026-10-17T21:38:45Z",
+              "motivation": "georeferencing",
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28",
+                  "type": "Canvas",
+                  "width": 1407,
+                  "height": 2063
+                },
+                "selector": {
+                  "type": "SvgSelector",
+                  "value": "<svg><polygon points=\"1269.7,122.3 951.0,122.0 944.1,122.0 941.9,1.0 915.7,1.0 902.0,42.5 880.0,122.0 505.6,128.4 143.9,139.7 146.0,907.8 814.8,892.7 883.1,891.2 1272.1,886.4 1273.5,886.3 1271.6,122.2 1269.7,122.3\" /></svg>"
+                }
+              },
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0028__2/gcps",
+                "type": "FeatureCollection",
+                "transformation": {
+                  "type": "helmert"
+                },
+                "features": [
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [880, 122],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.6768542, 42.0440483]
+                    }
+                  },
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [146, 907.8],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.678754, 42.0426247]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28/notes",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["Notes"]
+          },
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28/notes/1",
+              "type": "Annotation",
+              "motivation": "commenting",
+              "body": {
+                "type": "Choice",
+                "items": [
+                  {
+                    "type": "TextualBody",
+                    "value": "Two maps on one sheet, each from Lake Street to Greenwood Boulevard: Hinman and Judson Avenues above, and Forest Avenue to Sheridan Road below.",
+                    "language": "en",
+                    "format": "text/plain"
+                  },
+                  {
+                    "type": "TextualBody",
+                    "value": "Dos mapas en una hoja, cada uno de Lake Street a Greenwood Boulevard: Hinman Avenue y Judson Avenue arriba, y de Forest Avenue a Sheridan Road abajo.",
+                    "language": "es",
+                    "format": "text/plain"
+                  }
+                ]
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/28"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115",
+      "type": "Canvas",
+      "label": {
+        "en": ["Sheet 115"]
+      },
+      "width": 1407,
+      "height": 2063,
+      "thumbnail": [
+        {
+          "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115/full/352,516/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "width": 352,
+          "height": 516,
+          "service": [
+            {
+              "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115",
+              "type": "ImageService3",
+              "profile": "level0"
+            }
+          ]
+        }
+      ],
+      "navPlace": {
+        "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/navplace",
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/navplace/1",
+            "type": "Feature",
+            "properties": {
+              "label": {
+                "en": ["Northwestern University"]
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [-87.676291, 42.050763],
+                  [-87.674682, 42.050334],
+                  [-87.674467, 42.050252],
+                  [-87.674389, 42.050166],
+                  [-87.674385, 42.050111],
+                  [-87.674133, 42.050228],
+                  [-87.673952, 42.050262],
+                  [-87.673856, 42.050326],
+                  [-87.673774, 42.050304],
+                  [-87.673774, 42.050653],
+                  [-87.673519, 42.055887],
+                  [-87.673755, 42.056035],
+                  [-87.675245, 42.056197],
+                  [-87.677169, 42.05617],
+                  [-87.677189, 42.055018],
+                  [-87.677209, 42.053841],
+                  [-87.67727, 42.051258],
+                  [-87.677274, 42.051173],
+                  [-87.677291, 42.051106],
+                  [-87.677069, 42.050999],
+                  [-87.676872, 42.050923],
+                  [-87.676527, 42.050828],
+                  [-87.676291, 42.050763]
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      "items": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115/full/max/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "width": 1407,
+                "height": 2063,
+                "service": [
+                  {
+                    "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115",
+                    "type": "ImageService3",
+                    "profile": "level0"
+                  }
+                ]
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115"
+            }
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/georeferences",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["Georeferences"]
+          },
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/georeferences/1",
+              "type": "Annotation",
+              "label": {
+                "none": [
+                  "Evanston, Illinois | 1920 | sanborn01857_004 p115 [2]"
+                ]
+              },
+              "created": "2026-10-17T21:38:45Z",
+              "modified": "2026-10-17T21:38:45Z",
+              "motivation": "georeferencing",
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115",
+                  "type": "Canvas",
+                  "width": 1407,
+                  "height": 2063
+                },
+                "selector": {
+                  "type": "SvgSelector",
+                  "value": "<svg><polygon points=\"840.2,1782.5 1162.2,1891.3 1205.5,1912.5 1221.4,1935.2 1222.5,1949.8 1272.1,1917.5 1307.8,1907.8 1326.5,1890.3 1343.0,1895.9 1341.2,1802.5 1364.8,399.7 1317.1,360.9 1020.1,323.2 637.5,337.8 639.6,646.5 641.6,961.8 642.9,1653.7 642.5,1676.5 639.5,1694.5 684.2,1722.5 723.8,1741.9 792.9,1766.1 840.2,1782.5\" /></svg>"
+                }
+              },
+              "body": {
+                "id": "https://cdn.chronoscope.io/mapsnap/service:gmd:gmd410m:g4104m:g4104em:g018571920:01857_1920-0115__2/gcps",
+                "type": "FeatureCollection",
+                "transformation": {
+                  "type": "helmert"
+                },
+                "features": [
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [644.5, 1717.1],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.67726795681673, 42.05102155265735]
+                    }
+                  },
+                  {
+                    "type": "Feature",
+                    "properties": {
+                      "resourceCoords": [641.5, 312.6],
+                      "type": "gcp"
+                    },
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [-87.67714684808173, 42.0562640936786]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/notes",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["Notes"]
+          },
+          "items": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/notes/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "NORTHWESTERN UNIVERSITY",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115#xywh=330,1011,544,25"
+            },
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115/notes/2",
+              "type": "Annotation",
+              "motivation": "linking",
+              "body": [
+                {
+                  "type": "TextualBody",
+                  "value": "The 1920 volume, all 119 sheets, at the Library of Congress.",
+                  "language": "en",
+                  "format": "text/plain"
+                },
+                {
+                  "type": "SpecificResource",
+                  "source": {
+                    "id": "https://www.loc.gov/item/sanborn01857_004/",
+                    "type": "Text",
+                    "format": "text/html",
+                    "label": {
+                      "en": [
+                        "Sanborn Fire Insurance Map from Evanston, Cook County, Illinois"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/115#xywh=48,30,92,76"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

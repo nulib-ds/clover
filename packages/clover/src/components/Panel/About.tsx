@@ -23,6 +23,7 @@ import { titleTag, titled } from "../../ui/heading";
 import { Label } from "../Label/Label";
 import { languageProps } from "../../i18n/direction";
 import { readDate } from "../../core/dates";
+import { selectVisibleCanvases } from "../../core/selectors";
 // Alone, outside a Panel, its downloads' links in a section of their own, drawn then.
 const DownloadGroups = lazy(() =>
   import("../Download/Download").then(({ DownloadGroups }) => ({
@@ -33,6 +34,8 @@ const DownloadGroups = lazy(() =>
 const NavDate = lazy(() =>
   import("../../ui/NavDate").then(({ NavDate }) => ({ default: NavDate })),
 );
+// Its places, with their reader, only where it has one (Mat, 2026-11-13).
+const NavPlaces = lazy(() => import("./NavPlaces"));
 
 export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
   /** Also show the current Canvas's summary, for Manifests that describe each image. */
@@ -83,9 +86,11 @@ const PartOfManifest = lazy(() => import("./PartOfManifest"));
 
 /**
  * Everything the Manifest says about itself, in the order 3.x's About tab shows it:
- * what a Canvas shown on its own is part of, then summary, metadata, required statement,
- * provider (its logo and name, linked to its homepage), rights, homepage, see also,
- * downloads, and the Manifest's own address, its thumbnail over them all (`thumbnail`).
+ * what a Canvas shown on its own is part of, then summary, its places (`navPlace`, the
+ * Manifest's and the view's Canvases', each shown on the map over the Body as it is
+ * pressed), metadata, required statement, its date (`navDate`), provider (its logo and
+ * name, linked to its homepage), rights, homepage, see also, downloads, and the
+ * Manifest's own address, its thumbnail over them all (`thumbnail`).
  * Each part renders only if the Manifest has
  * it. The downloads are Download's: the `rendering` of the page in view ("This page")
  * and of the Manifest ("All pages").
@@ -136,6 +141,14 @@ function AboutContent({
     (state) => state.manifest as Record<string, any> | null,
     Object.is,
     "About",
+  );
+  // Whether it, or a Canvas in view, names where it is (`navPlace`): only a look.
+  const placed = useCloverSelector(
+    (state) =>
+      Boolean((state.manifest as { navPlace?: unknown } | null)?.navPlace) ||
+      selectVisibleCanvases(state.manifest, state.canvasId).some((canvas) =>
+        Boolean((canvas as { navPlace?: unknown }).navPlace),
+      ),
   );
   /*
    * The full Manifest opened from "Part of": the button goes with the Canvas, so focus
@@ -272,6 +285,23 @@ function AboutContent({
         </Suspense>
       )}
       <Summary className="clover-about-summary" />
+      {/*
+       * Where it is, each place shown on the map, after the summary and before the
+       * metadata (Mat, 2026-11-13: "put this after the summary. before metadata"): a label
+       * and its value, as the metadata's are, so no heading claims the metadata after it.
+       */}
+      {placed && (
+        <dl className="clover-about-place-of">
+          <div>
+            <dt {...languageProps(langOf("aboutPlace"))}>{t("aboutPlace")}</dt>
+            <dd>
+              <Suspense fallback={null}>
+                <NavPlaces />
+              </Suspense>
+            </dd>
+          </div>
+        </dl>
+      )}
       <Metadata className="clover-about-metadata" />
       <RequiredStatement className="clover-about-metadata" />
       {/* Its date for navigation, as its metadata says its others (Cookbook 0318). */}
