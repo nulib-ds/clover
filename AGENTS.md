@@ -86,7 +86,10 @@ deadline.
     root) and `NEXT_PUBLIC_SITE_URL` (canonical links, `docs/lib/site.ts`, from
     `vars.DOCS_SITE_URL`). Without them, a build is for
     `clover.iiif.library.northwestern.edu` at its root. The infrastructure itself is
-    `terraform/`.
+    `terraform/`. CORS is open to any origin, for the mocks and fixtures, through the
+    managed `Managed-CORS-with-preflight-and-SecurityHeadersPolicy` (2026-11-16; the
+    policy without preflight sent browsers no CORS header, `terraform/CORS.md`): check it
+    with a browser's headers (`Priority: u=1, i`), never `Origin` alone.
   - The site is a static export, so there are no server redirects. URLs that moved
     (3.x pages from `/docs/…` and `/docs/3.x/…`, 4.x pages from `/docs/4.x/…`, the demo, the Panel's page)
     are sent on by the 404 page (`app/not-found.tsx`, exported as `404.html`, which CloudFront
@@ -526,7 +529,7 @@ deadline.
     root). The Gallery's opens on its catalog's Manifest, switched at the card's top to
     the Collection it is in, and to James Turner's AnnotationPage (Mat, 2026-11-01), a path
     to a file of the site's own (`/annotations/james-turner.json`), fetched from the site
-    it is on (the published one sends no CORS headers) and written in the code as its
+    it is on (so a preview shows it before the docs deploy) and written in the code as its
     published address (`LiveViewerExample`'s `resources`, a docs example's switch, never
     the template's; Mat, 2026-11-01: "highlight how gallery can be used in both levels"). An example of what one template alone reads is on its page; the Viewer page
     keeps what every template, or Default and Document both (Panel layout), read. The
