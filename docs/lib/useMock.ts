@@ -19,9 +19,9 @@ const PUBLISHED_MOCKS = "https://clover.iiif.library.northwestern.edu/mocks/";
 
 /**
  * An address as an example's code writes it, a published mock's fetched from the site the
- * page is on instead (`useMock`): the published site sends no CORS headers, so from
- * `npm run dev` or a preview its own address fails to fetch. Any other address is as
- * given; a mock's is null until mounted.
+ * page is on instead (`useMock`), so `npm run dev` or a preview shows the mock as it is
+ * there, before the docs deploy. Any other address is as given; a mock's is null until
+ * mounted.
  */
 export function useSiteMock(address: string): string | null;
 export function useSiteMock(address?: string): string | null | undefined;

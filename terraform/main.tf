@@ -153,9 +153,11 @@ data "aws_cloudfront_cache_policy" "optimized" {
 }
 
 # The security headers, and CORS open to any origin: the mocks and the 3.x fixtures are
-# IIIF resources published for any viewer to open, which needs CORS.
+# IIIF resources published for any viewer to open, which needs CORS. The preflight
+# policy, not `Managed-CORS-and-SecurityHeadersPolicy`, which sends no CORS header to a
+# browser's `fetch()`. See `CORS.md`.
 data "aws_cloudfront_response_headers_policy" "security" {
-  name = "Managed-CORS-and-SecurityHeadersPolicy"
+  name = "Managed-CORS-with-preflight-and-SecurityHeadersPolicy"
 }
 
 resource "aws_cloudfront_distribution" "site" {
