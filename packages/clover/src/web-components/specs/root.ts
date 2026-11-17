@@ -13,6 +13,7 @@ export const root: ElementSpec = {
     "search-query": { prop: "searchQuery", type: "string" },
     annotations: { prop: "annotations", type: "data" },
     "annotation-pages": { prop: "annotationPages", type: ["view", "all"] },
+    "annotations-shown": { prop: "defaultAnnotationsShown", type: "boolean" },
     lang: { prop: "lang", type: "string" },
   },
   properties: ["iiifContent", "annotations", "request", "renderers"],
@@ -73,6 +74,11 @@ export const rootDocs: ElementDocs = {
       description:
         "Whose referenced annotation pages to fetch: the current view's as it changes, or every Canvas's at once.",
       default: "view",
+    },
+    "annotations-shown": {
+      description:
+        "Whether annotations start shown on the Body. \"false\" starts each annotation set hidden, and its toggle in Annotations or the Canvas's annotations menu shows it. The Ranges' regions start hidden too, shown as one is picked in Contents. A search's results and a content state's own annotation still show.",
+      default: "true",
     },
     lang: {
       description:

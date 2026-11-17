@@ -1754,6 +1754,39 @@ describe("templates", () => {
     expect(within(aside).queryByRole("radio")).toBeNull();
   });
 
+  it("Document: the page layout's menu lays the pages out one or two at a time, Escape back to its button", async () => {
+    render(<Templates.Document iiifContent={bookJson} defaultSidebarOpen />);
+    const button = await screen.findByRole("button", { name: "Page layout" });
+    const sidebar = () =>
+      document.querySelectorAll(
+        ".clover-template-document-thumbnails [role='option']",
+      ).length;
+    await waitFor(() => expect(sidebar()).toBeGreaterThan(0));
+    const spreads = sidebar();
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    const group = screen.getByRole("group", { name: "Page layout" });
+    const auto = within(group).getByRole("radio", { name: "Automatic" });
+    expect(auto).toBeChecked();
+    expect(auto).toHaveFocus();
+    fireEvent.click(within(group).getByRole("radio", { name: "Single page" }));
+    await waitFor(() => expect(sidebar()).toBe(bookJson.items.length));
+    expect(sidebar()).toBeGreaterThan(spreads);
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveFocus();
+  });
+
+  it("Document: no page layout's control where there is no choice to make", async () => {
+    render(<Templates.Document iiifContent={singleJson} />);
+    await waitFor(() =>
+      expect(
+        document.querySelector(".clover-template-document-toolbar"),
+      ).not.toBeNull(),
+    );
+    expect(screen.queryByRole("button", { name: "Page layout" })).toBeNull();
+  });
+
   it("Document: a section's button opens it alone, another's replaces it, its own again puts it away", async () => {
     render(<Templates.Document iiifContent={tocJson} />);
     const toolbar = await waitFor(() => {

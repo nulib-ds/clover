@@ -18,6 +18,7 @@ import type {
   RootProps,
 } from "../../parts";
 import { useAwayForPlaces } from "../shared/useAwayForPlaces";
+import { PageLayoutMenu } from "../shared/PageLayoutMenu";
 import { preloadDrag } from "../shared/useDragToClose";
 import { useDrawer } from "../shared/useDrawer";
 import { useFollowFocus } from "../shared/useFollowFocus";
@@ -117,6 +118,20 @@ export type DocumentProps = Omit<RootProps, "children"> & {
   collapseControls?: "auto" | "always";
   /** The Body's Canvas `options`: its gestures, zoom limits and motion. */
   canvasOptions?: CloverCanvasOptions;
+  /**
+   * Whether annotations start shown, on the pages and in the full viewer. Unset, the
+   * pages read clean and the full viewer shows them as it opens; `true` or `false` holds
+   * in both. Each set's toggle in Annotations, or the Canvas's annotations menu, shows or
+   * hides it. The Root's `defaultAnnotationsShown`.
+   */
+  defaultAnnotationsShown?: boolean;
+  /**
+   * The page layout's control under the thumbnails' toggle: Automatic (as the Manifest's
+   * `behavior` says), Single page or Two pages, in a small menu, as a PDF reader offers
+   * them. Default `true`; shown where the Manifest lays its pages out one or two at a
+   * time and has three or more.
+   */
+  pageLayout?: boolean;
 };
 
 /**
@@ -140,6 +155,8 @@ export function Document({
   storageKey = "clover-template-document",
   collapseControls,
   canvasOptions,
+  defaultAnnotationsShown,
+  pageLayout = true,
   ...given
 }: DocumentProps) {
   // The Panel's own prop, which Document does not read, left out of the Root's.
@@ -157,6 +174,7 @@ export function Document({
         .join(" ")}
       {...title.group}
       {...root}
+      defaultAnnotationsShown={defaultAnnotationsShown ?? false}
     >
       <DocumentLayout
         title={title}
@@ -172,6 +190,8 @@ export function Document({
         storageKey={storageKey}
         collapseControls={collapseControls}
         canvasOptions={canvasOptions}
+        defaultAnnotationsShown={defaultAnnotationsShown}
+        pageLayout={pageLayout}
       />
     </Clover.Root>
   );
@@ -218,6 +238,8 @@ function DocumentLayout({
   panelLabels,
   collapseControls,
   canvasOptions,
+  defaultAnnotationsShown,
+  pageLayout,
   title,
 }: { title: Clover.Titled } & Pick<
   DocumentProps,
@@ -233,6 +255,8 @@ function DocumentLayout({
   | "panelLabels"
   | "collapseControls"
   | "canvasOptions"
+  | "defaultAnnotationsShown"
+  | "pageLayout"
 >) {
   const t = Clover.useT();
   const langOf = Clover.useLangOf();
@@ -631,6 +655,18 @@ function DocumentLayout({
   const media = mediaOf(viewCanvases);
   const full = expanded;
   /*
+   * Unless the page sets `defaultAnnotationsShown`, the full viewer shows the annotations
+   * the pages start without (Mat, 2026-11-16: "in a document viewer, expanding show
+   * should show the annotations", "unless they set the prop explicitly"), and the pages
+   * are clean again as it closes; a set the reader hid or showed keeps that choice. Set,
+   * the Root holds it in both. After the Root's own setting (a passive effect runs after
+   * its layout effect), so it wins.
+   */
+  const followsFull = defaultAnnotationsShown === undefined;
+  useEffect(() => {
+    if (followsFull) clover.setAnnotationsShown(full);
+  }, [clover, full, followsFull]);
+  /*
    * Where the map lies (its `Inset`'s `container`, which it moves to and from, keeping
    * the one map): in the full viewer, in its Body (`"body"`), so the Canvas's controls and
    * their Tips lie over the map's box, which hangs `s` under them, as they lie over the
@@ -757,6 +793,14 @@ function DocumentLayout({
       <span style={Clover.visuallyHidden}>{t("templateSidebarToggle")}</span>
       <Clover.Tip label={t("templateSidebarToggle")} />
     </button>
+  );
+
+  /*
+   * Under the toggle, the page layout's (Mat, 2026-11-16: "add toggle here"), on the
+   * spine with it or in the corner while the thumbnails are put away.
+   */
+  const layoutMenu = pageLayout && (
+    <PageLayoutMenu className="clover-template-document-page-layout" />
   );
 
   return (
@@ -890,7 +934,10 @@ function DocumentLayout({
             className="clover-template-document-spine"
             data-for="sidebar"
           >
-            {toggle}
+            <div className="clover-template-document-sidebar-controls">
+              {toggle}
+              {layoutMenu}
+            </div>
           </div>
         )}
         <Clover.SplitPane
@@ -910,6 +957,7 @@ function DocumentLayout({
             {pages && !sidebar.open && (
               <div className="clover-template-document-sidebar-closed">
                 {toggle}
+                {layoutMenu}
               </div>
             )}
             {media && viewControls}

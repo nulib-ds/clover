@@ -446,24 +446,44 @@ export function selectListedSets(
   return listed;
 }
 
-const hiddenOf = new WeakMap<
+/**
+ * Whether a set starts hidden where a Root's `defaultAnnotationsShown` is `false`: every
+ * set but a search's results and a content state's own annotation, which are what was
+ * asked for. Each is shown again as any set is, by its toggle or by picking one of its
+ * annotations. The Ranges' regions start hidden too (`CONTENTS_SET_ID`, read apart from
+ * these sets: Mat, 2026-11-16, "bounding boxes drawn for xywh targeting chapters should
+ * also respect the annotations shown prop"), shown as a region is picked in Contents.
+ */
+const hiddenByDefault = (set: AnnotationSet) =>
+  set.source !== "search" && !set.id.endsWith("#content-state");
+
+type HiddenCache = WeakMap<
   AnnotationSet[],
   { hidden: string[]; shown: string[]; ids: string[] }
->();
+>;
+/*
+ * One cache for each way of asking: a Canvas asks both (its menu's unlisted sets read
+ * the OCR's alone), and one cache would hand each a new array every time.
+ */
+const hiddenOf: HiddenCache = new WeakMap();
+const allHiddenOf: HiddenCache = new WeakMap();
 
 /**
  * The sets not drawn: those switched off (`hiddenSets`), and those that start hidden
- * (`startsHidden`) and were not switched on (`shownSets`). The same array comes back
- * while nothing changes.
+ * (`startsHidden`, or every set while `allHidden`, a Root's `defaultAnnotationsShown`
+ * of `false`) and were not switched on (`shownSets`). The same array comes back while
+ * nothing changes.
  */
 export function selectHiddenSets(
   manifest: Manifest | null,
   added: AnnotationSet[],
   hidden: string[],
   shown: string[],
+  allHidden = false,
 ): string[] {
   const sets = selectAnnotationSets(manifest, added);
-  const cached = hiddenOf.get(sets);
+  const cache = allHidden ? allHiddenOf : hiddenOf;
+  const cached = cache.get(sets);
   if (cached && cached.hidden === hidden && cached.shown === shown)
     return cached.ids;
   const quiet = sets
@@ -471,11 +491,18 @@ export function selectHiddenSets(
       (set) =>
         !hidden.includes(set.id) &&
         !shown.includes(set.id) &&
-        startsHidden(set, (id) => selectCanvas(manifest, id) ?? undefined),
+        ((allHidden && hiddenByDefault(set)) ||
+          startsHidden(set, (id) => selectCanvas(manifest, id) ?? undefined)),
     )
     .map((set) => set.id);
+  if (
+    allHidden &&
+    !hidden.includes(CONTENTS_SET_ID) &&
+    !shown.includes(CONTENTS_SET_ID)
+  )
+    quiet.push(CONTENTS_SET_ID);
   const ids = quiet.length ? [...hidden, ...quiet] : hidden;
-  hiddenOf.set(sets, { hidden, shown, ids });
+  cache.set(sets, { hidden, shown, ids });
   return ids;
 }
 

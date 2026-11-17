@@ -34,6 +34,7 @@ export { useAwayForPlaces } from "./shared/useAwayForPlaces";
 export type { AwayDrawer } from "./shared/useAwayForPlaces";
 export { preloadDrag } from "./shared/useDragToClose";
 export { useFollowFocus } from "./shared/useFollowFocus";
+export { PageLayoutGlyph, PageLayoutMenu } from "./shared/PageLayoutMenu";
 export {
   BESIDE_REM,
   PAGE_MIN,

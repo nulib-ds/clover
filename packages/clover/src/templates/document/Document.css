@@ -817,8 +817,20 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
   gap: var(--clover-space-xs);
 }
 
-.clover-template-document-sidebar-closed {
+/*
+ * The thumbnails' toggle, and the page layout's control under it (`PageLayoutMenu`), `xs`
+ * apart: in the corner while they are put away, and on the spine beside them.
+ */
+.clover-template-document-sidebar-closed,
+.clover-template-document-sidebar-controls {
   display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-xs);
+}
+
+/* The view's controls beside them keep to the toggle's row. */
+.clover-template-document-lead {
+  align-items: flex-start;
 }
 
 /*
@@ -925,6 +937,22 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
 }
 
 /*
+ * A page's label runs to four lines and is cut short after (Mat, 2026-11-16: "clamp
+ * these at 4 lines"), as a grid's are at three (`Items.css`), so a long one never pushes
+ * the thumbnails apart; under the pointer or focused, it shows whole over the picture
+ * (WCAG 1.4.12, `clamped.ts`).
+ */
+.clover-template-document-sidebar
+  .clover-items[data-layout]
+  .clover-items-label-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}
+
+/*
  * Each picture its Canvas's shape at the sidebar's width, waiting for its image or not,
  * the image contained in it: one arriving, or shaped otherwise than its Canvas, never
  * moves the thumbnails (Mat, 2026-10-24: a press was lost as the ones above it grew).
@@ -963,12 +991,15 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
  */
 .clover-template-document-column {
   /*
-   * The space around every page, `xl`: between two, over the first, under the last and
-   * at their sides (Mat, 2026-11-09: "a gap between them that equals left", "expand gap
-   * 1 step", then "that gap should include the outside edges too"), the live Canvas
-   * fitting its pictures inside it as the stills are (below).
+   * The space around the pages, `xl`: over the first, under the last and at their sides
+   * (Mat, 2026-11-09: "expand gap 1 step", "that gap should include the outside edges
+   * too"), the live Canvas fitting its pictures inside it as the stills are (below).
+   * Between two, a space smaller, `l` (Mat, 2026-11-16: "the gap between spreads is in
+   * total one sizing step down from gap surrounding the edges"; equal to it from
+   * 2026-11-09).
    */
   --clover-template-document-gap: var(--clover-space-xl);
+  --clover-template-document-between: var(--clover-space-l);
   position: absolute;
   inset: 0;
   overflow-x: hidden;
@@ -980,16 +1011,16 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--clover-template-document-gap);
+  gap: var(--clover-template-document-between);
   padding-block: var(--clover-template-document-gap);
 }
 
 /*
  * A sheet, a Body entry for its view (`Sheets`): its pictures side by side at one
  * height, fitted whole with the gap at their sides, as the Canvas fits them at home.
- * At most as tall as the column less the gap above it and under it, and the inset's
- * depth of the next one's picture, which always shows (`--…-tease`). The same gap
- * between every two (Mat, 2026-11-09: "a uniform gap between each body instance"). None
+ * At most as tall as the column less the gap above it, the space under it and the
+ * inset's depth of the next one's picture, which always shows (`--…-tease`). The same
+ * space between every two (Mat, 2026-11-09: "a uniform gap between each body instance"). None
  * grows or fades: zoomed into, the live Canvas zooms within its sheet. A document of one
  * sheet has nothing to show under it, and takes the whole column.
  */
@@ -1000,7 +1031,8 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
   justify-content: center;
   box-sizing: border-box;
   height: min(
-    100cqh - 2 * var(--clover-template-document-gap) -
+    100cqh - var(--clover-template-document-gap) -
+      var(--clover-template-document-between) -
       var(--clover-template-document-tease),
     (100cqw - 2 * var(--clover-template-document-gap)) / var(--ratio)
   );
@@ -1013,7 +1045,8 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
  */
 .clover-template-document-sheet[data-fill] {
   height: calc(
-    100cqh - 2 * var(--clover-template-document-gap) -
+    100cqh - var(--clover-template-document-gap) -
+      var(--clover-template-document-between) -
       var(--clover-template-document-tease)
   );
 }
@@ -1881,4 +1914,146 @@ button.clover-template-document-live-play:focus-visible {
   > .clover-template-document-spine[data-for="sidebar"]
   > * {
   inset-inline-end: calc(var(--clover-control) / -2);
+}
+
+/*
+ * The thumbnails' toggle and the page layout's control, one over the other: their Tips
+ * beside them, toward the page, as a split handle's is (`ui/Tip.css`), so neither covers
+ * the other. (Four classes: over the lead's and the spine's own placing.)
+ */
+.clover-template-document
+  .clover-template-document-panes
+  :is(
+    .clover-template-document-sidebar-controls,
+    .clover-template-document-sidebar-closed
+  )
+  .clover-tip {
+  top: 50%;
+  bottom: auto;
+  inset-inline: calc(100% + var(--clover-space-xs)) auto;
+  translate: 0 -50%;
+}
+
+.clover-template-document
+  .clover-template-document-panes
+  :is(
+    .clover-template-document-sidebar-controls,
+    .clover-template-document-sidebar-closed
+  )
+  .clover-tip::before {
+  inset-block: 0;
+  inset-inline: auto 100%;
+  width: var(--clover-space-xs);
+  height: auto;
+}
+
+/*
+ * A step's preview in the full viewer (`ViewControls.tsx`): over the step, centered on
+ * it, `xs` clear, drawn as the Inset is (`ui/Inset.css`): Clover's ground, `xs` inside,
+ * one radius and one shadow; its pages side by side, stitched as Items draws a spread
+ * (Mat, 2026-11-16: "close the gap between images"), 6rem tall, each
+ * page's label a Tip over its picture as the pointer rests on it. It shows in the step's Tip's place while the
+ * step is under the pointer or focused, the pointer crossing the gap onto it, and goes on
+ * Escape until the pointer or focus leaves (WCAG 1.4.13).
+ */
+.clover-template-document-step {
+  position: relative;
+  display: inline-flex;
+}
+
+.clover-template-document-step-preview {
+  position: absolute;
+  z-index: 4;
+  bottom: calc(100% + var(--clover-space-xs));
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-2xs);
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(18rem, 80vw);
+  padding: var(--clover-space-xs);
+  border-radius: var(--clover-radius, 6px);
+  background: var(--clover-color-secondary, #fff);
+  color: var(--clover-color-primary-muted, #26292b);
+  box-shadow: 0 4px 16px #0001;
+  font-size: var(--clover-text-s);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 120ms ease,
+    visibility 0s linear 120ms;
+}
+
+/* The gap under it, bridged for the pointer. */
+.clover-template-document-step-preview::after {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  height: var(--clover-space-xs);
+  content: "";
+}
+
+.clover-template-document-step-pages {
+  display: flex;
+}
+
+.clover-template-document-step-page
+  > :is(img, .clover-template-document-step-blank) {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 6rem;
+  min-width: 0;
+  object-fit: contain;
+  background: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+.clover-template-document-step-blank {
+  aspect-ratio: 3 / 4;
+}
+
+.clover-template-document-step-page {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.clover-template-document-step[data-preview]:is(
+    :hover,
+    :has(> button:focus-visible)
+  ):not([data-dismissed])
+  > .clover-template-document-step-preview {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 120ms ease;
+}
+
+/* A step at either end goes nowhere: no preview. */
+.clover-template-document-step:has(> button[aria-disabled="true"])
+  > .clover-template-document-step-preview {
+  display: none;
+}
+
+/* Its preview says where it goes: the step's own Tip gives way. */
+.clover-template-document-step[data-preview] > button > .clover-tip {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-template-document-step-preview {
+    transition: none;
+  }
+}
+
+/* A recording's steps, at the top start (`.clover-template-document-lead`): under them. */
+.clover-template-document-lead .clover-template-document-step-preview {
+  top: calc(100% + var(--clover-space-xs));
+  bottom: auto;
+}
+
+.clover-template-document-lead .clover-template-document-step-preview::after {
+  top: auto;
+  bottom: 100%;
 }

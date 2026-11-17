@@ -250,6 +250,77 @@ describe("annotation sets", () => {
     it("leaves caption files alone: they are never a set", () => {
       expect(selectHiddenSets(p4(captionsJson), [], [], [])).toEqual([]);
     });
+
+    describe("with annotations shown by default off (`defaultAnnotationsShown`)", () => {
+      const every = [
+        "https://example.org/page/ocr",
+        "https://example.org/note/ocr",
+        "https://example.org/recording/ocr",
+      ];
+
+      it("starts every set hidden, each shown again by its toggle", () => {
+        // The Ranges' regions too, read apart from the sets.
+        expect(
+          [...selectHiddenSets(manifest, [], [], [], true)].sort(),
+        ).toEqual([...every, CONTENTS_SET_ID].sort());
+        expect(
+          selectHiddenSets(manifest, [], [], [CONTENTS_SET_ID], true),
+        ).not.toContain(CONTENTS_SET_ID);
+        const note = "https://example.org/note/ocr";
+        expect(selectHiddenSets(manifest, [], [], [note], true)).not.toContain(
+          note,
+        );
+      });
+
+      it("keeps the same array for each way of asking, asked in turn", () => {
+        // The store's arrays, the same until a set is switched.
+        const added: never[] = [];
+        const none: string[] = [];
+        const all = selectHiddenSets(manifest, added, none, none, true);
+        const ocr = selectHiddenSets(manifest, added, none, none);
+        expect(selectHiddenSets(manifest, added, none, none, true)).toBe(all);
+        expect(selectHiddenSets(manifest, added, none, none)).toBe(ocr);
+      });
+
+      it("still shows a search's results and a content state's own annotation", () => {
+        const added = [
+          { id: SEARCH_SET_ID, source: "search", entries: [] },
+          {
+            id: "https://example.org/note#content-state",
+            source: "added",
+            entries: [],
+          },
+        ] as never;
+        const hidden = selectHiddenSets(manifest, added, [], [], true);
+        expect(hidden).not.toContain(SEARCH_SET_ID);
+        expect(hidden).not.toContain("https://example.org/note#content-state");
+      });
+
+      it("follows the Root through its Clover, and a set chosen shows again", () => {
+        const clover = createClover();
+        clover.store.set({ manifest });
+        clover.setAnnotationsShown(false);
+        const hidden = () => {
+          const state = clover.store.get();
+          return selectHiddenSets(
+            state.manifest,
+            state.addedSets,
+            state.hiddenSets,
+            state.shownSets,
+            !state.annotationsShown,
+          );
+        };
+        const note = "https://example.org/note/ocr";
+        expect(hidden()).toContain(note);
+        const [entry] = selectAnnotationSets(manifest, []).find(
+          (set) => set.id === note,
+        )!.entries;
+        clover.selectAnnotation(entry.id);
+        expect(hidden()).not.toContain(note);
+        clover.setAnnotationsShown(true);
+        expect(hidden()).toEqual(["https://example.org/page/ocr"]);
+      });
+    });
   });
 
   // Cookbook 0139: a map on the page, tagged with where it shows, a GeoJSON Feature.

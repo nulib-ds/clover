@@ -14,6 +14,7 @@ export const viewer: ElementSpec = {
     "high-contrast": { prop: "highContrast", type: "boolean" },
     "search-query": { prop: "searchQuery", type: "string" },
     annotations: { prop: "annotations", type: "data" },
+    "annotations-shown": { prop: "defaultAnnotationsShown", type: "boolean" },
     // Past 6 the titles name what they head instead (`ui/heading.ts`).
     "heading-level": { prop: "headingLevel", type: "number", min: 2 },
     items: {
@@ -34,6 +35,7 @@ export const viewer: ElementSpec = {
     "panel-sections": { prop: "panelSections", type: "data" },
     "panel-labels": { prop: "panelLabels", type: "data" },
     "sidebar-open": { prop: "defaultSidebarOpen", type: "boolean" },
+    "page-layout": { prop: "pageLayout", type: "boolean" },
     "storage-key": { prop: "storageKey", type: "string" },
     fill: { prop: "fill", type: "boolean" },
     "collapse-controls": { prop: "collapseControls", type: ["auto", "always"] },
@@ -99,6 +101,10 @@ export const viewerDocs: ElementDocs = {
     annotations: {
       description:
         "Annotations to show beside the Manifest's own: a URL, or JSON (a list of URLs, or an AnnotationPage).",
+    },
+    "annotations-shown": {
+      description:
+        'Whether annotations start shown on the Body. "false" starts each annotation set hidden, and its toggle in Annotations or the Canvas\'s annotations menu shows it. Default and Gallery show them by default; Document, unless it is given, shows them in its full viewer and not on its pages.',
     },
     "heading-level": {
       description:
@@ -166,6 +172,11 @@ export const viewerDocs: ElementDocs = {
     "sidebar-open": {
       description:
         "Document: whether the page thumbnails start shown beside the page. By default, where the resource has several pages; a single page's starts put away. Where they would float over the page (a phone), they start put away.",
+    },
+    "page-layout": {
+      description:
+        "Document: the page layout's control under the thumbnails' toggle, a small menu of Automatic (as the Manifest says), Single page and Two pages. Shown where the Manifest lays its pages out one or two at a time and has three or more. \"false\" leaves it out.",
+      default: "true",
     },
     "storage-key": {
       description:

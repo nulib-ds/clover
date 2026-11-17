@@ -11,6 +11,54 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Document's page layout.** Under the thumbnails' toggle, a round control opens a small
+  menu of Automatic (as the Manifest's `behavior` says), Single page and Two pages, as a
+  PDF reader offers them; the current Canvas stays in view as the pages regroup. It shows
+  where the Manifest lays its pages out one or two at a time and has three or more;
+  `pageLayout={false}` (`page-layout="false"`) leaves it out. The Root holds the choice,
+  `clover.setPageLayout("auto" | "individuals" | "paged")`, with `pageLayout` and
+  `declaredLayout` in its state, and `PageLayoutMenu` and `PageLayoutGlyph` come from
+  `@nulib/clover/templates` for a template of your own.
+
+- **`defaultAnnotationsShown` on `Root` and the Viewer** (`annotations-shown` on
+  `<clover-root>` and `<clover-viewer>`), `true` by default: `false` starts each
+  annotation set hidden, as a still Canvas's OCR is, and its toggle in Annotations or the
+  Canvas's annotations menu shows it, as picking one of its annotations does. The Ranges'
+  regions start hidden too, shown as one is picked in Contents. A search's results and a
+  content state's own annotation still show. Every template passes it to its Root.
+
+### Changed
+
+- **Document shows annotations in its full viewer, not on its pages.** Its pages read
+  clean, and the full viewer shows the annotations and the Ranges' regions as it opens
+  and hides them as it closes; a set's toggle still shows or hides it. Given
+  `defaultAnnotationsShown`, the value holds in both. To show them everywhere, as before:
+
+  ```jsx
+  <Viewer iiifContent={url} template={Document} defaultAnnotationsShown />
+  ```
+
+- **Document's Previous and Next show where they go.** In the full viewer, a step under
+  the pointer or focused shows a small picture of the view it goes to, its pages stitched
+  as Items draws a spread, in the Inset's look, in place of its Tip; a page's label shows
+  as the pointer rests on its picture. Escape puts it away.
+
+- **Document's spreads sit closer together.** The space between two is one size down
+  from the space around them (`--clover-space-l`, under `--clover-space-xl` at the
+  column's edges), and a spread brought to the top rests with the edge's space over it,
+  as the first does.
+
+- **Document's thumbnail labels run to four lines**, cut short after, and show whole
+  under the pointer or focused, as a grid's do at three.
+
+- **Size budgets raised** to the next 50 bytes over what this release measures: Document
+  to 87.6 kB (111.05 kB to first view, 157.1 kB as a `<clover-viewer>`), for its page
+  layout menu and its steps' previews; the other templates, pages and elements by 0.05 to
+  0.75 kB, for the Root's annotation and page layout settings and the new strings, which
+  every page loads.
+
 ## [4.11.0] - 2026-11-16
 
 ### Changed

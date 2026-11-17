@@ -167,6 +167,7 @@ export type {
   CloverOptions,
   CloverState,
   CloverStatus,
+  PageLayout,
   ViewportState,
 } from "./core/clover";
 export { toPresentation4 } from "./core/presentation";

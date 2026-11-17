@@ -116,6 +116,7 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
       state.addedSets,
       state.hiddenSets,
       state.shownSets,
+      !state.annotationsShown,
     ),
   );
   const selectedAnnotation = useCloverSelector((state) => state.annotationId);

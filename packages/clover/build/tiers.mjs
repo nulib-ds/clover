@@ -157,8 +157,9 @@ export const SURFACES = [
   // The Canvas's map expanded over its Body, as Document's is over its pages.
   "clover-canvas-place",
   // A thumb in a small box, a press on it expanding what it is a thumb of (`Inset`), with
-  // its controls.
+  // its controls; and Document's steps' previews, drawn as it is.
   "clover-inset",
+  "clover-template-document-step-preview",
 ];
 
 /**
