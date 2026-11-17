@@ -15,6 +15,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Selectable text on a Canvas.** The text of `supplementing` annotations on regions of
+  an image (OCR, as the Internet Archive's and Northwestern's are) lies over it, unseen,
+  to select and copy as in a PDF, in every template and wherever a `Canvas` or `Body`
+  draws an image. A mouse or a pen dragged from a word selects it rather than panning, a
+  double click takes a word, a finger still pans, and Control+A or Command+A on the
+  focused Canvas selects all of it (the viewport's `aria-keyshortcuts` and key
+  description say so). Held still, a selection shows what it copies in a popover, with
+  Copy and Close; a copy writes each annotation's value as plain text, one space between
+  them. A `textGranularity` of `word`, `line` or `paragraph` (IIIF's Text Granularity
+  extension) chooses the finest where a Canvas has several. Its styles load with it, in
+  a part sheet of their own, `styles/text.css`, which a server-rendered page imports
+  beside the others it renders. New strings, `canvasKeysText`, `canvasTextCopy` and
+  `canvasTextCopied`, are in every locale. Its size budgets rose on purpose, by 0.1 to
+  0.25 kB gzip: every Canvas page carries the gesture check, the renderer's layer for
+  it and the strings (`build/size-budget.json`).
+
 - **Document's page layout.** Under the thumbnails' toggle, a round control opens a small
   menu of Automatic (as the Manifest's `behavior` says), Single page and Two pages, as a
   PDF reader offers them; the current Canvas stays in view as the pages regroup. It shows

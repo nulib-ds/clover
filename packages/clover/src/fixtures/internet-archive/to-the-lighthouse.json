@@ -1,0 +1,99 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "none": [
+      "To the lighthouse "
+    ]
+  },
+  "homepage": [
+    {
+      "format": "text/html",
+      "id": "https://archive.org/details/bwb_T5-AFP-938",
+      "label": {
+        "en": [
+          "Item Page on Internet Archive"
+        ]
+      },
+      "type": "Text"
+    }
+  ],
+  "provider": [
+    {
+      "homepage": [
+        {
+          "format": "text/html",
+          "id": "https://archive.org",
+          "label": {
+            "en": [
+              "Internet Archive Homepage"
+            ]
+          },
+          "type": "Text"
+        }
+      ],
+      "id": "https://archive.org",
+      "label": {
+        "en": [
+          "The Internet Archive"
+        ]
+      },
+      "logo": [
+        {
+          "format": "image/png",
+          "height": 79,
+          "id": "https://archive.org/images/glogo.png",
+          "type": "Image",
+          "width": 79
+        }
+      ],
+      "type": "Agent"
+    }
+  ],
+  "items": [
+    {
+      "annotations": [
+        {
+          "id": "https://iiif.archive.org/iiif/3/annotations/bwb_T5-AFP-938/bwb_T5-AFP-938_djvu.xml/40.json",
+          "type": "AnnotationPage"
+        }
+      ],
+      "height": 2762,
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas",
+      "items": [
+        {
+          "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/annotationPage/39",
+          "items": [
+            {
+              "body": {
+                "format": "image/jpeg",
+                "id": "https://iiif.archive.org/image/iiif/3/bwb_T5-AFP-938%2Fbwb_T5-AFP-938_jp2.zip%2Fbwb_T5-AFP-938_jp2%2Fbwb_T5-AFP-938_0040.jp2/full/max/0/default.jpg",
+                "service": [
+                  {
+                    "id": "https://iiif.archive.org/image/iiif/3/bwb_T5-AFP-938%2Fbwb_T5-AFP-938_jp2.zip%2Fbwb_T5-AFP-938_jp2%2Fbwb_T5-AFP-938_0040.jp2",
+                    "profile": "level2",
+                    "type": "ImageService3"
+                  }
+                ],
+                "type": "Image"
+              },
+              "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/annotation/39",
+              "motivation": "painting",
+              "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas",
+              "type": "Annotation"
+            }
+          ],
+          "type": "AnnotationPage"
+        }
+      ],
+      "label": {
+        "none": [
+          "40"
+        ]
+      },
+      "type": "Canvas",
+      "width": 1641
+    }
+  ]
+}

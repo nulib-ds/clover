@@ -21,12 +21,14 @@ import Annotations, {
 } from "./Annotations";
 import type { CloverCanvasProps } from "./Canvas.types";
 import { type MediaPlacement, canvasRectToWorld, canvasScene } from "./layout";
+import { type TextUnit, readTextUnits } from "./textUnits";
 import { useSvgReader } from "./useSvgReader";
 import { isRegionText, parseAnnotationTarget } from "../../core/annotations";
 import type { CanvasRenderer } from "../../lib/renderer";
 import { playFrom } from "../../lib/time";
 
 const NO_PAGES: string[] = [];
+const NO_UNITS: TextUnit[] = [];
 
 /**
  * What the Canvas reads of its annotations' state, from the controller that holds it
@@ -54,6 +56,8 @@ export interface AnnotationModel {
   release: () => boolean;
   /** The Canvas the controller opened past its placeholder, not to play it. */
   quietlyOpened: string | null;
+  /** Whether the view has text to select (`TextLayer`), which the viewport's keys say. */
+  hasText: boolean;
 }
 
 export interface AnnotationStateProps {
@@ -262,6 +266,45 @@ export function AnnotationState({
   );
   // The hotspots: the shown pages' only.
   const placedAnnotations = useMemo(() => shown(allPlaced), [allPlaced, shown]);
+  /*
+   * The view's text, to select and copy (`TextLayer`): every page's with a text
+   * granularity, a hidden page's too, as it is never seen but in a selection; OCR's
+   * pages start hidden. Not behind a placeholder, where nothing is drawn.
+   */
+  const textUnits = useMemo(
+    () =>
+      renderer && sceneVersion > 0 && drawn && !showPlaceholder
+        ? readTextUnits(
+            allAnnotations,
+            placeAnnotation ??
+              ((rect, _, targetIndex) =>
+                renderer.itemRectToWorld(targetIndex, rect)),
+          )
+        : NO_UNITS,
+    [
+      renderer,
+      allAnnotations,
+      sceneVersion,
+      drawn,
+      showPlaceholder,
+      placeAnnotation,
+    ],
+  );
+  // Its code, loaded the first time a view has text.
+  const [TextLayer, setTextLayer] = useState<
+    typeof import("./text/TextLayer").TextLayer | null
+  >(null);
+  const hasText = textUnits.length > 0;
+  useEffect(() => {
+    if (!hasText || TextLayer) return;
+    let live = true;
+    void import("./text/TextLayer").then((module) => {
+      if (live) setTextLayer(() => module.TextLayer);
+    });
+    return () => {
+      live = false;
+    };
+  }, [hasText, TextLayer]);
   /*
    * Those on a whole Canvas, the shown pages' too: no hotspot, but a line round their
    * Canvas while one is pointed at or picked (`placeWholeCanvas`), in a spread round its
@@ -546,6 +589,7 @@ export function AnnotationState({
       activate: activateAnnotation,
       release: releaseAnnotation,
       quietlyOpened,
+      hasText,
     }),
     [
       menuAnnotations,
@@ -560,6 +604,7 @@ export function AnnotationState({
       activateAnnotation,
       releaseAnnotation,
       quietlyOpened,
+      hasText,
     ],
   );
   // Before paint, so the Canvas draws with it in the same frame.
@@ -569,18 +614,23 @@ export function AnnotationState({
   const active =
     hoveredAnnotation ?? highlightedAnnotation ?? selectedAnnotation;
   return renderer && sceneVersion > 0 && !showPlaceholder ? (
-    <Annotations
-      renderer={renderer}
-      placed={placedAnnotations}
-      sceneVersion={sceneVersion}
-      active={active}
-      selected={selectedAnnotation}
-      whole={(active && wholePlaced?.get(active)) || null}
-      onActivate={activateAnnotation}
-      onSelect={selectAnnotation}
-      onFollow={followLink}
-      // The recording a tracked hotspot follows, where there is one to follow.
-      media={media ? mediaElement : undefined}
-    />
+    <>
+      {TextLayer && hasText && (
+        <TextLayer renderer={renderer} units={textUnits} />
+      )}
+      <Annotations
+        renderer={renderer}
+        placed={placedAnnotations}
+        sceneVersion={sceneVersion}
+        active={active}
+        selected={selectedAnnotation}
+        whole={(active && wholePlaced?.get(active)) || null}
+        onActivate={activateAnnotation}
+        onSelect={selectAnnotation}
+        onFollow={followLink}
+        // The recording a tracked hotspot follows, where there is one to follow.
+        media={media ? mediaElement : undefined}
+      />
+    </>
   ) : null;
 }

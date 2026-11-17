@@ -1,0 +1,502 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.archive.org/iiif/3/annotations/bwb_T5-AFP-938/bwb_T5-AFP-938_djvu.xml/40.json",
+  "type": "AnnotationPage",
+  "items": [
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "Vv"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/1",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=833,258,36,37",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "“And"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/2",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=224,384,120,37",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "even"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/3",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=364,395,100,26",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "if"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/4",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=484,382,32,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "it"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/5",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=533,382,32,39",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "isn’t"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/6",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=584,382,93,39",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "fine"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/7",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=695,381,80,39",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "tomorrow,”"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/8",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=793,380,259,44",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "said"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/9",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1071,378,86,40",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "Mrs."
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/10",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1178,379,97,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "Ramsay,"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/11",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1295,378,188,48",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "raising"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/12",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=223,446,151,50",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "her"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/13",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=395,445,74,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "eyes"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/14",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=489,457,89,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "to"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/15",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=601,453,42,29",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "glance"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/16",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=665,444,143,51",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "at"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/17",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=829,451,41,31",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "William"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/18",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=893,442,186,39",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "Bankes"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/19",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1104,440,158,40",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "and"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/20",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1284,439,84,39",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "Lily"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/21",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1392,438,92,50",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "Briscoe"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/22",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=224,508,160,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "as"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/23",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=412,520,40,26",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "they"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/24",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=482,507,93,51",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "passed,"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/25",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=604,506,151,52",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "“it"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/26",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=787,505,57,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "will"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/27",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=872,505,85,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "be"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/28",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=986,505,52,37",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "another"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/29",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1066,503,174,39",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "day."
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/30",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1268,501,89,52",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "And"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/31",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1387,500,97,40",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "now,”"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/32",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=223,570,130,44",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "she"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/33",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=386,569,70,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "said,"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/34",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=488,569,97,45",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "thinking"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/35",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=619,567,194,51",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "that"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/36",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=847,567,88,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "Lily’s"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/37",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=969,566,122,51",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "charm"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/38",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1123,565,142,39",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "was"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/39",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1297,575,80,27",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "her"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/40",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=1410,563,75,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "Chinese"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/41",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=224,631,176,39",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "eyes,"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/42",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=422,643,98,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "aslant"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/43",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=545,631,130,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "in"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/44",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=698,630,44,38",
+      "type": "Annotation"
+    },
+    {
+      "body": {
+        "format": "text/plain",
+        "type": "TextualBody",
+        "value": "her"
+      },
+      "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/canvas/39/anno/45",
+      "motivation": "supplementing",
+      "target": "https://iiif.archive.org/iiif/bwb_T5-AFP-938$39/canvas#xywh=765,630,73,38",
+      "type": "Annotation"
+    }
+  ]
+}

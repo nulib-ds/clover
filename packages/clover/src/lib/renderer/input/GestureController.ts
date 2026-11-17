@@ -87,6 +87,10 @@ interface Sample {
   t: number;
 }
 
+/** Whether a press landed on the picture's text, which is selected, not dragged. */
+const onText = (event: Event) =>
+  Boolean((event.target as Element).closest?.("[data-clover-canvas-text]"));
+
 /**
  * Pointer, wheel and keyboard input on the Body, turned into camera intents.
  *
@@ -144,6 +148,11 @@ export class GestureController {
     if (event.pointerType === "mouse" && event.button !== 0) return;
     // Controls and overlays inside the Body handle their own clicks.
     if (isInteractive(event.target, this.element)) return;
+    /*
+     * A mouse or a hovering pen on the picture's text (`Canvas/TextLayer.tsx`) selects it,
+     * as in a PDF; a finger still pans over it, as a press and hold selects it there.
+     */
+    if (!isDirect(event.pointerType, this.penHovers) && onText(event)) return;
 
     this.element.setPointerCapture?.(event.pointerId);
     const p = this.local(event);
@@ -291,6 +300,8 @@ export class GestureController {
     // Double taps are handled on pointerup; this is the synthesized echo.
     if (isDirect(this.lastPointerType, this.penHovers)) return;
     if (isInteractive(event.target, this.element)) return;
+    // A double click on the picture's text selects a word, as a page's does.
+    if (onText(event)) return;
     if (event.shiftKey)
       this.target.zoomBy(1 / CLICK_ZOOM, this.local(event), true);
     else this.zoomIn(this.local(event));

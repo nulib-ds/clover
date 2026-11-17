@@ -638,6 +638,19 @@ A drag pans the image, and a finger always follows 1:1.
 | `gestures.scrollToZoom`   | `boolean` | `false` | A plain wheel zooms. Off, the wheel scrolls the page past the Canvas, as it would past any picture, so an embedded Canvas never takes the page's scroll. A trackpad's pinch zooms either way.                                           |
 | `gestures.navigable`      | `boolean` | `true`  | Off, a drag, a pinch, the wheel, a click and the keys leave the view where it is. The Canvas's controls and its [handle](#canvas-handles-and-callbacks) still move it.                                                                  |
 
+### Selecting text
+
+Where a Canvas has `supplementing` annotations on regions of its image, as OCR does,
+their text lies over the image to select and copy, as in a PDF. A mouse or a pen dragged
+from a word selects; a drag that starts off the text pans. A finger still pans, and a
+press and hold selects. Control+A or Command+A on the focused Canvas selects all of it.
+
+Held still, a selection shows what it copies, with Copy and Close: each annotation's
+value as plain text, one space between them. Close or Escape lets the selection go. Where
+a Canvas's annotations give a `textGranularity` of `word`, `line` or `paragraph`
+([Text Granularity](https://iiif.io/api/extension/text-granularity/)), only the finest
+are taken, so the same words are never copied twice.
+
 ### Drag and glide
 
 | Option                   | Type      | Default | Description                                                                                                                                 |
@@ -698,7 +711,7 @@ dimmed), as reset does at home. Each keeps its place and its tip.
 ### Keyboard
 
 Focused, the Canvas answers to these keys, and describes them to assistive technology.
-`gestures.navigable` turns off all but Escape and a recording's.
+`gestures.navigable` turns off all but Escape, Control and A, and a recording's.
 
 | Key            | Action                                                     |
 | -------------- | ---------------------------------------------------------- |
@@ -706,7 +719,8 @@ Focused, the Canvas answers to these keys, and describes them to assistive techn
 | Plus, minus    | Zoom in or out a step, by half again.                      |
 | 0              | Go home.                                                   |
 | R, Shift and R | Turn the image a quarter turn to the right, or the left.   |
-| Escape         | Let go of a picked annotation.                             |
+| Escape         | Let go of the selected text, then of a picked annotation.  |
+| Control and A  | Select the text in the image, Command and A on a Mac.      |
 | Space or K     | On a recording, play or pause.                             |
 | J, L           | On a recording, skip ten seconds back or forward.          |
 | M              | On a recording, mute or unmute.                            |

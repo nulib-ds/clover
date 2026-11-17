@@ -204,6 +204,42 @@ describe("GestureController", () => {
     expect(target.zoomBy).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["mouse", false],
+    ["touch", true],
+  ])(
+    "a %s drag on the picture's text pans: %s, as a mouse selects it",
+    (pointerType, pans) => {
+      const { element, target } = setup();
+      const layer = document.createElement("div");
+      layer.dataset.cloverCanvasText = "";
+      const run = document.createElement("span");
+      layer.appendChild(run);
+      element.appendChild(layer);
+      const pointer = (from: Element, type: string, x: number) =>
+        from.dispatchEvent(
+          Object.assign(
+            new MouseEvent(type, {
+              clientX: x,
+              clientY: 10,
+              button: 0,
+              bubbles: true,
+            }),
+            { pointerId: 1, pointerType },
+          ),
+        );
+      pointer(run, "pointerdown", 10);
+      pointer(element, "pointermove", 80);
+      pointer(element, "pointerup", 80);
+      expect(
+        (target.panBy as ReturnType<typeof vi.fn>).mock.calls.length > 0,
+      ).toBe(pans);
+      // A double click there selects a word, never zooms.
+      run.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+      if (!pans) expect(target.zoomBy).not.toHaveBeenCalled();
+    },
+  );
+
   it("holds the camera still when not navigable, reporting only taps", () => {
     const { element, target } = setup({
       ...DEFAULT_GESTURES,
