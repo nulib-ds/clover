@@ -71,6 +71,184 @@ describe("GestureController", () => {
     },
   );
 
+  describe("cooperative", () => {
+    const hinted = (target: GestureTarget) =>
+      (target.hint as ReturnType<typeof vi.fn>).mock.calls.map(
+        ([kind]) => kind,
+      );
+    const cooperative = () => {
+      const made = setup({ ...DEFAULT_GESTURES, cooperative: true });
+      made.target.hint = vi.fn();
+      return made;
+    };
+    const touch = (
+      element: HTMLElement,
+      type: string,
+      x: number,
+      pointerId = 1,
+      pointerType = "touch",
+    ) =>
+      element.dispatchEvent(
+        Object.assign(
+          new MouseEvent(type, { clientX: x, clientY: 50, buttons: 1 }),
+          {
+            pointerId,
+            pointerType,
+          },
+        ),
+      );
+    // Each a second apart, so none reads as part of an earlier test's scroll.
+    let clock = new Event("wheel").timeStamp + 60_000;
+    const wheel = (
+      element: Element,
+      init: WheelEventInit,
+      after = 1000,
+    ): WheelEvent => {
+      clock += after;
+      const event = new WheelEvent("wheel", {
+        cancelable: true,
+        bubbles: true,
+        ...init,
+      });
+      Object.defineProperty(event, "timeStamp", { value: clock });
+      element.dispatchEvent(event);
+      return event;
+    };
+
+    afterEach(() => {
+      Object.defineProperty(document, "fullscreenElement", {
+        configurable: true,
+        value: null,
+      });
+    });
+
+    it("marks the Body so a finger's drag is the page's, and unmarks it when off", () => {
+      const { element, controller } = cooperative();
+      expect(element.hasAttribute("data-cooperative")).toBe(true);
+      controller.setOptions({ ...DEFAULT_GESTURES, cooperative: false });
+      expect(element.hasAttribute("data-cooperative")).toBe(false);
+    });
+
+    it("leaves a plain wheel to the page and says how to zoom", () => {
+      const { element, target } = cooperative();
+      const event = wheel(element, { deltaY: 100 });
+      expect(event.defaultPrevented).toBe(false);
+      expect(target.zoomBy).not.toHaveBeenCalled();
+      expect(hinted(target)).toEqual(["wheel"]);
+    });
+
+    it("says nothing as the page's scroll carries the view under a resting pointer", () => {
+      const { element, target } = cooperative();
+      wheel(document.body, { deltaY: 100 });
+      wheel(element, { deltaY: 100 }, 16);
+      expect(hinted(target)).toEqual([]);
+      // A scroll that starts over the view still says it.
+      wheel(element, { deltaY: 100 });
+      expect(hinted(target)).toEqual(["wheel"]);
+    });
+
+    it("says nothing for a sideways wheel", () => {
+      const { element, target } = cooperative();
+      wheel(element, { deltaX: 100 });
+      expect(hinted(target)).toEqual([]);
+    });
+
+    it("zooms a Ctrl wheel in lines a notch at a time, not as a pinch", () => {
+      const { element, target } = cooperative();
+      wheel(element, { deltaY: 3, deltaMode: 1, ctrlKey: true });
+      const [factor, , animate] = (target.zoomBy as ReturnType<typeof vi.fn>)
+        .mock.calls[0];
+      expect(factor).toBeCloseTo(Math.exp(-48 * 0.002));
+      expect(animate).toBe(true);
+    });
+
+    it.each([["ctrlKey"], ["metaKey"]])(
+      "zooms a mouse's wheel held with %s, a notch at a time",
+      (key) => {
+        const { element, target } = cooperative();
+        const event = new WheelEvent("wheel", {
+          deltaY: 100,
+          [key]: true,
+          cancelable: true,
+        });
+        element.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(true);
+        const [factor, , animate] = (target.zoomBy as ReturnType<typeof vi.fn>)
+          .mock.calls[0];
+        expect(factor).toBeCloseTo(Math.exp(-0.2));
+        expect(animate).toBe(true);
+        expect(hinted(target)).toEqual([]);
+      },
+    );
+
+    it("zooms on a plain wheel in full screen, with no page to scroll", () => {
+      const { element, target } = cooperative();
+      Object.defineProperty(document, "fullscreenElement", {
+        configurable: true,
+        value: document.body,
+      });
+      const event = new WheelEvent("wheel", { deltaY: 100, cancelable: true });
+      element.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(true);
+      expect(target.zoomBy).toHaveBeenCalled();
+      expect(hinted(target)).toEqual([]);
+    });
+
+    it("leaves one finger's drag to the page and says to use two", () => {
+      const { element, target } = cooperative();
+      touch(element, "pointerdown", 50);
+      touch(element, "pointermove", 80);
+      touch(element, "pointercancel", 80);
+      expect(target.panBy).not.toHaveBeenCalled();
+      expect(hinted(target)).toContain("touch");
+    });
+
+    it("says nothing as the last finger of a pinch moves", () => {
+      const { element, target } = cooperative();
+      touch(element, "pointerdown", 50, 1);
+      touch(element, "pointerdown", 100, 2);
+      touch(element, "pointerup", 100, 2);
+      touch(element, "pointermove", 90, 1);
+      touch(element, "pointercancel", 90, 1);
+      expect(hinted(target)).toEqual([]);
+    });
+
+    it("leaves a pen's drag to the page too", () => {
+      const { element, target } = cooperative();
+      touch(element, "pointerdown", 50, 1, "pen");
+      touch(element, "pointermove", 80, 1, "pen");
+      expect(target.panBy).not.toHaveBeenCalled();
+      expect(hinted(target)).toEqual(["touch"]);
+    });
+
+    it("still zooms on a double tap", () => {
+      const { element, target } = cooperative();
+      touch(element, "pointerdown", 50);
+      touch(element, "pointerup", 50);
+      touch(element, "pointerdown", 50);
+      touch(element, "pointerup", 50);
+      expect(target.zoomBy).toHaveBeenCalled();
+    });
+
+    it("pinches with two fingers, keeping the page from scrolling under them", () => {
+      const { element, target } = cooperative();
+      touch(element, "pointerdown", 50, 1);
+      touch(element, "pointerdown", 100, 2);
+      const move = new Event("touchmove", { cancelable: true });
+      Object.defineProperty(move, "targetTouches", { value: [{}, {}] });
+      element.dispatchEvent(move);
+      expect(move.defaultPrevented).toBe(true);
+      // A finger elsewhere on the screen is not a second one on the view.
+      const lone = new Event("touchmove", { cancelable: true });
+      Object.defineProperty(lone, "targetTouches", { value: [{}] });
+      element.dispatchEvent(lone);
+      expect(lone.defaultPrevented).toBe(false);
+      touch(element, "pointermove", 150, 2);
+      expect(target.zoomBy).toHaveBeenCalled();
+      expect(hinted(target)).toEqual([]);
+    });
+  });
+
   it.each([
     ["below flickMinSpeed, does not glide", { flickMinSpeed: 2000 }, undefined],
     ["glides for flickMomentum seconds", { flickMomentum: 0.5 }, 625],

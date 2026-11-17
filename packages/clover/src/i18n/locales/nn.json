@@ -19,6 +19,8 @@
   "bodyUnloadableVideo": "Denne videoen kunne ikkje lastast inn.",
   "bodyUnloadableAudio": "Denne lyden kunne ikkje lastast inn.",
   "bodyUnloadableModel": "Denne modellen kunne ikkje lastast inn.",
+  "gestureHintWheel": "Bruk {{key}} + rulling for å zoome",
+  "gestureHintTouch": "Bruk to fingrar for å flytte visinga",
   "canvasRoleDescription": "zoombart bilete",
   "canvasKeysImage": "Bruk piltastane for å flytte biletet, med Shift for lengre steg, pluss og minus for å zoome, 0 for å tilbakestille visinga, og R eller Shift+R for å rotere.",
   "canvasKeysMedia": "Trykk mellomrom eller K for å spele av eller pause, J eller L for å spole ti sekund bakover eller framover, og M for å slå lyden av eller på.",

@@ -19,6 +19,8 @@
   "bodyUnloadableVideo": "この動画を読み込めませんでした。",
   "bodyUnloadableAudio": "この音声を読み込めませんでした。",
   "bodyUnloadableModel": "このモデルを読み込めませんでした。",
+  "gestureHintWheel": "{{key}} を押しながらスクロールしてズーム",
+  "gestureHintTouch": "2 本の指で表示を移動",
   "canvasRoleDescription": "ズームできる画像",
   "canvasKeysImage": "矢印キーで移動（Shift で大きく移動）、プラスとマイナスでズーム、0 で表示をリセット、R または Shift+R で回転します。",
   "canvasKeysMedia": "Space または K で再生・一時停止、J または L で 10 秒戻る・進む、M でミュート・ミュート解除します。",

@@ -191,6 +191,24 @@
 }
 
 /*
+ * Cooperative (`gestures.cooperative`): a finger's drag scrolls the page, and
+ * two fingers move the view (`GestureController`). In full screen there is no page to
+ * scroll, so every drag is the view's.
+ */
+.clover-canvas-viewport[data-cooperative] {
+  touch-action: pan-x pan-y;
+}
+
+:fullscreen .clover-canvas-viewport[data-cooperative] {
+  touch-action: none;
+}
+
+/* Safari before 16.4. Apart, as one unknown selector would drop the whole rule. */
+:-webkit-full-screen .clover-canvas-viewport[data-cooperative] {
+  touch-action: none;
+}
+
+/*
  * A Canvas that cannot be moved, a lone recording or one held still: no grab hand, and a
  * finger's drag or pinch is the page's, so it scrolls past (or zooms) as anywhere else
  * (Mat, 2026-11-02: a vertical drag through a video kept the page from scrolling).

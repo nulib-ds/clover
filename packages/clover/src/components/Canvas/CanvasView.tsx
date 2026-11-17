@@ -55,6 +55,11 @@ import { type LanguageMapLike, localize } from "../../core/value";
 import { isGeoreferenced } from "../../core/geo-detect";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { BodyNote, BodyUnloadable } from "../../ui/BodyUnloadable";
+import {
+  GestureHint,
+  type GestureHintKind,
+  useGestureHint,
+} from "../../ui/GestureHint";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../i18n/useRootLanguage";
 import { useContainerName } from "../../i18n/useContainerName";
@@ -270,6 +275,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   } = props;
   const { t } = useCloverTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
+  const [hint, showHint] = useGestureHint();
   const [wrapperElement, setWrapperElement] = useState<HTMLElement | null>(
     null,
   );
@@ -1041,6 +1047,9 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     const offUnloadable = surface.on("unloadable", (failed) =>
       setUnloadable(Boolean(failed)),
     );
+    const offHint = surface.on("hint", (kind) =>
+      showHint(kind as GestureHintKind),
+    );
     const offViewport = surface.on("viewport", () => {
       readLimits();
       if (renderer) onViewportChangeRef.current?.(renderer.getBounds());
@@ -1053,13 +1062,14 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       offError();
       offUnloadable();
       offViewport();
+      offHint();
       surface.dispose();
       surfaceRef.current = null;
       setSurface(null);
     };
     // A new instanceId is a new viewer; nothing else remounts the surface
     // (`makeSurface` is a module's, and `releaseAnnotation` and `markDrawn` are stable).
-  }, [instanceId, makeSurface, releaseAnnotation, markDrawn]);
+  }, [instanceId, makeSurface, releaseAnnotation, markDrawn, showHint]);
 
   useEffect(() => {
     if (!renderer || !navigatorElement) return;
@@ -1359,6 +1369,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         )}
         {/* Nothing it paints could be loaded: said in the middle of the Body. */}
         <BodyUnloadable kind="image" shown={unloadable && !showPlaceholder} />
+        <GestureHint kind={hint} />
         {/*
          * A Canvas that paints nothing shows its name in the middle of its Body, as a Body
          * that could not load says so: its label, else its Manifest's, and nothing where

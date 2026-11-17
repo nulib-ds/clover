@@ -19,6 +19,8 @@
   "bodyUnloadableVideo": "No se pudo cargar este vídeo.",
   "bodyUnloadableAudio": "No se pudo cargar este audio.",
   "bodyUnloadableModel": "No se pudo cargar este modelo.",
+  "gestureHintWheel": "Usa {{key}} + desplazamiento para hacer zoom",
+  "gestureHintTouch": "Usa dos dedos para mover la vista",
   "canvasRoleDescription": "imagen ampliable",
   "canvasKeysImage": "Use las teclas de flecha para desplazar la imagen, con Mayús para avanzar más, las teclas más y menos para acercar y alejar, 0 para restablecer la vista, y R o Mayús+R para girar.",
   "canvasKeysMedia": "Pulse Espacio o K para reproducir o pausar, J o L para retroceder o avanzar diez segundos, y M para silenciar o activar el sonido.",

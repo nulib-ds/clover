@@ -19,6 +19,8 @@
   "bodyUnloadableVideo": "Non è stato possibile caricare questo video.",
   "bodyUnloadableAudio": "Non è stato possibile caricare questo audio.",
   "bodyUnloadableModel": "Non è stato possibile caricare questo modello.",
+  "gestureHintWheel": "Usa {{key}} + scorrimento per ingrandire",
+  "gestureHintTouch": "Usa due dita per spostare la vista",
   "canvasRoleDescription": "immagine ingrandibile",
   "canvasKeysImage": "Usa i tasti freccia per spostare l’immagine, con Maiusc per passi più ampi, più e meno per ingrandire e ridurre, 0 per ripristinare la vista e R o Maiusc+R per ruotarla.",
   "canvasKeysMedia": "Premi Spazio o K per riprodurre o mettere in pausa, J o L per tornare indietro o andare avanti di dieci secondi e M per disattivare o riattivare l’audio.",

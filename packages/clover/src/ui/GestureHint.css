@@ -1,0 +1,52 @@
+/*
+ * How to move the view, over the whole Body while a gesture is left to the page
+ * (`GestureHint`): white on a black wash, 5.7:1 or more over any picture. It takes no
+ * pointer. Empty, it stays laid out but clear, so its live region is in the
+ * accessibility tree before it speaks.
+ */
+.clover-gesture-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--clover-inset);
+  background-color: #0009;
+  color: #fff;
+  pointer-events: none;
+  animation: clover-gesture-hint-in 160ms ease-out;
+}
+
+.clover-gesture-hint:empty {
+  background-color: transparent;
+  animation: none;
+}
+
+.clover-gesture-hint-text {
+  margin: 0;
+  font-size: var(--clover-text-l);
+  text-align: center;
+  text-wrap: balance;
+}
+
+@keyframes clover-gesture-hint-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-gesture-hint {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .clover-gesture-hint-text {
+    padding: var(--clover-space-xs) var(--clover-space-s);
+    background-color: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+  }
+}

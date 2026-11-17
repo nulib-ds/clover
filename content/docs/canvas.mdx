@@ -568,6 +568,7 @@ click, pinch or scroll over the image to feel the difference.
     { prop: "placeholder", value: false, remount: true },
     { prop: "options.gestures.clickToZoom", value: true, remount: true },
     { prop: "options.gestures.scrollToZoom", value: false, remount: true },
+    { prop: "options.gestures.cooperative", value: false, remount: true },
     { prop: "options.gestures.flickEnabled", value: true, remount: true },
     {
       prop: "options.gestures.flickMinSpeed",
@@ -628,7 +629,8 @@ click, pinch or scroll over the image to feel the difference.
 
 ### Pointer and touch
 
-A drag pans the image, and a finger always follows 1:1.
+A drag pans the image, and a finger always follows 1:1. While `cooperative` is on, one
+finger's drag is the page's and two fingers pan.
 
 | Option                    | Type      | Default | Description                                                                                                                                                                                                                             |
 | ------------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -636,6 +638,7 @@ A drag pans the image, and a finger always follows 1:1.
 | `gestures.dblClickToZoom` | `boolean` | `true`  | A double click zooms in, where `clickToZoom` is off.                                                                                                                                                                                    |
 | `gestures.pinchToZoom`    | `boolean` | `true`  | Two fingers pinch to zoom.                                                                                                                                                                                                              |
 | `gestures.scrollToZoom`   | `boolean` | `false` | A plain wheel zooms. Off, the wheel scrolls the page past the Canvas, as it would past any picture, so an embedded Canvas never takes the page's scroll. A trackpad's pinch zooms either way.                                           |
+| `gestures.cooperative`    | `boolean` | `false` | A plain wheel and one finger's drag scroll the page, and a hint over the Canvas says how to move it: Ctrl or ⌘ with the wheel, or two fingers. In full screen the Canvas takes both.                                                    |
 | `gestures.navigable`      | `boolean` | `true`  | Off, a drag, a pinch, the wheel, a click and the keys leave the view where it is. The Canvas's controls and its [handle](#canvas-handles-and-callbacks) still move it.                                                                  |
 
 ### Drag and glide

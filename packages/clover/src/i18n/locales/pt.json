@@ -19,6 +19,8 @@
   "bodyUnloadableVideo": "Não foi possível carregar este vídeo.",
   "bodyUnloadableAudio": "Não foi possível carregar este áudio.",
   "bodyUnloadableModel": "Não foi possível carregar este modelo.",
+  "gestureHintWheel": "Use {{key}} + deslocamento para ampliar",
+  "gestureHintTouch": "Use dois dedos para mover a vista",
   "canvasRoleDescription": "imagem ampliável",
   "canvasKeysImage": "Use as teclas de seta para deslocar a imagem, com Shift para ir mais longe, mais e menos para ampliar e reduzir, 0 para repor a vista, e R ou Shift+R para rodar.",
   "canvasKeysMedia": "Prima Espaço ou K para reproduzir ou pausar, J ou L para recuar ou avançar dez segundos, e M para silenciar ou ativar o som.",
