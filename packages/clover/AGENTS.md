@@ -2366,6 +2366,21 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   each draw's transform. What reads an item's pixels from the world goes through
   `orientOf`, `shownToPixels` and `itemToWorld`, never `clip` and `rect` alone, so a turned
   item wants the tiles under the view. A resource's CSS never turns it (0045's rule).
+- **Selectable text** (Mat, 2026-11-16: "highlight text like a PDF viewer would"; then
+  "let's not limit to text granularity … trust it", "string each annotation together.
+  do a `space` gap between. no line breaks"). `Canvas/textUnits.ts` reads every
+  `supplementing` annotation on an `xywh` region with no time, and any with a
+  `textGranularity`, into runs (only the finest granularity a Canvas gives, so lines and
+  words are never both taken); `Canvas/text/TextLayer.tsx`, loaded by `AnnotationState`
+  the first time a view has some, lays them in the renderer's `WorldLayer`
+  (`lib/renderer/overlays/WorldLayer.ts`: one camera transform for the layer, under the
+  hotspots), unseen and `aria-hidden`, each run its region's height and stretched to its
+  width. A mouse or a hovering pen on it selects (`GestureController`'s `onText`), a
+  finger pans; Control or Command with A on the viewport selects all. A copy, and the
+  popover a held selection shows (a status, with Copy and Close, focus back to the
+  viewport as it goes), join the runs with one space. Its styles are the `text` part
+  sheet, loaded with it. The Internet Archive's OCR (word by word, no granularity) is the
+  fixture, `src/fixtures/internet-archive/`.
 - **A Canvas's annotations' state is in the hotspots' chunk** (Mat, 2026-10-27):
   `Canvas/AnnotationState.tsx` holds which pages show, the placing, hover and pick,
   framing, seeking and the placeholder's quiet open, draws the hotspots, and reports a

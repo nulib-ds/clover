@@ -23,6 +23,7 @@
 @import "../ui/Chevron.css";
 @import "../components/Canvas/Annotations.css";
 @import "../components/Canvas/Canvas.css";
+@import "../components/Canvas/text/TextLayer.css";
 @import "../components/Body/Caption.css";
 @import "../components/Canvas/Placeholder.css";
 @import "../components/Canvas/ControlMenu.css";

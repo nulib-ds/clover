@@ -242,7 +242,7 @@ test("the part sheets together, but those loaded with their code, declare what s
  * every module that draws any of it adopts as it loads.
  */
 test("each part sheet loaded with its code is its file's, adopted where it draws", async () => {
-  assert.deepEqual(LAZY.sort(), ["items-vertical", "map", "media", "scene"]);
+  assert.deepEqual(LAZY.sort(), ["items-vertical", "map", "media", "scene", "text"]);
   const src = resolve(root, "src");
   for (const name of LAZY) {
     const { default: css } = await import(
