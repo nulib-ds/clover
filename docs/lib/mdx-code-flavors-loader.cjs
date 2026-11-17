@@ -33,7 +33,8 @@ module.exports = function codeFlavorsLoader(source) {
     return callback(null, source);
   for (const helper of HELPERS)
     this.addDependency(path.join(__dirname, helper));
-  import(helpers)
+  // Loaded by Node as the loader runs, never bundled: Turbopack warns on a dynamic path.
+  import(/* webpackIgnore: true */ /* turbopackIgnore: true */ helpers)
     .then(({ withCodeFlavors }) => withCodeFlavors(String(source)))
     .then((text) => callback(null, text), callback);
 };
