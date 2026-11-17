@@ -16,6 +16,74 @@
   background-color: var(--clover-color-secondary-muted, #e6e8eb);
 }
 
+/*
+ * It comes in seamlessly wherever it is (Mat, 2026-11-13: "make the smooth load part of
+ * the Map component so we don't reinvent things for every composition/template"): its
+ * drawing, MapLibre's canvas with its controls and credits, out of sight until it has
+ * drawn the view it frames (`data-status`, ready at MapLibre's first frame, which is of
+ * that view: `MapView`'s `start`), then fading in, Clover's loading bar over its top
+ * meanwhile, past a moment (`MapView`). None of it moves where less motion is asked for.
+ */
+.clover-geomap-canvas {
+  transition: opacity 200ms ease;
+}
+
+.clover-geomap[data-status="loading"] .clover-geomap-canvas {
+  opacity: 0;
+}
+
+/*
+ * Kept where it frames (`navigable` false), a picture of where things are: no zoom
+ * buttons and no credits, which show again as it can be moved (Mat, 2026-11-14: "don't
+ * show credit on these small inset maps"), and the pointer as what holds it says, a press
+ * there its own (the Canvas's small map box expands).
+ */
+.clover-geomap[data-navigable="false"]
+  :is(.maplibregl-ctrl-group, .maplibregl-ctrl-attrib.maplibregl-compact) {
+  display: none;
+}
+
+.clover-geomap[data-navigable="false"] .maplibregl-canvas-container {
+  cursor: inherit;
+}
+
+/*
+ * What lays a map over other content says so (`data-map-host`: the Canvas's map box
+ * filling the Body, Document's map over its pages, a layout's own), and waits out of sight
+ * until its map has drawn, what it covers still there, its map's loading bar showing over
+ * its place; then it comes in, fading. What it covers it puts away once it has (the
+ * Canvas, `Body/Caption.css`; Document's pages).
+ */
+[data-map-host]:not(
+  :has(.clover-geomap:is([data-status="ready"], [data-status="error"]))
+) {
+  visibility: hidden;
+}
+
+[data-map-host] .clover-geomap .clover-loading {
+  visibility: visible;
+}
+
+[data-map-host]:has(.clover-geomap[data-status="ready"]) {
+  animation: clover-map-in 200ms ease;
+}
+
+@keyframes clover-map-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-geomap-canvas {
+    transition: none;
+  }
+
+  [data-map-host]:has(.clover-geomap[data-status="ready"]) {
+    animation: none;
+  }
+}
+
 .clover-geomap-error {
   position: absolute;
   inset: 0;

@@ -718,7 +718,8 @@ function SceneBody({
         }}
       >
         <ExitFullscreen hidden={!exitShown} />
-        {(captioned.length > 0 || React.Children.count(children) > 0) && (
+        {(captioned.length > 0 ||
+          React.Children.toArray(children).length > 0) && (
           <ControlCluster>
             {captioned.length > 0 && (
               <Button

@@ -16,8 +16,28 @@ export function hasMapData(
   if ((collection as Json | null)?.navPlace || (manifest as Json).navPlace) {
     return true;
   }
-  return selectSequence(manifest).canvases.some(canvasHasMapData);
+  return once(mapped, manifest, canvasHasMapData);
 }
+
+/*
+ * Each look's answer for a Manifest, kept: a selector asks on every change to the Root's
+ * state, several as a reader moves, and the look walks every Canvas (a thousand, in a
+ * long book). A Manifest whose pages load is a new object (`embedPage`), asked afresh.
+ */
+const mapped = new WeakMap<object, boolean>();
+const georeferenced = new WeakMap<object, boolean>();
+const once = (
+  answers: WeakMap<object, boolean>,
+  manifest: Manifest,
+  look: (canvas: unknown) => boolean,
+) => {
+  let answer = answers.get(manifest);
+  if (answer === undefined) {
+    answer = selectSequence(manifest).canvases.some(look);
+    answers.set(manifest, answer);
+  }
+  return answer;
+};
 
 /**
  * Whether a Canvas has anything of its own to put on a map: its navPlace, an annotation's
@@ -59,7 +79,7 @@ export function isGeoreferenced(canvas: unknown): boolean {
 
 /** Whether any Canvas of a Manifest is georeferenced, as far as its pages are loaded. */
 export const hasGeoreferences = (manifest: Manifest | null): boolean =>
-  Boolean(manifest) && selectSequence(manifest).canvases.some(isGeoreferenced);
+  Boolean(manifest) && once(georeferenced, manifest!, isGeoreferenced);
 
 type Json = Record<string, any>;
 

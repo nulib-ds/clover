@@ -153,6 +153,8 @@ export { useOneOpen } from "./ui/useOneOpen";
 export { useUniqueId } from "./ui/useUniqueId";
 /** "Read more" for text of your own that its CSS cuts short, as `Summary` is. */
 export { ReadMore } from "./ui/ReadMore";
+export { Inset } from "./ui/Inset";
+export type { InsetProps } from "./ui/Inset";
 /** A title at a heading level, and past h6, where headings end, the group it names. */
 export { titled } from "./ui/heading";
 export type { Titled } from "./ui/heading";

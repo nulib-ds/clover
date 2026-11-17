@@ -84,6 +84,7 @@ import {
   annotationPage as sanbornPage,
   collection as sanbornCollection,
   evanstonPage,
+  manifest as sanbornManifest,
 } from "../docs/mocks/sanborn/index.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -227,7 +228,8 @@ console.log(
 );
 
 // Sanborn's maps, georeferenced: one Annotation, an AnnotationPage of three, and an
-// AnnotationCollection of two pages, each given alone, apart from any Manifest.
+// AnnotationCollection of two pages, each given alone, apart from any Manifest; and four
+// of the sheets as a Manifest, its Canvases' annotations georeferences among them.
 const sanborn = join(root, "public/mocks/sanborn");
 rmSync(sanborn, { recursive: true, force: true });
 const writeSanborn = (path, json) => {
@@ -240,8 +242,9 @@ writeSanborn("annotation-page.json", sanbornPage(SANBORN_BASE));
 writeSanborn("annotation-collection.json", sanbornCollection(SANBORN_BASE));
 for (const year of SANBORN_YEARS)
   writeSanborn(`evanston/${year}.json`, evanstonPage(SANBORN_BASE, year));
+writeSanborn("manifest.json", sanbornManifest(SANBORN_BASE));
 console.log(
-  `sanborn: annotation.json, annotation-page.json, annotation-collection.json, evanston/ (${SANBORN_YEARS.join(", ")})`,
+  `sanborn: annotation.json, annotation-page.json, annotation-collection.json, evanston/ (${SANBORN_YEARS.join(", ")}), manifest.json`,
 );
 
 // The film with its captions and its transcript: one static Manifest.

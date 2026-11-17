@@ -256,6 +256,38 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
+  /*
+   * A page an annotation is on as a whole, framed as home frames a Canvas (Mat,
+   * 2026-11-16: "Zoom to its page"; `AnnotationState`): never held at the farthest zoom,
+   * even where the page is as tall as its spread.
+   */
+  it("frames a page of a spread whole, as home frames a Canvas", async () => {
+    // Two pages 1000 × 1500 in 800 × 600: home at 0.4, the farthest zoom 0.36.
+    mockedLoad.mockResolvedValue(bitmap(1000, 1500));
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    await renderer.setImages([
+      {
+        id: "a",
+        url: "a.jpg",
+        placement: { x: 0, y: 0, width: 1000, height: 1500 },
+      },
+      {
+        id: "b",
+        url: "b.jpg",
+        placement: { x: 1000, y: 0, width: 1000, height: 1500 },
+      },
+    ]);
+    renderer.fitBounds({ x: 1000, y: 0, width: 1000, height: 1500 }, true);
+    const top = renderer.worldToScreenPoint({ x: 1500, y: 0 });
+    const bottom = renderer.worldToScreenPoint({ x: 1500, y: 1500 });
+    // The whole page, top to foot, centered.
+    expect(top.y).toBeCloseTo(0, 6);
+    expect(bottom.y).toBeCloseTo(600, 6);
+    expect(top.x).toBeCloseTo(400, 6);
+    expect(renderer.getCamera().zoom).toBeCloseTo(0.4, 6);
+    renderer.dispose();
+  });
+
   it("keeps zoom within its limits", async () => {
     mockedLoad.mockResolvedValue(bitmap(1000, 1000));
     const renderer = new CanvasRenderer(host(), { animationTime: 0 });

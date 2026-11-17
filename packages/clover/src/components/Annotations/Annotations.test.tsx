@@ -31,6 +31,7 @@ import languagesJson from "../../fixtures/iiif-cookbook/0346-multilingual-annota
 import collectionJson from "../../fixtures/iiif-cookbook/0309-annotation-collection.json";
 import collectionPage1 from "../../fixtures/iiif-cookbook/0309-annotation-collection-anno_p1.json";
 import collectionPage2 from "../../fixtures/iiif-cookbook/0309-annotation-collection-anno_p2.json";
+import sanbornJson from "../../fixtures/mocks/sanborn/manifest.json";
 
 const canvasId = imageJson.items[0].id;
 const annotationId = imageJson.items[0].annotations[0].items[0].id;
@@ -232,10 +233,10 @@ describe("Annotations", () => {
     });
     const tag = (layersJson as any).items[0].items[0].items[0].body.items[1]
       .annotations[0].items[0].id;
-    expect(
-      await screen.findByRole("heading", { name: "X-ray" }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("A group of skulls.")).toBeInTheDocument();
+    expect(await screen.findByText("A group of skulls.")).toBeInTheDocument();
+    // By sheet (Mat, 2026-11-16): the X-ray's page is no heading in the list; the
+    // Canvas's annotations menu names it.
+    expect(screen.queryByRole("heading", { name: "X-ray" })).toBeNull();
     // Natural Light first: the X-ray's tag is not drawn.
     expect(document.getElementById(tag)).toBeNull();
 
@@ -322,22 +323,20 @@ describe("Annotations", () => {
         <Clover.Annotations scope="view" />
       </Clover.Root>,
     );
-    // Marked with its label's language.
     expect(
-      await screen.findByRole("heading", { name: "Added notes" }),
-    ).toHaveAttribute("lang", "en");
-    expect(
-      screen.getByText("A note of mine", {
+      await screen.findByText("A note of mine", {
         selector: ".clover-annotations-text",
       }),
     ).toBeInTheDocument();
+    // By sheet, whatever page it came on (Mat, 2026-11-16): its page's label no heading.
+    expect(screen.queryByRole("heading", { name: "Added notes" })).toBeNull();
   });
 
   /*
-   * WCAG 1.3.1: a Markdown body's lists are lists, and its headings headings, under the
-   * set's own heading, or at its level in a set with none.
+   * WCAG 1.3.1: a Markdown body's lists are lists, and its headings headings, at the list's
+   * level where no Canvas is named (its page's label names nothing in the list).
    */
-  it("reads a Markdown body's lists and headings, a level under the set's heading", async () => {
+  it("reads a Markdown body's lists and headings, at the list's level", async () => {
     const pageOf = (label?: Record<string, string[]>) => ({
       "@context": "http://iiif.io/api/presentation/3/context.json",
       id: "https://example.org/added",
@@ -357,7 +356,7 @@ describe("Annotations", () => {
         },
       ],
     });
-    const { unmount } = render(
+    render(
       <Clover.Root
         iiifContent={imageJson}
         annotations={pageOf({ en: ["Notes"] })}
@@ -365,13 +364,11 @@ describe("Annotations", () => {
         <Clover.Annotations scope="view" headingLevel={4} />
       </Clover.Root>,
     );
-    expect(
-      await screen.findByRole("heading", { level: 4, name: "Notes" }),
-    ).toBeInTheDocument();
     const sources = await screen.findByRole("heading", {
-      level: 5,
+      level: 4,
       name: "Sources",
     });
+    expect(screen.queryByRole("heading", { name: "Notes" })).toBeNull();
     const body = sources.closest(".clover-annotations-text") as HTMLElement;
     const [bullets, numbers] = within(body).getAllByRole("list");
     expect(bullets.tagName).toBe("UL");
@@ -386,16 +383,6 @@ describe("Annotations", () => {
           name.replace(/\s+/g, " ") ===
           "Find on the image: Sources One Two First Second",
       }),
-    ).toBeInTheDocument();
-    unmount();
-
-    render(
-      <Clover.Root iiifContent={imageJson} annotations={pageOf()}>
-        <Clover.Annotations scope="view" headingLevel={4} />
-      </Clover.Root>,
-    );
-    expect(
-      await screen.findByRole("heading", { level: 4, name: "Sources" }),
     ).toBeInTheDocument();
   });
 
@@ -482,11 +469,13 @@ describe("Annotations", () => {
           <Clover.Annotations scope="view" />
         </Clover.Root>,
       );
+      // By its place among the Canvas's annotations, as its hotspot and the Canvas's menu
+      // count it, whatever page it came on: the Manifest's own one is first.
       expect(
-        await screen.findByRole("button", { name: "Find on the image: 1" }),
+        await screen.findByRole("button", { name: "Find on the image: 2" }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: "Find on the image: 2" }),
+        screen.getByRole("button", { name: "Find on the image: 3" }),
       ).toBeInTheDocument();
     });
   });
@@ -629,7 +618,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
     return null;
   }
 
-  it("names pages by the AnnotationCollection they are part of, one layer across Canvases (Cookbook 0309)", async () => {
+  it("lists an AnnotationCollection's pages by Canvas, as every page is, under one toggle (Cookbook 0309)", async () => {
     // The Collection's label is in the Manifest's references alone, not the pages fetched.
     const pages: Record<string, unknown> = {
       [collectionPage1.id]: collectionPage1,
@@ -644,19 +633,20 @@ describe("Annotations, every Canvas's (scope all)", () => {
       </Clover.Root>,
     );
     await screen.findByText("text-4");
-    // One layer, named by the Collection, with one toggle for both pages.
+    // By sheet (Mat, 2026-11-16): each page under its Canvas, the Collection naming none,
+    // and one toggle for both.
     expect(
-      screen.getByRole("checkbox", { name: "Hide Newspaper layout markup" }),
+      screen.getByRole("checkbox", { name: "Hide annotations" }),
     ).toBeInTheDocument();
-    const layer = screen.getByRole("region", {
-      name: "Newspaper layout markup",
-    });
     expect(
-      within(layer)
-        .getAllByRole("heading")
-        .map((heading) => heading.textContent),
-    ).toEqual(["Newspaper layout markup", "p. 1", "p. 2"]);
-    expect(within(layer).getAllByRole("button")).toHaveLength(8);
+      screen.queryByRole("region", { name: "Newspaper layout markup" }),
+    ).toBeNull();
+    expect(
+      screen.getAllByRole("heading").map((heading) => heading.textContent),
+    ).toEqual(["p. 1", "p. 2"]);
+    expect(
+      document.querySelectorAll(".clover-annotations button"),
+    ).toHaveLength(8);
   });
 
   it("fetches the pages up to the one in view, and the next only as the list's end comes into view", async () => {
@@ -686,7 +676,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
     }
   });
 
-  it("lists them by layer, one hide toggle each, then by Canvas under its label, those in view current", async () => {
+  it("lists them by Canvas under its label, whatever page each is on, one hide toggle for all, those in view current", async () => {
     const fetch = vi.fn(async () => new Response(JSON.stringify(referenced)));
     render(
       <Clover.Root iiifContent={manifest} request={{ fetch }}>
@@ -701,22 +691,24 @@ describe("Annotations, every Canvas's (scope all)", () => {
       expect.anything(),
     );
     /*
-     * Two layers: the unlabeled tags (two pages, one toggle), and the Comments, each
-     * toggle named "Hide" and its layer's label, which follows it in the header.
+     * By sheet (Mat, 2026-11-16: "don't organize by motivation. always just organize by
+     * sheet"): no layer of Comments apart from the tags, and one toggle for all of them.
      */
-    const boxes = [
-      screen.getByRole("checkbox", { name: "Hide annotations" }),
-      screen.getByRole("checkbox", { name: "Hide Comments" }),
-    ];
+    expect(screen.getAllByRole("checkbox")).toHaveLength(1);
+    const hide = screen.getByRole("checkbox", { name: "Hide annotations" });
+    expect(screen.queryByRole("region", { name: "Comments" })).toBeNull();
     expect(
-      boxes[1].closest(".clover-annotations-set-header"),
-    ).toHaveTextContent("Comments");
-    const comments = screen.getByRole("region", { name: "Comments" });
+      screen.getAllByRole("heading").map((heading) => heading.textContent),
+    ).toEqual(["Page 1", "Page 2", "Page 3"]);
+    // Page 3's in its pages' order: its tag, then its comment.
     expect(
-      within(comments)
-        .getAllByRole("heading")
-        .map((heading) => heading.textContent),
-    ).toEqual(["Comments", "Page 2", "Page 3"]);
+      within(screen.getByRole("region", { name: "Page 3" }))
+        .getAllByRole("listitem")
+        .map((entry) => entry.textContent),
+    ).toEqual([
+      expect.stringContaining("Tag 3"),
+      expect.stringContaining("Comment 3"),
+    ]);
     // Page 1 is in view, so its group is current.
     const groups = () =>
       [...document.querySelectorAll(".clover-annotations-canvas")].map(
@@ -727,25 +719,27 @@ describe("Annotations, every Canvas's (scope all)", () => {
       );
     expect(groups()).toEqual([
       ["Page 1", "true"],
-      ["Page 3", null],
       ["Page 2", null],
       ["Page 3", null],
     ]);
     act(() => clover.goTo(`${base}/canvas/3`));
     expect(groups()).toEqual([
       ["Page 1", null],
-      ["Page 3", "true"],
       ["Page 2", null],
       ["Page 3", "true"],
     ]);
 
-    // One toggle hides the whole layer, both of its pages.
-    fireEvent.click(boxes[0]);
-    expect(clover.store.get().hiddenSets).toEqual([
-      `${base}/page/tags-1`,
-      `${base}/page/tags-3`,
-    ]);
-    expect(boxes[0]).toBeChecked();
+    // The one toggle hides every page it lists.
+    fireEvent.click(hide);
+    expect([...clover.store.get().hiddenSets].sort()).toEqual(
+      [
+        `${base}/page/comments-2`,
+        `${base}/page/comments-3`,
+        `${base}/page/tags-1`,
+        `${base}/page/tags-3`,
+      ].sort(),
+    );
+    expect(hide).toBeChecked();
   });
 
   // What each marks, beside what it says: its region, cut small by the image server.
@@ -829,6 +823,118 @@ describe("Annotations, every Canvas's (scope all)", () => {
     expect(
       container.querySelector("img.clover-annotations-thumbnail"),
     ).toHaveAttribute("alt", "");
+  });
+
+  /*
+   * Mat, 2026-11-16: "they do relate to a targeted canvas and or region, yes?", then
+   * "Those and regions": a note on the whole Canvas pictured by all of it, and a region its
+   * server cannot cut (level 0) cut here from the whole image at a size the server lists.
+   */
+  describe("pictures where the server lists sizes alone, or for the whole Canvas", () => {
+    const service = "https://example.org/iiif/zero";
+    const pictured = (target: string) => ({
+      ...manifest,
+      items: [
+        {
+          ...manifest.items[0],
+          width: 100,
+          height: 100,
+          items: [
+            {
+              id: `${base}/canvas/1/page`,
+              type: "AnnotationPage",
+              items: [
+                {
+                  id: `${base}/canvas/1/paint`,
+                  type: "Annotation",
+                  motivation: "painting",
+                  target: `${base}/canvas/1`,
+                  body: {
+                    id: `${service}/full/max/0/default.jpg`,
+                    type: "Image",
+                    width: 1000,
+                    height: 1000,
+                    service: [
+                      { id: service, type: "ImageService3", profile: "level0" },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+          annotations: [
+            page(1, "notes-1", [{ ...note(1, "noted", "Noted"), target }]),
+          ],
+        },
+      ],
+    });
+    // A level 0 service: two sizes of the whole image, and no region cut.
+    const fetch = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            "@context": "http://iiif.io/api/image/3/context.json",
+            id: service,
+            type: "ImageService3",
+            protocol: "http://iiif.io/api/image",
+            profile: "level0",
+            width: 1000,
+            height: 1000,
+            sizes: [
+              { width: 250, height: 250 },
+              { width: 500, height: 500 },
+            ],
+          }),
+        ),
+    );
+
+    it("pictures a note on the whole Canvas by all of it, at a size the server lists", async () => {
+      const { container } = render(
+        <Clover.Root
+          iiifContent={pictured(`${base}/canvas/1`)}
+          request={{ fetch }}
+        >
+          <Clover.Annotations scope="all" />
+        </Clover.Root>,
+      );
+      await screen.findByText("Noted");
+      await waitFor(() =>
+        expect(
+          container.querySelector("img.clover-annotations-thumbnail"),
+        ).toHaveAttribute("src", `${service}/full/250,250/0/default.jpg`),
+      );
+    });
+
+    it("cuts a region the server cannot, from the smallest listed size that holds it", async () => {
+      const { container } = render(
+        <Clover.Root
+          iiifContent={pictured(`${base}/canvas/1#xywh=10,20,30,40`)}
+          request={{ fetch }}
+        >
+          <Clover.Annotations scope="all" />
+        </Clover.Root>,
+      );
+      await screen.findByText("Noted");
+      // The region's shorter side, 300 of the image's 1000, at 52: 250 wide is enough.
+      const cut = await waitFor(() => {
+        const found = container.querySelector<HTMLElement>(
+          ".clover-annotations-thumbnail[data-cut]",
+        );
+        expect(found).not.toBeNull();
+        return found!;
+      });
+      const image = cut.querySelector("img")!;
+      expect(image).toHaveAttribute(
+        "src",
+        `${service}/full/250,250/0/default.jpg`,
+      );
+      expect(image).toHaveAttribute("alt", "");
+      // The region filling the square as `cover` fills it with a server's cut.
+      expect(parseFloat(image.style.width)).toBeCloseTo(333.333, 2);
+      expect(parseFloat(image.style.height)).toBeCloseTo(333.333, 2);
+      expect(parseFloat(image.style.left)).toBeCloseTo(-33.333, 2);
+      expect(parseFloat(image.style.top)).toBeCloseTo(-83.333, 2);
+    });
   });
 
   // Cookbook 0261: a shape's picture is the box it fills.
@@ -924,7 +1030,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
     );
   });
 
-  it("lists a Manifest of one Canvas by layer alone, with no Canvas to name", async () => {
+  it("lists a Manifest of one Canvas with no Canvas to name, and no page's", async () => {
     const one = {
       ...manifest,
       items: [
@@ -946,14 +1052,13 @@ describe("Annotations, every Canvas's (scope all)", () => {
         <Clover.Annotations scope="all" />
       </Clover.Root>,
     );
-    const comments = await screen.findByRole("region", { name: "Comments" });
+    await screen.findByText("Comment 1");
+    expect(screen.queryByRole("heading")).toBeNull();
+    expect(screen.queryByRole("region")).toBeNull();
     expect(
-      within(comments)
-        .getAllByRole("heading")
-        .map((heading) => heading.textContent),
-    ).toEqual(["Comments"]);
-    expect(comments).toHaveTextContent("Comment 1");
-    expect(comments.querySelector("[aria-current]")).toBeNull();
+      screen.getByRole("checkbox", { name: "Hide annotations" }),
+    ).toBeInTheDocument();
+    expect(document.querySelector("[aria-current]")).toBeNull();
   });
 
   it("joins the information panel listing every Canvas's, not only the view's", async () => {
@@ -972,6 +1077,138 @@ describe("Annotations, every Canvas's (scope all)", () => {
     await waitFor(() => expect(panel).toHaveTextContent("Comment 3"));
     expect(panel).toHaveTextContent("Tag 1");
     expect(panel).toHaveTextContent("Comment 2");
+  });
+});
+
+/*
+ * Mat, 2026-11-16: "make it so georeferencing annotations are handled by Page on other
+ * items. don't categorize these annotations differently. do leave the map … map icon",
+ * then "don't organize by motivation. always just organize by sheet". The Sanborn sheets:
+ * on each Canvas a page of georeferences ("Georeferences") and one of notes ("Notes").
+ */
+describe("Annotations, with georeferenced images", () => {
+  const sheet = (n: number) =>
+    `https://clover.iiif.library.northwestern.edu/mocks/sanborn/canvas/${n}`;
+  let clover: any;
+  function Spy() {
+    clover = Clover.useClover().clover;
+    return null;
+  }
+
+  it("lists each under its sheet with the sheet's annotations, the map's pin on its picture", async () => {
+    render(
+      <Clover.Root iiifContent={sanbornJson}>
+        <Spy />
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    // Its georeferenced images arrive with their reader, after its notes.
+    await screen.findByRole("button", {
+      name: "Find on the map: Evanston, Illinois | 1920 | sanborn01857_004 p17",
+    });
+    const two = screen.getByRole("region", { name: "Sheet 28" });
+    // By sheet alone: no heading of a page's label, whatever each is for.
+    expect(
+      screen.getAllByRole("heading").map((heading) => heading.textContent),
+    ).toEqual(["Sheet 17", "Sheet 24", "Sheet 28", "Sheet 115"]);
+    expect(screen.queryByRole("region", { name: "Georeferences" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Notes" })).toBeNull();
+    expect(document.querySelector(".clover-annotations-places")).toBeNull();
+    // Sheet 28's two maps first, each its picture with the map's pin over its corner,
+    // then its note.
+    const rows = within(two).getAllByRole("listitem");
+    expect(rows).toHaveLength(3);
+    for (const row of rows.slice(0, 2))
+      expect(
+        row.querySelector(
+          ".clover-annotations-place-picture > .clover-annotations-place-glyph",
+        ),
+      ).toHaveAttribute("aria-hidden", "true");
+    expect(rows[2].querySelector(".clover-annotations-place-glyph")).toBeNull();
+    expect(rows[2]).toHaveTextContent("Two maps on one sheet");
+    // One toggle for the notes the Canvas shows; the georeferenced images the map lays.
+    expect(screen.getAllByRole("checkbox")).toHaveLength(1);
+    expect(
+      screen.getByRole("checkbox", { name: "Hide annotations" }),
+    ).toBeInTheDocument();
+
+    // Pressed: its Canvas, and the map asked for it, marked as a picked annotation is.
+    const find = within(
+      screen.getByRole("region", { name: "Sheet 24" }),
+    ).getByRole("button", {
+      name: "Find on the map: Evanston, Illinois | 1920 | sanborn01857_004 p24",
+    });
+    expect(find).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(find);
+    expect(clover.store.get().canvasId).toBe(sheet(24));
+    expect(clover.place.get()).toBe(`overlay-${sheet(24)}/georeferences/1`);
+    expect(find).toHaveAttribute("aria-pressed", "true");
+    expect(find.closest("li")).toHaveAttribute("data-selected", "true");
+    // Its sheet is the Canvas in view now.
+    expect(screen.getByRole("region", { name: "Sheet 24" })).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+
+  /*
+   * Mat, 2026-11-16: "this should be a rule for annotations as they relate to body. not a
+   * template specific thing." Sheet 24's note is on the whole sheet: picked in the list,
+   * the Body goes to its Canvas, draws the line round it and frames it, as in any layout.
+   */
+  it("has the Body draw the line round a whole Canvas picked in the list, and frame it", async () => {
+    render(
+      <Clover.Root iiifContent={sanbornJson}>
+        <Clover.Body />
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
+    emit("open");
+    await act(async () => {
+      await import("../Canvas/AnnotationState");
+    });
+    expect(
+      document.querySelector(".clover-canvas-annotation-whole"),
+    ).toBeNull();
+    const calls = renderer.setImages.mock.calls.length;
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: /^Find on the image: Downtown Evanston/,
+      }),
+    );
+    // Its Canvas, laid out in the Body and opened.
+    await waitFor(() =>
+      expect(renderer.setImages.mock.calls.length).toBeGreaterThan(calls),
+    );
+    renderer.home.mockClear();
+    emit("open");
+    await waitFor(() =>
+      expect(
+        document.querySelector(".clover-canvas-annotation-whole"),
+      ).not.toBeNull(),
+    );
+    // A Canvas shown alone: home, the whole of it.
+    await waitFor(() => expect(renderer.home).toHaveBeenCalled());
+    expect(
+      document.querySelector(".clover-canvas-annotation-whole"),
+    ).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("lists the view's together, with no sheet to name", async () => {
+    render(
+      <Clover.Root iiifContent={sanbornJson}>
+        <Clover.Annotations scope="view" />
+      </Clover.Root>,
+    );
+    const find = await screen.findByRole("button", {
+      name: "Find on the map: Evanston, Illinois | 1920 | sanborn01857_004 p17",
+    });
+    const rows = screen.getAllByRole("listitem");
+    expect(rows[0]).toBe(find.closest("li"));
+    expect(rows).toHaveLength(3);
+    expect(screen.queryByRole("heading")).toBeNull();
+    expect(screen.getAllByRole("checkbox")).toHaveLength(1);
   });
 });
 

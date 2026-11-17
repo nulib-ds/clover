@@ -1734,8 +1734,16 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   (`evanston.json`), every document carrying mapsnap's ODbL (static, and wholly live in
   `npm run dev` under `pages/api/mocks/sanborn/`, every file of it rewritten there,
   `WHOLLY_LIVE` in `next.config.mjs`, so the Collection's pages load before they are
-  deployed). The package's tests use copies of
-  `page-transcript`, `paged`, `rudolf-hess-nuremberg`, `sanborn` and `transcripts`, in
+  deployed); and four of that 1920 volume's sheets (17, 24, 28 with its two maps, and the
+  campus's 115) as a Manifest (`manifest.json`, from `manifest.mjs`; 2026-11-13, never
+  called an atlas: Mat, the same day), for trying the Annotations list with places mixed
+  in: on each Canvas a page of `georeferencing` annotations (mapsnap's fits, body and
+  SvgSelector as fetched, retargeted at the Canvas) and a page of notes (`describing`,
+  `commenting`, one an English and Spanish Choice, `tagging` printed words and a GeoJSON
+  Feature point, Cookbook 0139, and `linking` to the volume at the Library of Congress),
+  every region read from the image; a navPlace on the Manifest and on Sheet 115's Canvas,
+  worked out from the fits. The package's tests use copies of `page-transcript`, `paged`,
+  `rudolf-hess-nuremberg`, `sanborn` and `transcripts`, in
   `packages/clover/src/fixtures/mocks/<name>/`.
 
 ## Agent tools (WebMCP)

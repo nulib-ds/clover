@@ -3,7 +3,7 @@ import {
   canvasTextTranscripts,
   type IIIFCanvas,
 } from "../Canvas/layout";
-import { hasMapData } from "../../core/geo-detect";
+import { hasGeoreferences, hasMapData } from "../../core/geo-detect";
 import { isImageServiceManifest } from "../../core/load";
 import { searchServiceOf } from "../../core/search-service";
 import { tableOfContents } from "../../core/ranges";
@@ -26,7 +26,12 @@ export type PanelSection =
   | "transcript"
   | "annotations";
 
-/** Every default section, in the order a `Panel` draws them. */
+/**
+ * Every section, in the order a `Panel` draws them. Each is offered unasked but the Map,
+ * which a page names to have (`sections`): its places and georeferenced images are listed
+ * in Annotations instead, and shown on the map over the Body (Mat, 2026-11-13: "if we have
+ * navPlace or georeference annotations. no longer render a Map section").
+ */
 const PANEL_SECTIONS: readonly PanelSection[] = [
   "about",
   "targets",
@@ -69,9 +74,13 @@ const HAS: Record<PanelSection, (state: CloverState) => boolean> = {
         canvasTimedText(canvas).length > 0 ||
         canvasTextTranscripts(canvas).length > 0,
     ),
+  // Its annotations, else its georeferences, which Annotations lists where no Map does.
   annotations: (state) =>
     selectListedSets(state.manifest, state.addedSets).length > 0,
 };
+
+/** The sections offered only where a page names them. */
+const ASKED_ONLY: ReadonlySet<PanelSection> = new Set(["map"]);
 
 /**
  * Those of `PANEL_SECTIONS` with data, narrowed to the ones a page asked for. Anything
@@ -80,21 +89,31 @@ const HAS: Record<PanelSection, (state: CloverState) => boolean> = {
  */
 const narrow = (
   data: Record<PanelSection, boolean>,
-  sections?: readonly PanelSection[],
+  sections: readonly PanelSection[] | undefined,
+  georeferenced: boolean,
 ) => {
   const chosen = Array.isArray(sections)
     ? new Set<string>(sections)
     : undefined;
-  return PANEL_SECTIONS.filter(
-    (section) => data[section] && (!chosen || chosen.has(section)),
-  );
+  const asked = (section: PanelSection) =>
+    chosen ? chosen.has(section) : !ASKED_ONLY.has(section);
+  // Its georeferences are listed in Annotations wherever no Map section shows them; its
+  // places (`navPlace`) are About's.
+  const listed = {
+    ...data,
+    annotations: data.annotations || (georeferenced && !asked("map")),
+  };
+  return PANEL_SECTIONS.filter((section) => listed[section] && asked(section));
 };
 
 /**
  * The default sections a `Panel` in this Root would have, in its order: About, and each
  * other one the resource has data for, narrowed to `sections` where the page names the
- * ones it wants. None of them, and the panel draws nothing, so a layout of your own can
- * ask first and leave out the pane that would hold it:
+ * ones it wants. The Map is offered only where `sections` names it; elsewhere the
+ * resource's georeferenced images are listed in Annotations, which is offered for them,
+ * and its places in About. None of them,
+ * and the panel draws nothing, so a layout of your own can ask first and leave out the
+ * pane that would hold it:
  *
  * ```jsx
  * const sections = Clover.usePanelSections(["contents", "search"]);
@@ -121,5 +140,8 @@ export function usePanelSections(
     transcript: useCloverSelector(HAS.transcript),
     annotations: useCloverSelector(HAS.annotations),
   };
-  return narrow(data, sections);
+  const georeferenced = useCloverSelector((state) =>
+    hasGeoreferences(state.manifest),
+  );
+  return narrow(data, sections, georeferenced);
 }

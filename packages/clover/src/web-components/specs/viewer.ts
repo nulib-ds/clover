@@ -156,8 +156,8 @@ export const viewerDocs: ElementDocs = {
     },
     "panel-sections": {
       description:
-        'Default, Document and Gallery: which of the panel\'s sections it may have (Document\'s toolbar\'s buttons), as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and there is no panel where none of them does.',
-      default: "every section",
+        'Default, Document and Gallery: which of the panel\'s sections it may have (Document\'s toolbar\'s buttons), as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and there is no panel where none of them does. "map" gives the map a section of its own; else About names the places and Annotations lists the georeferenced images, each shown on the map over the clover-body (Document: over its pages) as it is pressed.',
+      default: "every section but the map",
     },
     "panel-labels": {
       description:

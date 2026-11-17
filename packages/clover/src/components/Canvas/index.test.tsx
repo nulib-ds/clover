@@ -28,6 +28,7 @@ import { CanvasRenderer } from "../../lib/renderer";
 import { clearInfoCache } from "../../lib/renderer/sources/imageService";
 import { Root } from "../Root/Root";
 import { Body } from "../Body/Body";
+import { Annotations } from "../Annotations/Annotations";
 import { decodeContentState } from "../../core/content-state-reader";
 import { stubViewport } from "./testing/viewport";
 
@@ -487,15 +488,18 @@ describe("Canvas", () => {
     const box = await screen.findByRole("group", {
       name: "The Laocoön Bronze",
     });
-    expect(box).toHaveAttribute("data-open", "true");
+    // An Inset, as Document's map box is (Mat, 2026-11-15: "this is the standard for maps").
+    expect(box).toHaveClass("clover-inset");
     expect(control).toHaveAttribute("aria-expanded", "true");
     expect(control).toHaveAttribute("aria-controls", box.id);
     // Closed, focus back on the control; and open again from it.
     fireEvent.click(within(box).getByRole("button", { name: "Close" }));
-    expect(box).toHaveAttribute("data-open", "false");
-    expect(control).toHaveFocus();
+    expect(box).not.toBeInTheDocument();
+    await waitFor(() => expect(control).toHaveFocus());
     fireEvent.click(control);
-    expect(box).toHaveAttribute("data-open", "true");
+    expect(
+      await screen.findByRole("group", { name: "The Laocoön Bronze" }),
+    ).toHaveClass("clover-inset");
   });
 
   // A georeferenced map with no navPlace: its Map control opens the map it is warped onto.
@@ -516,41 +520,96 @@ describe("Canvas", () => {
     await loaded();
     const figure = screen.getByTestId("clover-canvas");
     const box = await screen.findByTestId("clover-canvas-place");
-    await waitFor(() => expect(box).toHaveAttribute("data-open", "true"));
+    expect(box).toHaveClass("clover-inset");
     const expand = () =>
       within(box).getByRole("button", { name: "Expand map" });
+    const collapse = () =>
+      within(box).getByRole("button", { name: "Collapse map" });
     await waitFor(() => expect(expand()).toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Zoom in" })).toBeInTheDocument();
 
-    // Expanded: the map takes the Canvas's place, and the view's controls go with it. The
-    // same button, named for what it does now, keeps focus.
-    const toggle = expand();
-    toggle.focus();
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAccessibleName("Collapse map");
-    expect(toggle).not.toHaveAttribute("aria-pressed");
-    expect(toggle).toHaveFocus();
+    // Expanded: the map takes the Canvas's place, and the view's controls go with it; the
+    // page's picture over it trades them back, focus going on to it (WCAG 2.4.3).
+    expand().focus();
+    fireEvent.click(expand());
+    await waitFor(() => expect(collapse()).toHaveFocus());
+    expect(box).not.toHaveClass("clover-inset");
+    // Its one Close, in the page's picture's box (Mat, 2026-11-16).
+    const page = box.querySelector<HTMLElement>(".clover-canvas-place-page")!;
+    expect(within(box).getAllByRole("button", { name: "Close" })).toEqual([
+      within(page).getByRole("button", { name: "Close" }),
+    ]);
     expect(figure).toHaveAttribute("data-place", "swapped");
     expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
-    expect(
-      screen.getByRole("button", { name: "Full screen" }),
-    ).toBeInTheDocument();
     expect(control).toHaveAttribute("aria-expanded", "true");
 
-    // Collapsed: the Canvas and its controls come back.
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAccessibleName("Expand map");
+    // Collapsed: the Canvas and its controls come back, focus on Expand map.
+    fireEvent.click(collapse());
+    await waitFor(() => expect(expand()).toHaveFocus());
     expect(figure).not.toHaveAttribute("data-place");
     expect(screen.getByRole("button", { name: "Zoom in" })).toBeInTheDocument();
 
     // Escape, expanded: the first puts its Tip away (WCAG 1.4.13), the next closes the box
     // and brings the Canvas back, focus on the control.
-    fireEvent.click(toggle);
-    fireEvent.keyDown(toggle, { key: "Escape" });
-    fireEvent.keyDown(toggle, { key: "Escape" });
-    expect(box).toHaveAttribute("data-open", "false");
+    fireEvent.click(expand());
+    await waitFor(() => expect(collapse()).toHaveFocus());
+    fireEvent.keyDown(collapse(), { key: "Escape" });
+    fireEvent.keyDown(collapse(), { key: "Escape" });
+    expect(box).not.toBeInTheDocument();
     expect(figure).not.toHaveAttribute("data-place");
-    expect(control).toHaveFocus();
+    await waitFor(() => expect(control).toHaveFocus());
+  });
+
+  // Mat, 2026-11-13: a georeferenced image pressed in Annotations opens the map expanded.
+  it("fills the Body with the Root's map for a place pressed in Annotations, and gives it back", async () => {
+    render(
+      <Root iiifContent={evanston() as never}>
+        <Canvas />
+        <Annotations />
+      </Root>,
+    );
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    await open();
+    const find = await screen.findByRole("button", {
+      name: /^Find on the map: /,
+    });
+    expect(find).toHaveAttribute("aria-pressed", "false");
+    find.focus();
+    fireEvent.click(find);
+    await loaded();
+    const figure = screen.getByTestId("clover-canvas");
+    await waitFor(() =>
+      expect(figure).toHaveAttribute("data-place", "swapped"),
+    );
+    const asked = () =>
+      screen
+        .queryAllByTestId("clover-canvas-place")
+        .find((box) => box.id.startsWith("place-asked-"));
+    // Its box loads with MapLibre's map, as it first opens.
+    await waitFor(() => expect(asked()).toBeDefined());
+    const box = asked()!;
+    expect(box).toHaveAttribute("data-swapped", "true");
+    expect(box).toHaveAccessibleName("Map");
+    // Focus stays on what was pressed, now pressed.
+    expect(find).toHaveFocus();
+    expect(find).toHaveAttribute("aria-pressed", "true");
+
+    // Collapsed, it stays, in its box over the Canvas, which comes back.
+    fireEvent.click(within(box).getByRole("button", { name: "Collapse map" }));
+    expect(figure).not.toHaveAttribute("data-place");
+    expect(box).toHaveClass("clover-inset");
+
+    // Closed: put away, focus back on the place in the list.
+    fireEvent.click(within(box).getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(asked()).toBeUndefined());
+    expect(find).toHaveFocus();
+    expect(find).toHaveAttribute("aria-pressed", "false");
   });
 
   it("renders an accessible, focusable viewport", () => {
@@ -699,6 +758,26 @@ describe("Canvas", () => {
     );
     expect(screen.getByRole("button", { name: "Zoom in" })).toBeVisible();
     expect(document.querySelector(".clover-body-note")).toBeNull();
+  });
+
+  // `{shown && <Control />}` while not shown is no control of the host's: Document's Map
+  // control, outside its full viewer, took the Canvas's row as given one (2026-11-14).
+  it("takes children that are not shown as no controls of the host's", () => {
+    const drawn = (children?: React.ReactNode) => {
+      const { container, unmount } = render(
+        <Canvas canvases={[placeholderVideo.items[0]]} instanceId="x">
+          {children}
+        </Canvas>,
+      );
+      const html = container.innerHTML;
+      unmount();
+      return html;
+    };
+    const none = drawn();
+    const shown = false as boolean;
+    expect(drawn(shown && <button type="button">Mine</button>)).toBe(none);
+    expect(drawn(null)).toBe(none);
+    expect(drawn(<button type="button">Mine</button>)).not.toBe(none);
   });
 
   it("names no keys behind a placeholder, where none does anything", () => {
@@ -1548,10 +1627,11 @@ describe("Canvas", () => {
       fireEvent.click(await screen.findByRole("button", { name: "Map" }));
       await loaded();
       const box = await screen.findByTestId("clover-canvas-place");
-      await waitFor(() => expect(box).toHaveAttribute("data-open", "true"));
+      const map = box.querySelector(".clover-geomap");
+      expect(map).not.toBeNull();
       rerender(<Canvas canvases={[]} manifestId="loading" />);
       expect(screen.getByTestId("clover-canvas-place")).toBe(box);
-      expect(box).toHaveAttribute("data-open", "true");
+      expect(box.querySelector(".clover-geomap")).toBe(map);
       expect(screen.getByRole("button", { name: "Map" })).toBeInTheDocument();
       rerender(
         <Canvas
@@ -1561,7 +1641,7 @@ describe("Canvas", () => {
         />,
       );
       expect(screen.getByTestId("clover-canvas-place")).toBe(box);
-      expect(box).toHaveAttribute("data-open", "true");
+      expect(box.querySelector(".clover-geomap")).toBe(map);
     });
 
     // Cookbook 0230: two Manifests whose Canvases share one id, at two sizes.
@@ -1618,6 +1698,163 @@ describe("Canvas", () => {
         expect.any(HTMLElement),
         expect.objectContaining({ x: 0, y: 0 }),
       );
+    });
+
+    /*
+     * Mat, 2026-11-16: "if an annotation is targeting the canvas and not a specific
+     * region. draw the line around the whole canvas. think about this for spreads where
+     * there are multiple canvases in a visible spread".
+     */
+    describe("an annotation on a whole Canvas", () => {
+      const spread = pages.slice(1, 3);
+      const [, right] = spread;
+      const whole = "https://example.org/anno/whole";
+      const annotations = [
+        {
+          targetIndex: 1,
+          annotation: {
+            id: whole,
+            type: "Annotation",
+            motivation: "commenting",
+            body: [{ type: "TextualBody", value: "About this page" }],
+            target: right.id,
+          } as any,
+        },
+        // The same page as a region, for where the whole of it lies.
+        {
+          targetIndex: 1,
+          annotation: {
+            id: "https://example.org/anno/page",
+            type: "Annotation",
+            motivation: "commenting",
+            body: [{ type: "TextualBody", value: "The page as a region" }],
+            target: `${right.id}#xywh=0,0,${right.width},${right.height}`,
+          } as any,
+        },
+      ];
+      const pinned = (element: Element | null) =>
+        renderer.overlays.add.mock.calls.findLast(
+          ([pinnedElement]: [Element]) => pinnedElement === element,
+        )?.[1];
+
+      it("has no hotspot, and no line at rest", async () => {
+        render(<Canvas canvases={spread} annotations={annotations} />);
+        await open();
+        expect(
+          screen.queryByRole("button", { name: "About this page" }),
+        ).toBeNull();
+        expect(
+          screen.getByRole("button", { name: "The page as a region" }),
+        ).toBeInTheDocument();
+        expect(
+          document.querySelector(".clover-canvas-annotation-whole"),
+        ).toBeNull();
+      });
+
+      it("draws a line round its page alone in a spread while picked, taking nothing from the pointer", async () => {
+        render(
+          <Canvas
+            canvases={spread}
+            annotations={annotations}
+            selectedAnnotation={whole}
+          />,
+        );
+        await open();
+        const line = await waitFor(() => {
+          const found = document.querySelector<HTMLElement>(
+            ".clover-canvas-annotation-whole",
+          );
+          expect(found).not.toBeNull();
+          return found!;
+        });
+        expect(line).toHaveAttribute("aria-hidden", "true");
+        expect(line.style.pointerEvents).toBe("none");
+        // Where the right page lies, as the whole of it as a region does: not the spread.
+        const page = pinned(
+          screen.getByRole("button", { name: "The page as a region" }),
+        );
+        expect(page.x).toBeGreaterThan(0);
+        expect(pinned(line)).toEqual(page);
+        // Zoomed to its page, the whole of it, as home frames a Canvas: in the viewport's
+        // padded area, with none of a region's padding (Mat, 2026-11-16: "Zoom to its page").
+        await waitFor(() =>
+          expect(renderer.fitBounds).toHaveBeenCalledWith(page, true, {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+          }),
+        );
+        expect(renderer.fitAnnotation).not.toHaveBeenCalledWith(
+          page,
+          expect.anything(),
+        );
+        expect(renderer.home).not.toHaveBeenCalled();
+      });
+
+      it("goes home on a Canvas shown alone, which is the whole of it", async () => {
+        const [page] = pages;
+        const alone = [
+          {
+            targetIndex: 0,
+            annotation: {
+              ...annotations[0].annotation,
+              target: page.id,
+            },
+          },
+        ];
+        const { rerender } = render(
+          <Canvas canvases={[page]} annotations={alone} />,
+        );
+        await open();
+        renderer.home.mockClear();
+        rerender(
+          <Canvas
+            canvases={[page]}
+            annotations={alone}
+            selectedAnnotation={whole}
+          />,
+        );
+        await waitFor(() => expect(renderer.home).toHaveBeenCalledWith(true));
+        expect(renderer.fitAnnotation).not.toHaveBeenCalled();
+        expect(
+          document.querySelector(".clover-canvas-annotation-whole"),
+        ).not.toBeNull();
+      });
+
+      it("draws it while pointed at too, from a list beside the Canvas", async () => {
+        const { rerender } = render(
+          <Canvas canvases={spread} annotations={annotations} />,
+        );
+        await open();
+        expect(
+          document.querySelector(".clover-canvas-annotation-whole"),
+        ).toBeNull();
+        rerender(
+          <Canvas
+            canvases={spread}
+            annotations={annotations}
+            highlightedAnnotation={whole}
+          />,
+        );
+        await waitFor(() =>
+          expect(
+            document.querySelector(".clover-canvas-annotation-whole"),
+          ).not.toBeNull(),
+        );
+        rerender(
+          <Canvas
+            canvases={spread}
+            annotations={annotations}
+            highlightedAnnotation={null}
+          />,
+        );
+        await waitFor(() =>
+          expect(
+            document.querySelector(".clover-canvas-annotation-whole"),
+          ).toBeNull(),
+        );
+      });
     });
   });
   describe("Choice", () => {

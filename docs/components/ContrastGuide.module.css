@@ -295,6 +295,15 @@
     0 0 0 4px var(--bg);
 }
 
+/* A point at rest: its dot (`--fg`) in its ring, the ground (`--bg`). */
+.sample[data-sample="point"]::before {
+  content: "";
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: 50%;
+  background: var(--fg);
+}
+
 /*
  * A control in the higher-contrast mode: its glyph on its fill (`--disc`), ringed in the
  * accent (`--ring`), 1px clear, on the ground (`--bg`), as `styles/contrast.css` rings it.

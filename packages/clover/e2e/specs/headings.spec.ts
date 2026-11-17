@@ -79,18 +79,19 @@ test("a Markdown note's headings nest under the panel's, its lists are lists", a
   isMobile,
 }) => {
   await open(page, isMobile);
-  // The title h2, the panel's sections h3, the set's title h4, the note's own under it.
+  /*
+   * The title h2, the panel's sections h3, the note's own under them: by sheet (Mat,
+   * 2026-11-16), its page's label no heading, and one Canvas, so none named.
+   */
   await expect(
     page.getByRole("heading", { level: 3, name: "Annotations" }),
   ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Notes" })).toHaveCount(0);
   await expect(
-    page.getByRole("heading", { level: 4, name: "Notes" }),
+    page.getByRole("heading", { level: 4, name: "Sources" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { level: 5, name: "Sources" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { level: 6, name: "Readings" }),
+    page.getByRole("heading", { level: 5, name: "Readings" }),
   ).toBeVisible();
 
   const body = page.locator(".clover-annotations-text");
@@ -151,8 +152,9 @@ test("Chromium's own accessibility tree reads the note's headings and lists", as
     "The tree is read over Chromium's CDP.",
   );
   await open(page, isMobile);
+  // Under the panel's h3, by sheet, with no page's title between (Mat, 2026-11-16).
   await expect(
-    page.getByRole("heading", { level: 5, name: "Sources" }),
+    page.getByRole("heading", { level: 4, name: "Sources" }),
   ).toBeVisible();
   const client = await page.context().newCDPSession(page);
   const { nodes } = (await client.send("Accessibility.getFullAXTree")) as {
@@ -169,8 +171,8 @@ test("Chromium's own accessibility tree reads the note's headings and lists", as
   const level = (name: string) =>
     heading(name)?.properties?.find((property) => property.name === "level")
       ?.value.value;
-  expect(level("Sources")).toBe(5);
-  expect(level("Readings")).toBe(6);
+  expect(level("Sources")).toBe(4);
+  expect(level("Readings")).toBe(5);
   // The entry's button, named by the note's text and none of its syntax.
   const names = nodes
     .filter((node) => node.role?.value === "button")

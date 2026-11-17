@@ -415,8 +415,8 @@ test("a press on a page opens it as the full viewer over the column; Escape clos
   await settled(page, 1);
 
   // A zoom on the page's Canvas opens it too, the keyboard's way in: the view's controls
-  // are the Canvas's own, at its top end, and over the top left the arrow back, the
-  // pager's steps after it.
+  // are the Canvas's own, at its top end, and centered at its foot the arrow back, the
+  // pager's steps after it (Mat, 2026-11-13: "maybe move these down to here. centered.").
   await viewport(page).focus();
   await page.keyboard.press("+");
   await full(page);
@@ -433,6 +433,15 @@ test("a press on a page opens it as the full viewer over the column; Escape clos
     .boundingBox())!;
   const back = (await magnifier.boundingBox())!;
   expect(zoom.x).toBeGreaterThan(back.x);
+  const row = (await view.boundingBox())!;
+  const pages = (await page
+    .locator(".clover-template-document-main")
+    .boundingBox())!;
+  expect(
+    Math.abs(row.x + row.width / 2 - (pages.x + pages.width / 2)),
+  ).toBeLessThan(1);
+  expect(row.y).toBeGreaterThan(zoom.y);
+  expect(pages.y + pages.height - (row.y + row.height)).toBeLessThan(40);
   // Next and Previous step through the pages, the full viewer open.
   await view.getByRole("button", { name: "Next" }).click();
   await expect.poll(() => selected(page)).toBe(2);
@@ -445,6 +454,52 @@ test("a press on a page opens it as the full viewer over the column; Escape clos
   await expect(column(page)).not.toHaveAttribute("data-expanded");
   await settled(page, 1);
   await expect(viewport(page)).toBeFocused();
+});
+
+/*
+ * Mat, 2026-11-16: "open 0240. expand first canvas. navigate to second canvas. collapse.
+ * scroll initial view", "also, expand/collapse map as well. all variations." Closing the
+ * full viewer, or putting the map back, leaves focus in the Canvas; its picture, moved to
+ * the next sheet before it had drawn there, showed the last one in its place.
+ */
+test("closed, the full viewer leaves focus on its Canvas, whose picture still gives way to the still as the column scrolls", async ({
+  page,
+}) => {
+  await open(page);
+  await viewport(page).focus();
+  await page.keyboard.press("+");
+  await full(page);
+  const view = page.locator(".clover-template-document-view");
+  await view.getByRole("button", { name: "Next" }).click();
+  await expect.poll(() => selected(page)).toBe(1);
+  await view.locator("> button").first().click();
+  await expect(column(page)).not.toHaveAttribute("data-expanded");
+  await settled(page, 1);
+  await expect(viewport(page)).toBeFocused();
+  // Every frame the Canvas is moved, its picture is out of sight.
+  await page.evaluate(() => {
+    const live = document.querySelector(".clover-template-document-live")!;
+    const seen = ((window as any).__moved = { frames: 0, shown: 0 });
+    const tick = () => {
+      if (live.hasAttribute("data-moved")) {
+        seen.frames++;
+        const picture = live.querySelector(".clover-canvas-viewport > canvas");
+        if (picture && getComputedStyle(picture).opacity !== "0") seen.shown++;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  const { scrollTop, sheets: all } = await read(page);
+  const step = Math.round(all[0].height);
+  await scrollBy(page, -1);
+  expect(await rested(page, scrollTop - step)).toBe(0);
+  await scrollBy(page, 1);
+  expect(await rested(page, scrollTop)).toBe(1);
+  await expect(viewport(page)).toBeFocused();
+  const moved = await page.evaluate(() => (window as any).__moved);
+  expect(moved.frames).toBeGreaterThan(0);
+  expect(moved.shown).toBe(0);
 });
 
 test("a thumbnail, PageDown and PageUp bring their sheets; a scroll takes over from one on its way", async ({

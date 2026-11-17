@@ -1,6 +1,6 @@
 ---
 title: Annotations
-description: Every annotation of a IIIF resource, by layer and by Canvas, to read, to find on the Canvas, and to hide from it.
+description: Every annotation of a IIIF resource, by Canvas, to read, to find on the Canvas, and to hide from it.
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
@@ -17,8 +17,8 @@ import { PartHead } from "docs/components/Clover4/PartHead";
 </div>
 
 <div className="docs-lede">
-  The resource's annotations, by layer and by Canvas: to read, to find on the
-  Canvas, and to hide from it.
+  The resource's annotations, by Canvas: to read, to find on the Canvas, and to
+  hide from it.
 </div>
 
 <Example>
@@ -43,30 +43,48 @@ import { PartHead } from "docs/components/Clover4/PartHead";
 ## API reference
 
 Inside a `Root`, it lists every Canvas's annotations, and those of pages the Root's
-`annotations` adds, by layer (AnnotationPages that share a label) and then by Canvas; with
-none, it renders nothing. An image's own annotations, such as those of one image of a choice (an X-ray beside
-the natural light), are listed under it and drawn while it is the image chosen. Pressing one finds it on the Canvas, choosing its image if need be, and shows its layer again if it was hidden; the
-eye at the end of a layer's heading hides the layer there, and lights the entries it
-hides while it is pointed at or focused. A still image's OCR (`supplementing` text on its lines or words)
+`annotations` adds, by Canvas, under its label, whatever page each was published on and
+whatever it is for; with none, it renders nothing. Each has a picture of what it marks:
+its region, cut by the image's server, or from a size the server lists where it cannot cut
+one; or all of its Canvas, for one on the whole Canvas. An image's own annotations, such as
+those of one image of a choice (an X-ray beside the natural light), are listed under its
+Canvas and drawn while it is the image chosen. Pressing one finds it on the Canvas,
+choosing its image if need be, and shows its page again if it was hidden; one on a whole
+Canvas, pointed at or picked, is outlined round that Canvas wherever the Body shows it,
+in a spread its page alone, and picked, the view zooms to that page.
+The eye at the
+list's head hides them all there, and lights the entries it hides while it is pointed at
+or focused, and the Canvas's annotations menu hides one page at a time. A still image's OCR (`supplementing` text on its lines or words)
 is neither listed nor drawn: a [search](/docs/search) finds in it and draws its hits. A
 transcription of the whole page, captions and a recording's text show as ever. In a box
 that scrolls, the Canvases in view come to its top as the
-current Canvas changes. Where a layer gives the same words as separate annotations, one per language,
-it lists one language at a time, offered by their codes in its header: the Root's
+current Canvas changes. Where the same words come as separate annotations, one per language,
+it lists one language at a time, offered by their codes at its head: the Root's
 `language` to start, else the browser's. An annotation that tags a place (a GeoJSON
 feature, as a map on a page is tagged with where it shows) is listed by the place's name,
-and picked, the Canvas opens a box of it, as it opens its information: the name over a
-[Map](/docs/map) of the place. Its other props, and its `ref`, go to its element.
+and picked, the Canvas opens a small box of it under its controls, a [Map](/docs/map) of
+the place. The resource's georeferenced images are listed under their Canvas with its
+other annotations, first, each by its name and its picture, the map's pin over the
+picture's corner; the eye leaves them, as the Canvas never shows them. Pressing one fills
+the Body with the map,
+framed on it, going to its Canvas first. The page's picture, in a box under the map's zoom
+buttons, brings the Canvas back with the map in a small box over it, a press on which
+expands it again, and Close puts the map away, focus back on the image pressed. Where
+the panel lies over the Body, as on a phone, it is put away as one is pressed, and focus
+goes to the map, then back to the panel's toggle as the map closes. Its places
+(`navPlace`), a property of the resource rather than an annotation, are named in
+[About](/docs/panel), after its summary. Its other props, and its `ref`, go to its element.
 
 <ApiReference elements="clover-annotations">
 
-| Prop           | Type                                    | Default | Description                                                         |
-| -------------- | --------------------------------------- | ------- | ------------------------------------------------------------------- |
-| `scope`        | `"view" \| "all"`                       | `"all"` | Every Canvas's annotations, all fetched as it shows, or the view's. |
-| `renderEntry`  | `(entry: AnnotationEntry) => ReactNode` | —       | Your own rendering of an entry's content.                           |
-| `headingLevel` | `number`                                | `3`     | Its first headings: one below the heading over it.                  |
-| `as`           | element type                            | `"div"` | The element to render.                                              |
-| `className`    | `string`                                | —       | Added to `clover-annotations`.                                      |
+| Prop           | Type                                    | Default | Description                                                               |
+| -------------- | --------------------------------------- | ------- | ------------------------------------------------------------------------- |
+| `scope`        | `"view" \| "all"`                       | `"all"` | Every Canvas's annotations, all fetched as it shows, or the view's.       |
+| `renderEntry`  | `(entry: AnnotationEntry) => ReactNode` | —       | Your own rendering of an entry's content.                                 |
+| `places`       | `boolean`                               | `true`  | Its georeferenced images, by Canvas, each shown on the map over the Body. |
+| `headingLevel` | `number`                                | `3`     | Its first headings: one below the heading over it.                        |
+| `as`           | element type                            | `"div"` | The element to render.                                                    |
+| `className`    | `string`                                | —       | Added to `clover-annotations`.                                            |
 
 </ApiReference>
 
@@ -75,7 +93,7 @@ and picked, the Canvas opens a box of it, as it opens its information: the name 
 ### On a recording
 
 On a recording, each annotation shows when it starts, and pressing it goes there. These
-follow the defendants through the film, in two layers; its captions are the
+follow the defendants through the film; its captions are the
 [Transcript](/docs/transcript)'s.
 
 <Example>

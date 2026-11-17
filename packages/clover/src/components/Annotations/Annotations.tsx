@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { EntryBodies } from "./EntryBodies";
+import type { Place } from "./Places";
 import {
   type AnnotationEntry,
   type AnnotationPageRef,
@@ -15,6 +16,7 @@ import {
 import { usePagesReached } from "../../react/usePagesReached";
 import { ListEnd } from "../../ui/ListEnd";
 import { annotationName } from "../../core/annotation-name";
+import { hasGeoreferences } from "../../core/geo-detect";
 import { readLink, readTagSource } from "../../core/link";
 import { ExternalGlyph } from "../../ui/ExternalGlyph";
 import { showLink } from "../../core/show-link";
@@ -50,24 +52,35 @@ import { languageProps } from "../../i18n/direction";
 export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
   /**
    * Every annotation in the Manifest (default), as the Viewer's panel lists them: by
-   * layer (AnnotationPages that share a label, or have none), then by Canvas, under each
-   * Canvas's label, the ones in view marked current and kept in sight as the reader
-   * moves. Or `"view"`: the view's alone, by set.
+   * Canvas, under each Canvas's label, whatever page each was published on, the ones in
+   * view marked current and kept in sight as the reader moves. Or `"view"`: the view's
+   * alone, by Canvas where it shows several.
    */
   scope?: "view" | "all";
   /** Your own rendering of an annotation's content. */
   renderEntry?: (entry: AnnotationEntry) => React.ReactNode;
   /**
-   * The heading level for each set's title. Headings in an annotation's Markdown sit a
-   * level below it, or at it in a set with no title. Default 3.
+   * The heading level for each Canvas's label. Headings in an annotation's Markdown sit a
+   * level below it, or at it where no Canvas is named. Default 3.
    */
   headingLevel?: number;
+  /**
+   * The resource's georeferenced images, listed with its annotations under their Canvas,
+   * each its picture with the map's pin over its corner, pressed to show it on the map
+   * over the Body, which the Body opens filling it. Default `true`; `false` where the page
+   * shows a map of its own (Document's aside). Its places (`navPlace`) are About's.
+   */
+  places?: boolean;
   as?: React.ElementType;
 }
 
+// The georeferenced images, with their reader, only where the Root has any.
+const loadPlaces = () => import("./Places");
+const NO_PLACES: Place[] = [];
+
 /**
- * The annotations of the Root's resource — comments, tags, transcriptions — grouped by
- * set, as a list to read and to point with.
+ * The annotations of the Root's resource — comments, tags, transcriptions, georeferenced
+ * images — by the Canvas each is on, as a list to read and to point with.
  *
  * - Each entry shows its content (IIIF's limited HTML, sanitized; an image body as an
  *   image). Pressing it frames the annotation on the Canvas, going to its Canvas first if
@@ -75,12 +88,13 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  *   drawn around the entry.
  * - Hovering or focusing an entry highlights its hotspot, and hovering a hotspot
  *   highlights its entry: one highlight, shared through the Root, with no timers.
- * - Each set is headed by its AnnotationPage's own label, when it has one, and at the
- *   header's end a toggle that hides its annotations from the Canvas (`HideToggle`: an
- *   eye, "Hide" and the page's label, or "Hide annotations" for a page without one).
- *   Pointed at or focused, it lights every entry it hides.
+ * - Never grouped by the page each was published on, nor by what it is for (Mat,
+ *   2026-11-16: "don't organize by motivation. always just organize by sheet"; to be done
+ *   better by motivation one day). At the list's head, a toggle that hides them all from
+ *   the Canvas (`HideToggle`: an eye, "Hide annotations"), the Canvas's annotations menu
+ *   hiding one page at a time. Pointed at or focused, it lights every entry it hides.
  * - Where the same words come as separate annotations, one per language (a transcription
- *   and its translation), the set's header offers their languages by code ("AR", "EN"),
+ *   and its translation), the list's head offers their languages by code ("AR", "EN"),
  *   and lists one at a time: the Root's `language` to start, else the reader's
  *   (`LanguageChoice`). Annotations in no language show whichever is chosen.
  */
@@ -92,13 +106,14 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
       scope = "all",
       renderEntry,
       headingLevel = 3,
+      places = true,
       as: Tag = "div",
       className,
       ...rest
     },
     ref,
   ) {
-    const { t, langOf } = useCloverTranslation();
+    const { t, langOf, hostLanguage } = useCloverTranslation();
     const { clover, language } = useClover("Annotations");
     const sets = useCloverSelector((state) =>
       selectListedSets(state.manifest, state.addedSets),
@@ -147,245 +162,138 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
       scope === "all" ? selectAnnotationPages(state.manifest) : NO_PAGES,
     );
     const reach = usePagesReached(pages);
-
-    const visible = (set: AnnotationSet) =>
-      set.entries.filter((entry) =>
-        shown.some((canvas) => canvas.id === entry.canvasId),
-      );
-    const groups = sets
-      .map((set) => ({ set, entries: visible(set) }))
-      .filter(({ entries }) => entries.length);
-    // Past 6 not a heading (`ui/heading.ts`): each set is named by its title either way.
-    const Heading = titleTag(headingLevel);
+    const shownIds = shown.map((canvas) => canvas.id);
     const showLabel = {
       text: t("annotationsShow"),
       lang: langOf("annotationsShow"),
     };
 
-    if (scope === "all")
-      return (
-        <AnnotationLayers
-          ref={ref}
-          as={Tag}
-          className={className}
-          rest={rest}
-          sets={sets}
-          shown={shown.map((canvas) => canvas.id)}
-          headingLevel={headingLevel}
-          language={language}
-          showLabel={showLabel}
-          hiddenSets={hiddenSets}
-          selected={selected}
-          highlighted={highlighted}
-          renderEntry={renderEntry}
-          onSelect={choose}
+    /*
+     * Its georeferenced images (`Places`), each listed under its Canvas as every
+     * annotation is: only a look until there is one, then their reader, loaded.
+     */
+    const mapped = useCloverSelector(
+      (state) => places && hasGeoreferences(state.manifest),
+    );
+    const placesModule = useLoaded(loadPlaces, mapped);
+    const manifest = useCloverSelector((state) =>
+      placesModule && mapped ? state.manifest : null,
+    );
+    const listed = useMemo(
+      () =>
+        placesModule && manifest
+          ? placesModule.placesOf(manifest, language, (number) => ({
+              text: t("mapPlaceUntitled", { number }),
+              ...(langOf("mapPlaceUntitled")
+                ? { lang: langOf("mapPlaceUntitled") }
+                : {}),
+            }))
+          : NO_PLACES,
+      [placesModule, manifest, language, t, langOf],
+    );
+    const asked = React.useSyncExternalStore(
+      clover.place.subscribe,
+      clover.place.get,
+      clover.place.get,
+    );
+    const showPlace = {
+      text: t("annotationsShowPlace"),
+      lang: langOf("annotationsShowPlace"),
+    };
+    const ask = (place: Place) => {
+      // On another Canvas: there first, so the map follows the view to it.
+      if (!shownIds.includes(place.canvasId)) clover.goTo(place.canvasId);
+      clover.place.emit(place.key);
+    };
+    const renderPlace = (place: Place) =>
+      placesModule && (
+        <placesModule.PlaceEntry
+          key={place.key}
+          place={place}
+          asked={asked === place.key}
+          pointed={place.overlay === highlighted}
+          show={showPlace}
+          hostLanguage={hostLanguage}
+          request={clover.request}
+          onAsk={ask}
           onHighlight={(id) => clover.highlight.emit(id)}
-          onVisible={(ids, on) =>
-            ids.forEach((id) => clover.setSetVisible(id, on))
-          }
-          end={reach.more && <ListEnd onReached={reach.reachNext} />}
         />
       );
-    if (!groups.length) return null;
+
     return (
-      <Tag
+      <AnnotationSheets
         ref={ref}
-        className={join("clover-annotations", className)}
-        {...rest}
-      >
-        {groups.map(({ set, entries }) => (
-          <AnnotationGroup
-            key={set.id}
-            set={set}
-            entries={entries}
-            canvases={shown as Array<Record<string, any>>}
-            Heading={Heading}
-            headingLevel={headingLevel}
-            language={language}
-            // The AnnotationPage's own label, or none: the panel's section names them.
-            title={localize(set.label, language)}
-            showLabel={showLabel}
-            hidden={hiddenSets.includes(set.id)}
-            selected={selected}
-            highlighted={highlighted}
-            renderEntry={renderEntry}
-            onSelect={choose}
-            onHighlight={(id) => clover.highlight.emit(id)}
-            onVisible={(on) => clover.setSetVisible(set.id, on)}
-          />
-        ))}
-      </Tag>
+        as={Tag}
+        className={className}
+        rest={rest}
+        scope={scope}
+        sets={sets}
+        places={listed}
+        shown={shownIds}
+        headingLevel={headingLevel}
+        language={language}
+        showLabel={showLabel}
+        hiddenSets={hiddenSets}
+        selected={selected}
+        highlighted={highlighted}
+        renderEntry={renderEntry}
+        renderPlace={renderPlace}
+        onSelect={choose}
+        onHighlight={(id) => clover.highlight.emit(id)}
+        onVisible={(ids, on) =>
+          ids.forEach((id) => clover.setSetVisible(id, on))
+        }
+        end={reach.more && <ListEnd onReached={reach.reachNext} />}
+      />
     );
   },
 );
 
-function AnnotationGroup({
-  set,
-  entries,
-  canvases,
-  Heading,
-  headingLevel: setLevel,
-  title,
-  language,
-  showLabel,
-  hidden,
-  selected,
-  highlighted,
-  renderEntry,
-  onSelect,
-  onHighlight,
-  onVisible,
-}: {
-  set: AnnotationSet;
+/** A Canvas's annotations, as the list shows them under its label. */
+interface Sheet {
+  canvasId: string;
+  label: LocalizedValue;
   entries: AnnotationEntry[];
-  /** The Canvases in view, for pictures of the regions marked. */
-  canvases: Array<Record<string, any>>;
-  Heading: React.ElementType;
-  /** The level of the set's heading. */
-  headingLevel: number;
-  /** The AnnotationPage's label, and its language; empty when none, and then no heading. */
-  title: LocalizedValue;
-  language?: string;
-  /** Clover's interface words for finding one, with their language where it is not the page's. */
-  showLabel: LocalizedValue;
-  hidden: boolean;
-  selected: string | null;
-  highlighted: string | null;
-  renderEntry?: (entry: AnnotationEntry) => React.ReactNode;
-  onSelect: (id: string) => void;
-  onHighlight: (id: string | null) => void;
-  onVisible: (visible: boolean) => void;
-}) {
-  const id = useUniqueId();
-  // Headings in an entry's Markdown sit under the set's own, or at its level without one.
-  const headingLevel = title.text ? setLevel + 1 : setLevel;
-  const languages = useMemo(() => languagesOf(entries), [entries]);
-  const [picked, setPicked] = useState<string>();
-  /*
-   * Where About's toggle holds this set's languages, its choice is the set's, and the set
-   * offers none; else the set offers its own, for itself alone (`covers`), starting in
-   * the Root's.
-   */
-  const offered = useReadingLanguages();
-  const follows = covers(offered, languages);
-  const chosen = follows
-    ? startingLanguage(languages, offered!.chosen)
-    : startingLanguage(languages, offered?.chosen ?? language, picked);
-  const listed = entries.filter((entry) => inLanguage(entry, chosen));
-  return (
-    <section
-      className="clover-annotations-set"
-      aria-labelledby={title.text ? `${id}-title` : undefined}
-      data-set={set.id}
-    >
-      {/* The AnnotationPage's label when it has one, its languages, its hide toggle last. */}
-      <div className="clover-annotations-set-header">
-        {title.text && (
-          <Heading
-            className="clover-annotations-title"
-            id={`${id}-title`}
-            {...languageProps(title.lang)}
-          >
-            {title.text}
-          </Heading>
-        )}
-        {chosen && !follows && (
-          <LanguageChoice
-            languages={languages}
-            chosen={chosen}
-            onChange={setPicked}
-            nameKey="annotationsLanguage"
-            part="clover-annotations"
-          />
-        )}
-        <HideToggle
-          hidden={hidden}
-          onChange={(hide) => onVisible(!hide)}
-          of={title.text ? `${id}-title` : undefined}
-        />
-      </div>
-      <ol className="clover-annotations-list">
-        {listed.map((entry, index) => (
-          <AnnotationItem
-            key={entry.id}
-            entry={entry}
-            canvas={canvases.find((canvas) => canvas.id === entry.canvasId)}
-            index={index}
-            headingLevel={headingLevel}
-            language={language}
-            showLabel={showLabel}
-            selected={entry.id === selected}
-            highlighted={entry.id === highlighted}
-            renderEntry={renderEntry}
-            onSelect={onSelect}
-            onHighlight={onHighlight}
-          />
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-/** A layer of annotations: the sets that share a label (or have none), by Canvas. */
-interface Layer {
-  key: string;
-  title: LocalizedValue;
-  setIds: string[];
-  canvases: Array<{
-    canvasId: string;
-    label: LocalizedValue;
-    entries: AnnotationEntry[];
-  }>;
+  /** The georeferenced images on it, before its annotations. */
+  places: Place[];
 }
 
 /**
- * The Manifest's annotations as layers, each by Canvas in reading order: one checkbox
- * for a layer, however many pages it was published in (a page per Canvas, as most are).
+ * Every annotation by the Canvas it is on, in reading order, whatever page it was
+ * published on and whatever it is for (Mat, 2026-11-16: "don't organize by motivation.
+ * always just organize by sheet"; by layer, the pages sharing a label, from 2026-10-19):
+ * a Canvas's georeferenced images first, then its annotations, in their pages' order.
  */
-function layersOf(
+function sheetsOf(
   sets: AnnotationSet[],
+  places: Place[],
   canvases: Array<{ id: string; label?: unknown }>,
   language?: string,
-): Layer[] {
+): Sheet[] {
   const order = new Map(canvases.map((canvas, index) => [canvas.id, index]));
-  const layers = new Map<
+  const byCanvas = new Map<
     string,
-    {
-      title: LocalizedValue;
-      setIds: string[];
-      byCanvas: Map<string, AnnotationEntry[]>;
-    }
+    { entries: AnnotationEntry[]; places: Place[] }
   >();
-  for (const set of sets) {
-    const title = localize(set.label, language);
-    const key = title.text;
-    let layer = layers.get(key);
-    if (!layer) {
-      layer = { title, setIds: [], byCanvas: new Map() };
-      layers.set(key, layer);
+  const on = (canvasId: string) => {
+    let sheet = byCanvas.get(canvasId);
+    if (!sheet) {
+      sheet = { entries: [], places: [] };
+      byCanvas.set(canvasId, sheet);
     }
-    layer.setIds.push(set.id);
-    for (const entry of set.entries) {
-      const list = layer.byCanvas.get(entry.canvasId) ?? [];
-      list.push(entry);
-      layer.byCanvas.set(entry.canvasId, list);
-    }
-  }
-  return [...layers.entries()].map(([key, layer]) => ({
-    key,
-    title: layer.title,
-    setIds: layer.setIds,
-    canvases: inOrder([...layer.byCanvas.entries()], order).map(
-      ([canvasId, entries]) => ({
-        canvasId,
-        label: localize(
-          canvases.find((canvas) => canvas.id === canvasId)
-            ?.label as LanguageMapLike,
-          language,
-        ),
-        entries,
-      }),
+    return sheet;
+  };
+  for (const set of sets)
+    for (const entry of set.entries) on(entry.canvasId).entries.push(entry);
+  for (const place of places) on(place.canvasId).places.push(place);
+  return inOrder([...byCanvas.entries()], order).map(([canvasId, sheet]) => ({
+    canvasId,
+    label: localize(
+      canvases.find((canvas) => canvas.id === canvasId)
+        ?.label as LanguageMapLike,
+      language,
     ),
+    ...sheet,
   }));
 }
 
@@ -407,7 +315,7 @@ function inOrder<T>(groups: Array<[string, T]>, order: Map<string, number>) {
  * there are several) and picture. Until it arrives a group has no name.
  */
 function useElsewhere(
-  layers: Layer[],
+  sheets: Sheet[],
   here: Map<string, unknown>,
 ): {
   named: boolean;
@@ -416,14 +324,14 @@ function useElsewhere(
   const { clover, language } = useClover("Annotations");
   const wanted = useMemo(() => {
     const ids = new Set<string>();
-    for (const layer of layers)
-      for (const group of layer.canvases) {
-        if (here.has(group.canvasId)) continue;
-        const manifest = manifestOfAnnotation(group.entries[0].annotation);
-        if (manifest) ids.add(manifest);
-      }
+    for (const sheet of sheets) {
+      // A georeferenced image is always on one of the open Manifest's Canvases.
+      if (here.has(sheet.canvasId) || !sheet.entries.length) continue;
+      const manifest = manifestOfAnnotation(sheet.entries[0].annotation);
+      if (manifest) ids.add(manifest);
+    }
     return [...ids];
-  }, [layers, here]);
+  }, [sheets, here]);
   const [manifests, setManifests] = useState<Manifest[]>([]);
   useEffect(() => {
     let live = true;
@@ -457,19 +365,26 @@ function useElsewhere(
 }
 
 /**
- * Every annotation, by layer and by Canvas (`scope="all"`; a Manifest of one Canvas, by
- * layer alone). The Canvases in view are marked current (`aria-current`), and as the
- * reader moves to another, its annotations come to the top of the list's scrolling box;
- * one chosen elsewhere (its hotspot, the Canvas's menu) is brought into view. Neither while the pointer or focus is in the list,
- * so nothing moves under the reader, and never the page itself.
+ * The annotations by sheet, the Canvas each is on (`sheetsOf`): every Canvas's
+ * (`scope="all"`; a Manifest of one Canvas, with no Canvas to name), or the view's. One
+ * header over them all: their languages, where they come one per language, and one toggle
+ * that hides them all from the Canvas (the Canvas's annotations menu hides one page at a
+ * time). Every Canvas's: the Canvases in view are marked current (`aria-current`), and as
+ * the reader moves to another, its annotations come to the top of the list's scrolling
+ * box; one chosen elsewhere (its hotspot, the Canvas's menu) is brought into view.
+ * Neither while the pointer or focus is in the list, so nothing moves under the reader,
+ * and never the page itself.
  */
-const AnnotationLayers = forwardRef<
+const AnnotationSheets = forwardRef<
   HTMLElement,
   {
     as: React.ElementType;
     className?: string;
     rest: React.HTMLAttributes<HTMLElement>;
+    scope: "view" | "all";
     sets: AnnotationSet[];
+    /** Its georeferenced images (`Places`), each listed under its Canvas. */
+    places: Place[];
     /** The Canvases in view. */
     shown: string[];
     headingLevel: number;
@@ -479,18 +394,21 @@ const AnnotationLayers = forwardRef<
     selected: string | null;
     highlighted: string | null;
     renderEntry?: (entry: AnnotationEntry) => React.ReactNode;
+    renderPlace: (place: Place) => React.ReactNode;
     onSelect: (id: string) => void;
     onHighlight: (id: string | null) => void;
     onVisible: (setIds: string[], visible: boolean) => void;
-    /** After the layers: where more of them load as the reader reaches it. */
+    /** After the sheets: where more of them load as the reader reaches it. */
     end?: React.ReactNode;
   }
->(function AnnotationLayers(
+>(function AnnotationSheets(
   {
     as: Tag,
     className,
     rest,
+    scope,
     sets,
+    places,
     shown,
     headingLevel,
     language,
@@ -499,6 +417,7 @@ const AnnotationLayers = forwardRef<
     selected,
     highlighted,
     renderEntry,
+    renderPlace,
     onSelect,
     onHighlight,
     onVisible,
@@ -507,29 +426,63 @@ const AnnotationLayers = forwardRef<
   ref,
 ) {
   const id = useUniqueId();
+  const all = scope === "all";
   const canvases = useCloverSelector(
     (state) => selectSequence(state.manifest).canvases,
   ) as Array<{ id: string; label?: unknown }>;
-  const layers = useMemo(
-    () => layersOf(sets, canvases, language),
-    [sets, canvases, language],
-  );
+  const shownKey = shown.join("\n");
+  const sheets = useMemo(() => {
+    const every = sheetsOf(sets, places, canvases, language);
+    return all
+      ? every
+      : every.filter((sheet) => shown.includes(sheet.canvasId));
+    // `shown` by its ids.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sets, places, canvases, language, all, shownKey]);
   const canvasById = useMemo(
     () => new Map(canvases.map((canvas) => [canvas.id, canvas])),
     [canvases],
   );
-  const elsewhere = useElsewhere(layers, canvasById);
-  // Each layer's language, where it offers a choice: the reader's, by layer, once picked.
-  const [picked, setPicked] = useState<Record<string, string>>({});
-  // About's choice is each layer's where it holds the layer's languages; else its own.
-  const offered = useReadingLanguages();
+  const elsewhere = useElsewhere(sheets, canvasById);
   const manifestLabel = useCloverSelector((state) => state.manifest?.label);
   const title = useMemo(
     () => localize(manifestLabel as LanguageMapLike, language),
     [manifestLabel, language],
   );
-  // By Canvas only where there are Canvases to tell apart: several, or some elsewhere.
-  const grouped = canvases.length > 1 || elsewhere.named;
+  /*
+   * By Canvas only where there are Canvases to tell apart: every Canvas's, where the
+   * Manifest has several or some are another's; the view's, where it shows several.
+   */
+  const grouped = all
+    ? canvases.length > 1 || elsewhere.named
+    : sheets.length > 1;
+  /*
+   * The sets its one toggle hides from the Canvas: none where it lists georeferenced
+   * images alone, which the Canvas never draws (the map lays them).
+   */
+  const setIds = useMemo(
+    () => [
+      ...new Set(
+        sheets.flatMap((sheet) => sheet.entries.map((entry) => entry.setId)),
+      ),
+    ],
+    [sheets],
+  );
+  const hideable = setIds.length > 0;
+  const hidden =
+    hideable && setIds.every((setId) => hiddenSets.includes(setId));
+  // Their languages, where the same words come one per language: About's choice where it holds them, else the list's own.
+  const languages = useMemo(
+    () => languagesOf(sheets.flatMap((sheet) => sheet.entries)),
+    [sheets],
+  );
+  const [picked, setPicked] = useState<string>();
+  const offered = useReadingLanguages();
+  const follows = covers(offered, languages);
+  const chosen = follows
+    ? startingLanguage(languages, offered!.chosen)
+    : startingLanguage(languages, offered?.chosen ?? language, picked);
+  const choice = Boolean(chosen && !follows);
   const root = useRef<HTMLElement | null>(null);
   /*
    * Whether to leave the list where it is: it is not shown (a closed section's measures
@@ -545,42 +498,43 @@ const AnnotationLayers = forwardRef<
     return box.matches(":hover") || box.contains(document.activeElement);
   };
   /*
-   * The Canvases in view come to the top as the reader moves to them: only where the
-   * list is by Canvas, since with one there is no group to bring up, only the layer's
-   * title and eye to hide.
+   * Every Canvas's: the Canvases in view come to the top as the reader moves to them, only
+   * where the list is by Canvas, since with one there is no Canvas to bring up.
    */
-  const shownKey = shown.join("\n");
   useEffect(() => {
     const node = root.current;
-    if (!node || !grouped || still()) return;
-    const group = shown
+    if (!all || !node || !grouped || still()) return;
+    const sheet = shown
       .map((canvasId) =>
         node.querySelector<HTMLElement>(
           `[data-canvas="${CSS.escape(canvasId)}"]`,
         ),
       )
       .find(Boolean);
-    if (!group) return;
+    if (!sheet) return;
     /*
-     * The first Canvas of its layer brings the layer's header too, its eye and its
-     * languages (`LanguageChoice`), rather than scrolling them out of sight.
+     * The first Canvas brings the list's header too, its languages
+     * (`LanguageChoice`) and its eye, rather than scrolling them out of sight.
      */
-    const layer = group.closest<HTMLElement>(".clover-annotations-set");
-    const first = layer?.querySelector("[data-canvas]") === group;
-    bringIntoView(first && layer ? layer : group, "start");
+    const list = sheet.closest<HTMLElement>(".clover-annotations-set");
+    const first = list?.querySelector("[data-canvas]") === sheet;
+    bringIntoView(first && list ? list : sheet, "start");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shownKey]);
   // One chosen on the Canvas is brought into view.
   useEffect(() => {
     const node = root.current;
-    if (!node || !selected || still()) return;
+    if (!all || !node || !selected || still()) return;
     const entry = node.querySelector<HTMLElement>(
       `[data-entry="${CSS.escape(selected)}"]`,
     );
     if (entry) bringIntoView(entry, "nearest");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  if (!layers.length) return null;
+  if (!sheets.length) return null;
+  // Past 6 not headings (`ui/heading.ts`): each names its Canvas either way.
+  const Label = titleTag(headingLevel);
   return (
     <Tag
       ref={(node: HTMLElement | null) => {
@@ -589,138 +543,101 @@ const AnnotationLayers = forwardRef<
         else if (ref) ref.current = node;
       }}
       className={join("clover-annotations", className)}
-      data-scope="all"
+      data-scope={all ? "all" : undefined}
       {...rest}
     >
-      {layers.map((layer, layerIndex) => {
-        // Past 6 not headings (`ui/heading.ts`): each names its section either way.
-        const Title = titleTag(headingLevel);
-        // A layer's Canvases sit a level under its title, or at its level without one.
-        const level = layer.title.text ? headingLevel + 1 : headingLevel;
-        const Label = titleTag(level);
-        const hidden = layer.setIds.every((setId) =>
-          hiddenSets.includes(setId),
-        );
-        const languages = languagesOf(
-          layer.canvases.flatMap((group) => group.entries),
-        );
-        const follows = covers(offered, languages);
-        const chosen = follows
-          ? startingLanguage(languages, offered!.chosen)
-          : startingLanguage(
-              languages,
-              offered?.chosen ?? language,
-              picked[layer.key],
-            );
-        return (
-          <section
-            key={layer.key}
-            className="clover-annotations-set"
-            aria-labelledby={
-              layer.title.text ? `${id}-${layerIndex}` : undefined
-            }
-          >
-            <div className="clover-annotations-set-header">
-              {layer.title.text && (
-                <Title
-                  className="clover-annotations-title"
-                  id={`${id}-${layerIndex}`}
-                  {...languageProps(layer.title.lang)}
-                >
-                  {layer.title.text}
-                </Title>
-              )}
-              {chosen && !follows && (
-                <LanguageChoice
-                  languages={languages}
-                  chosen={chosen}
-                  onChange={(tag) =>
-                    setPicked((current) => ({ ...current, [layer.key]: tag }))
-                  }
-                  nameKey="annotationsLanguage"
-                  part="clover-annotations"
-                />
-              )}
+      <div className="clover-annotations-set">
+        {/* Its languages, then its hide toggle, at the end of the line. */}
+        {(choice || hideable) && (
+          <div className="clover-annotations-set-header">
+            {choice && (
+              <LanguageChoice
+                languages={languages}
+                chosen={chosen!}
+                onChange={setPicked}
+                nameKey="annotationsLanguage"
+                part="clover-annotations"
+              />
+            )}
+            {hideable && (
               <HideToggle
                 hidden={hidden}
-                onChange={(hide) => onVisible(layer.setIds, !hide)}
-                of={layer.title.text ? `${id}-${layerIndex}` : undefined}
+                onChange={(hide) => onVisible(setIds, !hide)}
               />
-            </div>
-            {layer.canvases.map((group, groupIndex) => {
-              const entries = group.entries.filter((entry) =>
-                inLanguage(entry, chosen),
-              );
-              if (!entries.length) return null;
-              // A Manifest of one Canvas has nothing to tell apart: no label, no mark.
-              /*
-               * On a Canvas of another Manifest the annotations name: named by that
-               * Manifest's label, and its Canvas's where it has several.
-               */
-              const there = elsewhere.of.get(group.canvasId);
-              // Beside other Manifests', this one's are named by its Manifest's label too.
-              const label = there
-                ? there.label
-                : elsewhere.named && title.text
-                  ? canvases.length > 1 && group.label.text
-                    ? [title, group.label]
-                    : [title]
-                  : [group.label];
-              const labeled = grouped && Boolean(label[0]?.text);
-              const current = grouped && shown.includes(group.canvasId);
-              const labelId = `${id}-${layerIndex}-${groupIndex}`;
-              return (
-                <section
-                  key={group.canvasId}
-                  className="clover-annotations-canvas"
-                  data-canvas={group.canvasId}
-                  aria-labelledby={labeled ? labelId : undefined}
-                  aria-current={current ? "true" : undefined}
-                >
-                  {labeled && (
-                    <Label
-                      className="clover-annotations-canvas-label"
-                      id={labelId}
-                      {...languageProps(
-                        label.length === 1 ? label[0].lang : undefined,
-                      )}
-                    >
-                      {label.length === 1
-                        ? label[0].text
-                        : label.map((part, index) => (
-                            <React.Fragment key={index}>
-                              {index > 0 && ", "}
-                              <span {...languageProps(part.lang)}>
-                                {part.text}
-                              </span>
-                            </React.Fragment>
-                          ))}
-                    </Label>
+            )}
+          </div>
+        )}
+        {sheets.map((sheet, index) => {
+          const entries = sheet.entries.filter((entry) =>
+            inLanguage(entry, chosen),
+          );
+          if (!entries.length && !sheet.places.length) return null;
+          /*
+           * On a Canvas of another Manifest the annotations name: named by that
+           * Manifest's label, and its Canvas's where it has several.
+           */
+          const there = elsewhere.of.get(sheet.canvasId);
+          // Beside other Manifests', this one's are named by its Manifest's label too.
+          const label = there
+            ? there.label
+            : elsewhere.named && title.text
+              ? canvases.length > 1 && sheet.label.text
+                ? [title, sheet.label]
+                : [title]
+              : [sheet.label];
+          const labeled = grouped && Boolean(label[0]?.text);
+          const current = all && grouped && shown.includes(sheet.canvasId);
+          const labelId = `${id}-${index}`;
+          return (
+            <section
+              key={sheet.canvasId}
+              className="clover-annotations-canvas"
+              data-canvas={sheet.canvasId}
+              aria-labelledby={labeled ? labelId : undefined}
+              aria-current={current ? "true" : undefined}
+            >
+              {labeled && (
+                <Label
+                  className="clover-annotations-canvas-label"
+                  id={labelId}
+                  {...languageProps(
+                    label.length === 1 ? label[0].lang : undefined,
                   )}
-                  <ol className="clover-annotations-list">
-                    {entries.map((entry, index) => (
-                      <AnnotationItem
-                        key={entry.id}
-                        entry={entry}
-                        canvas={canvasById.get(group.canvasId) ?? there?.canvas}
-                        index={index}
-                        headingLevel={labeled ? level + 1 : level}
-                        language={language}
-                        showLabel={showLabel}
-                        selected={entry.id === selected}
-                        highlighted={entry.id === highlighted}
-                        renderEntry={renderEntry}
-                        onSelect={onSelect}
-                        onHighlight={onHighlight}
-                      />
-                    ))}
-                  </ol>
-                </section>
-              );
-            })}
-          </section>
-        );
-      })}
+                >
+                  {label.length === 1
+                    ? label[0].text
+                    : label.map((part, at) => (
+                        <React.Fragment key={at}>
+                          {at > 0 && ", "}
+                          <span {...languageProps(part.lang)}>{part.text}</span>
+                        </React.Fragment>
+                      ))}
+                </Label>
+              )}
+              <ol className="clover-annotations-list">
+                {sheet.places.map(renderPlace)}
+                {entries.map((entry, at) => (
+                  <AnnotationItem
+                    key={entry.id}
+                    entry={entry}
+                    canvas={canvasById.get(sheet.canvasId) ?? there?.canvas}
+                    index={at}
+                    // Headings in an entry's Markdown sit under its Canvas's label.
+                    headingLevel={labeled ? headingLevel + 1 : headingLevel}
+                    language={language}
+                    showLabel={showLabel}
+                    selected={entry.id === selected}
+                    highlighted={entry.id === highlighted}
+                    renderEntry={renderEntry}
+                    onSelect={onSelect}
+                    onHighlight={onHighlight}
+                  />
+                ))}
+              </ol>
+            </section>
+          );
+        })}
+      </div>
       {end}
     </Tag>
   );
@@ -728,29 +645,44 @@ const AnnotationLayers = forwardRef<
 
 /**
  * Where the picture of what an entry marks comes from: its region of the Canvas, or the box
- * its shape fills, cut small by the image server once its `info.json` is read
- * (`regionSource`, `ui/EntryThumbnail`). None for an entry that shows an image of its own
- * (0377), one with neither, or an image the server cannot cut.
+ * its shape fills, cut small once its image's `info.json` is read (`regionSource`;
+ * `RegionThumbnail`, which cuts it here where the server cannot); and one on the whole
+ * Canvas, the whole of it, at a size the server lists (Mat, 2026-11-16: "they do relate
+ * to a targeted canvas and or region"). None for an entry that shows an image of its own
+ * (0377), a point, a stretch of a recording's time, or an image without a service.
  */
 function useRegionSource(
   entry: AnnotationEntry,
   canvas?: Record<string, any>,
 ): ThumbnailSource | null {
   // A shape (an SvgSelector, Cookbook 0261) by the box it fills, its reader loaded for one.
-  const svg = entry.target.rect ? undefined : entry.target.svg;
+  const { rect: own, svg: shape, point, t } = entry.target;
+  const svg = own ? undefined : shape;
   const reader = useLoaded(loadSvgShape, Boolean(svg));
   return useMemo(() => {
     const box = svg ? reader?.readSvgShape(svg)?.box : undefined;
     const rect =
-      entry.target.rect ??
-      (box ? { x: box.x, y: box.y, w: box.width, h: box.height } : undefined);
+      own ??
+      (box
+        ? { x: box.x, y: box.y, w: box.width, h: box.height }
+        : !shape && !point && !t && canvas?.width && canvas?.height
+          ? { x: 0, y: 0, w: canvas.width, h: canvas.height }
+          : undefined);
     if (!rect || !canvas || entry.bodies.some((body) => body.image))
       return null;
     return regionSource(canvas, rect, entry.layer?.image);
-  }, [entry, canvas, svg, reader]);
+  }, [entry, canvas, own, shape, point, t, svg, reader]);
 }
 
 const loadSvgShape = () => import("../../core/svg-shape");
+// A region cut where its image's server cannot cut it: loaded only for an entry with one.
+const loadRegionThumbnail = () => import("./RegionThumbnail");
+
+/** Whether a picture is of part of its image, not all of it (`regionSource`'s shares). */
+const cutsRegion = (source: ThumbnailSource | null) => {
+  const share = source?.region as { width: number; height: number } | undefined;
+  return !!share && share.width * share.height < 1;
+};
 
 /**
  * One annotation in the list: its content, pressed anywhere to frame it, and, for the
@@ -800,6 +732,9 @@ function AnnotationItem({
   const name = text.text ? `${show.text}: ${text.text}` : show.text;
   const { clover } = useClover("Annotations");
   const thumbnail = useRegionSource(entry, canvas);
+  // A region: cut where its server cannot (`RegionThumbnail`); nothing until that loads.
+  const region = cutsRegion(thumbnail);
+  const cutHere = useLoaded(loadRegionThumbnail, region);
   return (
     <li
       className="clover-annotations-entry"
@@ -820,11 +755,21 @@ function AnnotationItem({
       {time && (
         <CueTime start={time.start} className="clover-annotations-time" />
       )}
-      <EntryThumbnail
-        className="clover-annotations-thumbnail"
-        source={thumbnail}
-        request={clover.request}
-      />
+      {region ? (
+        cutHere && (
+          <cutHere.default
+            className="clover-annotations-thumbnail"
+            source={thumbnail!}
+            request={clover.request}
+          />
+        )
+      ) : (
+        <EntryThumbnail
+          className="clover-annotations-thumbnail"
+          source={thumbnail}
+          request={clover.request}
+        />
+      )}
       <div className="clover-annotations-body clover-cue-text">
         {renderEntry ? (
           renderEntry(entry)

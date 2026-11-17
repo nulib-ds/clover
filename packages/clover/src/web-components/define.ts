@@ -125,6 +125,8 @@ const LOADERS: Record<string, LoadPart> = {
     import("./elements/tip").then((module) => module.TipElement),
   "clover-read-more": () =>
     import("./elements/read-more").then((module) => module.ReadMoreElement),
+  "clover-inset": () =>
+    import("./elements/inset").then((module) => module.InsetElement),
   // `<clover-tab>` loads nothing: its panel reads it (a `config` element).
 };
 

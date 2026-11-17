@@ -58,6 +58,12 @@ every rule below.
   column (`.clover-template-document-column`).
 - **We build from the leaf-level components out** (Mat, 2026-10-31): never define
   something in a template unless it is specific to that template's UX.
+- **Parity between the templates** (Mat, 2026-11-16: "parity between the templates is the
+  path"): a behavior is a part's rule, the same in every template and layout of parts
+  (an annotation as it relates to the Body: "this should be a rule for annotations as they
+  relate to body. not a template specific thing"), never one template's addition. So
+  Document's pages in its column that its Body is not on, stills it draws itself, show no
+  annotation, a region's or a whole Canvas's line, as Default shows none outside its Body.
 - **Specs speak for the docs' agent helpers** (the root `AGENTS.md`, "Agent tools
   (WebMCP)"; Mat, 2026-10-26). The docs read every part, prop and template from the
   element specs (`src/web-components/specs/`) to check and write layouts for agents
@@ -264,7 +270,9 @@ every rule below.
 - **Which default sections there are** is decided in one place,
   `components/Panel/sections.ts`: `PANEL_SECTIONS`, their order (its own, not exported);
   `HAS`, whether the
-  resource holds anything for each (About always); and `usePanelSections(sections?)`, one
+  resource holds anything for each (About always; Annotations also for what the resource
+  maps, where no Map section is offered); `ASKED_ONLY`, the sections offered only where a
+  page names them (the Map, 2026-11-13); and `usePanelSections(sections?)`, one
   read of the Root for each, never one for the list, which a selector returning an array
   would make new every render. `Panel` reads it, and so does every template, through
   `shared/PanelPane.tsx`, which draws no pane, no bar and no toggle where it comes back
@@ -510,7 +518,12 @@ every rule below.
   turn simply swaps the content). It and its controls stay hidden (`data-moved`,
   `data-scrolling`; controls through `--clover-controls-shown`) until the sheet is in
   place and the Canvas has drawn it (`data-status` not `loading`, or its placeholder,
-  or `REVEAL_MS`), unless focus is in it. Zoomed, moved or turned (the handle's
+  or `REVEAL_MS`), unless focus is in it; then its picture alone gives way (each child of
+  its viewport without focus: the surface, a video), as focus on the Canvas is ringed on
+  the still's frame, which shows meanwhile (Mat, 2026-11-16: "it happens if a user
+  expands and then collapses the viewer and continues to scroll": the full viewer closed,
+  or the map put back, leaves focus in the Canvas, and its picture, moved to the next
+  sheet before it had drawn there, showed the last one in its place). Zoomed, moved or turned (the handle's
   `atHome`, which a resize keeps, so growing never reads as zooming out), the active
   sheet fills the column (`data-zoomed`), the others dissolve, and the Canvas takes every
   drag; another view or home puts it back. A resize keeps the active sheet at the top
@@ -1039,12 +1052,19 @@ every rule below.
   is read as IIIF writes it.
   - The `Panel` lists every annotation (Mat, 2026-10-19), as `Annotations` does by
     default (`scope="all"`, since 2026-10-21: handled at the part, so one placed alone
-    lists what the panel would, and no template passes it): `AnnotationLayers`, by layer (`layersOf`: sets sharing a localized label
-    are one layer, the unlabeled ones another) and then by Canvas, in sequence order. A
-    page's label is its own, else its AnnotationCollection's (`pageLabel`; Cookbook 0309,
-    Mat, 2026-10-29: "treat them like collections to a degree"), read from the Manifest's
-    reference too (`embedPage` keeps what the reference says that the page does not), so
-    a Collection's pages across Canvases are one layer. `selectAnnotationCollection` gives
+    lists what the panel would, and no template passes it): `AnnotationSheets`, by sheet,
+    the Canvas each is on (`sheetsOf`), in sequence order, whatever page each was
+    published on and whatever it is for (Mat, 2026-11-16: "don't organize by motivation.
+    always just organize by sheet"; by layer, the pages sharing a label, from 2026-10-19),
+    so no page's label heads them in the list: one toggle at its head hides all it lists,
+    the Canvas's annotations menu hiding a page at a time, under its label. Later (Mat,
+    the same day): "in future we may want to better organize by motivation"; until then,
+    nothing in the list sorts or names them by motivation or by page. `scope="view"` is
+    the same, the view's Canvases alone. A page's label is its own, else its
+    AnnotationCollection's (`pageLabel`; Cookbook 0309, Mat, 2026-10-29: "treat them like
+    collections to a degree"), read from the Manifest's reference too (`embedPage` keeps
+    what the reference says that the page does not), for the Canvas's menu and the
+    Collection's name. `selectAnnotationCollection` gives
     the first such Collection, its pages and its entries; `Items of="annotations"` (its own
     chunk, `AnnotationItems.tsx`) lists and steps them, and the Default header names it
     under the title with a pager, as a Collection's members, picking the first as the
@@ -1068,9 +1088,16 @@ every rule below.
     loads for its strip: in there, its import of `parseAnnotationTarget` put about
     0.23 kB on every template's first load. The painted image's service cuts it once its `info.json` is
     read (`resolveThumbnail`), at 52 (twice the `l` square it is shown at) and never more
-    than the region has. Never a service that cannot cut (level 0) or a service-less
-    image, which would mean fetching a large one: those get none. Intersect the region
-    with the painted image's bounds; never clamp its corner.
+    than the region has. A service that cannot cut (level 0, as mapsnap's Sanborn sheets'
+    is) has it cut here from the whole image (Mat, 2026-11-16: "Those and regions"; none
+    from 2026-10-19, to spare the download): `RegionThumbnail.tsx`, lazy, loaded only for
+    an entry with a region, takes the smallest size the server lists that gives the region
+    52 on its shorter side, else the largest, and places it in the square as `cover`
+    fills it with a server's cut (`data-cut`, in shares of the square, its clipping inline so it never spills on a page without the stylesheet, and so in no sheet: in core it put 3 to 13 bytes on six budgets). A service-less
+    image still gets none. One on the whole Canvas is pictured by all of it, at a size the
+    server lists (Mat, the same day: "they do relate to a targeted canvas and or region");
+    a point or a stretch of a recording's time, none. Intersect the region with the
+    painted image's bounds; never clamp its corner.
   - It needs every Canvas's pages, so it calls `clover.holdAllAnnotationPages()`, which
     returns its release. Do not call `setAnnotationPages("all")` from a part: the Root's
     own effect resets the scope after a child's effect runs.
@@ -1176,19 +1203,40 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     (WCAG 2.4.3). `Connected` and the list's "Open the link" use `showLink(clover, link)`;
     `LoadedCanvas` follows within what it loaded, keeping its `CanvasView`, empty (with
     `manifestId="loading"` and no Canvases), while another Manifest loads, so focus stays.
-  - Annotations in several languages (Mat, 2026-10-25; Northwestern's Maktaba): where a
-    layer gives the same words as separate annotations, one per language
+  - Annotations in several languages (Mat, 2026-10-25; Northwestern's Maktaba): where the
+    same words come as separate annotations, one per language
     (`languagesOf` in `components/Annotations/languages.ts`: two or more languages, split
-    across its annotations, never where each holds them all), its header ends with
+    across its annotations, never where each holds them all), the list's head ends with
     their codes (`LanguageChoice`, drawn as the Transcript's, by one sheet, `ui/Codes.css`), one listed at a time:
     the Root's `language` to start, else the reader's (`startingLanguage`, as
     `localize` chooses); annotations in no language show either way. Each radio is
     named by its code and its language's own name (`autonym`, `Intl.DisplayNames`) in
     that language. The choice is the list's alone: the Canvas's caption and menu still
-    show every language. A layer's first Canvas coming into view brings the layer's
-    header with it, so the choice is never scrolled out of sight.
+    show every language. The first Canvas coming into view brings the list's head with
+    it, so the choice is never scrolled out of sight.
   - An image body shows in the hotspot's `Tip` (`image`), lazy, re-placed on load.
-  - A whole-Canvas annotation (no region, point, shape or time) goes to the caption
+  - A whole-Canvas annotation (no region, point, shape or time; `wholeCanvasOf`) is never a
+    hotspot, which would lie over the whole picture and take every press. What follows is
+    a rule of the Body's Canvas, as annotations relate to the Body, never a template's
+    (Mat, 2026-11-16: "this should be a rule for annotations as they relate to body. not a
+    template specific thing."): every template and layout of parts has it wherever its
+    Body shows the Canvas, Document's column on the page its Body holds (its other pages
+    are stills, which draw no annotation, a region's or a whole page's, until the Body is
+    on them). Pointed at or
+    picked, it has a line round its Canvas, a picked hotspot's line drawn within the
+    Canvas's edge so the view never cuts it, and the dim around it (Mat, 2026-11-16: "if
+    an annotation is targeting the canvas and not a specific region. draw the line around
+    the whole canvas. think about this for spreads where there are multiple canvases in a
+    visible spread"): placed as the scene places its Canvas (`placeWholeCanvas`, through
+    the same placer as the hotspots), so in a spread it goes round its page alone; one
+    `aria-hidden` element (`WholeOutline`, `.clover-canvas-annotation-whole`) over the
+    hotspots, its `pointer-events` none after the overlay layer pins it. Picked, the view
+    zooms to its page (Mat, the same day: "Zoom to its page"), as home frames a Canvas:
+    the renderer's `fitBounds` in the viewport's padded area (`--clover-canvas-inset`),
+    with none of a region's padding and not clear of the controls, which would hold a page
+    as tall as its spread at the farthest zoom, cut at its foot; a Canvas shown alone,
+    `home`. Framed from the annotations' chunk, so the renderer, on every first view, is
+    untouched (it was 4 to 43 bytes over eight budgets). It goes to the caption too
     (`wholeCanvasComments`, in the hotspot chunk, so the `i` it brings shows once that
     loads), rendered in `CaptionDetails` by `EntryBodies` (shared with the list, in
     `components/Annotations/EntryBodies.tsx`) over `readBodies` (`core/annotation-bodies.ts`,
@@ -1620,8 +1668,223 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `Map` through the parts, as an app's tree shaking does not), and that the Viewer's
     Map tab is a lazy chunk; `@allmaps/*` is on the forbidden list (422 kB gzip). The size table
     has "Map, before MapLibre" and "MapLibre, on a map" (MapLibre's chunks only).
-  - The panel offers the tab when `core/geo-detect.ts` `hasMapData` (a look, not a read)
-    finds navPlace or a georeference, and lazy-loads `RootMap` from
+  - **No Map section by default** (Mat, 2026-11-13: "if we have navPlace or georeference
+    annotations. no longer render a Map section. INSTEAD, put these annotations in the
+    Annotations section. DO NOT OPEN A MAP in the section"; a draft to fine-tune). Where
+    `core/geo-detect.ts` finds a georeference (`hasGeoreferences`, a look, not a read),
+    Annotations lists the georeferenced images as it lists every annotation, by sheet
+    (Mat, 2026-11-16: "make it so georeferencing annotations are handled by Page on other
+    items. don't categorize these annotations differently. do leave the map … map icon",
+    then "don't organize by motivation. always just organize by sheet"; first, in a list
+    apart under no title of Clover's, from 2026-11-13): under their Canvas's label, before
+    its annotations. `Annotations/Places.tsx` (lazy, with `core/geo.ts`, through
+    `useLoaded`) gives them with their Canvases (`placesOf`) and draws each row
+    (`PlaceEntry`), keyed as the map's list keys them (`overlay-<id>`), each its picture
+    with the map's pin over its corner (Mat, 2026-11-13: "overlay map icon in corner of
+    thumbnail"), marked picked while the map shows it. They are never annotation entries:
+    the Canvas never draws them, so the list's toggle leaves them and lights only what it
+    hides (`:not(.clover-annotations-place)`), and a list of them alone has none. Places
+    (`navPlace`, a resource's property, never an annotation) are About's, after its
+    summary and before its metadata, "Place" over them as a metadata label is, never a
+    heading that would claim the metadata after it ("move navplace to the About tab. like
+    how we have navDate", then "put this after the summary. before metadata";
+    `Panel/NavPlaces.tsx`, lazy, where the Manifest or a Canvas in view has one): the
+    Manifest's and the view's Canvases', keyed `place-<index>` among the Root's places
+    (`navPlaceOf`, as the Root's map reads them), the Collection's own skipped
+    (`countPlaces`), and another member's, and an annotation's, which its annotation
+    lists. A press goes to the row's Canvas and emits its key on the Root's `place`
+    channel; the connected Canvas counts each ask (`askedPlace`) and opens a place box of
+    its own (`Canvas/PlaceBox`'s `asked`) swapped from the start, before it paints: the
+    Root's map (`useRootMap`, beside `MapView` in `MapView.tsx`, so the box never reaches
+    the list), framed on the key by `MapView`'s `focus` (after the view's own framing, so
+    a sheet of two maps frames the one asked for), a place marked picked with no popup, as
+    its row names it (`markPlace`; Mat, 2026-11-13, "Map over the Body": the popup and its
+    picture covered the place).
+    Close, Escape or another popup put it away and emit null; the box gives focus back to
+    what asked, else, where that went with what held it, to the button whose
+    `aria-controls` names that (`backTo`; WCAG 2.4.3), once it has gone (`ui/focusSoon`,
+    frame by frame), as the Canvas's controls are out of sight under an expanded map. The
+    place box is Document's standard (Mat, 2026-11-15: "default should be treated the same
+    as document. this is the standard for maps now"): small, an `Inset` drawn in the
+    Canvas, placed by `Inset.css` under its controls (`--clover-canvas-controls-end` where
+    a template moves the row's end), Close its action; expanded (`data-swapped`), the map
+    fills the Body, its zoom row ending where the Canvas's row did
+    (`--clover-map-controls-right`), the page's picture in an Inset in the map's box
+    (`Thumbnail` of its `owner`, else the Root's Canvas), no Close, and every child of the
+    Canvas but the box out of sight once the map has come in (`Body/Caption.css`). Each box
+    gets its own `swapped`, and focus follows a swap to `swap-<id>`, its Expand map or the
+    picture's Collapse map, frame by frame until it takes. Where the panel lies over the
+    Body (a phone), `PanelPane` puts it away as a place is asked for, focus to its toggle
+    and on to the box's first control as it opens (`useAwayForPlaces`, its asked box
+    marked `data-asked`), unless focus has gone elsewhere meanwhile; the Default
+    template's first load carries it, so keep it lean (no `?.`). A Panel offers the Map
+    section only where `sections` names `map`, and then Annotations lists no georeferenced
+    images (`places={!has("map")}`). Document, likewise (`usePanelSections(panelSections)`),
+    shows an asked place on its own map over the pages (`ExpandedMap`, `data-asked`): its
+    live Canvas, its map control off, answers no
+    ask (`CanvasView`: no asked box where `controls.map` is false, the layout around it
+    showing the map), and `Clover.Map` follows the Root's `place` (`ConnectedMap`'s
+    `useAskedPlace`), so a template needs only its key. Its aside stays beside the map, and
+    on a phone goes, focus on to the map (`useAwayForPlaces`, now
+    `templates/shared/useAwayForPlaces.ts`, exported from `@nulib/clover/templates` as
+    every helper a template imports from `shared/` is, returning what had focus as the
+    place was asked for); Close and Escape give focus back to it, else to its section's
+    button; an annotation chosen in the aside puts the map away. Its zoom row is at its
+    top end, where the Map has it and the full viewer has the Canvas's controls (Mat,
+    2026-11-14: "put map controls in top right. like we do for canvas controls."; centered
+    at its foot from 2026-11-13). The full viewer's row ends with a Map control of
+    Document's own (`mapControl`, a child of the Body, which the Canvas puts in its row;
+    the Canvas's own stays off, `controls.map: false`), where the page has map data
+    (`canvasHasMapData`), else the Manifest a `navPlace`, as the Canvas's own control
+    shows in Default (Mat, 2026-11-14: "add the map icon back if canvas has geo data
+    (navplace/georeferencing annotation) this should toggle the inset on/off"): it shows
+    the map in its box over the pages (`mapOn`, framed on all it maps, while the resource
+    has map data), `aria-expanded` and `aria-controls` on it, and puts it away, focus kept
+    on it; Close gives focus back to it. Among the pages the Canvas has none (2026-11-09).
+    The map shown is one of Clover's popups (`Clover.useOneOpen(mapShown, putMapAway)`),
+    as the Canvas's place boxes are: a place picked on the page (Cookbook 0139) puts it
+    away, and it puts that place's box away, focus left where it is (Mat's preview,
+    2026-11-15: the two lay in one place, the map's Close under the other; WCAG 2.4.11).
+    Either box hangs `s` under the controls at its end, their Tips over it, as over the
+    Canvas's own popups (Mat, 2026-11-14: "This is a little too far off the controls
+    above it."; clear of the Tips for an hour before): a Tip cannot lie over a box outside
+    what holds it (the Canvas's isolated stacking context; the map's box,
+    `container-type: size`), so each box lies inside: the page's picture in the map's box
+    (the Map's `children`, drawn there, z 1, under MapLibre's controls), and the map, in
+    the full viewer, in the Body (its `Inset`'s `container`: `"body"` in the full viewer,
+    else the main pane; Mat, 2026-11-14: "Yes, add it"), placed by the Inset there, z 1,
+    under the Canvas's popups (z 2) and controls (z 3); the Canvas's own then go under the
+    full map, and the full viewer's row (`:has()` on the map's `data-status`). Templates
+    import only React, the parts and `shared/` (`templates.test.tsx`), so a portal is the
+    Inset's, never the template's. It
+    has no Close of its own over the pages: the page's picture in a box at its top end
+    (`Clover.Thumbnail of="canvas"`), Collapse map, trades
+    the two ("remove this. in the top right corner, show the image inset into a box. like
+    we do on default viewer for the map control overlaying the image. one should be able
+    to swap between the two"), with Close after it, as the map's box has after Expand map
+    (Mat, 2026-11-16: "include close button here as well"; the Canvas's map box's picture
+    too), and the map's Image control, at the end of its zoom row, puts the picture away and
+    brings it back (`held` in `MapView`, for any `children` while the map can be moved;
+    "add an image icon above that toggles inset like we do for the map inset on and image
+    itself"), as the Canvas's Map control does the map's box. Under the pointer, an Inset
+    lights its expand button too ("hovering the inset pane to expand should also make
+    focus/hover state the expand button", `Inset.css`): the map in a box over the pages (`inset`, `data-inset`), as
+    the Canvas's map box is over the Body in Default, with Expand map and Close, the
+    pages in sight; one map throughout (the second child, whatever comes before it), its
+    resize keeping its center, the place asked for; focus follows each swap
+    (`${id}-map-swap`). It comes in seamlessly (Mat, 2026-11-13: "make the load in
+    seamless/smooth ux, even if it takes a millisecond longer"): out of sight
+    (`visibility` and `opacity`, by `:has()` on its `.clover-geomap`'s `data-status`)
+    until its map is ready, the pages still there and in reach with Clover's loading bar
+    (`.clover-loading`, beside it, as opacity would hide it inside) over their top, then
+    it fades in, and the pages and the full viewer's own controls go 200ms on, once it
+    has (at once where less motion is asked for); the phone's hand-off waits for it to
+    take focus (`useAwayForPlaces`, ten seconds). `MapView` starts MapLibre on what it
+    frames (`start`: the place or image asked for, else everything, as its framing and
+    `focus` effects will), so `load` is of that view, never the world first. The arrival
+    is the Map's own (Mat, 2026-11-13: "make the smooth load part of the Map component
+    so we don't reinvent things for every composition/template"): ready (`data-status`,
+    `onReady`) only at MapLibre's first `idle` after its framing and `focus` effects in
+    the same commit (`settled`, with a `triggerRepaint` so one comes, and `DRAWN_BY` if
+    none does), its drawing transparent and Clover's loading bar over it until then,
+    fading in (`Map.css`); a box laying a map over other content says `data-map-host`
+    and waits out of sight, the map's bar showing through (`visibility`, which a child
+    can undo, never `opacity`), fading in as its map is ready, and what it covers keyed
+    on the same ready (the Canvas, `Body/Caption.css`; Document's pages). Measured on
+    0318 in Chrome with the GPU: the fade's 200ms whole, no long task at ready. Headless
+    Chromium draws WebGL in software, and its first composite of a map shown reads it
+    back (`GLES2::ReadPixels`, 1.2s): measure smoothness in Chrome (`channel: "chrome"`).
+    The asked box reports its map's ready (`onReady`) so the Canvas keeps its view's
+    controls until then (`away`). After its first view a map glides (`frame`'s duration,
+    `animationDuration` in seconds, as the Canvas's `options.animationDuration`; Mat:
+    "the animatie/glide should be a prop … name props the same"), never where less
+    motion is asked for: the view's images, a place or image chosen or asked for.
+  - `navigable` (Mat, 2026-11-13, named as the Canvas's `options.gestures.navigable`):
+    false keeps a map where it frames, MapLibre's handlers off (`dragPan`, `scrollZoom`,
+    `boxZoom`, `doubleClickZoom`, `keyboard`, `touchZoomRotate`), its canvas out of the
+    tab order, its zoom buttons and credits hidden (`data-navigable`), and its own place
+    handlers quiet (no names, no choosing), a press its host's. Every small map box is so
+    ("in all cases of this map popover, do not show annotation popovers … this map should
+    not be zoomable. it should just expand or be closed. and click anywhere by the X to
+    close would expand it"; "don't show credit on these small inset maps"): the Canvas's
+    (`PlaceBox`, `navigable={swapped}`, a press on it but its buttons swapping it), and
+    Document's in its box. Its credits come back as it can be moved: a map kept so for
+    good needs its basemap credited on the page.
+  - `Inset` (`ui/Inset.tsx`, public in the parts; Mat, 2026-11-14: "we should think about
+    this inset a utility component used for many cases. it holds a thumb, and expands
+    targeted content"): a thumb in a small box, a press anywhere but its buttons
+    expanding it, its expand button (one glyph everywhere: "keep icon consistent for
+    expanding the inset"; a frame open at its upper right, a box at its lower left, and an
+    arrow from the opening down to the box: "do the opposite icon. one point to bottom
+    left.") and its host's controls in its corner, ringed under the pointer
+    as Items rings an item ("the outline should be the same as well on hover"), 14rem
+    wide at most, its thumb 10rem tall at most, `xs` round it. `expanded`, it holds its
+    content plainly in the same shape, so a map in it is never remounted (its content is
+    always its first child: a change of shape remounted it). Given a `container`, it
+    lies there through a portal into a node of its own (`display: contents`, before a last
+    `figcaption`), which it moves from one container to the next, so what it holds is
+    never made again; until one is known, it shows nowhere. `"body"` is its Root's Body:
+    the Body tells its Root its box as it mounts (`clover.body`, a channel, as `media`
+    holds the playing video; a few bytes, as every template's first view has a Body), and
+    the Inset, loaded only where it is used, finds the renderer's box in it
+    (`:scope > .clover-canvas`, a Canvas's, Timeline's or Scene's, else the Body's own)
+    and follows it as the renderer changes (a `MutationObserver` on the Body's children).
+    There it places itself unless a page's styles do (`Inset.css`,
+    `:is(.clover-body, .clover-canvas) > * > .clover-inset`): its top end, `s` under the
+    controls, z 1. As an element, `<clover-inset>` (`elements/inset.tsx`;
+    Mat, 2026-11-15: "inset can land in this PR") is native, as `<clover-read-more>` is: the
+    element is the box (its `clover-inset` class), the page's children its thumb, its
+    expand button (`InsetExpand`, shared with `Inset`) drawn after them with the page's
+    `slot="actions"` controls `Placed` after it, its press listener attached at layout; it
+    lies where it is written (no `container`), and `<clover-map>` takes no children yet.
+    Its label's language is `label-lang`, on its button alone (`lang` on the element would
+    mark the page's thumb too), and with no `label` it is its children alone, no box and
+    no press, as nothing would be the keyboard's way in. The Body tells `clover.body` the
+    last of its Root's Bodies still mounted (`boxesOf`), never null while one is.
+  - Never a rule whose last compound has no class, id or attribute to key it (`> :not(…)`,
+    `:not(:has(…))`): the browser tests it against every element in every style pass. One
+    hiding a swapped Canvas's children cost 45ms a move through 1,000 Canvases (the timing
+    spec, 2026-11-15); hide the Canvas itself (`visibility`, which its children inherit)
+    and show the box in it, as `Body/Caption.css` and Document's map do.
+    Document's two boxes are Insets ("make sure they are using the same component", "it
+    should be same wrapping component"): the page's picture over the map, and the map's
+    wrapper itself, expanded over the pages and small in its box. Its toolbar marks About
+    for a page's place and Annotations for its georeferenced image (`usePageMarks`'s
+    `mapped`).
+    The full viewer's way back is two arrows pointing at each other on the diagonal
+    ("let's do a youtube still expand collapse two arrows pointing at or away from
+    eachother diagonallly"), and Full screen four such arrows, one to each corner, out to
+    enter and in to exit (`ZoomFullScreen`, `ZoomExitFullScreen` in
+    `ui/controlGlyphs.tsx`: "use same arrows as expand/collapse for fullscreen", then "it
+    should be four arrows. all directions"); the template draws its own, using only the
+    parts: keep their arrows alike.
+  - An asked place follows the view (Mat, 2026-11-13: "toggling canvases in expanded map
+    mode doesn't toggle map"): `useRootMap`, as the view changes, asks for the new
+    Canvas's place, else its first georeferenced image, where what was asked was a
+    Canvas's, never as a map first shows; a place of the Manifest's, or a member's,
+    holds. Emitted once on the Root's `place`, so the map, About's pressed place and
+    Annotations' chosen image move together.
+  - About's places (`NavPlaces`): each name a button underlined as About's links are, in
+    every state (Mat, 2026-11-13: "don't bold this on click", "normalize"; its pressed
+    state is `aria-pressed` and the map's mark, never a look of its own), then its
+    coordinates, latitude then longitude to four places, its middle for a shape
+    (`middleOf`, `core/geo.ts`), after the map control's pin, the pin `primary-muted` at
+    half strength ("can this be more muted"; decorative, its row in the contrast guide),
+    the figures a step smaller, in `<bdi dir="ltr">` so a page written right to left keeps
+    their order.
+  - The place box's swap (Expand map, Collapse map) keeps what the map shows: `reframe`
+    reads its bounds as it is asked, before MapLibre knows its new size, and its observer
+    fits them at the new size (`kept`), where it framed every place and sheet before (Mat,
+    2026-11-13). Swapped, the Canvas's own children, its controls, viewport and notes
+    (`BodyUnloadable`, `BodyNote`), are hidden with it (`Body/Caption.css`), never over the
+    map.
+  - Put back in its box (`navigable` turned false), as the page takes its place again in
+    Default's map box and Document's map alike, a map lets go of the place it named or
+    picked, and the Root of an annotation picked or pointed at on it, a place's or a
+    georeferenced image's (`onLetGo`, from `useRootMap`); another annotation picked stays
+    (Mat, 2026-11-16: "the toggle back to image after having an open map retains the
+    active/focus on the annotation. unset these annotations during this toggle back").
+  - The Map section, where named, lazy-loads `RootMap` from
     `components/Map/ConnectedMap.tsx`, beside `ConnectedMap`, the maps that follow a Root
     and list (`MapList`, handed to `MapView` as `List`). `MapView.tsx` (the view, and
     `GivenMap`, which the Canvas's map box draws with) never reaches the list: a module a
@@ -1643,8 +1906,20 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `Georeference`s, memoized on the Manifest.
   - Georeferences are drawn the basic way, with no Allmaps: the least-squares affine fit
     of the control points in Web Mercator (exact for three) maps the image's corners, and
-    the image (about 2048 px, asked as its `info.json` allows, `overlayImage.ts`, clipped to the
-    SvgSelector mask on a 2D canvas) is a MapLibre `canvas` source under the places.
+    the image (about 2048 px, asked as its `info.json` allows, `overlayImage.ts`, drawn on a
+    2D canvas) is a MapLibre `canvas` source under the places. Drawn whole (Mat,
+    2026-11-16: "for georeferenced images. show the full image. draw the line. but then
+    partially obscure the part outside the line, make it semi transparent"; clipped to its
+    SvgSelector mask before): the map inside its mask at full strength, the rest (margins, a
+    title) at 38.2% (`BEYOND_MASK`), the outlines drawing the line between. Every other
+    map laid is cut out of that faded part where it lies on the ground (Mat, 2026-11-16:
+    "if the semi transparent part intersects another georeference point, just mask it
+    entirely"), so the fade shows over the streets alone, never over a map (`shareOf`
+    undoes the fit by the corners, exact in Web Mercator); and the other maps on its image
+    (Sanborn's Sheet 28, two; the same Canvas, else image service, `imageOf`) where they
+    are printed, as each is laid where it is by its own overlay and, warped as this one,
+    would stand where it is not. Two faded parts meeting over the streets both show. An
+    image laid before another is not drawn again: the later lies over it, its map opaque. The drawing is `overlayImage.ts`'s `drawOverlay`, loaded only to lay an image (in `MapView` it put about 130 bytes on the Map's first loads), its image's cross-origin setting handed in, as importing `sendsCredentials` there put it in a chunk every element page shares.
     A `transformation` of `helmert` is fitted as a similarity instead (`helmertTransform`,
     exact for two points, the image's y read mirrored so a scan is never flipped; Mat,
     2026-11-12, for mapsnap's fits); every other is the affine fit.
@@ -1652,7 +1927,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - A map frames an overlay by its mask where it has one (`boundsOf`): a sheet of several
     maps is fitted map by map, and the whole sheet by one inset's fit lands far away.
     Overlays are framed whole, as close as zoom 19 (`OVERLAY_ZOOM`), places alone no
-    closer than 12; a `zoom` given caps both.
+    closer than 12, an outline too, however small, as one asked for from Annotations is
+    (Mat, 2026-11-13: "Keep zoom 12", shown the campus's outline 10× farther out than its
+    sheet); a `zoom` given caps both.
   - Georeferences given as the content (an Annotation alone, or AnnotationPages or an
     AnnotationCollection of them; Mat, 2026-11-12) are never notes or content states:
     `core/georeference-content.ts`, a chunk of its own, reached from the chunks that
@@ -1685,6 +1962,34 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     (`overlayItems`, which Items' `of="georeferences"` shares). The Canvas's map box
     passes `items={false}`, naming its one place itself; Document's map hides the list
     until focus is in it (`.clover-geomap-items`, Mat, 2026-11-09).
+  - On the map, a place is marked as Items marks an item (DESIGN.md §3; Mat, 2026-11-15:
+    "try to look at how we do inactive/hover/focused/active treatments elsewhere. we
+    should be consistent"), as its images and its list already were: hover, picked and a
+    linked annotation had one look, so a place pointed at read as the one chosen. Feature
+    states, read by `addPlaceLayers`' `CHOSEN`, `CURRENT` and `POINTED`: the map's own
+    `hover` and `picked` (pressed, chosen from the list, asked for), and from React
+    (`MapView`'s marks, by `markKey`) `pointed` (its annotation the Root's `highlight`, or
+    its row pointed at or focused, `rowPlace`), `chosen` (its annotation picked) and
+    `current` (a Canvas in view's own place, or the open member's, never an
+    annotation's). Pointed at, the accent at half strength in the wider dark and light
+    lines; current, whole; chosen, whole and the area tinted 8%. Every state keeps the dark
+    edge and light line, which hold 3:1 over land, park and water whatever the accent; the
+    accent alone is 3.1:1 on Liberty's water. The Canvas's map box shows only the view's
+    places, so marks none current.
+  - A point at rest is filled as an inactive control is (`ui/Button.css`), the controls'
+    dark fill (`--clover-color-control`, `control` in `colorsOf`) in its light ring and
+    dark edge (Mat, 2026-11-15, shown that its accent dot looked marked beside a place
+    truly marked; light for a day, then 2026-11-16: "inactive ones should be more of the
+    dark token, look more like inactive buttons"): `POINT` the controls' fill, or its
+    feature's `marker-color`, the accent when `WHOLE`, as a control takes it; `POINT_EDGE`
+    its dark edge alone at rest, no accent under the dot, and marked the accent's band,
+    half while pointed at. An image's point (`Annotations.css`) and the seek bar's are the
+    same, the controls' fill at rest and the accent while active.
+  - One mark for each Canvas (Mat, 2026-11-15): a Canvas whose images the map lays
+    (`imaged`, every overlay's Canvas while `overlay` is on) is marked by their outline
+    alone, its own place never `current`. Sanborn's Sheet 115 has a place worked out from
+    its image's fit, on the image's edge, where the place's band and the image's outline
+    stacked into one heavy line. Pointed at or chosen, the place is still marked.
   - `overlays="all"` (Mat, 2026-11-12) lays every Canvas's overlays in a Root, not only
     the view's; standalone, every one already. Pointing is the Root's (`highlight`): an
     overlay pointed at on the map or in its list is emitted, and one emitted elsewhere
@@ -1725,7 +2030,16 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     (`OUTLINES`) in the controls' dark color, 1.5px, over the images (each added under it
     however late) and under the places and the accent outline; Selection outline
     (`mapSelectionOutline`), on to start, takes the accent's outline away. A new map
-    option joins the tray, offered by a prop of its own or `outlines`.
+    option joins the tray, offered by a prop of its own or `outlines`. Offered by default
+    since 2026-11-16 (Mat: "show that dropdown by default for georeferencing annotations
+    that are not points. the option should be shown always. it should only show on the
+    full expanded map"), where 2026-11-12 had it off unless asked: `offered` in `MapView`
+    takes `outlines` (now default true), `navigable`, `overlay` and an overlay to outline,
+    so the map over the Body has it once expanded and the small box never;
+    `outlines={false}` shows no gear. Outlines itself still starts off. The tray is none of
+    Clover's popups (`useOneOpen`): the map is often held by one, the Canvas's map box or
+    Document's map over the pages, which its opening put away, gear and all (2026-11-16,
+    found as the gear first showed in Default).
   - `allmaps` (Mat, 2026-11-12: "a view in allmaps button", "integrate allmaps branding",
     then "look at their packages for a logo. keep it an svg if possible and small. let's
     not go the plugin route", "I'd like the logo to be within a map. never on white"): a
@@ -1762,7 +2076,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     pointed at, on the map or at its row (or its row focused), is outlined at half
     strength, as Items rings an item under the pointer (`--clover-accent-ring-hover`).
   - More than four overlays drawn together ask smaller images (`overlaySize`: about four
-    at 2048px all told, never under 768px), so a sheet atlas never holds hundreds of MB
+    at 2048px all told, never under 768px), so an AnnotationPage of sheets never holds hundreds of MB
     of textures. It is the map's text alternative and the keyboard's way
     to its places (WCAG 2.1.1, 1.1.1). Only scope "view" (a host's Root) passes
     `current`: a standalone `iiifContent` map has no view, so it marks no place current.
@@ -2390,7 +2704,12 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     be in an image … slightly off the seekbar"; on the rail as "little bumps" for a while,
     then "bring annotations off the seekbar again … a gr step above what seekbar is (the
     gap)": `s` over the rail, the step over its `xs`), each with a faint 3px stem of the
-    accent down under the rail to its foot, fading as it goes ("a gradient mask"). The
+    accent down under the rail to its foot, fading as it goes ("a gradient mask"). Each
+    dot is the controls' dark fill in its light ring at rest and the accent once lit or
+    picked, as an image's point is (Mat, 2026-11-16: "Light, like the rest", chosen over
+    keeping the accent at rest; then, for every point, "inactive ones should be more of the
+    dark token, look more like inactive buttons", which also sets them apart from the
+    seek bar's light thumb). The
     dots are drawn under the seek bar's input and their clear buttons over it ("make sure
     seekbar knob is above things"), the buttons lighting their dots (`lit`), and the room
     they reach over the seek bar joins `--clover-transport-room`
@@ -2642,7 +2961,8 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     reads it (`narrow`, `components/Panel/sections.ts`), since an attribute carries
     whatever JSON it was given. Do not add an attribute type for a shape `data` can carry.
   - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or
-    a reason why not yet (`LATER`, empty since 2026-10-22) or not at all (`NEVER`, empty
+    a reason why not yet (`LATER`, empty since 2026-10-22, but for `Inset` on 2026-11-14,
+    whose `<clover-inset>` came the next day) or not at all (`NEVER`, empty
     since 2026-10-22: `Tip` is `<clover-tip>`, `ReadMore` `<clover-read-more>`). A new
     part fails it until it has either, and an element's slots, like its attributes, fail
     it without docs.

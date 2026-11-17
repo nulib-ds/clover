@@ -47,7 +47,7 @@ export interface LightboxProps {
    * The panel's sections, from Clover's own: with
    * `["contents", "search", "transcript", "annotations"]` it has those four, each still
    * only where the resource has data for it, and no panel at all where it has none of
-   * them. Default: every section.
+   * them. Default: every section but the Map, as a Panel's.
    */
   panelSections?: readonly PanelSection[];
   /**

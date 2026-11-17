@@ -80,6 +80,7 @@ import {
   transcript,
   transcriptDocs,
 } from "./sections";
+import { inset, insetDocs } from "./inset";
 import { readMore, readMoreDocs } from "./read-more";
 import { tip, tipDocs } from "./tip";
 import { viewer, viewerDocs } from "./viewer";
@@ -129,6 +130,7 @@ const ALL: [ElementSpec, ElementDocs][] = [
   [scene, sceneDocs],
   [tip, tipDocs],
   [readMore, readMoreDocs],
+  [inset, insetDocs],
 ];
 
 /** Every element Clover defines. */
@@ -176,6 +178,7 @@ export const SPECS: readonly ElementSpec[] = [
   scene,
   tip,
   readMore,
+  inset,
 ];
 
 /** What the types and the manifest say of each, by tag. Never loaded by a page. */

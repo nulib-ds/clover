@@ -15,6 +15,7 @@ import Annotations, {
   type TimedAnnotation,
   goToTrack,
   placeAnnotations,
+  placeWholeCanvas,
   timeAnnotations,
   wholeCanvasComments,
 } from "./Annotations";
@@ -262,6 +263,18 @@ export function AnnotationState({
   // The hotspots: the shown pages' only.
   const placedAnnotations = useMemo(() => shown(allPlaced), [allPlaced, shown]);
   /*
+   * Those on a whole Canvas, the shown pages' too: no hotspot, but a line round their
+   * Canvas while one is pointed at or picked (`placeWholeCanvas`), in a spread round its
+   * page alone. Placed as the scene places their Canvases, so only once it is laid out.
+   */
+  const wholePlaced = useMemo(
+    () =>
+      placeAnnotation && sceneVersion > 0 && drawn
+        ? placeWholeCanvas(shown(allAnnotations), canvases, placeAnnotation)
+        : null,
+    [placeAnnotation, sceneVersion, drawn, allAnnotations, shown, canvases],
+  );
+  /*
    * Behind a placeholder nothing is drawn, so nothing is placed: the menu lists them as
    * the planned layout places them, for their names; a pick opens the Canvas.
    */
@@ -407,7 +420,32 @@ export function AnnotationState({
       list.find((annotation) => annotation.id === selectedAnnotation);
     const drawnOne = find(placedAnnotations);
     const placed = drawnOne ?? find(allPlaced);
-    if (!placed) return; // Not placed yet; the next layout tries again.
+    if (!placed) {
+      /*
+       * One on a whole Canvas: its page framed, the whole of it, as home frames a Canvas
+       * (Mat, 2026-11-16: "Zoom to its page"): in the viewport's padded area
+       * (`--clover-canvas-inset`), with none of a region's padding and not clear of the
+       * controls, which would hold a page as tall as its spread at the farthest zoom, cut
+       * at its foot. A Canvas shown alone, home, which is that.
+       */
+      const whole = wholePlaced?.get(selectedAnnotation);
+      if (!whole || !renderer) return; // Not placed yet; the next layout tries again.
+      framed.current = selectedAnnotation;
+      if ((canvases?.length ?? 0) < 2) {
+        renderer.home(!glide.current);
+        return;
+      }
+      const style = getComputedStyle(renderer.host);
+      const padding = (side: string) =>
+        parseFloat(style.getPropertyValue(`padding-${side}`)) || 0;
+      renderer.fitBounds(whole, !glide.current, {
+        top: padding("top"),
+        right: padding("right"),
+        bottom: padding("bottom"),
+        left: padding("left"),
+      });
+      return;
+    }
     framed.current = placed.id;
     if (placed.track) {
       // One that follows a recording moves: its hotspot goes to it, not framed.
@@ -419,6 +457,8 @@ export function AnnotationState({
     selectedAnnotation,
     placedAnnotations,
     allPlaced,
+    wholePlaced,
+    canvases,
     mediaElement,
     renderer,
     refind,
@@ -526,13 +566,16 @@ export function AnnotationState({
   useLayoutEffect(() => onModel(model), [model, onModel]);
   useLayoutEffect(() => () => onModel(null), [onModel]);
 
+  const active =
+    hoveredAnnotation ?? highlightedAnnotation ?? selectedAnnotation;
   return renderer && sceneVersion > 0 && !showPlaceholder ? (
     <Annotations
       renderer={renderer}
       placed={placedAnnotations}
       sceneVersion={sceneVersion}
-      active={hoveredAnnotation ?? highlightedAnnotation ?? selectedAnnotation}
+      active={active}
       selected={selectedAnnotation}
+      whole={(active && wholePlaced?.get(active)) || null}
       onActivate={activateAnnotation}
       onSelect={selectAnnotation}
       onFollow={followLink}

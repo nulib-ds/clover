@@ -50,16 +50,17 @@
  * What the toggle hides, shown as it is pointed at or focused (Mat, 2026-10-26: "make it
  * obvious that this would hides/toggles all annotations in the page"): every entry of
  * its set lit together, as one is under the pointer. The list's sets and the Canvas
- * menu's alike.
+ * menu's alike; never a georeferenced image listed with them, which the map lays and the
+ * toggle leaves.
  */
 .clover-annotations-set:has(
     > .clover-annotations-set-header > .clover-hide:hover
   )
-  .clover-annotations-entry,
+  .clover-annotations-entry:not(.clover-annotations-place),
 .clover-annotations-set:has(
     > .clover-annotations-set-header > .clover-hide input:focus-visible
   )
-  .clover-annotations-entry {
+  .clover-annotations-entry:not(.clover-annotations-place) {
   background-color: var(--clover-color-secondary-muted, #e6e8eb);
 }
 
@@ -254,5 +255,39 @@ a.clover-annotations-link svg {
   .clover-annotations-canvas[aria-current="true"]
     > .clover-annotations-canvas-label {
     border-inline-start-color: Highlight;
+  }
+}
+
+/*
+ * A georeferenced image's picture (`Places`), listed with the annotations under its
+ * Canvas, with the map control's pin over its corner, as the Body's map control is drawn:
+ * a disc in the controls' fill, the glyph theirs, at the end of the picture's foot, a
+ * little past it (Mat, 2026-11-13: "overlay map icon in corner of thumbnail"; kept,
+ * 2026-11-16: "do leave the map … map icon"). Decorative: its button says it is on the map.
+ */
+.clover-annotations-place-picture {
+  position: relative;
+  display: flex;
+  flex: none;
+}
+
+.clover-annotations-place-glyph {
+  position: absolute;
+  inset-block-end: calc(-1 * var(--clover-space-3xs));
+  inset-inline-end: calc(-1 * var(--clover-space-3xs));
+  box-sizing: border-box;
+  width: var(--clover-space-m);
+  height: var(--clover-space-m);
+  padding: var(--clover-space-3xs);
+  border-radius: 50%;
+  background-color: var(--clover-color-control, #1a1d1e);
+  fill: var(--clover-color-control-glyph, #fff);
+}
+
+@media (forced-colors: active) {
+  .clover-annotations-place-glyph {
+    border: 1px solid CanvasText;
+    background-color: Canvas;
+    fill: CanvasText;
   }
 }

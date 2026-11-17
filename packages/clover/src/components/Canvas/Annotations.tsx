@@ -270,6 +270,11 @@ interface AnnotationsProps {
   active: string | null;
   /** The picked annotation, exposed as current (WCAG 4.1.2). */
   selected: string | null;
+  /**
+   * Where the active annotation lies, when it is on a whole Canvas (`placeWholeCanvas`):
+   * the line drawn round that Canvas.
+   */
+  whole?: Rect | null;
   onActivate: (id: string | null) => void;
   /** A hotspot clicked: zoom to it, and it becomes the menu's current annotation. */
   onSelect: (annotation: PlacedAnnotation) => void;
@@ -366,6 +371,7 @@ const Annotations: React.FC<AnnotationsProps> = ({
   sceneVersion,
   active,
   selected,
+  whole,
   onActivate,
   onSelect,
   onFollow,
@@ -490,8 +496,48 @@ const Annotations: React.FC<AnnotationsProps> = ({
           media={media}
         />
       ))}
+      {whole && (
+        <WholeOutline
+          key={sceneVersion}
+          world={whole}
+          renderer={renderer}
+          // Over every hotspot, so in a spread the other page's dim with the rest.
+          depth={placed.length * 2 + 2}
+        />
+      )}
     </>,
     overlaysOf(renderer).container,
+  );
+};
+
+/**
+ * The line round an annotation on a whole Canvas while it is pointed at or picked, drawn
+ * as a picked hotspot's is: the dark edge, the accent band, the light line, and the
+ * picture around it dimmed a little. It takes no press and holds no focus, as it lies over
+ * the whole picture: the list and the caption read the annotation, and pick it.
+ */
+const WholeOutline: React.FC<{
+  world: Rect;
+  renderer: CanvasRenderer;
+  depth: number;
+}> = ({ world, renderer, depth }) => {
+  const [element, setElement] = useState<HTMLElement | null>(null);
+  const { x, y, width, height } = world;
+  useEffect(() => {
+    if (!element) return;
+    const unpin = overlaysOf(renderer).add(element, { x, y, width, height });
+    // The layer lets the pointer through to what it pins; this, nothing takes from it.
+    element.style.pointerEvents = "none";
+    renderer.invalidate();
+    return unpin;
+  }, [element, renderer, x, y, width, height]);
+  return (
+    <span
+      ref={setElement}
+      className="clover-canvas-annotation-whole"
+      aria-hidden="true"
+      style={{ zIndex: depth }}
+    />
   );
 };
 
@@ -826,6 +872,26 @@ export function scrollNote(event: React.KeyboardEvent<HTMLElement>): boolean {
 }
 
 /**
+ * The Canvas an annotation is on as a whole (Cookbook 0266): one whose target names no
+ * region, point, shape or time; none for any other, or for a Canvas not handed.
+ */
+function wholeCanvasOf(
+  { annotation, targetIndex }: CanvasAnnotation,
+  canvases: IIIFCanvas[] | undefined,
+): IIIFCanvas | undefined {
+  const target = parseAnnotationTarget(
+    [annotation?.target].flat()[0] as Parameters<
+      typeof parseAnnotationTarget
+    >[0],
+  );
+  if (target.rect || target.point || target.svg || target.t) return undefined;
+  return (
+    canvases?.find((each) => each.id === target.id) ??
+    (target.id ? undefined : canvases?.[targetIndex])
+  );
+}
+
+/**
  * The annotations on a whole Canvas, by Canvas (Cookbook 0266): a target with no region,
  * point, shape or time, and a body with something to read or see. The Canvas's caption
  * shows them.
@@ -835,24 +901,45 @@ export function wholeCanvasComments(
   canvases: IIIFCanvas[] | undefined,
 ): Map<string, CanvasAnnotation["annotation"][]> {
   const byCanvas = new Map<string, CanvasAnnotation["annotation"][]>();
-  for (const { annotation, targetIndex } of annotations ?? []) {
-    const target = parseAnnotationTarget(
-      [annotation?.target].flat()[0] as Parameters<
-        typeof parseAnnotationTarget
-      >[0],
-    );
-    if (target.rect || target.point || target.svg || target.t) continue;
+  for (const each of annotations ?? []) {
+    const { annotation } = each;
     if (
       !bodiesOf(annotation as Record<string, any>).some(
         (body) => typeof body?.value === "string" || body?.type === "Image",
       )
     )
       continue;
-    const canvas =
-      canvases?.find((each) => each.id === target.id) ??
-      (target.id ? undefined : canvases?.[targetIndex]);
+    const canvas = wholeCanvasOf(each, canvases);
     if (!canvas) continue;
     byCanvas.set(canvas.id, [...(byCanvas.get(canvas.id) ?? []), annotation]);
   }
   return byCanvas;
+}
+
+/**
+ * Where each annotation on a whole Canvas lies in the world: the whole of its Canvas,
+ * wherever that is placed, so the line drawn round it while it is pointed at or picked
+ * goes round that Canvas alone, one page of a spread (Mat, 2026-11-16: "if an annotation
+ * is targeting the canvas and not a specific region. draw the line around the whole
+ * canvas. think about this for spreads where there are multiple canvases in a visible
+ * spread"). Never a hotspot: one over the whole picture would take every press.
+ */
+export function placeWholeCanvas(
+  annotations: CanvasAnnotation[],
+  canvases: IIIFCanvas[] | undefined,
+  place: AnnotationPlacer,
+): Map<string, Rect> {
+  const placed = new Map<string, Rect>();
+  for (const each of annotations) {
+    const canvas = wholeCanvasOf(each, canvases);
+    const id = each.annotation?.id;
+    if (!canvas?.width || !canvas.height || !id) continue;
+    const world = place(
+      { x: 0, y: 0, width: canvas.width, height: canvas.height },
+      canvas.id,
+      each.targetIndex,
+    );
+    if (world) placed.set(id, world);
+  }
+  return placed;
 }

@@ -46,6 +46,7 @@ import {
 } from "../../hooks/useHighContrast";
 import { ErrorBoundary } from "../../ui/ErrorBoundary";
 import { Loading } from "../../ui/Loading";
+import { focusSoon } from "../../ui/focusSoon";
 import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
@@ -196,6 +197,14 @@ export type CanvasViewProps = CloverCanvasProps & {
    * this one is drawn: its images' `info.json` and their coarsest and middle levels.
    */
   ahead?: CloverCanvasProps["canvases"];
+  /**
+   * A place asked for from Annotations (the Root's `place`, `Connected.tsx`), keyed as a
+   * map's list keys it: the Root's map fills the Body, framed on it, each time `n`
+   * changes; null to put it away.
+   */
+  askedPlace?: { key: string; n: number } | null;
+  /** The map asked for is put away: its Close, Escape, or another popup opening. */
+  onAskedPlaceClose?: () => void;
 };
 
 /**
@@ -467,11 +476,28 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * brings the Canvas back.
    */
   const [swappedBox, setSwappedBox] = useState<string | null>(null);
+  /*
+   * A place asked for from Annotations (Mat, 2026-11-13: "clicking the georef or navplace
+   * annotation opens the map over the body as expanded"): the Root's map, filling the Body
+   * as each ask comes, before it paints, until Collapse map (`PlaceBox`). Not where its map
+   * control is off (`controls.map: false`): the layout around it shows the map then, as
+   * Document shows it over its pages.
+   */
+  const asked = controlsConfig && controlsConfig.map ? props.askedPlace : null;
+  const askedId = `place-asked-${instance}`;
+  useLayoutEffect(() => {
+    if (asked) setSwappedBox(askedId);
+    // Each ask, as it comes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [asked?.n]);
   const placeSwapped =
     (swappedBox === placeId && placeOpen) ||
-    (swappedBox === `place-of-${instance}` && pickOpen);
+    (swappedBox === `place-of-${instance}` && pickOpen) ||
+    (swappedBox === askedId && Boolean(asked));
   const swapPlace = (box: string) =>
     setSwappedBox((swapped) => (swapped === box ? null : box));
+  // The asked box's map drawn: until then the Canvas, and its controls, stay (`Map.css`).
+  const [askedReady, setAskedReady] = useState(false);
   const modelRef = useRef(model);
   modelRef.current = model;
   const releaseAnnotation = useCallback(() => modelRef.current.release(), []);
@@ -704,7 +730,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * would otherwise go: over a placeholder and over a lone video or sound, where Clover's
    * own image controls have no place, the cluster stays for them.
    */
-  const hostControls = React.Children.count(children) > 0;
+  // Controls of the host's, as given: none for `{shown && <Control />}` while not shown.
+  const hostControls = React.Children.toArray(children).length > 0;
   /*
    * Over a placeholder, the annotations menu stays too: a pick from it opens the Canvas
    * and frames the annotation there, as a pick from a list beside it does. Over a lone
@@ -1270,7 +1297,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             onCaptionToggle={() => setCaptionOpen((open) => !open)}
             placeId={shownPlaces ? placeId : undefined}
             placeOpen={placeOpen}
-            away={placeSwapped}
+            away={placeSwapped && (swappedBox !== askedId || askedReady)}
             onPlaceToggle={() => {
               setPlaceShown(true);
               setPlaceOpen((open) => !open);
@@ -1470,15 +1497,17 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             <PlaceBox
               id={`place-of-${instance}`}
               open={pickOpen}
-              swapped={placeSwapped}
+              swapped={placeSwapped && swappedBox === `place-of-${instance}`}
               onSwap={() => swapPlace(`place-of-${instance}`)}
               onClose={(restoreFocus) => {
                 setSwappedBox(null);
                 setClosedPick(pickKey);
+                // Once it has gone, the Canvas back in sight (`focusSoon`).
                 if (restoreFocus)
-                  document.getElementById(pickedPlace.id)?.focus();
+                  focusSoon(() => document.getElementById(pickedPlace.id));
               }}
               feature={pickedPlace.feature}
+              owner={canvases?.[0]}
               name={pickedPlace.name}
               language={language}
             />
@@ -1489,18 +1518,37 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             <PlaceBox
               id={placeId}
               open={placeOpen}
-              swapped={placeSwapped}
+              swapped={placeSwapped && swappedBox === placeId}
               onSwap={() => swapPlace(placeId)}
               onClose={(restoreFocus) => {
                 setSwappedBox(null);
                 setPlaceOpen(false);
                 if (restoreFocus)
-                  document.getElementById(`place-${instance}`)?.focus();
+                  focusSoon(() => document.getElementById(`place-${instance}`));
               }}
               feature={shownPlaces.feature}
               canvases={shownPlaces.canvases}
               owner={canvases?.[0]}
               name={shownPlaces.name}
+              language={language}
+            />
+          </Suspense>
+        )}
+        {asked && (
+          <Suspense fallback={null}>
+            <PlaceBox
+              id={askedId}
+              open
+              swapped={placeSwapped && swappedBox === askedId}
+              onSwap={() => swapPlace(askedId)}
+              onClose={() => {
+                setSwappedBox(null);
+                props.onAskedPlaceClose?.();
+              }}
+              feature={null}
+              owner={canvases?.[0]}
+              asked={asked}
+              onReady={setAskedReady}
               language={language}
             />
           </Suspense>

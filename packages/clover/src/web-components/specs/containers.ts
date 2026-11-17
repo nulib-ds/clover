@@ -32,7 +32,7 @@ export const panel: ElementSpec = {
 export const panelDocs: ElementDocs = {
   name: "CloverPanelElement",
   description:
-    "The information panel of the clover-root it is in, in tabs or stacked boxes: the sections Clover has data for (About, Contents, Search, a Map, the Transcript, Annotations, the Collection), or its clover-tab children, in their order.",
+    "The information panel of the clover-root it is in, in tabs or stacked boxes: the sections Clover has data for (About, Contents, Search, the Transcript, Annotations, the Collection, and a Map where sections names it), or its clover-tab children, in their order.",
   attributes: {
     layout: {
       description:
@@ -65,8 +65,8 @@ export const panelDocs: ElementDocs = {
     },
     sections: {
       description:
-        'Which of the default sections it may have, as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and the panel draws nothing where none of them does. Its clover-tab children win over it.',
-      default: "every section",
+        'Which of the default sections it may have, as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest; "map" gives the map a section of its own, whose georeferenced images Annotations lists otherwise. Each still shows only where the resource has data for it, and the panel draws nothing where none of them does. Its clover-tab children win over it.',
+      default: "every section but the map",
     },
     labels: {
       description:

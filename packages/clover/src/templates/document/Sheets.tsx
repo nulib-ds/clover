@@ -48,11 +48,13 @@ const HELD_MS = 500;
 /**
  * The Canvas's own controls among the pages: none of the view's, which only the full
  * viewer offers (`VIEW_CONTROLS`), its annotations' list is the aside's (Mat, 2026-11-09: "remove this"), its hotspots still
- * on the page, and its map is the aside's too, which expands over the pages
- * (`SectionContent.tsx`; Mat, 2026-11-09: "remove this from over here. instead someone
- * should be able to do this from the sidebar panel map"). Its information, its summary
- * and metadata, is not offered either (Mat, 2026-11-10: "remove the metadata i at the
- * canvas level"). Choice stays, where a page has one.
+ * on the page, and its map is the template's, over the pages, shown from the aside
+ * (`SectionContent.tsx`'s `ExpandedMap`; Mat, 2026-11-09: "remove this from over here.
+ * instead someone should be able to do this from the sidebar panel map"): a place in
+ * About or a georeferenced image in Annotations, never the Canvas, which shows no map
+ * without its map control. Its information, its summary and metadata, is not offered
+ * either (Mat, 2026-11-10: "remove the metadata i at the canvas level"). Choice stays,
+ * where a page has one.
  */
 const OWN_CONTROLS = {
   zoom: false,
@@ -1089,7 +1091,7 @@ export function Sheets({
             /*
              * The view's controls (zoom, the turns, reset, full screen) only in the full
              * viewer, a video's its player's; among the pages the Canvas keeps its own
-             * (Choice, the place; `OWN_CONTROLS`). Open at once: the
+             * (Choice; `OWN_CONTROLS`). Open at once: the
              * sheet's still is its placeholder.
              */
             controls={

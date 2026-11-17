@@ -22,12 +22,20 @@ import {
   type MapFeatureCollection,
   boundsOf,
   cornersOf,
+  georeferencedContentAddress,
+  georeferencesOf,
   groundOf,
   navPlaceOf,
   pictureOf,
   type Position,
   readGeoreference,
 } from "../../core/geo";
+import { selectShownId, selectVisibleCanvases } from "../../core/selectors";
+import { isGeoreferencedContent } from "../../core/geo-detect";
+import {
+  useOptionalClover,
+  useOptionalCloverSelector,
+} from "../../react/context";
 import type { IIIFContent } from "../../core/load";
 import { type CloverRequest, sendsCredentials } from "../../core/request";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -38,7 +46,6 @@ import { getMapWorkerUrl } from "../../core/map-config";
 import { useNearViewport } from "../Body/useNearViewport";
 import { directionOf, languageProps } from "../../i18n/direction";
 import { Tip } from "../../ui/Tip";
-import { useOneOpen } from "../../ui/useOneOpen";
 import { useContainerName } from "../../i18n/useContainerName";
 import { ZoomIn, ZoomOut } from "../../ui/controlGlyphs";
 import { Information } from "../Body/glyphs";
@@ -61,7 +68,7 @@ export interface MapProps
   overlay?: boolean;
   /**
    * Inside a `Root`: whose georeferenced images it lays, the Canvases' in view (`view`, the
-   * default) or every Canvas's (`all`), an atlas's sheets at once. Standalone, every one.
+   * default) or every Canvas's (`all`), every sheet at once. Standalone, every one.
    */
   overlays?: "view" | "all";
   /**
@@ -72,9 +79,11 @@ export interface MapProps
    */
   items?: MapItemsLayout | false;
   /**
-   * Offers the map's outline options, behind a gear after its zoom controls: Outlines,
-   * pressed to outline every georeferenced image on the map, and Selection outline,
-   * pressed to put away the accent's outline round the one chosen. Default false.
+   * The map's outline options, behind a gear after its zoom controls: Outlines, pressed
+   * to outline every georeferenced image on the map, and Selection outline, pressed to put
+   * away the accent's outline round the one chosen. Offered wherever the map lays
+   * georeferenced images and can be moved (`navigable`), so never in the Canvas's small
+   * map box until it is expanded. Default true; `false` offers them nowhere.
    */
   outlines?: boolean;
   /**
@@ -101,6 +110,29 @@ export interface MapProps
    * streets (Mat, 2026-11-04: "zoom map to street level").
    */
   zoom?: number;
+  /**
+   * Seconds it takes to glide from what it frames to the next: another Canvas, a place or
+   * an image chosen. As the Canvas's `options.animationDuration` is for its camera. Default
+   * 0.6; `0` goes there at once, as it always does where less motion is asked for.
+   */
+  animationDuration?: number;
+  /**
+   * Whether it can be moved at all: dragged, pinched, wheeled, double-clicked or keyed,
+   * with its zoom buttons, and its places named as they are pointed at or pressed. As the
+   * Canvas's `options.gestures.navigable` is for its view. Default true; `false` keeps it
+   * where it frames, its places marked, its zoom buttons and credits out of sight, a press
+   * left to what holds it (as the Canvas's small map box, which a press expands). Its
+   * credits show again as it can be moved: a basemap's license may ask for them, so a map
+   * kept so for good needs them given on the page.
+   */
+  navigable?: boolean;
+  /**
+   * Drawn over the map, in its box, under its controls, whose Tips lie over it: an `Inset`
+   * of what the map is the place of, say, placed by its own styles (Document's page over
+   * its map, hanging under the zoom row). While the map can be moved, a control at the end
+   * of its zoom row, Image, puts it away and brings it back.
+   */
+  children?: React.ReactNode;
   /**
    * A place was chosen, on the map or in its list. Inside a `Root`, choosing one on a
    * Canvas also goes there.
@@ -212,7 +244,7 @@ const OVERLAY_SIZE = 2048;
 
 /**
  * Longer side, in pixels, of each overlay's image where several are drawn together: as
- * large as four at most would be, all told (a sheet of an atlas, many at once), never
+ * large as four at most would be, all told (an AnnotationPage's sheets, many at once), never
  * under 768.
  */
 const overlaySize = (count: number) =>
@@ -262,13 +294,15 @@ interface ViewProps
   source?: string;
   /** A region of its own. Default true; false in a panel, whose section is one. */
   landmark?: boolean;
-  /** The annotations pointed at or picked beside it: their places show active. */
-  activeAnnotations?: string[];
-  /** The annotation picked in the Root: a georeferenced image so is outlined, whole. */
+  /**
+   * The annotation picked in the Root: a georeferenced image or a place so is marked
+   * whole.
+   */
   picked?: string | null;
   /**
    * The annotation pointed at in the Root (in Items, Annotations, a list of the page's
-   * own): a georeferenced image so is outlined at half strength, and its item lit.
+   * own): a georeferenced image or a place so is marked at half strength, and its item
+   * lit.
    */
   highlighted?: string | null;
   /** A georeferenced image is pointed at, on the map or in its list; null as it leaves. */
@@ -287,13 +321,28 @@ interface ViewProps
    * place box's swap, as its map fills the Body and goes back (`Canvas/PlaceBox`).
    */
   reframe?: unknown;
+  /**
+   * An item asked for beside the map (a place pressed in Annotations, `Canvas/PlaceBox`),
+   * keyed as its list keys it, `place-<index>` or `overlay-<id>`: chosen and framed, a
+   * place named in its popup, each time `n` changes, as a press on its row would.
+   */
+  focus?: { key: string; n: number } | null;
+  /**
+   * It is ready (has drawn the view it frames) or has failed, and as it goes, not:
+   * `Canvas/PlaceBox`, whose Canvas keeps its controls until the map has come in.
+   */
+  onReady?: (ready: boolean) => void;
+  /**
+   * It is put back in its box (`navigable` turned false), letting go of the place it named:
+   * the Root lets go of an annotation picked or pointed at on it too (`useRootMap`).
+   */
+  onLetGo?: () => void;
 }
 
 export function MapView({
   features,
   overlays,
   current,
-  activeAnnotations,
   picked = null,
   highlighted = null,
   onPointOverlay,
@@ -301,8 +350,13 @@ export function MapView({
   List,
   onHighlight,
   reframe,
+  focus = null,
+  onReady,
+  onLetGo,
+  animationDuration = 0.6,
+  navigable = true,
   items = "list",
-  outlines = false,
+  outlines = true,
   allmaps = false,
   source,
   credits = true,
@@ -321,6 +375,7 @@ export function MapView({
   as: Tag = "div",
   className,
   style,
+  children,
   ...rest
 }: ViewProps) {
   const { t } = useCloverTranslation();
@@ -341,6 +396,10 @@ export function MapView({
   // MapLibre's controls, each with Clover's glyph and popover in it.
   const [tips, setTips] = useState<{ element: Element; key: string }[]>([]);
   const [failed, setFailed] = useState(false);
+  // It has drawn the view it frames, its tiles in (below): what it frames next, it glides to.
+  const [settled, setSettled] = useState(false);
+  // How long that glide takes, in ms (`animationDuration`).
+  const glide = Math.max(0, animationDuration) * 1000;
   // The overlays on the map, by id, once their images are drawn.
   const [drawnIds, setDrawnIds] = useState<ReadonlySet<string>>(NO_IDS);
   // The item last chosen in the list: `place-<index>` or `overlay-<id>`.
@@ -353,8 +412,18 @@ export function MapView({
   const [pointed, setPointed] = useState<string | null>(null);
   // The overlay whose row is under the pointer, or focused.
   const [rowHover, setRowHover] = useState<string | null>(null);
+  // The place whose row is under the pointer, or focused, by its place in the data.
+  const [rowPlace, setRowPlace] = useState<number | null>(null);
   // The accent outline round those chosen, which the options' Selection outline turns off.
   const [selectionShown, setSelectionShown] = useState(true);
+  /*
+   * Its outline options, offered where they have something to outline and room to be: a
+   * map that lays georeferenced images (never a point, which has no edge) and can be
+   * moved, as the map over the Body is once expanded, never the small box (Mat,
+   * 2026-11-16: "show that dropdown by default for georeferencing annotations that are not
+   * points … it should only show on the full expanded map"), unless `outlines` is false.
+   */
+  const offered = outlines && navigable && overlay && overlays.length > 0;
   // Outlined at half strength, as Items rings an item under the pointer: the overlay
   // whose item is pointed at or focused, else the one under the pointer on the map, else
   // one pointed at elsewhere in the Root.
@@ -383,6 +452,7 @@ export function MapView({
     grounds,
     point: setPointed,
     pointOverlay: onPointOverlay,
+    navigable,
   });
   latest.current = {
     onSelect,
@@ -394,11 +464,46 @@ export function MapView({
     grounds,
     point: setPointed,
     pointOverlay: onPointOverlay,
+    navigable,
+  };
+  /*
+   * Where it first looks, read as MapLibre starts: what it is asked to frame (`focus`), as
+   * its effect will frame it, else all it has, as its first framing will, so its first
+   * frame, and the `load` that makes it ready, are of what it shows, never the world
+   * before a jump (Mat, 2026-11-13: "make the load in seamless/smooth ux").
+   */
+  const start = useRef<() => Record<string, unknown> | null>(() => null);
+  start.current = () => {
+    const key = focus ? focus.key : null;
+    const image =
+      key && key.startsWith("overlay-")
+        ? overlays.find((item) => `overlay-${item.id}` === key)
+        : undefined;
+    const place = key && !image ? keyed(key).place : undefined;
+    const bounds = image
+      ? boundsOf([], [image])
+      : place
+        ? boundsOf([place])
+        : boundsOf(features.features, overlay ? overlays : []);
+    if (!bounds) return null;
+    const [[west, south], [east, north]] = bounds;
+    if (west === east && south === north)
+      return { center: [west, south], zoom: zoom ?? POINT_ZOOM };
+    const most = image
+      ? (zoom ?? OVERLAY_ZOOM)
+      : place
+        ? zoom
+        : (zoom ?? (overlay && overlays.length ? OVERLAY_ZOOM : undefined));
+    return { bounds, fitBoundsOptions: { padding: 32, maxZoom: most ?? 12 } };
   };
   // Names a place in a popup at a point, once MapLibre is up.
   const name = useRef<((feature: MapFeature, at: unknown) => void) | null>(
     null,
   );
+  // Marks a place picked, with no popup: one asked for beside the map (`focus`).
+  const markPlace = useRef<((feature: MapFeature) => void) | null>(null);
+  // Lets go of the place named or picked, as a press off the places does.
+  const letGoPlace = useRef<(() => void) | null>(null);
   // Reads new places: what was named, pointed at or picked among the old ones let go.
   const reread = useRef<((next: MapFeatureCollection) => void) | null>(null);
   // Chooses an image pressed on the map, as its row in the list chooses it.
@@ -408,6 +513,8 @@ export function MapView({
   // Frames what there is: kept current, for a `reframe` to call once the map is resized.
   const frameAll = useRef<(() => void) | null>(null);
   const reframeWanted = useRef(false);
+  // What the map showed as a `reframe` was asked, fitted again at its new size.
+  const kept = useRef<unknown>(null);
 
   // MapLibre, loaded and started once, near the window.
   useEffect(() => {
@@ -455,6 +562,7 @@ export function MapView({
           style: styleUrl ?? DEFAULT_STYLE_URL,
           center: [0, 20],
           zoom: 1,
+          ...start.current(),
           maxPitch: 0,
           dragRotate: false,
           scrollZoom,
@@ -720,10 +828,27 @@ export function MapView({
             pick(feature);
             show(feature);
           };
+          /*
+           * A place asked for beside the map, by a row that names it (Annotations' places;
+           * Mat, 2026-11-13): marked picked, in the accent, but unnamed, so no popup and its
+           * picture cover the place framed. Pointed at, it is named as any place is.
+           */
+          markPlace.current = (feature) => {
+            dismissed = "";
+            picked = null;
+            unname();
+            pick(feature);
+          };
+          letGoPlace.current = () => {
+            dismissed = "";
+            picked = null;
+            pick(null);
+            unname();
+          };
           for (const layer of CLICKABLE) {
             instance.on("click", layer, (event: any) => {
               const feature = event.features?.[0] as MapFeature | undefined;
-              if (!feature) return;
+              if (!feature || !latest.current.navigable) return;
               name.current?.(feature, event.lngLat);
               latest.current.onSelect?.(feature);
             });
@@ -754,6 +879,7 @@ export function MapView({
             latest.current.pointOverlay?.(sheet);
           };
           instance.on("mousemove", (event: any) => {
+            if (!latest.current.navigable) return;
             const under = (instance.queryRenderedFeatures?.(event.point, {
               layers: CLICKABLE.filter((layer) => instance.getLayer?.(layer)),
             }) ?? []) as MapFeature[];
@@ -789,6 +915,7 @@ export function MapView({
           // A press off the places lets go of the one picked, and one on an image chooses
           // it, as its row in the list does: framed, and its Canvas gone to.
           instance.on("click", (event: any) => {
+            if (!latest.current.navigable) return;
             const under = instance.queryRenderedFeatures?.(event.point, {
               layers: CLICKABLE.filter((layer) => instance.getLayer?.(layer)),
             });
@@ -828,7 +955,12 @@ export function MapView({
             instance?.resize();
             if (!reframeWanted.current) return;
             reframeWanted.current = false;
-            frameAll.current?.();
+            // What it showed, at its new size, else everything it has.
+            const extent = kept.current;
+            kept.current = null;
+            if (extent)
+              instance.fitBounds?.(extent, { padding: 0, duration: 0 });
+            else frameAll.current?.();
           });
           observer.observe(container.current);
         }
@@ -842,6 +974,7 @@ export function MapView({
       observer?.disconnect();
       instance?.remove();
       name.current = null;
+      markPlace.current = null;
       reread.current = null;
       framed.current = "";
       setMap(null);
@@ -857,26 +990,55 @@ export function MapView({
   }, [map, features]);
 
   /*
-   * A place whose annotation is pointed at or picked beside the map (its hotspot, the
-   * Annotations list) shows active, as that hotspot does (Mat, 2026-10-29: "make it so
-   * hover/active rules apply for annotations on maps too").
+   * Each place marked as Items marks an item (DESIGN.md §3), as the map's images and its
+   * list are (Mat, 2026-11-15: "we should be consistent. look at items, annotations"):
+   * pointed at, the accent at half strength, a preview; chosen, whole (`addPlaceLayers`).
+   * Beside the map's own pointer and pick (`hover`, `picked`): pointed at, its annotation
+   * pointed at beside the map, as its hotspot is (Mat, 2026-10-29: "make it so
+   * hover/active rules apply for annotations on maps too"), or its row pointed at or
+   * focused; chosen, its annotation picked; current, the place of a Canvas in view (or of
+   * the member open), not an annotation's, as that Canvas's images are outlined. A Canvas
+   * whose image the map lays over it is marked by that image's outline alone, its place
+   * at rest, so each Canvas has one mark (Mat, 2026-11-15): a sheet's place, worked out
+   * from its image's fit, lies on the image's edge, where the two stacked.
    */
-  const linked = useRef<number[]>([]);
-  const activeKey = activeAnnotations?.join("\n") ?? "";
+  const imaged = overlay ? overlays.map((item) => item.canvasId) : [];
+  const marked = useRef<number[]>([]);
+  // Plain checks, as `?.` and `??` cost bytes here.
+  const markKey = [
+    picked,
+    highlighted,
+    rowPlace,
+    current && current.join(),
+    imaged.join(" "),
+  ].join("\n");
   useEffect(() => {
-    if (!map?.setFeatureState) return;
-    const ids = features.features.flatMap((feature, index) =>
-      feature.properties.annotationId &&
-      activeKey.split("\n").includes(feature.properties.annotationId)
-        ? [index]
-        : [],
-    );
-    for (const id of linked.current)
-      map.setFeatureState({ source: NAVPLACE, id }, { linked: false });
-    for (const id of ids)
-      map.setFeatureState({ source: NAVPLACE, id }, { linked: true });
-    linked.current = ids;
-  }, [map, features, activeKey]);
+    if (!map || !map.setFeatureState) return;
+    const was = marked.current;
+    marked.current = [];
+    features.features.forEach((feature, id) => {
+      const { annotationId, canvasId, manifestId } = feature.properties;
+      const where = canvasId || manifestId;
+      const state = {
+        chosen: !!annotationId && annotationId === picked,
+        pointed:
+          (!!annotationId && annotationId === highlighted) || id === rowPlace,
+        current:
+          !annotationId &&
+          !!where &&
+          !!current &&
+          current.includes(where) &&
+          !imaged.includes(where),
+      };
+      const on = state.chosen || state.pointed || state.current;
+      // Each marked now, or before (to let go), told what it is.
+      if (on || was.includes(id))
+        map.setFeatureState({ source: NAVPLACE, id }, state);
+      if (on) marked.current.push(id);
+    });
+    // What it reads, by its key.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, features, markKey]);
   // What the list names: every place, and each overlay drawn.
   const listed = overlay
     ? overlays.filter((item) => drawnIds.has(item.id))
@@ -949,39 +1111,43 @@ export function MapView({
       if (drawn.current[item.id]) return;
       const layer = `geomap-overlay-${index}-${hash(item.id)}`;
       drawn.current[item.id] = layer;
-      void drawOverlay(item, request, overlaySize(wanted.length)).then(
-        (canvas) => {
-          if (!live || !canvas || drawn.current[item.id] !== layer) return;
-          const corners = cornersOf(item);
-          if (!corners || map.getSource(layer)) return;
-          map.addSource(layer, {
-            type: "canvas",
-            canvas,
-            coordinates: corners,
-            animate: false,
-          });
-          map.addLayer(
-            {
-              id: layer,
-              type: "raster",
-              source: layer,
-              paint: {
-                "raster-opacity": overlayOpacity,
-                "raster-fade-duration": 0,
-              },
+      void drawOverlay(
+        item,
+        wanted,
+        request,
+        overlaySize(wanted.length),
+        sendsCredentials(request) ? "use-credentials" : "anonymous",
+      ).then((canvas) => {
+        if (!live || !canvas || drawn.current[item.id] !== layer) return;
+        const corners = cornersOf(item);
+        if (!corners || map.getSource(layer)) return;
+        map.addSource(layer, {
+          type: "canvas",
+          canvas,
+          coordinates: corners,
+          animate: false,
+        });
+        map.addLayer(
+          {
+            id: layer,
+            type: "raster",
+            source: layer,
+            paint: {
+              "raster-opacity": overlayOpacity,
+              "raster-fade-duration": 0,
             },
-            // Under the outlines, the places and the outline, however late it arrives.
-            map.getLayer(OUTLINES)
-              ? OUTLINES
-              : map.getLayer(FILL)
-                ? FILL
-                : map.getLayer(OUTLINE)
-                  ? OUTLINE
-                  : undefined,
-          );
-          setDrawnIds((before) => new Set(before).add(item.id));
-        },
-      );
+          },
+          // Under the outlines, the places and the outline, however late it arrives.
+          map.getLayer(OUTLINES)
+            ? OUTLINES
+            : map.getLayer(FILL)
+              ? FILL
+              : map.getLayer(OUTLINE)
+                ? OUTLINE
+                : undefined,
+        );
+        setDrawnIds((before) => new Set(before).add(item.id));
+      });
     });
     return () => {
       live = false;
@@ -1018,7 +1184,7 @@ export function MapView({
   useEffect(() => {
     if (!map) return;
     // Those chosen, unless the options' Selection outline is off (`outlines`).
-    const whole = !outlines || selectionShown ? outlined : [];
+    const whole = !offered || selectionShown ? outlined : [];
     const half = overlays.filter(
       (item) => item.id === hovered && !outlined.includes(item),
     );
@@ -1063,7 +1229,7 @@ export function MapView({
       // Over everything else on the map: the images (each added under it, however
       // late), the places and the basemap's labels.
     );
-  }, [map, outlined, overlays, hovered, outlines, selectionShown]);
+  }, [map, outlined, overlays, hovered, offered, selectionShown]);
 
   // Frame what there is, once for each extent: a place chosen stays framed when the
   // view it opens draws nothing new, and a map given another place (a Collection's next
@@ -1079,17 +1245,27 @@ export function MapView({
     const extent = bounds.flat().join();
     if (extent === framed.current) return;
     // The first framing is at once; each one after glides there from where it was.
-    const glide = framed.current !== "";
+    const again = framed.current !== "";
     framed.current = extent;
-    frame(map, bounds, zoom ?? POINT_ZOOM, most, glide);
+    frame(map, bounds, zoom ?? POINT_ZOOM, most, again ? glide : 0);
+    // Its glide is read as it frames.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, features, overlays, overlay, zoom]);
 
-  // Asked to frame again: once the map has its new size, which its observer reports.
+  /*
+   * Asked to frame again (the place box's swap, as its map fills the Body and goes back):
+   * once the map has its new size, which its observer reports, what it showed is fitted
+   * to it, so Expand map and Collapse map keep the place or sheet in view, never every one
+   * the map has (Mat, 2026-11-13). Read now, before MapLibre knows its new size.
+   */
   const reframed = useRef(reframe);
   useEffect(() => {
     if (Object.is(reframed.current, reframe)) return;
     reframed.current = reframe;
     reframeWanted.current = true;
+    kept.current = map?.getBounds?.() ?? null;
+    // Only as it is asked: the map is read as it is then.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reframe]);
 
   /*
@@ -1140,16 +1316,34 @@ export function MapView({
   const choose = (feature: MapFeature) => {
     const bounds = boundsOf([feature]);
     if (map && bounds) {
-      frame(map, bounds, Math.max(map.getZoom(), zoom ?? POINT_ZOOM), zoom);
+      frame(
+        map,
+        bounds,
+        Math.max(map.getZoom(), zoom ?? POINT_ZOOM),
+        zoom,
+        settled ? glide : 0,
+      );
       name.current?.(feature, center(bounds));
     }
     onSelect?.(feature);
   };
+  /*
+   * An image chosen, framed: at once for its first view, and once that is drawn, gliding
+   * from where it was, as the view's own images are framed (Mat, 2026-11-13: "we lost the
+   * smooth glide between items when canvas items toggle or a user toggles annotations",
+   * "again make this part of the map component").
+   */
   const show = (item: Georeference) => {
     setChosenKey(`overlay-${item.id}`);
     const bounds = boundsOf([], [item]);
     if (map && bounds)
-      frame(map, bounds, zoom ?? POINT_ZOOM, zoom ?? OVERLAY_ZOOM);
+      frame(
+        map,
+        bounds,
+        zoom ?? POINT_ZOOM,
+        zoom ?? OVERLAY_ZOOM,
+        settled ? glide : 0,
+      );
   };
   // An image pressed on the map: chosen, as its row would be.
   chooseSheet.current = (id) => {
@@ -1187,18 +1381,19 @@ export function MapView({
    * The gear is a disclosure (`aria-expanded`, `aria-controls`): pressed, by Enter or
    * Space too, its tray opens to its start on one ground, the gear its close at the
    * tray's end, focus staying on it, and Shift+Tab goes back through the tray; Escape in
-   * it closes it, focus to the gear. Opening, it closes Clover's popup open (`useOneOpen`).
+   * it closes it, focus to the gear. It is none of Clover's popups (`useOneOpen`): the map
+   * is often held in one, the Canvas's map box or Document's map over the pages, which its
+   * opening would put away, gear and all (2026-11-16).
    *
-   * Its options, offered by `outlines`: Outlines (Mat, 2026-11-12: "add ability to toggle
-   * on/off annotation outlines, default it false"), off to start, pressed to draw every
-   * overlay's edge in the controls' dark color, over the images and under the places and
-   * the outline of those chosen; and Selection outline ("add ability to turn off the
-   * accent outline on selected item as well"), on to start, the accent's ring round those
-   * chosen, which a press takes away.
+   * Its options, wherever they are offered (`offered`, above): Outlines (Mat, 2026-11-12:
+   * "add ability to toggle on/off annotation outlines, default it false"), off to start,
+   * pressed to draw every overlay's edge in the controls' dark color, over the images and
+   * under the places and the outline of those chosen; and Selection outline ("add ability
+   * to turn off the accent outline on selected item as well"), on to start, the accent's
+   * ring round those chosen, which a press takes away.
    */
-  const offered = outlines;
   const optionsId = useUniqueId();
-  const [optionsSlot, setOptionsSlot] = useState<HTMLElement | null>(null);
+  const optionsSlot = useControlSlot(map, offered);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const optionsKey = optionsOpen ? "mapCollapseOptions" : "mapExpandOptions";
   const optionsName = useContainerName(
@@ -1207,20 +1402,25 @@ export function MapView({
     false,
     root.hostLanguage,
   );
-  useOneOpen(offered && optionsOpen, () => undefined);
+  // Closed as it goes.
   useEffect(() => {
-    if (!map || !offered) return;
-    const group = document.createElement("div");
-    group.className = "maplibregl-ctrl maplibregl-ctrl-group";
-    const control = { onAdd: () => group, onRemove: () => group.remove() };
-    map.addControl(control, "top-right");
-    setOptionsSlot(group);
-    return () => {
-      map.removeControl?.(control);
-      setOptionsSlot(null);
-      setOptionsOpen(false);
-    };
-  }, [map, offered]);
+    if (!optionsSlot) setOptionsOpen(false);
+  }, [optionsSlot]);
+  /*
+   * What it holds over the map (`children`: the page's picture over Document's map and the
+   * Canvas's), put away and brought back by a round control at the end of its zoom row,
+   * Image, a picture on it, as the Canvas's Map control puts away and brings back its map's
+   * box (Mat, 2026-11-16: "add an image icon above that toggles inset like we do for the map
+   * inset on and image itself"): a disclosure (`aria-expanded`), shown to start, offered
+   * while the map can be moved, when what it holds hangs under that row, and shown again
+   * each time it is. Added after the options' gear, whenever that comes or goes.
+   */
+  const holds = Boolean(children) && navigable;
+  const [held, setHeld] = useState(true);
+  const heldSlot = useControlSlot(map, holds, offered);
+  useEffect(() => {
+    if (!holds) setHeld(true);
+  }, [holds]);
   /*
    * A link to Allmaps Viewer (`allmaps`; Mat, 2026-11-12: "a view in allmaps button", its
    * logo "within a map. never on white", and no plugin): Allmaps' mark on a control of
@@ -1243,7 +1443,7 @@ export function MapView({
       : null;
   }, [allmaps, source, overlays, chosenKey]);
   const [edgesShown, setEdgesShown] = useState(false);
-  const edges = outlines && edgesShown && overlay;
+  const edges = offered && edgesShown;
   useEffect(() => {
     if (!map) return;
     const data = {
@@ -1299,17 +1499,129 @@ export function MapView({
     if (inView.length === overlays.length) return;
     const bounds = boundsOf([], inView);
     if (bounds)
-      frame(map, bounds, zoom ?? POINT_ZOOM, zoom ?? OVERLAY_ZOOM, true);
+      frame(map, bounds, zoom ?? POINT_ZOOM, zoom ?? OVERLAY_ZOOM, glide);
     // Only as the view's images change: the rest is read as it is then.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, inViewKey]);
+
+  /*
+   * An item asked for beside the map (`focus`): chosen and framed as its row's press
+   * would, a place marked picked with no popup (the row that asked names it), and the
+   * press's own work (going to a member) left to what asked. After the first framing and
+   * the view's, which it follows in the same commit, so the one asked for is framed, not
+   * every image on its Canvas (a sheet of two maps).
+   */
+  useEffect(() => {
+    if (!map || !focus) return;
+    // An image by its georeference, drawn yet or not: its control points frame it.
+    const image = focus.key.startsWith("overlay-")
+      ? overlays.find((item) => `overlay-${item.id}` === focus.key)
+      : undefined;
+    if (image) return show(image);
+    const { place } = keyed(focus.key);
+    if (!place) return;
+    setChosenKey(focus.key);
+    const bounds = boundsOf([place]);
+    if (!bounds) return;
+    // At once for its first view; after, gliding there, as an image is (`show`).
+    frame(
+      map,
+      bounds,
+      Math.max(map.getZoom(), zoom ?? POINT_ZOOM),
+      zoom,
+      settled ? glide : 0,
+    );
+    markPlace.current?.(place);
+    // Each time it is asked, once the map is up; the rest is read as it is then.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, focus?.n]);
+
+  /*
+   * Put back in its box (no longer `navigable`), as the page takes its place again in
+   * Default's map box and Document's map alike, it lets go of the place it named and the
+   * Root of the annotation picked on it (Mat, 2026-11-16: "the toggle back to image after
+   * having an open map retains the active/focus on the annotation. unset these
+   * annotations during this toggle back").
+   */
+  const wasNavigable = useRef(navigable);
+  useEffect(() => {
+    if (wasNavigable.current === navigable) return;
+    wasNavigable.current = navigable;
+    if (navigable) return;
+    if (letGoPlace.current) letGoPlace.current();
+    if (onLetGo) onLetGo();
+    // As it is put back; what holds it is read as it is then.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigable]);
+
+  /*
+   * Ready once it has drawn the view it frames, its tiles in: MapLibre's first `idle`
+   * after the framing above, in the same commit, so what waits on it (`Map.css`) shows it
+   * whole, its work done, and fades it in with nothing else to do (Mat, 2026-11-13: "make
+   * smooth. capture frames between the interactions and loads being ready"). A map that
+   * never settles shows all the same, in a few seconds.
+   */
+  useEffect(() => {
+    if (!map) return;
+    let live = true;
+    const done = () => {
+      if (live) setSettled(true);
+    };
+    const late = setTimeout(done, DRAWN_BY);
+    if (typeof map.once === "function") {
+      map.once("idle", done);
+      if (map.triggerRepaint) map.triggerRepaint();
+    } else done();
+    return () => {
+      live = false;
+      clearTimeout(late);
+      if (typeof map.off === "function") map.off("idle", done);
+    };
+  }, [map]);
+
+  /*
+   * Navigable (`navigable`): dragged, pinched, wheeled (where `scrollZoom` says),
+   * double-clicked and keyed; else kept where it frames, its canvas out of the tab order,
+   * a press left to what holds it (Mat, 2026-11-13: "this map should not be zoomable. it
+   * should just expand or be closed").
+   */
+  useEffect(() => {
+    if (!map) return;
+    const turn = (handler: any, on: boolean) => {
+      if (!handler || !handler.enable) return;
+      if (on) handler.enable();
+      else handler.disable();
+    };
+    turn(map.dragPan, navigable);
+    turn(map.scrollZoom, navigable && scrollZoom);
+    turn(map.boxZoom, navigable);
+    turn(map.doubleClickZoom, navigable);
+    turn(map.keyboard, navigable);
+    turn(map.touchZoomRotate, navigable);
+    map.getCanvas().tabIndex = navigable ? 0 : -1;
+  }, [map, navigable, scrollZoom]);
+
+  // Whether it is ready, to what holds it as it changes, and not as it goes (`onReady`).
+  const told = useRef(onReady);
+  told.current = onReady;
+  const ready = (Boolean(map) && settled) || failed;
+  useEffect(() => {
+    if (told.current) told.current(ready);
+  }, [ready]);
+  useEffect(
+    () => () => {
+      if (told.current) told.current(false);
+    },
+    [],
+  );
 
   return (
     <HostLanguageContext.Provider value={root.hostLanguage}>
       <Tag
         ref={root.ref}
         className={join("clover-geomap", className)}
-        data-status={failed ? "error" : map ? "ready" : "loading"}
+        data-status={failed ? "error" : map && settled ? "ready" : "loading"}
+        data-navigable={navigable ? undefined : "false"}
         style={style}
         {...highContrastProps(contrast)}
         {...rest}
@@ -1327,7 +1639,18 @@ export function MapView({
             className="clover-geomap-canvas"
             style={{ position: "absolute", inset: 0 }}
           />
-          {optionsSlot &&
+          {/*
+           * Until it has drawn the view it frames, Clover's loading bar over its top, past
+           * a moment, its drawing out of sight, then fading in (`Map.css`; Mat, 2026-11-13:
+           * "make the smooth load part of the Map component").
+           */}
+          {!ready && (
+            <span className="clover-loading" data-overlay aria-hidden="true">
+              <span />
+            </span>
+          )}
+          {offered &&
+            optionsSlot &&
             createPortal(
               <div
                 className="clover-geomap-options"
@@ -1349,38 +1672,34 @@ export function MapView({
                   hidden={!optionsOpen}
                   {...optionsName.props}
                 >
-                  {outlines && (
-                    <button
-                      type="button"
-                      className="clover-geomap-outlines"
-                      aria-label={t("mapOutlines")}
-                      aria-pressed={edgesShown}
+                  <button
+                    type="button"
+                    className="clover-geomap-outlines"
+                    aria-label={t("mapOutlines")}
+                    aria-pressed={edgesShown}
+                    lang={langOf("mapOutlines")}
+                    onClick={() => setEdgesShown((shown) => !shown)}
+                  >
+                    <MapGlyph name="mapOutlines" />
+                    <Tip
+                      label={t("mapOutlines")}
                       lang={langOf("mapOutlines")}
-                      onClick={() => setEdgesShown((shown) => !shown)}
-                    >
-                      <MapGlyph name="mapOutlines" />
-                      <Tip
-                        label={t("mapOutlines")}
-                        lang={langOf("mapOutlines")}
-                      />
-                    </button>
-                  )}
-                  {outlines && (
-                    <button
-                      type="button"
-                      className="clover-geomap-selection-outline"
-                      aria-label={t("mapSelectionOutline")}
-                      aria-pressed={selectionShown}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    className="clover-geomap-selection-outline"
+                    aria-label={t("mapSelectionOutline")}
+                    aria-pressed={selectionShown}
+                    lang={langOf("mapSelectionOutline")}
+                    onClick={() => setSelectionShown((shown) => !shown)}
+                  >
+                    <MapGlyph name="mapSelectionOutline" />
+                    <Tip
+                      label={t("mapSelectionOutline")}
                       lang={langOf("mapSelectionOutline")}
-                      onClick={() => setSelectionShown((shown) => !shown)}
-                    >
-                      <MapGlyph name="mapSelectionOutline" />
-                      <Tip
-                        label={t("mapSelectionOutline")}
-                        lang={langOf("mapSelectionOutline")}
-                      />
-                    </button>
-                  )}
+                    />
+                  </button>
                 </div>
                 <button
                   type="button"
@@ -1398,6 +1717,22 @@ export function MapView({
                 {optionsName.node}
               </div>,
               optionsSlot,
+            )}
+          {holds &&
+            heldSlot &&
+            createPortal(
+              <button
+                type="button"
+                className="clover-geomap-held"
+                aria-label={t("canvasImage")}
+                aria-expanded={held}
+                lang={langOf("canvasImage")}
+                onClick={() => setHeld((shown) => !shown)}
+              >
+                <MapGlyph name="canvasImage" />
+                <Tip label={t("canvasImage")} lang={langOf("canvasImage")} />
+              </button>,
+              heldSlot,
             )}
           {map && allmapsUrl && (
             <Suspense fallback={null}>
@@ -1429,6 +1764,11 @@ export function MapView({
               {t("mapUnavailable")}
             </p>
           )}
+          {/*
+           * What it holds over the map: in its box, under its controls (`children`), unless
+           * put away by Image (`held`).
+           */}
+          {(held || !holds) && children}
         </div>
         {described && List && (
           <>
@@ -1459,8 +1799,11 @@ export function MapView({
                   onChooseOverlay?.(item.overlay);
                 }}
                 onPoint={(key) => {
-                  const { overlay: image } = keyed(key);
+                  const { overlay: image, place } = keyed(key);
                   setRowHover(image?.id ?? null);
+                  setRowPlace(
+                    place && key ? Number(key.slice("place-".length)) : null,
+                  );
                   onPointOverlay?.(image?.id ?? null);
                 }}
               />
@@ -1481,10 +1824,10 @@ function frame(
   bounds: [Position, Position],
   zoom: number,
   most = 12,
-  glide = false,
+  glide = 0,
 ) {
   // A map moving from one place to the next eases there, never where motion is reduced.
-  const duration = glide && !reducedMotion() ? GLIDE : 0;
+  const duration = glide && !reducedMotion() ? glide : 0;
   const [[west, south], [east, north]] = bounds;
   if (west === east && south === north) {
     const view = { center: [west, south], zoom };
@@ -1495,8 +1838,8 @@ function frame(
   }
 }
 
-/** How long a map takes to ease from one place to the next, in ms. */
-const GLIDE = 600;
+/** How long a map is waited on to settle before it is shown anyway, in ms. */
+const DRAWN_BY = 4000;
 
 const reducedMotion = () =>
   typeof window !== "undefined" &&
@@ -1549,6 +1892,28 @@ function center([[west, south], [east, north]]: [Position, Position]) {
   return [(west + east) / 2, (south + north) / 2];
 }
 
+/**
+ * A control group of the map's own among MapLibre's at its top end, while `on`, for React
+ * to draw into (a portal): the options' gear, the Image control. Added again as `after`
+ * changes, so it keeps its place after a group added since.
+ */
+function useControlSlot(map: any, on: boolean, after?: unknown) {
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!map || !on) return;
+    const group = document.createElement("div");
+    group.className = "maplibregl-ctrl maplibregl-ctrl-group";
+    const control = { onAdd: () => group, onRemove: () => group.remove() };
+    map.addControl(control, "top-right");
+    setSlot(group);
+    return () => {
+      map.removeControl?.(control);
+      setSlot(null);
+    };
+  }, [map, on, after]);
+  return slot;
+}
+
 /** Clover's colors, resolved: MapLibre paints with WebGL, which cannot read `var()`. */
 function colorsOf(element: Element | null) {
   const token = (name: string, fallback: string) =>
@@ -1560,34 +1925,67 @@ function colorsOf(element: Element | null) {
     accent: token("--clover-color-accent", "#0065c3"),
     dark: token("--clover-color-primary", "#1a1d1e"),
     light: token("--clover-color-secondary", "#ffffff"),
+    // The round controls' fill, a point's at rest.
+    control: token("--clover-color-control", "#1a1d1e"),
     // A point's dot, `m` across, as a hotspot's is.
     dot: unit / 2,
   };
 }
 
-/** Whether a place is active: pointed at, picked, or its annotation so elsewhere. */
-const ACTIVE = [
+/**
+ * Whether a place is chosen: picked (pressed, chosen from its list, or asked for), or its
+ * annotation picked (`MapView`'s marks).
+ */
+const CHOSEN = [
+  "any",
+  ["boolean", ["feature-state", "picked"], false],
+  ["boolean", ["feature-state", "chosen"], false],
+];
+
+/** Whether a place is current: the place of a Canvas in view, or of the member open. */
+const CURRENT = ["boolean", ["feature-state", "current"], false];
+
+/**
+ * Whether a place is pointed at: under the pointer, its row pointed at or focused, or its
+ * annotation pointed at beside the map.
+ */
+const POINTED = [
   "any",
   ["boolean", ["feature-state", "hover"], false],
-  ["boolean", ["feature-state", "picked"], false],
-  ["boolean", ["feature-state", "linked"], false],
+  ["boolean", ["feature-state", "pointed"], false],
 ];
+
+/** Chosen or current: the accent whole. */
+const WHOLE = ["any", CHOSEN, CURRENT];
+
+/** Any of them: the state's marks drawn. */
+const MARKED = ["any", WHOLE, POINTED];
 
 /**
  * The places' source and layers: areas, lines and points, drawn as the Canvas draws a
- * hotspot (`Canvas/Annotations.css`): at rest a dark edge under a light line, nothing laid
- * over what it marks; active (pointed at, picked, or its annotation pointed at or picked
- * beside it) a wider dark edge, a wider light line, and the accent on it. A point is an
- * accent dot in a light ring with a dark edge, an accent band round the ring while active,
- * and a circle of 24px around it that a press finds (WCAG 2.5.8). Simplestyle's keys
- * (`fill`, `stroke`, `marker-color`) still color what they name.
+ * shape's hotspot (`Canvas/Annotations.css`), and marked as Items marks an item (DESIGN.md
+ * §3), as the map's images and its list are (Mat, 2026-11-15: "we should be consistent.
+ * look at items, annotations"): at rest a dark edge under a light line, nothing laid over
+ * what it marks; pointed at, a wider dark edge and light line with the accent between them
+ * at half strength, a preview; current (the place of the Canvas in view), the accent
+ * whole, as the Annotations list marks the Canvases in view by the accent alone; chosen,
+ * the accent whole and an area tinted with it, faintly, as a row chosen in a panel is.
+ * The accent is 3px, as Items' ring and the images' outline are; the dark and the light
+ * keep 3:1 over any ground, land, park or water, whatever the accent (C40). A point at rest
+ * is filled as an inactive control is, with the controls' dark fill, in a light ring with a
+ * dark edge (Mat, 2026-11-16: "inactive ones should be more of the dark token, look more
+ * like inactive buttons"; the accent before 2026-11-15, which looked marked, and light for
+ * a day); pointed at, the accent's band round it at half strength; current or chosen, the
+ * dot the accent, as a control takes it, and its band whole; and a circle of 24px around it
+ * that a press finds (WCAG 2.5.8). Simplestyle's keys (`fill`, `stroke`, `marker-color`)
+ * still color what they name, but the accent marks a state.
  */
 function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
-  const { accent, dark, light, dot } = colors;
+  const { accent, dark, light, control, dot } = colors;
   map.addSource(NAVPLACE, {
     type: "geojson",
     data: { type: "FeatureCollection", features: [] },
-    // Each feature its place in the data as its id, for its state (`ACTIVE`).
+    // Each feature its place in the data as its id, for its state (`MARKED`).
     generateId: true,
   });
   map.addLayer({
@@ -1602,10 +2000,21 @@ function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
       false,
     ],
     paint: {
-      // Clear but for a fill its feature asks for: still found by the pointer inside.
-      "fill-color": ["coalesce", ["get", "fill"], accent],
+      /*
+       * Clear but for a fill its feature asks for: still found by the pointer inside.
+       * Chosen, the accent, faintly, as a row chosen in a panel is tinted (8%): whatever
+       * the accent is, never a color of its own.
+       */
+      "fill-color": [
+        "case",
+        CHOSEN,
+        accent,
+        ["coalesce", ["get", "fill"], accent],
+      ],
       "fill-opacity": [
         "case",
+        CHOSEN,
+        0.08,
         ["has", "fill"],
         ["coalesce", ["get", "fill-opacity"], 0.18],
         0,
@@ -1627,8 +2036,9 @@ function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
     filter: lines,
     layout: round,
     paint: {
+      // Marked, 1px each side of the light line.
       "line-color": dark,
-      "line-width": ["case", ACTIVE, 6, 3],
+      "line-width": ["case", MARKED, 7, 3],
     },
   });
   map.addLayer({
@@ -1638,8 +2048,9 @@ function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
     filter: lines,
     layout: round,
     paint: {
+      // Marked, 1px each side of the accent.
       "line-color": light,
-      "line-width": ["case", ACTIVE, 4, 1],
+      "line-width": ["case", MARKED, 5, 1],
     },
   });
   map.addLayer({
@@ -1649,16 +2060,29 @@ function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
     filter: lines,
     layout: round,
     paint: {
-      "line-color": ["coalesce", ["get", "stroke"], accent],
+      "line-color": [
+        "case",
+        MARKED,
+        accent,
+        ["coalesce", ["get", "stroke"], accent],
+      ],
       "line-width": [
         "case",
-        ACTIVE,
-        2,
+        MARKED,
+        3,
         ["has", "stroke"],
         ["coalesce", ["get", "stroke-width"], 2],
         0,
       ],
-      "line-opacity": ["coalesce", ["get", "stroke-opacity"], 1],
+      // Chosen or current whole, and pointed at half strength, as Items rings an item.
+      "line-opacity": [
+        "case",
+        WHOLE,
+        1,
+        POINTED,
+        0.5,
+        ["coalesce", ["get", "stroke-opacity"], 1],
+      ],
     },
   });
   const points = [
@@ -1681,9 +2105,12 @@ function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
     source: NAVPLACE,
     filter: points,
     paint: {
-      // Active, the accent band round the light ring, then the dark edge round that.
-      "circle-radius": ["case", ACTIVE, dot + 2 + 2, dot + 2],
+      // Marked, the accent's 3px band round the light ring, then the dark edge round that:
+      // whole while chosen or current, at half strength while pointed at. At rest, the
+      // edge alone, with no accent under the dot.
+      "circle-radius": ["case", MARKED, dot + 2 + 3, dot + 2],
       "circle-color": accent,
+      "circle-opacity": ["case", WHOLE, 1, POINTED, 0.5, 0],
       "circle-stroke-width": 1,
       "circle-stroke-color": dark,
     },
@@ -1695,7 +2122,13 @@ function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
     filter: points,
     paint: {
       "circle-radius": dot,
-      "circle-color": ["coalesce", ["get", "marker-color"], accent],
+      // The controls' fill, or the color its feature asks for; current or chosen, the accent.
+      "circle-color": [
+        "case",
+        WHOLE,
+        accent,
+        ["coalesce", ["get", "marker-color"], control],
+      ],
       "circle-stroke-width": 2,
       "circle-stroke-color": light,
     },
@@ -1703,46 +2136,12 @@ function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
 }
 
 /**
- * An overlay's picture: the image (about `size` px, `overlaySize`), clipped to its mask,
- * on a canvas for MapLibre's canvas source. Null if the image will not load (or, without
- * CORS, cannot be drawn into WebGL).
+ * An overlay's picture, drawn by `overlayImage.ts` (`drawOverlay`), loaded only to lay one,
+ * so a map with none never loads it.
  */
-async function drawOverlay(
-  overlay: Georeference,
-  request: CloverRequest | undefined,
-  size: number,
-): Promise<HTMLCanvasElement | null> {
-  const { overlayImageUrl } = await import("./overlayImage");
-  const url = await overlayImageUrl(overlay.image, size, request);
-  if (!url) return null;
-  const image = await new Promise<HTMLImageElement | null>((done) => {
-    const element = new Image();
-    element.crossOrigin = sendsCredentials(request)
-      ? "use-credentials"
-      : "anonymous";
-    element.onload = () => done(element);
-    element.onerror = () => done(null);
-    element.src = url;
-  });
-  if (!image?.naturalWidth) return null;
-  const canvas = document.createElement("canvas");
-  canvas.width = image.naturalWidth;
-  canvas.height = image.naturalHeight;
-  const context = canvas.getContext("2d");
-  if (!context) return null;
-  if (overlay.mask) {
-    const sx = canvas.width / overlay.width;
-    const sy = canvas.height / overlay.height;
-    context.beginPath();
-    overlay.mask.forEach(([x, y], index) =>
-      index ? context.lineTo(x * sx, y * sy) : context.moveTo(x * sx, y * sy),
-    );
-    context.closePath();
-    context.clip();
-  }
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  return canvas;
-}
+const drawOverlay = (
+  ...args: Parameters<typeof import("./overlayImage").drawOverlay>
+) => import("./overlayImage").then((module) => module.drawOverlay(...args));
 
 /** A short, stable token for an id, for a layer name. */
 function hash(text: string): string {
@@ -1795,6 +2194,31 @@ const Gear = () => (
   />
 );
 
+/**
+ * A picture: a frame, a sun in its upper corner and hills along its foot, as the pin is the
+ * map: the control that puts away and brings back the page's picture over the map.
+ */
+const Picture = () => (
+  <>
+    <rect
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="36"
+      x="74"
+      y="106"
+      width="364"
+      height="300"
+      rx="40"
+    />
+    <circle stroke="none" cx="330" cy="196" r="34" />
+    <path
+      stroke="none"
+      strokeLinejoin="round"
+      d="M110 372L206 262L270 334L314 292L402 372Z"
+    />
+  </>
+);
+
 /** The open tray's close, a cross, as Document's map's Close draws it. */
 const Close = () => (
   <path
@@ -1818,6 +2242,7 @@ const GLYPHS: Record<string, () => React.ReactElement> = {
   mapAttribution: Information,
   mapOutlines: Outlines,
   mapSelectionOutline: SelectionOutline,
+  canvasImage: Picture,
   gear: Gear,
   close: Close,
 };
@@ -1843,3 +2268,161 @@ function MapGlyph({ name }: { name: string }) {
     </svg>
   );
 }
+
+/**
+ * The props of `MapView` that follow a Root: the Root's places, its overlays (the view's,
+ * or every Canvas's), what is current, pointed at and picked, and what a press on the map
+ * does in the Root. `scope` "view" a host's Root, whose view's Canvases are current; "all"
+ * a standalone map, with no view. `whose` is the map's own `overlays`. Read by the maps
+ * that list (`ConnectedMap`) and by the map a place asked for from Annotations opens over
+ * the Body (`Canvas/PlaceBox`), which lists nothing: here, beside the view both draw, so
+ * neither reaches the other's code.
+ */
+export function useRootMap(
+  scope: "view" | "all",
+  whose: MapProps["overlays"],
+  onSelect?: MapProps["onSelect"],
+) {
+  const context = useOptionalClover()!;
+  const features = useOptionalCloverSelector(
+    (state) => navPlaceOf(state.manifest, state.collection, context.language),
+    navPlaceOf(null),
+  );
+  const all = useOptionalCloverSelector(
+    (state) => georeferencesOf(state.manifest),
+    NO_GEOREFERENCES,
+  );
+  const shown = useOptionalCloverSelector(
+    (state) => selectVisibleCanvases(state.manifest, state.canvasId),
+    NO_CANVASES,
+  );
+  // The same array while the view holds, so the map is not re-framed under the reader.
+  // Georeference annotations given as the content: every sheet, unless asked for the view's.
+  const georeferenced = useOptionalCloverSelector(
+    (state) => isGeoreferencedContent(state.manifest),
+    false,
+  );
+  const every =
+    scope === "all" || whose === "all" || (georeferenced && whose !== "view");
+  // Where they were read from, for a link to them (`allmaps`).
+  const source = useOptionalCloverSelector(
+    (state) => georeferencedContentAddress(state.manifest),
+    undefined,
+  );
+  const overlays = useMemo(
+    () =>
+      every
+        ? all
+        : all.filter((overlay) =>
+            shown.some((canvas) => canvas.id === overlay.canvasId),
+          ),
+    [every, all, shown],
+  );
+  // The annotations pointed at and picked, as the Canvas's hotspots show them.
+  const picked = useOptionalCloverSelector((state) => state.annotationId, null);
+  const highlighted = React.useSyncExternalStore(
+    context.clover.highlight.subscribe,
+    context.clover.highlight.get,
+    context.clover.highlight.get,
+  );
+  // Only a view's Canvases are current, with the member open among its Collection's (or
+  // asked for, while it loads): standalone, nothing shows the Root's first one.
+  const manifestId = useOptionalCloverSelector(selectShownId, null);
+  const current = useMemo(
+    () =>
+      scope === "view"
+        ? [
+            ...shown.map((canvas) => canvas.id),
+            ...(manifestId ? [manifestId] : []),
+          ]
+        : undefined,
+    [scope, shown, manifestId],
+  );
+  /*
+   * A place asked for follows the view (Mat, 2026-11-13: "toggling canvases in expanded
+   * map mode doesn't toggle map"): where it is a Canvas's, its place or a georeferenced
+   * image, another Canvas coming into view asks for its own, its place first, else its
+   * first image, so the map over the Body goes with it, and what lists them marks it.
+   * Never as the map first shows, which frames what was asked; and a place of the
+   * Manifest's, or a member's, holds. Once, where two maps follow the Root.
+   */
+  const view = shown.map((canvas) => canvas.id).join(" ");
+  const seen = useRef(view);
+  useEffect(() => {
+    if (seen.current === view) return;
+    seen.current = view;
+    const asked = context.clover.place.get();
+    if (!asked) return;
+    const inView = (canvasId: string | undefined) =>
+      Boolean(canvasId) && shown.some((canvas) => canvas.id === canvasId);
+    const owner = asked.startsWith("overlay-")
+      ? all.find((overlay) => `overlay-${overlay.id}` === asked)
+      : features.features[Number(asked.slice("place-".length))];
+    const of = owner && ("properties" in owner ? owner.properties : owner);
+    if (!of || !of.canvasId || inView(of.canvasId)) return;
+    const place = features.features.findIndex(
+      ({ properties }) =>
+        inView(properties.canvasId) && !properties.annotationId,
+    );
+    const image = all.find((overlay) => inView(overlay.canvasId));
+    const next =
+      place >= 0 ? `place-${place}` : image ? `overlay-${image.id}` : null;
+    if (next) context.clover.place.emit(next);
+    // The view, by its Canvases: what it reads is read as it changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
+  return {
+    source,
+    features,
+    overlays,
+    current,
+    picked,
+    highlighted,
+    onHighlight: (feature: MapFeature | null) =>
+      context.clover.highlight.emit(feature?.properties.annotationId ?? null),
+    // Put back in its box: an annotation picked or pointed at on it, a place's or a
+    // georeferenced image's, let go, as the place it named is.
+    onLetGo: () => {
+      const ours = (id: string | null) =>
+        !!id &&
+        (all.some((item) => item.id === id) ||
+          features.features.some(
+            (feature) => feature.properties.annotationId === id,
+          ));
+      if (ours(context.clover.store.get().annotationId))
+        context.clover.selectAnnotation(null);
+      if (ours(context.clover.highlight.get()))
+        context.clover.highlight.emit(null);
+    },
+    // An image pointed at, on the map or in its list: the Root's, as an annotation's
+    // is, so a list of the page's own (or Items') lights it too.
+    onPointOverlay: (id: string | null) => context.clover.highlight.emit(id),
+    // An image chosen: its Canvas, where the Root has it and is not there.
+    onChooseOverlay: (item: Georeference) => {
+      const { canvasId } = item;
+      if (canvasId && !shown.some((canvas) => canvas.id === canvasId))
+        context.clover.goTo(canvasId);
+    },
+    language: context.language,
+    request: context.clover.request,
+    onSelect: (feature: MapFeature) => {
+      onSelect?.(feature);
+      // An annotation's place: the annotation, so its region is framed (Cookbook 0139).
+      // One the annotations do not list (it has no name): its Canvas, as before.
+      const { annotationId, canvasId, manifestId: member } = feature.properties;
+      // Another member's place: that member, as its row in the Collection opens it.
+      if (member && member !== context.clover.store.get().manifest?.id) {
+        void context.clover.goToManifest(member);
+        return;
+      }
+      if (annotationId) context.clover.selectAnnotation(annotationId);
+      const selected =
+        annotationId !== undefined &&
+        context.clover.store.get().annotationId === annotationId;
+      if (!selected && canvasId) context.clover.goTo(canvasId);
+    },
+  };
+}
+
+const NO_GEOREFERENCES: Georeference[] = [];
+const NO_CANVASES: ReturnType<typeof selectVisibleCanvases> = [];

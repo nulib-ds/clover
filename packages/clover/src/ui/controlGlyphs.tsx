@@ -29,38 +29,52 @@ export const ZoomOut = () => {
   );
 };
 
-/** Four corners, arrows turned outward, a little bolder than drawn (Mat, 2026-11-08). */
-export const ZoomFullScreen = () => {
-  return (
-    <path
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="40"
-      d="M432 320v112H320M421.8 421.77L304 304M80 192V80h112M90.2 90.23L208 208M320 80h112v112M421.77 90.2L304 208M192 432H80V320M90.23 421.8L208 304"
-    />
-  );
-};
+/*
+ * Full screen's glyphs: four arrows on the diagonals, one to each corner (Mat,
+ * 2026-11-13: "use same arrows as expand/collapse for fullscreen", then "it should be
+ * four arrows. all directions"), drawn as Document's way back to its pages draws its two:
+ * each a heavy shaft, rounded at its tail, and a solid head, its corners rounded as the
+ * other glyphs' joins are. Their fill and stroke their own, for the transport's svg too.
+ */
+const SHAFTS = {
+  fill: "none",
+  stroke: "currentColor",
+  strokeLinecap: "round",
+  strokeWidth: 56,
+} as const;
+const HEADS = {
+  fill: "currentColor",
+  stroke: "currentColor",
+  strokeLinejoin: "round",
+  strokeWidth: 40,
+} as const;
+
+/** An arrow drawn to the top right corner, turned about the middle to each of the four. */
+const Four = ({ shaft, head }: { shaft: string; head: string }) => (
+  <>
+    {[0, 90, 180, 270].map((turn) => (
+      <g key={turn} transform={`rotate(${turn} 256 256)`}>
+        <path {...SHAFTS} d={shaft} />
+        <path {...HEADS} d={head} />
+      </g>
+    ))}
+  </>
+);
+
+/** Four arrows pointing out, from the middle to the corners. */
+export const ZoomFullScreen = () => (
+  <Four shaft="M304 208L368 144" head="M432 80V192L320 80Z" />
+);
 
 /**
- * The same four corners, arrows turned inward.
+ * The four arrows pointing in, from the corners to the middle.
  *
  * Shown in place of the expand glyph while full screen is active, so the control reads as
  * where it will take you rather than where you already are.
  */
-export const ZoomExitFullScreen = () => {
-  return (
-    <path
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="40"
-      d="M304 416v-112h112M405.77 405.77L304 304M208 96v112H96M106.23 106.23L208 208M416 208H304V96M405.77 106.23L304 208M96 304h112v112M106.23 405.77L208 304"
-    />
-  );
-};
+export const ZoomExitFullScreen = () => (
+  <Four shaft="M440 72L360 152" head="M296 216V104L408 216Z" />
+);
 
 export const Reset = () => {
   return (

@@ -9,14 +9,14 @@ are the provider's logo, linked to its homepage, and Clover's round controls, to
 one capsule in the controls' dark fill, the open one in the accent, ringed white: first a
 globe for the languages to read in, the resource's and Clover's interface languages
 (`Clover.Language`; About in the aside offers none), then a button for each section the
-resource has (About, the views, the Collection, the contents, the map, the transcript, the
-annotations) and Download, where there is a `rendering`; and at its end, inside one edge
+resource has (About, the views, the Collection, the contents, the transcript, the
+annotations; the map only where `panelSections` names it) and Download, where there is a `rendering`; and at its end, inside one edge
 with it, Clover's search field, open where the toolbar is 56rem wide or more, else a
 magnifier that opens into it. A section that holds something of the page in view has a dot
 of the accent, ringed white, on its button, described as "This page", gone while the
 section is open: About where the page describes itself (About then shows its label,
-summary and metadata after the resource's), Contents where it has chapters, Annotations
-where one is listed on it, and the Map where it has a place of its own. A section's button
+summary and metadata after the resource's) or has a place, Contents where it has
+chapters, and Annotations where one is listed on it or a georeferenced image is. A section's button
 opens it alone in Document's own aside, beside the page with a bar to share the width
 where there is room, over the page where there is not, its close on its inner edge.
 Pressed again, the button puts it away. A search made in the toolbar lists its hits in the
@@ -32,11 +32,14 @@ go to the previous page and the next, Home and End to the first and last, focus 
 with them and each page's place said, as the thumbnails' list steps; Enter opens it, or
 plays it on a page that plays. The full viewer
 lies over the whole column: the Canvas's own controls at its top end, as in Default (zoom in
-and out, the two turns, reset, full screen), and in the magnifier's place an arrow back
-to the pages, Previous and Next after it; the arrow, or Escape, closes it and puts the
-view home. A press on a thumbnail, and PageUp and PageDown, bring their page to the
-top. An annotation chosen in the aside (a search's hit, a region in Contents, a place on
-the map, a hotspot too), or a Transcript's cue, opens the full viewer on its page, framed
+and out, the two turns, reset, full screen, then Map, where the page, else the resource,
+has a place, which shows the map in a box hanging just under them, in the Canvas, so their
+Tips lie over it, and puts it away), and centered at its foot a button back to
+the pages, its two arrows pointing at each other, Previous and
+Next after it (over its top left for a recording, whose player's controls are at its
+foot); the button, or Escape, closes it and puts the view home. A press on a thumbnail, and PageUp and PageDown, bring their page to the
+top. An annotation chosen in the aside (a search's hit, a region in Contents, a hotspot
+too), or a Transcript's cue, opens the full viewer on its page, framed
 or playing from its time, its thumbnail chosen; on a phone the aside goes as it opens. A single page takes the column's whole height, its picture fitted whole in the
 middle of it.
 
@@ -47,8 +50,19 @@ too: it, or a press on the still, plays it, the full viewer open, a video fillin
 player's own controls at its foot, full screen among them at the lower right, and none of
 a picture's. Closing the full viewer pauses it.
 
-The aside's map has Expand map, which lays it over the whole column, its zoom row,
-Collapse map and Close at its top end; Collapse map puts it back in the aside.
+A place named in About, or a georeferenced image listed in Annotations, shows the Root's
+map over the whole column as it is pressed, framed on it and marked, its zoom row at its
+top end, where the full viewer has the Canvas's controls, and the page's picture in a box
+just under it, in the map's box (`children`), so its Tips lie over it, the aside staying
+beside it with what was pressed; on a phone the aside goes, and focus goes on to the map.
+The page's box, Collapse map, trades the two: the map in a box over the pages at their
+top end, as the Canvas's map box is over the Body in Default, with Expand map, which
+trades them back, and Close; focus goes with each swap, and the map stays the one map.
+Another page chosen meanwhile moves it to that page's place, its image else. Close or
+Escape puts it away, focus back to what was pressed, else to its section's button. An
+annotation then chosen in the aside puts it away too, opening the full viewer on its
+page. Where `panelSections` names the Map, it is a section of its own whose Expand map
+lays it over the column too; the toolbar's Map button puts it back in the aside.
 
 The page thumbnails' toggle sits on the bar between them and the pages while they show,
 and over the page's top left while they are put away. The bar widens or narrows them

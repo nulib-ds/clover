@@ -332,6 +332,62 @@ describe("<clover-read-more>", () => {
   });
 });
 
+// Mat, 2026-11-15: "inset can land in this PR".
+describe("<clover-inset>", () => {
+  it("is a thumb's box of the page's, a press on which sends clover-expand, its controls in its corner", async () => {
+    document.body.innerHTML = `<clover-inset label="Expand map" controls="map" role="group" aria-label="Map"><img alt="" src="thumb.jpg"><button type="button" slot="actions" aria-label="Close">×</button></clover-inset>`;
+    const inset = document.querySelector("clover-inset") as HTMLElement;
+    const close = inset.querySelector('[slot="actions"]') as HTMLElement;
+    const expanded = vi.fn();
+    inset.addEventListener("clover-expand", expanded);
+    // Its expand button, named for what a press does, aimed at what it expands.
+    const expand = await within(inset).findByRole("button", {
+      name: "Expand map",
+    });
+    expect(inset).toHaveClass("clover-inset");
+    expect(expand).toHaveAttribute("aria-controls", "map");
+    // The page's own controls after it, in its corner, their listeners kept.
+    expect(close.parentElement).toBe(expand.parentElement);
+    expect(
+      expand.compareDocumentPosition(close) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    const closed = vi.fn();
+    close.addEventListener("click", closed);
+    // A press on its thumb or its button sends clover-expand; one on its Close does not.
+    fireEvent.click(inset.querySelector("img")!);
+    fireEvent.click(expand);
+    fireEvent.click(close);
+    expect(expanded).toHaveBeenCalledTimes(2);
+    expect(closed).toHaveBeenCalledTimes(1);
+    // Expanded: its children as they are, no box, no button, its controls back.
+    inset.toggleAttribute("expanded", true);
+    await waitFor(() => expect(inset).not.toHaveClass("clover-inset"));
+    expect(
+      within(inset).queryByRole("button", { name: "Expand map" }),
+    ).toBeNull();
+    expect(close.parentElement).toBe(inset);
+    fireEvent.click(inset.querySelector("img")!);
+    expect(expanded).toHaveBeenCalledTimes(2);
+  });
+
+  it("puts its label's language on its button alone, and with no label does nothing", async () => {
+    document.body.innerHTML = `<clover-inset label="Agrandir la carte" label-lang="fr"><img alt="A street"></clover-inset><clover-inset id="bare"><img alt=""></clover-inset>`;
+    const expand = await within(document.body).findByRole("button", {
+      name: "Agrandir la carte",
+    });
+    expect(expand).toHaveAttribute("lang", "fr");
+    expect(document.querySelector("clover-inset")).not.toHaveAttribute("lang");
+    // No label: no box, no button, and a press sends nothing (none for the keyboard either).
+    const bare = document.getElementById("bare")!;
+    const expanded = vi.fn();
+    bare.addEventListener("clover-expand", expanded);
+    await waitFor(() => expect(bare).not.toHaveClass("clover-inset"));
+    fireEvent.click(bare.querySelector("img")!);
+    expect(expanded).not.toHaveBeenCalled();
+    expect(within(bare).queryByRole("button")).toBeNull();
+  });
+});
+
 describe("The Canvas's handle, on <clover-canvas> and <clover-body>", () => {
   it("is kept by <clover-canvas> once its view is laid out, as onReady hands it in React", async () => {
     const canvas = document.createElement("clover-canvas") as HTMLElement & {

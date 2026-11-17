@@ -1,0 +1,131 @@
+import React, { useEffect, useState } from "react";
+
+import type { CloverRequest } from "../../core/request";
+import { type ThumbnailSource, resolveThumbnail } from "../../core/thumbnail";
+import { join } from "../../lib/classnames";
+import { fetchInfo } from "../../lib/renderer/sources/imageService";
+import {
+  type RegionShare,
+  sizedImageUrl,
+} from "../../lib/renderer/sources/sizedImage";
+import { ENTRY_THUMBNAIL_SIZE } from "../../ui/EntryThumbnail";
+
+/**
+ * An annotation's region, pictured beside it in the list (`AnnotationItem`): cut by its
+ * image's server where the server can cut, as `EntryThumbnail` asks; else, where it cannot
+ * (a level 0 server, as mapsnap's Sanborn sheets are), the whole image at a size the server
+ * lists, cut here (Mat, 2026-11-16: "Those and regions"; none, from 2026-10-19, to spare
+ * the download). The size is the smallest listed that gives the region the picture's
+ * pixels on its shorter side, else the largest, never more than the image has, so a small
+ * region costs one of the larger sizes, shared by every region on its image. Its own
+ * module, loaded only where an entry has a region to cut.
+ */
+
+/** Where to cut, and the whole image's width over its height. */
+interface Cut {
+  share: RegionShare;
+  ratio: number;
+}
+
+async function resolveRegion(
+  source: ThumbnailSource,
+  request?: CloverRequest,
+): Promise<{ src: string; cut?: Cut } | undefined> {
+  const src = await resolveThumbnail(source, ENTRY_THUMBNAIL_SIZE, request);
+  const share = source.region;
+  if (src || !source.service || !share || typeof share === "string")
+    return src ? { src } : undefined;
+  try {
+    const info = await fetchInfo(source.service, { request });
+    const shorter = Math.min(
+      share.width * info.width,
+      share.height * info.height,
+    );
+    const whole = sizedImageUrl(
+      info,
+      Math.max(info.width, info.height) *
+        Math.min(1, ENTRY_THUMBNAIL_SIZE / Math.max(shorter, 1)),
+    );
+    return whole
+      ? { src: whole, cut: { share, ratio: info.width / info.height } }
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export default function RegionThumbnail({
+  source,
+  request,
+  className,
+}: {
+  source: ThumbnailSource;
+  request?: CloverRequest;
+  className?: string;
+}) {
+  const [picture, setPicture] = useState<{ src: string; cut?: Cut }>();
+  // By what it asks for, so a source made again each render asks once.
+  const key = JSON.stringify(source);
+  useEffect(() => {
+    setPicture(undefined);
+    let live = true;
+    void resolveRegion(source, request).then(
+      (found) => live && setPicture(found),
+    );
+    return () => {
+      live = false;
+    };
+    // `key` stands in for `source`; `request` is the Root's, the same for its life.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  if (!picture) return null;
+  const classes = join("clover-entry-thumbnail", className);
+  const { src, cut } = picture;
+  if (!cut)
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
+      <img
+        className={classes}
+        src={src}
+        alt=""
+        width={ENTRY_THUMBNAIL_SIZE / 2}
+        height={ENTRY_THUMBNAIL_SIZE / 2}
+        loading="lazy"
+        decoding="async"
+      />
+    );
+  /*
+   * Cut as `object-fit: cover` fills the square with a server's cut: the region's shorter
+   * side across the square, centered, the rest of the image beyond its edge. In shares of
+   * the square, so it holds at whatever size the square is drawn; the square a flex item of
+   * its entry, and so a block. Its clipping inline, as only this draws it, so the image
+   * never spills out on a page without Clover's stylesheet.
+   */
+  const { share, ratio } = cut;
+  const width = Math.max(1 / share.width, ratio / share.height);
+  const height = width / ratio;
+  const percent = (value: number) => `${value * 100}%`;
+  return (
+    <span
+      className={classes}
+      data-cut=""
+      style={{ position: "relative", overflow: "hidden" }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js. */}
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        style={{
+          position: "absolute",
+          maxWidth: "none",
+          width: percent(width),
+          height: percent(height),
+          left: percent((1 - share.width * width) / 2 - share.x * width),
+          top: percent((1 - share.height * height) / 2 - share.y * height),
+        }}
+      />
+    </span>
+  );
+}

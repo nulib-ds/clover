@@ -128,10 +128,11 @@ const srgbMix = (a: Rgb, p: number, b: Rgb): Rgb =>
   a.map((c, i) => c * p + b[i] * (1 - p));
 
 /**
- * How a pair is drawn in its sample: words, a ring, a glyph, a line, two tones, or a glyph
- * on its fill ringed in a third color (a control in the higher-contrast mode).
+ * How a pair is drawn in its sample: words, a ring, a glyph, a line, two tones, a dot in its
+ * ring (a point), or a glyph on its fill ringed in a third color (a control in the
+ * higher-contrast mode).
  */
-type Sample = "text" | "ring" | "glyph" | "line" | "duo" | "ringed";
+type Sample = "text" | "ring" | "glyph" | "line" | "duo" | "point" | "ringed";
 
 /**
  * Every pair Clover draws, as the Colors page's checklist names them: its colors, where
@@ -291,7 +292,7 @@ const PAIRS: {
         <C>accent</C> against <C>secondary</C>
       </>
     ),
-    where: "Focus, the selected item, the current tab",
+    where: "Focus, the selected item, the current tab, a point marked",
     sample: "ring",
     colors: (p) => ({ fg: rgb(p.accent), bg: rgb(p.secondary) }),
     needs: 3,
@@ -373,6 +374,21 @@ const PAIRS: {
     needs: null,
   },
   {
+    name: "A place's pin",
+    tokens: (
+      <>
+        <C>primary-muted</C> at half strength on <C>secondary</C>
+      </>
+    ),
+    where: "Before a place's coordinates in About: the figures say where it is",
+    sample: "glyph",
+    colors: (p) => ({
+      fg: srgbMix(rgb(p["primary-muted"]), 0.5, rgb(p.secondary)),
+      bg: rgb(p.secondary),
+    }),
+    needs: null,
+  },
+  {
     name: "Over a picture",
     tokens: (
       <>
@@ -383,6 +399,19 @@ const PAIRS: {
     sample: "duo",
     colors: (p) => ({ fg: rgb(p.primary), bg: rgb(p.secondary) }),
     needs: 9,
+  },
+  {
+    name: "A point at rest",
+    tokens: (
+      <>
+        <C>control</C> in a ring of <C>secondary</C>
+      </>
+    ),
+    where:
+      "A point on an image, the map or the seek bar, as an inactive control is",
+    sample: "point",
+    colors: (p) => ({ fg: rgb(p.control), bg: rgb(p.secondary) }),
+    needs: 3,
   },
 ];
 

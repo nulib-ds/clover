@@ -221,6 +221,7 @@ export const annotations: ElementSpec = {
   needsRoot: true,
   attributes: {
     scope: { prop: "scope", type: ["view", "all"] },
+    places: { prop: "places", type: "boolean" },
     ...headingLevel,
   },
   properties: ["renderEntry"],
@@ -228,13 +229,18 @@ export const annotations: ElementSpec = {
 export const annotationsDocs: ElementDocs = {
   name: "CloverAnnotationsElement",
   description:
-    "The annotations, by layer and then by Canvas: each to pick, which frames it on the Body, with its region pictured.",
+    "The annotations, by Canvas: each to pick, which frames it on the Body, with its region pictured.",
   attributes: {
     scope: {
       description: "Every Canvas's annotations, or only the view's.",
       default: "all",
     },
-    ...headingLevelDocs("its layers' titles"),
+    places: {
+      description:
+        "\"false\" leaves out the resource's georeferenced images, listed by Canvas as its other annotations are, each pressed to show it on the map over the clover-body. Its places are clover-about's.",
+      default: "true",
+    },
+    ...headingLevelDocs("its Canvases' labels"),
   },
   properties: {
     renderEntry: {
@@ -297,7 +303,7 @@ export const about: ElementSpec = {
 export const aboutDocs: ElementDocs = {
   name: "CloverAboutElement",
   description:
-    "The information panel's first section, on its own: the label and thumbnail, summary, metadata, required statement, rights, homepage, see also, downloads and address.",
+    "The information panel's first section, on its own: the label and thumbnail, summary, places (navPlace, each shown on the map over the clover-body as it is pressed), metadata, required statement, date, rights, homepage, see also, downloads and address.",
   attributes: {
     "canvas-summary": {
       description: "Also the Canvas in view's summary, before the resource's.",
@@ -346,6 +352,12 @@ export const map: ElementSpec = {
     "style-url": { prop: "styleUrl", type: "string" },
     "scroll-zoom": { prop: "scrollZoom", type: "boolean" },
     zoom: { prop: "zoom", type: "number", min: 0 },
+    "animation-duration": {
+      prop: "animationDuration",
+      type: "number",
+      min: 0,
+    },
+    navigable: { prop: "navigable", type: "boolean" },
     credits: { prop: "credits", type: "boolean" },
     language: { prop: "language", type: "string" },
     "high-contrast": { prop: "highContrast", type: "boolean" },
@@ -381,8 +393,8 @@ export const mapDocs: ElementDocs = {
     },
     outlines: {
       description:
-        "Adds a gear beside the zoom buttons with two options. Outlines draws the edge of every georeferenced image; Selection outline hides the accent outline around the chosen one.",
-      default: "false",
+        'Shows a gear beside the zoom buttons with two options, wherever the map lays georeferenced images and can be moved (never in the Canvas\'s small map box until it is expanded). Outlines draws the edge of every georeferenced image; Selection outline hides the accent outline around the chosen one. "false" shows no gear.',
+      default: "true",
     },
     allmaps: {
       description:
@@ -400,6 +412,16 @@ export const mapDocs: ElementDocs = {
     zoom: {
       description:
         "How close it frames its places: a lone point at this zoom, several no closer. 8 for a point and 12 for several by default; 15 shows a point's streets.",
+    },
+    "animation-duration": {
+      description:
+        'Seconds it takes to glide from what it frames to the next: another Canvas, a place or an image chosen, as clover-canvas\'s options.animationDuration is for its camera. "0" goes there at once, as it always does where less motion is asked for.',
+      default: "0.6",
+    },
+    navigable: {
+      description:
+        'Whether it can be moved at all: dragged, pinched, wheeled, double-clicked or keyed, with its zoom buttons, and its places named as they are pointed at or pressed, as clover-canvas\'s options.gestures.navigable is for its view. "false" keeps it where it frames, its places marked, a press left to the page; turned "false", it lets go of the place it named.',
+      default: "true",
     },
     credits: {
       description:

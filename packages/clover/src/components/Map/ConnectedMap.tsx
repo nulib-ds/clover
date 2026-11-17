@@ -1,19 +1,8 @@
-import React, { forwardRef, useMemo } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 
 import { MapList } from "./MapList";
-import { type Forwarded, type MapProps, MapView } from "./MapView";
-import {
-  type Georeference,
-  georeferencedContentAddress,
-  georeferencesOf,
-  navPlaceOf,
-} from "../../core/geo";
-import { selectShownId, selectVisibleCanvases } from "../../core/selectors";
-import { isGeoreferencedContent } from "../../core/geo-detect";
-import {
-  useOptionalClover,
-  useOptionalCloverSelector,
-} from "../../react/context";
+import { type Forwarded, type MapProps, MapView, useRootMap } from "./MapView";
+import { useOptionalClover } from "../../react/context";
 
 /*
  * The maps that follow a Root, and list what they map (`MapList`): the Panel's, a `Map`
@@ -47,116 +36,33 @@ export function ConnectedMap({
   ...rest
 }: Omit<MapProps, "iiifContent" | "request" | "language"> &
   Forwarded & { scope: "view" | "all"; landmark?: boolean }) {
-  const context = useOptionalClover()!;
-  const features = useOptionalCloverSelector(
-    (state) => navPlaceOf(state.manifest, state.collection, context.language),
-    navPlaceOf(null),
-  );
-  const all = useOptionalCloverSelector(
-    (state) => georeferencesOf(state.manifest),
-    NONE,
-  );
-  const shown = useOptionalCloverSelector(
-    (state) => selectVisibleCanvases(state.manifest, state.canvasId),
-    NO_CANVASES,
-  );
-  // The same array while the view holds, so the map is not re-framed under the reader.
-  // Georeference annotations given as the content: every sheet, unless asked for the view's.
-  const atlas = useOptionalCloverSelector(
-    (state) => isGeoreferencedContent(state.manifest),
-    false,
-  );
-  const every =
-    scope === "all" || whose === "all" || (atlas && whose !== "view");
-  // Where they were read from, for a link to them (`allmaps`).
-  const source = useOptionalCloverSelector(
-    (state) => georeferencedContentAddress(state.manifest),
-    undefined,
-  );
-  const overlays = useMemo(
-    () =>
-      every
-        ? all
-        : all.filter((overlay) =>
-            shown.some((canvas) => canvas.id === overlay.canvasId),
-          ),
-    [every, all, shown],
-  );
-  // The annotations pointed at and picked, as the Canvas's hotspots show them.
-  const picked = useOptionalCloverSelector((state) => state.annotationId, null);
-  const highlighted = React.useSyncExternalStore(
-    context.clover.highlight.subscribe,
-    context.clover.highlight.get,
-    context.clover.highlight.get,
-  );
-  const active = useMemo(
-    () =>
-      [picked, highlighted].filter(
-        (id): id is string => typeof id === "string",
-      ),
-    [picked, highlighted],
-  );
-  // Only a view's Canvases are current, with the member open among its Collection's (or
-  // asked for, while it loads): standalone, nothing shows the Root's first one.
-  const manifestId = useOptionalCloverSelector(selectShownId, null);
-  const current = useMemo(
-    () =>
-      scope === "view"
-        ? [
-            ...shown.map((canvas) => canvas.id),
-            ...(manifestId ? [manifestId] : []),
-          ]
-        : undefined,
-    [scope, shown, manifestId],
-  );
-  return (
-    <MapView
-      {...rest}
-      List={MapList}
-      source={source}
-      features={features}
-      overlays={overlays}
-      current={current}
-      activeAnnotations={active}
-      picked={picked}
-      highlighted={highlighted}
-      onHighlight={(feature) =>
-        context.clover.highlight.emit(feature?.properties.annotationId ?? null)
-      }
-      // An image pointed at, on the map or in its list: the Root's, as an annotation's
-      // is, so a list of the page's own (or Items') lights it too.
-      onPointOverlay={(id) => context.clover.highlight.emit(id)}
-      // An image chosen: its Canvas, where the Root has it and is not there.
-      onChooseOverlay={(item) => {
-        const { canvasId } = item;
-        if (canvasId && !shown.some((canvas) => canvas.id === canvasId))
-          context.clover.goTo(canvasId);
-      }}
-      language={context.language}
-      request={context.clover.request}
-      onSelect={(feature) => {
-        onSelect?.(feature);
-        // An annotation's place: the annotation, so its region is framed (Cookbook 0139).
-        // One the annotations do not list (it has no name): its Canvas, as before.
-        const {
-          annotationId,
-          canvasId,
-          manifestId: member,
-        } = feature.properties;
-        // Another member's place: that member, as its row in the Collection opens it.
-        if (member && member !== context.clover.store.get().manifest?.id) {
-          void context.clover.goToManifest(member);
-          return;
-        }
-        if (annotationId) context.clover.selectAnnotation(annotationId);
-        const selected =
-          annotationId !== undefined &&
-          context.clover.store.get().annotationId === annotationId;
-        if (!selected && canvasId) context.clover.goTo(canvasId);
-      }}
-    />
-  );
+  const root = useRootMap(scope, whose, onSelect);
+  const asked = useAskedPlace();
+  return <MapView {...rest} {...root} focus={asked} List={MapList} />;
 }
 
-const NONE: Georeference[] = [];
-const NO_CANVASES: ReturnType<typeof selectVisibleCanvases> = [];
+/**
+ * The place asked for in the Root (About's places, Annotations' georeferenced images: its
+ * `place`), framed and marked on the map, as on the map over the Body: Document's over its
+ * pages is a `Map`. Counted, so the same place asked again is framed again; the last one
+ * asked stays framed as its map is put away.
+ */
+function useAskedPlace() {
+  const context = useOptionalClover();
+  const place = context && context.clover.place;
+  const count = useRef(1);
+  const [asked, setAsked] = useState(() => {
+    const key = place && place.get();
+    return key ? { key, n: count.current } : null;
+  });
+  useEffect(
+    () =>
+      place
+        ? place.subscribe((key) => {
+            if (key) setAsked({ key, n: (count.current += 1) });
+          })
+        : undefined,
+    [place],
+  );
+  return asked;
+}

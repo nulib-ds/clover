@@ -245,11 +245,13 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
  * 2026-11-04: "bring annotations off the seekbar again. it should not intersect. make it
  * a gr step above what seekbar is (the gap)"; on the rail's top edge, as bumps, for a
  * while that day), clear of the thumb too, drawn as an image's point is
- * (`Annotations.css`): an accent dot in a light ring with a dark edge, at `s`, and while it
- * is pointed at, focused or picked, the accent band around the ring and the edge around
- * that. One of the two tones holds 3:1 against whatever is under it (WCAG 1.4.11). Each
- * takes the pointer in an `l` square over the rail (WCAG 2.5.8); the rail is the seek
- * bar's.
+ * (`Annotations.css`): at rest the controls' dark fill in a light ring with a dark edge,
+ * at `s`, and while it is pointed at, focused or picked, the dot the accent, an accent band
+ * around its light ring and the edge around that (Mat, 2026-11-16: "Light, like the rest",
+ * over keeping the accent at rest; then, for every point, "inactive ones should be more of
+ * the dark token, look more like inactive buttons"). One of the two tones holds 3:1
+ * against whatever is under it (WCAG 1.4.11). Each takes the pointer in an `l` square over
+ * the rail (WCAG 2.5.8); the rail is the seek bar's.
  */
 .clover-canvas-transport-points,
 .clover-canvas-transport-marks {
@@ -286,7 +288,7 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
   height: var(--clover-transport-mark);
   border: 2px solid var(--clover-color-secondary, #fff);
   border-radius: 50%;
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(--clover-color-control, #1a1d1e);
   box-shadow: 0 0 0 1px var(--clover-color-primary, #1a1d1e);
   translate: -50% -50%;
 }
@@ -316,6 +318,7 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
 }
 
 .clover-canvas-transport-mark-point[data-active="true"] {
+  background-color: var(--clover-color-accent, #0065c3);
   box-shadow:
     0 0 0 2px var(--clover-color-accent, #0065c3),
     0 0 0 3px var(--clover-color-primary, #1a1d1e);

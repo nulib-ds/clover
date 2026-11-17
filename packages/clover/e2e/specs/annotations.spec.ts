@@ -5,7 +5,7 @@ import { serveIIIF } from "./fixtures";
 /*
  * The information panel's Annotations, every Canvas's (`scope="all"`), in the Default
  * template, on the docs' `paged` mock: the catalog's "Then" and "Now" tags, a page of
- * them on each of eight plates, unlabeled, so one layer, by Canvas.
+ * them on each of eight plates, listed by Canvas, as every list is (Mat, 2026-11-16).
  */
 const CATALOG =
   "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json";
