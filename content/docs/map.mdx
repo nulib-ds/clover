@@ -111,7 +111,7 @@ To read the same places and images yourself, call the [map helpers](/docs/compos
 A resource's [navPlace](https://iiif.io/api/extension/navplace/) gives its location as
 GeoJSON. Map shows each place as a point, a line or an area, and lists it under the map.
 This photograph's navPlace is a point at the street corner it shows. Change the map's height,
-scroll zoom and list in its code.
+scroll zoom, cooperative gestures and list in its code.
 
 <LivePart
   part="Map"
@@ -129,6 +129,7 @@ scroll zoom and list in its code.
       max: 640,
     },
     { prop: "scrollZoom", value: false },
+    { prop: "cooperative", value: false },
     {
       prop: "items",
       value: "list",
