@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.11.0] - 2026-11-16
+
 ### Changed
 
 - **Places are named in About, georeferenced images listed in Annotations, and each is
