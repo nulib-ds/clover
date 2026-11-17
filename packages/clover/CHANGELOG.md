@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.11.2] - 2026-11-17
+
 ### Added
 
 - **Cooperative gestures on the Canvas and the Map**, as an embedded Google map has them,
@@ -21,15 +23,6 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `options.gestures.cooperative` on the Canvas (`canvasOptions` in a template) or
   `cooperative` on the Map (`cooperative` on `<clover-map>`). A Canvas's handle reports
   each hint as a `hint` event (`"wheel"` or `"touch"`).
-
-### Fixed
-
-- **Ctrl with a mouse wheel zooms a notch at a time** on the Canvas, as a plain wheel
-  does with `scrollToZoom`, rather than at a trackpad pinch's rate, which jumped.
-
-## [4.11.1] - 2026-11-16
-
-### Added
 
 - **Selectable text on a Canvas.** The text of `supplementing` annotations on regions of
   an image (OCR, as the Internet Archive's and Northwestern's are) lies over it, unseen,
@@ -46,6 +39,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `canvasTextCopied`, are in every locale. Its size budgets rose on purpose, by 0.1 to
   0.25 kB gzip: every Canvas page carries the gesture check, the renderer's layer for
   it and the strings (`build/size-budget.json`).
+
+### Fixed
+
+- **Ctrl with a mouse wheel zooms a notch at a time** on the Canvas, as a plain wheel
+  does with `scrollToZoom`, rather than at a trackpad pinch's rate, which jumped.
+
+## [4.11.1] - 2026-11-16
+
+### Added
 
 - **Document's page layout.** Under the thumbnails' toggle, a round control opens a small
   menu of Automatic (as the Manifest's `behavior` says), Single page and Two pages, as a
