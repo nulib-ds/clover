@@ -8,5 +8,6 @@
  */
 
 @import "./shared/Lightbox.css";
+@import "./shared/PageLayoutMenu.css";
 @import "./document/Document.css";
 @import "./gallery/Gallery.css";

@@ -127,6 +127,7 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
         state.addedSets,
         state.hiddenSets,
         state.shownSets,
+        !state.annotationsShown,
       ),
     );
     const selected = useCloverSelector((state) => state.annotationId);

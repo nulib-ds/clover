@@ -78,6 +78,15 @@ export interface RootProps
    */
   annotationPages?: "view" | "all";
   /**
+   * Whether annotations start shown on the Body. Default `true`; Document's is `false`.
+   * With `false`, each annotation set starts hidden, as a still Canvas's OCR does, and
+   * its toggle in Annotations or the Canvas's annotations menu shows it, as picking one
+   * of its annotations does. The Ranges' regions start hidden too,
+   * shown as one is picked in Contents. A search's results and a content state's own
+   * annotation still show.
+   */
+  defaultAnnotationsShown?: boolean;
+  /**
    * Where the reader is, as a IIIF content state, as it changes: a move, a pan or zoom,
    * or a pause or seek in media. At most every 150ms while it moves, always its last
    * place, and only when it changed.

@@ -1,8 +1,8 @@
 # Document
 
 Reads like a PDF viewer's continuous view: a toolbar across the top, page thumbnails down
-the left, and the pages down one column on a gray ground, the same space around every
-page and the top of the next always in sight.
+the left, and the pages down one column on a gray ground, a space around them and one
+size smaller between two, and the top of the next always in sight.
 
 The toolbar holds the title, a hairline under it fading out toward its ends. At its end
 are the provider's logo, linked to its homepage, and Clover's round controls, together on

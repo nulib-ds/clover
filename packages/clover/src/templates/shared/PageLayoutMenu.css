@@ -1,0 +1,31 @@
+/*
+ * The page layout's control (`PageLayoutMenu.tsx`): Clover's round control, and beside
+ * it, `xs` off its end and level with its top, its menu, drawn as the Canvas's menus are
+ * (`ControlMenu.css`): Clover's background and text, one radius and one shadow, `xs`
+ * inside, each option its radio, glyph and word. Reading right to left, it opens toward
+ * the left.
+ */
+.clover-template-page-layout {
+  position: relative;
+  display: inline-flex;
+}
+
+.clover-template-page-layout-menu {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  inset-inline-start: calc(100% + var(--clover-space-xs));
+  min-width: 10rem;
+}
+
+.clover-template-page-layout-menu .clover-template-page-layout-option svg {
+  flex: none;
+  color: var(--clover-color-primary-muted, #26292b);
+}
+
+/* Open, its Tip goes: the menu is where it would be. */
+.clover-template-page-layout
+  > .clover-template-page-layout-button[aria-expanded="true"]
+  > .clover-tip {
+  display: none;
+}

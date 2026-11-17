@@ -190,10 +190,13 @@ export function Sheets({
   const sheetAt = (index: number) =>
     sheetsBox.current?.children[index] as HTMLElement | undefined;
 
-  /* The gap between two sheets (`Document.css`), kept in sight over one brought up. */
+  /*
+   * The space over the first sheet (`Document.css`), kept in sight over one brought up,
+   * so each rests as the first does: more than the gap between two.
+   */
   const gapOf = () =>
     sheetsBox.current
-      ? parseFloat(getComputedStyle(sheetsBox.current).rowGap) || 0
+      ? parseFloat(getComputedStyle(sheetsBox.current).paddingTop) || 0
       : 0;
   /* The space at a sheet's sides, the gap, which the Canvas fits its pictures inside. */
   const insetOf = (sheet: HTMLElement) =>

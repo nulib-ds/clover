@@ -37,6 +37,8 @@ import {
   searchServiceOf,
 } from "./search-service";
 import { type Channel, type Store, createChannel, createStore } from "./store";
+import { type SequenceBehavior, resolveBehavior } from "./sequence";
+import { asArray } from "../lib/asArray";
 
 /**
  * One Clover: what a `Root` owns. Framework-free, so it can be tested — and driven —
@@ -86,6 +88,21 @@ export interface CloverState {
    * drawn is `selectHiddenSets`'s.
    */
   shownSets: string[];
+  /**
+   * Whether annotation sets start shown (a Root's `defaultAnnotationsShown`): while
+   * `false`, every set but a search's results and a content state's own starts hidden,
+   * the Ranges' regions too, as a still Canvas's OCR does, until its toggle shows it.
+   */
+  annotationsShown: boolean;
+  /**
+   * How the pages are laid out, the reader's choice over the Manifest's `behavior`, as a
+   * PDF reader's page display is: `"auto"`, as the Manifest says; `"individuals"`, a page
+   * at a time; `"paged"`, two at a time, the first alone. The Manifest in `manifest` is
+   * a copy saying so, so every view reads it alike.
+   */
+  pageLayout: PageLayout;
+  /** The layout the Manifest itself declares, whatever `pageLayout` says. */
+  declaredLayout: SequenceBehavior;
   /**
    * Sets beside the Manifest's own pages: its images' own (Cookbook 0326, read once it is
    * shown, their module loaded then), the host's through `annotations`, and a content
@@ -228,6 +245,13 @@ export interface Clover {
    */
   setAnnotationPages(scope: "view" | "all"): void;
   /**
+   * Whether annotation sets start shown (`annotationsShown`); a set the reader has
+   * shown or hidden keeps that choice.
+   */
+  setAnnotationsShown(shown: boolean): void;
+  /** Lay the pages out one or two at a time, or as the Manifest says (`pageLayout`). */
+  setPageLayout(layout: PageLayout): void;
+  /**
    * Fetch every Canvas's referenced annotation pages while held, whatever
    * `setAnnotationPages` says: for a listing of all of them (`Annotations`'
    * `scope="all"`). Returns the release.
@@ -306,6 +330,9 @@ const INITIAL: CloverState = {
   annotationId: null,
   hiddenSets: [],
   shownSets: [],
+  annotationsShown: true,
+  pageLayout: "auto",
+  declaredLayout: "individuals",
   addedSets: [],
   search: NO_SEARCH,
   regions: null,
@@ -434,6 +461,8 @@ export function createClover(options: CloverOptions = {}): Clover {
    * Show a Manifest, at the Canvas these choose, in this order: the host's Canvas, a
    * content state's, the default, the Manifest's `start`, its first.
    */
+  /** The shown Manifest's own `behavior`, which `pageLayout`'s copy stands in for. */
+  let declared: unknown;
   const arrive = (
     manifest: Manifest,
     collection: Presentation4Collection | null,
@@ -442,6 +471,8 @@ export function createClover(options: CloverOptions = {}): Clover {
     /** An annotation of the content's own (`stateSets`) to pick, on the Canvas opened. */
     pick?: string | null,
   ) => {
+    declared = (manifest as { behavior?: unknown }).behavior;
+    manifest = withLayout(manifest, store.get().pageLayout, declared);
     const { canvases } = selectSequence(manifest);
     const has = (id?: string | null) =>
       Boolean(id) && canvases.some((canvas) => canvas.id === id);
@@ -475,6 +506,7 @@ export function createClover(options: CloverOptions = {}): Clover {
       search: NO_SEARCH,
       regions: null,
       manifest,
+      declaredLayout: resolveBehavior(declared),
       opening: null,
       collection,
       canvasId,
@@ -832,9 +864,13 @@ export function createClover(options: CloverOptions = {}): Clover {
       const { hiddenSets, shownSets } = store.get();
       if (
         entry.setId !== SEARCH_SET_ID &&
-        selectHiddenSets(manifest, addedSets, hiddenSets, shownSets).includes(
-          entry.setId,
-        )
+        selectHiddenSets(
+          manifest,
+          addedSets,
+          hiddenSets,
+          shownSets,
+          !store.get().annotationsShown,
+        ).includes(entry.setId)
       )
         setVisible(entry.setId, true);
       // On a Canvas not in view: go there; the Canvas frames it once laid out. One this
@@ -934,6 +970,22 @@ export function createClover(options: CloverOptions = {}): Clover {
         time,
       });
     },
+    setPageLayout(layout) {
+      store.set((state) =>
+        state.pageLayout === layout
+          ? {}
+          : {
+              pageLayout: layout,
+              ...(state.manifest
+                ? { manifest: withLayout(state.manifest, layout, declared) }
+                : {}),
+            },
+      );
+    },
+    setAnnotationsShown(shown) {
+      if (store.get().annotationsShown !== shown)
+        store.set({ annotationsShown: shown });
+    },
     setAnnotationPages(scope) {
       if (scope === pageScope) return;
       pageScope = scope;
@@ -963,4 +1015,35 @@ export function createClover(options: CloverOptions = {}): Clover {
       searching?.abort();
     },
   };
+}
+
+/** How the pages are laid out: as the Manifest says, or one or two at a time. */
+export type PageLayout = "auto" | "individuals" | "paged";
+
+/**
+ * The Manifest with its layout `behavior` as `layout` asks, its other behaviors kept
+ * (`auto-advance`, `hidden`): itself where nothing changes, else a copy, as an arriving
+ * annotation page replaces it, so every selector reads it anew.
+ */
+function withLayout(
+  manifest: Manifest,
+  layout: PageLayout,
+  declared: unknown,
+): Manifest {
+  const others = asArray(declared).filter(
+    (value) => value !== "individuals" && value !== "paged",
+  );
+  const behavior =
+    layout === "auto"
+      ? declared
+      : resolveBehavior(declared) === "continuous" ||
+          resolveBehavior(declared) === "unordered"
+        ? declared
+        : [layout, ...others];
+  const now = (manifest as { behavior?: unknown }).behavior;
+  if (JSON.stringify(now) === JSON.stringify(behavior)) return manifest;
+  const copy: Record<string, unknown> = { ...manifest };
+  if (behavior === undefined) delete copy.behavior;
+  else copy.behavior = behavior;
+  return copy as unknown as Manifest;
 }

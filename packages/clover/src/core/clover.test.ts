@@ -837,3 +837,26 @@ describe("createClover: a content state's several targets", () => {
     expect(current(clover)).toBe(-1);
   });
 });
+
+describe("createClover: page layout", () => {
+  it("lays the pages out one or two at a time, or as the Manifest says, on the same Canvas", async () => {
+    const clover = createClover();
+    await clover.load(bookJson);
+    const views = () => selectSequence(clover.store.get().manifest).views;
+    const declared = views();
+    expect(clover.store.get().declaredLayout).toBe("paged");
+    expect(declared.some((view) => view.length === 2)).toBe(true);
+    clover.goTo(canvasIds[2]);
+
+    clover.setPageLayout("individuals");
+    expect(views()).toHaveLength(canvasIds.length);
+    expect(clover.store.get().canvasId).toBe(canvasIds[2]);
+
+    clover.setPageLayout("paged");
+    expect(views()).toEqual(declared);
+
+    clover.setPageLayout("auto");
+    expect(views()).toEqual(declared);
+    expect(clover.store.get().pageLayout).toBe("auto");
+  });
+});

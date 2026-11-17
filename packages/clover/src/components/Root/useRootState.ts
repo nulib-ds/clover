@@ -43,6 +43,7 @@ export interface RootStateOptions {
   renderers?: BodyRenderer[];
   annotations?: AnnotationsInput;
   annotationPages?: "view" | "all";
+  defaultAnnotationsShown?: boolean;
   onContentStateChange?: (state: ContentStateOutput) => void;
 }
 
@@ -70,6 +71,7 @@ export function useRootState<Props extends RootStateOptions>({
   renderers,
   annotations,
   annotationPages = "view",
+  defaultAnnotationsShown = true,
   onContentStateChange,
   ...rest
 }: Props): [
@@ -167,6 +169,11 @@ export function useRootState<Props extends RootStateOptions>({
   useEffect(() => {
     clover.setAnnotationPages(annotationPages);
   }, [clover, annotationPages]);
+
+  // Before paint: the Manifest is still loading, so no view is drawn without it.
+  useIsomorphicLayoutEffect(() => {
+    clover.setAnnotationsShown(defaultAnnotationsShown);
+  }, [clover, defaultAnnotationsShown]);
 
   useRootContentState(clover, onContentStateChange);
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import * as Clover from "../../parts";
 
@@ -93,8 +93,14 @@ export function ViewControls({
       </button>
       {pages &&
         (rtl
-          ? [<Clover.Next key="next" />, <Clover.Previous key="previous" />]
-          : [<Clover.Previous key="previous" />, <Clover.Next key="next" />])}
+          ? [
+              <StepPreview key="next" step="next" />,
+              <StepPreview key="previous" step="previous" />,
+            ]
+          : [
+              <StepPreview key="previous" step="previous" />,
+              <StepPreview key="next" step="next" />,
+            ])}
     </div>
   );
 }
@@ -116,3 +122,125 @@ const SHAFT = {
 const HEAD = { strokeLinejoin: "round", strokeWidth: 40 } as const;
 const BACK_SHAFTS = "M440 72L368 144M72 440L144 368";
 const BACK_HEADS = "M304 208V80L432 208ZM208 304V432L80 304Z";
+
+/** The pictures' height in a step's preview: a page about Items' own size. */
+const PREVIEW_SIZE = 160;
+
+/**
+ * Clover's `Previous` or `Next`, and over it, under the pointer or focused, a small
+ * picture of the view it goes to, its pages side by side, each page's label a Tip over
+ * its picture under the pointer,
+ * drawn as the Inset is (Mat, 2026-11-16: "have prev/next show little image popovers
+ * styled like the inset when focused/hovered"): Clover's ground, `xs` round, one radius
+ * and one shadow (`Document.css`). It takes the step's Tip's place, saying where the step
+ * goes, and is the step's name for nobody else: the button keeps its own (WCAG 2.5.3), so
+ * the preview is hidden from assistive technology. Its pictures load the first time it is
+ * pointed at or focused. Hoverable, the pointer crossing onto it, and dismissed by Escape
+ * until the pointer or focus leaves (1.4.13). None at either end, where the step has
+ * nowhere to go.
+ */
+function StepPreview({ step }: { step: "previous" | "next" }) {
+  const sequence = Clover.useSequence();
+  const navigation = Clover.useNavigation();
+  const [armed, setArmed] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const target = navigation.position + (step === "next" ? 1 : -1);
+  const view = sequence.views[target];
+  const canvases = useMemo(
+    () => (view ?? []).map((index) => sequence.canvases[index]),
+    [view, sequence.canvases],
+  );
+  const shown =
+    sequence.direction === "right-to-left" ? [...canvases].reverse() : canvases;
+  const Step = step === "next" ? Clover.Next : Clover.Previous;
+  useEffect(() => {
+    if (!armed || dismissed) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDismissed(true);
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [armed, dismissed]);
+  const arm = () => {
+    setArmed(true);
+    setDismissed(false);
+  };
+  return (
+    <span
+      className="clover-template-document-step"
+      data-preview={view ? "" : undefined}
+      data-dismissed={dismissed || undefined}
+      onPointerEnter={arm}
+      onFocus={arm}
+      onPointerLeave={() => setDismissed(false)}
+      onBlur={() => setDismissed(false)}
+    >
+      <Step />
+      {view && (
+        <span
+          className="clover-template-document-step-preview"
+          aria-hidden="true"
+        >
+          <span className="clover-template-document-step-pages">
+            {shown.map((canvas) => (
+              <span
+                key={canvas.id}
+                className="clover-template-document-step-page"
+              >
+                <PreviewPage canvas={canvas} load={armed} />
+                <PageLabel canvas={canvas} />
+              </span>
+            ))}
+          </span>
+        </span>
+      )}
+    </span>
+  );
+}
+
+type Container = ReturnType<typeof Clover.useSequence>["canvases"][number];
+
+/** A page's picture, Items' thumbnail of it, once asked for, at its own shape. */
+function PreviewPage({ canvas, load }: { canvas: Container; load: boolean }) {
+  const { clover } = Clover.useClover("Document");
+  const source = useMemo(
+    () => Clover.thumbnailSource(canvas) ?? Clover.stillSource(canvas),
+    [canvas],
+  );
+  const [src, setSrc] = useState<string | undefined>(source?.src);
+  useEffect(() => {
+    if (!load || !source || src) return;
+    let current = true;
+    void Clover.resolveThumbnail(source, PREVIEW_SIZE, clover.request).then(
+      (url) => current && setSrc(url),
+    );
+    return () => {
+      current = false;
+    };
+  }, [load, source, src, clover]);
+  const { width, height } = canvas as { width?: number; height?: number };
+  const style =
+    width && height ? { aspectRatio: `${width} / ${height}` } : undefined;
+  return src ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img alt="" decoding="async" src={src} style={style} />
+  ) : (
+    <span className="clover-template-document-step-blank" style={style} />
+  );
+}
+
+/**
+ * A page's label, in the language it is read in, as a Tip over its picture, shown as the
+ * pointer rests on it (Mat, 2026-11-16: "don't show labels on insets. allow a user to
+ * hover over the thumb to see it if they'd like").
+ */
+function PageLabel({ canvas }: { canvas: Container }) {
+  const label = Clover.useLocalized(
+    (canvas as { label?: unknown }).label as Parameters<
+      typeof Clover.useLocalized
+    >[0],
+  );
+  return label.text ? (
+    <Clover.Tip label={label.text} lang={label.lang || undefined} />
+  ) : null;
+}
