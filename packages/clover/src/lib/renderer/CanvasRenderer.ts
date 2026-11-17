@@ -39,6 +39,7 @@ import {
 } from "./math/rect";
 import type { Navigator } from "./overlays/Navigator";
 import type { OverlayLayer } from "./overlays/OverlayLayer";
+import type { WorldLayer } from "./overlays/WorldLayer";
 import { TARGET_BAND, planFrame } from "./scene/planFrame";
 import {
   type SceneImage,
@@ -214,6 +215,11 @@ export class CanvasRenderer implements GestureTarget {
    * loads it.
    */
   overlays: OverlayLayer | null = null;
+  /**
+   * What is laid out in world units under the hotspots (a Canvas's text): made by the
+   * first thing laid in it (`worldLayerOf`), so a Canvas with none never loads it.
+   */
+  world: WorldLayer | null = null;
 
   private options: typeof DEFAULTS;
   private backend: Backend | null = null;
@@ -959,6 +965,7 @@ export class CanvasRenderer implements GestureTarget {
     this.cache.dispose();
     this.dom?.dispose();
     this.overlays?.dispose();
+    this.world?.dispose();
     this.items = [];
     this.detachMedia.forEach((detach) => detach());
     this.mediaByKey.clear();
@@ -1005,6 +1012,7 @@ export class CanvasRenderer implements GestureTarget {
     else if (wants.length && wants.every((want) => this.cache.failed(want.url)))
       this.setUnloadable(true);
     this.paint(plan.draws);
+    this.world?.position(camera, this.viewport);
     this.overlays?.position(camera, this.viewport);
     this.navigator?.render(
       this.items.filter((item) => !item.spec.hidden),
@@ -1138,9 +1146,9 @@ export class CanvasRenderer implements GestureTarget {
       void import("./backends/dom/DomLayers").then(({ DomLayers }) => {
         if (this.disposed) return;
         const dom = new DomLayers(this.host);
-        // Over the canvas, under the hotspots.
-        if (this.overlays)
-          this.host.insertBefore(dom.container, this.overlays.container);
+        // Over the canvas, under the world layer and the hotspots.
+        const over = this.world?.container ?? this.overlays?.container;
+        if (over) this.host.insertBefore(dom.container, over);
         this.dom = dom;
         this.invalidate();
       });
@@ -1234,10 +1242,13 @@ export class CanvasRenderer implements GestureTarget {
       display: "block",
       pointerEvents: "none",
     });
-    // Under the DOM layer and the hotspots, made before it or after.
+    // Under the DOM layer, the world layer and the hotspots, made before it or after.
     this.host.insertBefore(
       canvas,
-      this.dom?.container ?? this.overlays?.container ?? null,
+      this.dom?.container ??
+        this.world?.container ??
+        this.overlays?.container ??
+        null,
     );
 
     const tryWebGL =

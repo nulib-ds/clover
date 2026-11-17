@@ -111,6 +111,7 @@ const NO_MODEL: AnnotationModel = {
   activate: () => undefined,
   release: () => false,
   quietlyOpened: null,
+  hasText: false,
 };
 // Few Canvases are animations: their clock and bar load when one is shown.
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
@@ -185,6 +186,11 @@ const MEDIA_KEYS = {
 const ANNOTATION_KEYS = {
   description: "canvasKeysAnnotations",
   keys: "Escape",
+};
+/** With text read from the picture, Control or Command with A selects it (`TextLayer`). */
+const TEXT_KEYS = {
+  description: "canvasKeysText",
+  keys: "Control+A Meta+A",
 };
 
 /** A Canvas's controls, always shown. */
@@ -890,6 +896,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         ...(navigable ? [CAMERA_KEYS] : []),
         ...(media ? [MEDIA_KEYS] : []),
         ...(hasAnnotations ? [ANNOTATION_KEYS] : []),
+        ...(model.hasText ? [TEXT_KEYS] : []),
       ];
   const keysId = `keys-${instance}`;
   const roleDescription =

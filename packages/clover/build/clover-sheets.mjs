@@ -200,6 +200,7 @@ const LAZY = new Set([
   "components/Map/Map",
   "components/Scene/Scene",
   "components/Items/vertical/ItemsVertical",
+  "components/Canvas/text/TextLayer",
 ]);
 
 /**
@@ -475,6 +476,8 @@ export const PART_SHEETS = {
     "components/Timeline",
   ],
   scene: ["components/Scene"],
+  // The text a Canvas reads from its picture, to select and copy (`TextLayer.tsx`).
+  text: ["components/Canvas/text"],
   map: ["components/Map"],
   split: ["components/Split"],
   "collection-select": ["components/CollectionSelect"],
@@ -526,7 +529,7 @@ function importersOf() {
  * draws what another part's sheet styles unnamed here, and on a name here it never needs.
  */
 export const DRAWN_INSIDE = {
-  core: ["media", "scene", "map"],
+  core: ["media", "scene", "map", "text"],
   panel: ["items", "map"],
   // Its list of places and images, drawn by Items (`MapItems`).
   map: ["items"],

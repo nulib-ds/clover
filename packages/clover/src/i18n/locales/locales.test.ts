@@ -36,6 +36,8 @@ const PROPER_NAMES = [
   /^[A-Z0-9]{2,}$/,
   // Allmaps Viewer, where the Map's `allmaps` link goes.
   /^Allmaps$/,
+  // The keys that select the Canvas's text.
+  /^(?:Control|Command)(?:\+[A-Z])?$/,
 ];
 
 it("writes English in sentence case: a capital opens a sentence or a proper name", () => {

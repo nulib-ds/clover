@@ -1384,6 +1384,94 @@ describe("Canvas", () => {
         ).toBeInTheDocument();
       });
 
+      /*
+       * Its text, where its annotations say their granularity (IIIF's Text Granularity
+       * extension), lies over the picture to select and copy, as a PDF's does.
+       */
+      it("can be selected and copied where it says its granularity", async () => {
+        document.body.appendChild(renderer.host);
+        render(
+          <Canvas
+            src="a.jpg"
+            annotations={lines.map((annotation) => ({
+              targetIndex: 0,
+              pageId: page,
+              annotation: { ...annotation, textGranularity: "line" } as any,
+            }))}
+          />,
+        );
+        await open();
+        await act(async () => {
+          await import("./text/TextLayer");
+        });
+        const layer = await waitFor(() => {
+          const found = renderer.host.querySelector(".clover-canvas-text");
+          expect(found).not.toBeNull();
+          return found as HTMLElement;
+        });
+        // Unseen, and out of the accessibility tree: the view keeps its own name.
+        expect(layer).toHaveAttribute("aria-hidden", "true");
+        expect(layer.style.color).toBe("transparent");
+        const runs = [...layer.querySelectorAll("span")];
+        expect(runs.map((run) => run.textContent)).toEqual([
+          "I. 54. Jahrgang",
+          "Berliner Tageblatt",
+        ]);
+        expect(runs[1]).toHaveAttribute("lang", "de");
+        expect(runs[1].style.top).toBe("50px");
+        // The viewport names the keys that select it.
+        expect(screen.getByTestId("clover-canvas-viewport")).toHaveAttribute(
+          "aria-keyshortcuts",
+          expect.stringContaining("Control+A Meta+A"),
+        );
+        // Control+A on the viewport selects all of it; a copy writes it, a space between.
+        fireEvent.keyDown(renderer.host, { key: "a", ctrlKey: true });
+        expect(document.getSelection()?.toString()).toContain(
+          "Berliner Tageblatt",
+        );
+        const setData = vi.fn();
+        const copy = new Event("copy", { bubbles: true, cancelable: true });
+        Object.defineProperty(copy, "clipboardData", { value: { setData } });
+        document.dispatchEvent(copy);
+        expect(setData).toHaveBeenCalledWith(
+          "text/plain",
+          "I. 54. Jahrgang Berliner Tageblatt",
+        );
+        expect(copy.defaultPrevented).toBe(true);
+        // Held still, the selection shows what it copies, in a status, with Copy and Close.
+        const popover = renderer.overlays.container.querySelector(
+          ".clover-canvas-text-copy",
+        ) as HTMLElement;
+        const status = within(popover).getAllByRole("status")[0];
+        await waitFor(() =>
+          expect(status.textContent).toBe("I. 54. Jahrgang Berliner Tageblatt"),
+        );
+        const writeText = vi.fn().mockResolvedValue(undefined);
+        Object.defineProperty(navigator, "clipboard", {
+          value: { writeText },
+          configurable: true,
+        });
+        fireEvent.click(within(popover).getByRole("button", { name: "Copy" }));
+        expect(writeText).toHaveBeenCalledWith(
+          "I. 54. Jahrgang Berliner Tageblatt",
+        );
+        expect(
+          await within(popover).findByRole("button", { name: "Copied" }),
+        ).toBeInTheDocument();
+        // Close lets the selection go, and the popover with it.
+        fireEvent.click(within(popover).getByRole("button", { name: "Close" }));
+        expect(document.getSelection()?.isCollapsed).toBe(true);
+        await waitFor(() => expect(status.textContent).toBe(""));
+        expect(within(popover).queryByRole("button")).toBeNull();
+        // Escape does the same.
+        fireEvent.keyDown(renderer.host, { key: "a", ctrlKey: true });
+        await waitFor(() => expect(status.textContent).not.toBe(""));
+        fireEvent.keyDown(renderer.host, { key: "Escape" });
+        await waitFor(() => expect(status.textContent).toBe(""));
+        delete (navigator as { clipboard?: unknown }).clipboard;
+        renderer.host.remove();
+      });
+
       // The book's first page, its OCR on it, with or without a search.
       const manifest = (service?: unknown) => {
         const [first] = bookJson.items as any[];

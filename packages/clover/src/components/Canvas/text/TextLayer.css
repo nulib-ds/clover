@@ -1,0 +1,106 @@
+/*
+ * The text read from the picture (`TextLayer.tsx`), loaded with it, never painted: a mouse or a pen
+ * selects it, so the cursor is the text's, and the selection is the accent's, see-through,
+ * so the picture's own words show through it. Forced colors give it the system's, the
+ * words selected shown in its text color over it.
+ */
+.clover-canvas-text > span {
+  cursor: text;
+}
+
+.clover-canvas-text ::selection {
+  color: transparent;
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 35%,
+    transparent
+  );
+}
+
+@media (forced-colors: active) {
+  .clover-canvas-text ::selection {
+    color: HighlightText;
+    background-color: Highlight;
+  }
+}
+
+/*
+ * What a selection held over the picture's text copies (`TextLayer.tsx`), loaded with it, drawn as a
+ * popover is (`ui/Tip.css`): small, on the controls' dark fill, its lines as they copy,
+ * scrolling past a third of the Body, then Copy and Close. Shown only while there is a
+ * selection; otherwise it takes no room, but its words stay a live region in the tree,
+ * so the first are heard (WCAG 4.1.3).
+ */
+.clover-canvas-text-copy {
+  z-index: 4;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-xs);
+  width: max-content;
+  max-width: min(24rem, calc(100% - var(--clover-space-s)));
+  max-height: 38%;
+  padding: var(--clover-space-xs);
+  border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-color-primary, #1a1d1e);
+  color: var(--clover-color-secondary, #fff);
+  font-size: var(--clover-text-s);
+  cursor: auto;
+}
+
+.clover-canvas-text-copy:not([data-shown]) {
+  padding: 0;
+}
+
+.clover-canvas-text-copy-words {
+  min-height: 0;
+  overflow: auto;
+  padding: 0 var(--clover-space-2xs);
+  overflow-wrap: anywhere;
+}
+
+.clover-canvas-text-copy-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--clover-space-2xs);
+}
+
+/* Words, never glyphs alone, each a target of 24px or more (WCAG 2.5.8). */
+.clover-canvas-text-copy-button {
+  min-height: var(--clover-space-l);
+  padding: 0 var(--clover-space-xs);
+  border: 0;
+  border-radius: var(--clover-radius, 3px);
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-secondary, #fff) 14%,
+    transparent
+  );
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.clover-canvas-text-copy-button:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-secondary, #fff) 24%,
+    transparent
+  );
+}
+
+.clover-canvas-text-copy-button:focus-visible,
+.clover-canvas-text-copy-words:focus-visible {
+  outline: 2px solid var(--clover-color-secondary, #fff);
+  outline-offset: 1px;
+}
+
+@media (forced-colors: active) {
+  .clover-canvas-text-copy[data-shown] {
+    border: 1px solid CanvasText;
+  }
+
+  .clover-canvas-text-copy-button {
+    border: 1px solid ButtonText;
+  }
+}
