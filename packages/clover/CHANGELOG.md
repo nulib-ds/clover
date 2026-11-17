@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.11.1] - 2026-11-16
+
 ### Added
 
 - **Document's page layout.** Under the thumbnails' toggle, a round control opens a small
