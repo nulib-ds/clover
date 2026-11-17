@@ -5,8 +5,11 @@ import {
   isDirect,
   isHovering,
   isInteractive,
+  pageWheeling,
   scrollsWithin,
+  watchWheels,
 } from "../../pointer";
+import { getFullscreenElement } from "../../fullscreen";
 import type { Point } from "../math/affine";
 
 /** What gestures drive. Screen coordinates are CSS pixels relative to the Body. */
@@ -28,7 +31,11 @@ export interface GestureTarget {
    * picked annotation). If it did, the tap does nothing more: no zoom, no `tap`.
    */
   dismiss?(): boolean;
+  /** A gesture `cooperative` left to the page: a plain wheel, or one finger's drag. */
+  hint?(kind: GestureHintKind): void;
 }
+
+export type GestureHintKind = "wheel" | "touch";
 
 export interface GestureOptions {
   /**
@@ -45,6 +52,14 @@ export interface GestureOptions {
    * `ctrlKey`) always zooms the image, since it is never a page scroll.
    */
   scrollToZoom: boolean;
+  /**
+   * The page keeps its own gestures, as an embedded Google map does: a plain wheel and
+   * one finger's drag scroll the page and say how to move the view (`hint`): Ctrl or ⌘
+   * with the wheel, two fingers on a touch screen. In full screen, with no page to
+   * scroll, the wheel and a finger's drag are the view's. `scrollToZoom` still lets a
+   * plain wheel zoom. Off by default.
+   */
+  cooperative: boolean;
   /**
    * The reader may move the camera at all: drag, pinch, wheel, double-click and keys.
    * Off, the view stays where the host puts it and only taps are reported (a lone video
@@ -67,6 +82,7 @@ export const DEFAULT_GESTURES: GestureOptions = {
   dblClickToZoom: true,
   pinchToZoom: true,
   scrollToZoom: false,
+  cooperative: false,
   navigable: true,
   flickEnabled: true,
   flickMinSpeed: 200,
@@ -80,6 +96,8 @@ const VELOCITY_WINDOW_MS = 100;
 /** One wheel "line" of zoom: e^(−deltaY × rate). */
 const WHEEL_ZOOM_RATE = 0.002;
 const PINCH_WHEEL_ZOOM_RATE = 0.01;
+/** A wheel delta, px, past which a Ctrl wheel is a mouse's notch, not a trackpad's pinch. */
+const PINCH_MOST = 50;
 
 interface Sample {
   x: number;
@@ -108,6 +126,8 @@ export class GestureController {
   private lastPointerType = "";
   /** A pen has hovered over the Body, so pens here are pointed as a mouse is. */
   private penHovers = false;
+  /** Two pointers have been down in this gesture: its last finger is a pinch's, not a scroll. */
+  private pinched = false;
 
   constructor(
     private readonly element: HTMLElement,
@@ -121,10 +141,36 @@ export class GestureController {
     element.addEventListener("dblclick", this.onDoubleClick);
     element.addEventListener("wheel", this.onWheel, { passive: false });
     element.addEventListener("keydown", this.onKeyDown);
+    element.addEventListener("touchmove", this.onTouchMove, { passive: false });
+    watchWheels();
+    this.markCooperative();
   }
 
   setOptions(options: GestureOptions): void {
     this.options = options;
+    this.markCooperative();
+  }
+
+  // Lets a finger's drag through to the page (`Canvas.css`).
+  private markCooperative() {
+    this.element.toggleAttribute(
+      "data-cooperative",
+      this.options.cooperative && this.options.navigable,
+    );
+  }
+
+  private fullscreen(): boolean {
+    return Boolean(getFullscreenElement()?.contains(this.element));
+  }
+
+  /** A drag the page takes: a finger's, or a pen's that does not hover, where cooperative. */
+  private leftToPage(pointerType: string): boolean {
+    return isDirect(pointerType, this.penHovers) && this.cooperating();
+  }
+
+  private cooperating(): boolean {
+    if (!this.options.cooperative || !this.options.navigable) return false;
+    return !this.fullscreen();
   }
 
   dispose(): void {
@@ -136,6 +182,8 @@ export class GestureController {
     el.removeEventListener("dblclick", this.onDoubleClick);
     el.removeEventListener("wheel", this.onWheel);
     el.removeEventListener("keydown", this.onKeyDown);
+    el.removeEventListener("touchmove", this.onTouchMove);
+    el.removeAttribute("data-cooperative");
   }
 
   private local(event: { clientX: number; clientY: number }): Point {
@@ -164,6 +212,7 @@ export class GestureController {
       this.target.setInteracting(true);
     } else if (this.pointers.size === 2) {
       this.pinch = this.pinchState();
+      this.pinched = true;
       if (this.down) this.down.moved = true;
     }
   };
@@ -184,7 +233,9 @@ export class GestureController {
       ) {
         this.down.moved = true;
       }
-      if (this.down?.moved && this.options.navigable) {
+      if (this.down?.moved && this.leftToPage(event.pointerType)) {
+        if (!this.pinched) this.target.hint?.("touch");
+      } else if (this.down?.moved && this.options.navigable) {
         this.target.panBy(dx, dy, !this.tracksPointer(event.pointerType));
       }
       this.samples.push({ x: p.x, y: p.y, t: event.timeStamp });
@@ -220,7 +271,8 @@ export class GestureController {
     this.element.releasePointerCapture?.(event.pointerId);
 
     if (this.pointers.size === 1) {
-      // Pinch → drag: carry on panning from the remaining finger, without a jump.
+      // Pinch → drag: carry on panning from the remaining finger, without a jump, unless
+      // cooperative leaves one finger to the page.
       this.pinch = null;
       const [remaining] = this.pointers.values();
       this.samples = [{ ...remaining, t: event.timeStamp }];
@@ -229,8 +281,10 @@ export class GestureController {
     if (this.pointers.size > 0) return;
 
     const down = this.down;
+    const pinched = this.pinched;
     this.down = null;
     this.pinch = null;
+    this.pinched = false;
     this.target.setInteracting(false);
     if (!down) return;
 
@@ -281,7 +335,12 @@ export class GestureController {
       return;
     }
     // A drag the browser took over (to scroll the page) is the page's: no fling after it.
-    if (event.type === "pointercancel") return;
+    if (event.type === "pointercancel") {
+      if (this.leftToPage(event.pointerType) && !pinched)
+        this.target.hint?.("touch");
+      return;
+    }
+    if (this.leftToPage(event.pointerType)) return;
     const first = this.samples[0];
     const last = this.samples[this.samples.length - 1];
     const span = (last?.t ?? 0) - (first?.t ?? 0);
@@ -318,16 +377,46 @@ export class GestureController {
   }
 
   private onWheel = (event: WheelEvent) => {
-    const pinch = event.ctrlKey;
     if (!this.options.navigable) return;
-    if (!pinch && !this.options.scrollToZoom) return;
+    const delta = normalizeWheel(event);
+    /*
+     * A trackpad's pinch comes as a wheel with `ctrlKey` and small, fractional deltas; a
+     * mouse's wheel held with Ctrl or ⌘ comes in notches, and zooms as a plain wheel does.
+     */
+    const pinch =
+      event.ctrlKey && event.deltaMode === 0 && Math.abs(delta) < PINCH_MOST;
+    const held = event.ctrlKey || event.metaKey;
+    // Cooperative in full screen, with no page to scroll, a plain wheel zooms.
+    const free =
+      this.options.scrollToZoom ||
+      (this.options.cooperative && this.fullscreen());
+    if (!held && !free) {
+      // Not for a page scroll that carries the view under a resting pointer, nor sideways.
+      if (
+        this.cooperating() &&
+        Math.abs(event.deltaY) >= Math.abs(event.deltaX) &&
+        !pageWheeling(event, this.element) &&
+        !scrollsWithin(event.target, this.element, delta)
+      )
+        this.target.hint?.("wheel");
+      return;
+    }
     // A box in the Body that scrolls that way (a long hotspot note) scrolls, not zooms.
-    if (!pinch && scrollsWithin(event.target, this.element, event.deltaY))
+    if (!held && scrollsWithin(event.target, this.element, event.deltaY))
       return;
     event.preventDefault();
-    const delta = normalizeWheel(event);
     const rate = pinch ? PINCH_WHEEL_ZOOM_RATE : WHEEL_ZOOM_RATE;
     this.target.zoomBy(Math.exp(-delta * rate), this.local(event), !pinch);
+  };
+
+  /*
+   * Where a finger's drag is the page's (`touch-action: pan-x pan-y`), two fingers still
+   * pinch and pan the view, not the page.
+   */
+  private onTouchMove = (event: TouchEvent) => {
+    if (!this.cooperating() || event.targetTouches.length < 2) return;
+    if (isInteractive(event.target, this.element)) return;
+    if (event.cancelable) event.preventDefault();
   };
 
   private onKeyDown = (event: KeyboardEvent) => {

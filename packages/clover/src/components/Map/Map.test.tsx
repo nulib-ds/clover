@@ -42,6 +42,15 @@ import { stubViewport } from "../Canvas/testing/viewport";
 const maps: FakeMap[] = [];
 let failNext = false;
 
+function toggled() {
+  const handler = {
+    on: false,
+    enable: () => void (handler.on = true),
+    disable: () => void (handler.on = false),
+  };
+  return handler;
+}
+
 class FakeMap {
   options: any;
   sources: Record<string, any> = {};
@@ -129,6 +138,8 @@ class FakeMap {
   // The handlers whose rotation Clover turns off (WCAG 2.5.1).
   touchZoomRotate = { disableRotation: vi.fn() };
   keyboard = { disableRotation: vi.fn() };
+  scrollZoom = toggled();
+  cooperativeGestures = toggled();
   getCanvas() {
     return this.canvas;
   }
@@ -387,6 +398,35 @@ describe("Map", () => {
     // Wheel zoom stays off, and the default basemap loses its roads.
     expect(map.options.scrollZoom).toBe(false);
     expect(map.getLayer("road-primary")).toBeUndefined();
+  });
+
+  it("leaves the wheel and a finger's drag to the page, saying how to move the map", async () => {
+    const place = {
+      type: "Feature",
+      properties: {},
+      geometry: { type: "Point", coordinates: [-87.69, 42.04] },
+    };
+    const { rerender } = render(<CloverMap navPlace={place} />);
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    // Off by default.
+    await waitFor(() => expect(map.scrollZoom.on).toBe(false));
+    expect(map.cooperativeGestures.on).toBe(false);
+
+    rerender(<CloverMap navPlace={place} cooperative />);
+    // Its wheel on, for Ctrl or ⌘; the plain wheel and one finger the page's.
+    await waitFor(() => expect(map.cooperativeGestures.on).toBe(true));
+    expect(map.scrollZoom.on).toBe(true);
+    act(() =>
+      map.fire("cooperativegestureprevented", { gestureType: "touch_pan" }),
+    );
+    expect(
+      await screen.findByText("Use two fingers to move the view"),
+    ).toBeInTheDocument();
+
+    rerender(<CloverMap navPlace={place} cooperative scrollZoom />);
+    await waitFor(() => expect(map.scrollZoom.on).toBe(true));
+    expect(map.cooperativeGestures.on).toBe(false);
   });
 
   // Mat, 2026-11-08: "it's okay to rerender but can we smooth it out?"

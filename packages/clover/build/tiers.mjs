@@ -160,6 +160,8 @@ export const SURFACES = [
   // its controls; and Document's steps' previews, drawn as it is.
   "clover-inset",
   "clover-template-document-step-preview",
+  // How to move a view whose page keeps its gestures, over its Body.
+  "clover-gesture-hint-text",
 ];
 
 /**
@@ -192,6 +194,8 @@ export const UNDERLAID = [
   "clover-template-lightbox",
   // The map's pin over a georeferenced image's picture in Annotations: a mark with no words.
   "clover-annotations-place-glyph",
+  // The wash under a gesture hint, meant to be seen through; its words are a surface.
+  "clover-gesture-hint",
 ];
 
 const SURFACE_RULE = `:where(${SURFACES.map((name) => `.${name}`).join(",")}){background-color:Canvas;color:CanvasText}`;

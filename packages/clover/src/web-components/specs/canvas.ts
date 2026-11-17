@@ -178,7 +178,10 @@ export const handleMethodDocs: MethodDocs = {
   },
   on: {
     parameters: [
-      ["event", '"open" | "viewport" | "change" | "error" | "backend" | "tap"'],
+      [
+        "event",
+        '"open" | "viewport" | "change" | "error" | "backend" | "tap" | "hint"',
+      ],
       ["listener", "(detail?: unknown) => void"],
     ],
     returns: "() => void",

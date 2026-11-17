@@ -21,6 +21,7 @@ import { CameraAnimator } from "./camera/CameraAnimator";
 import {
   DEFAULT_GESTURES,
   GestureController,
+  type GestureHintKind,
   type GestureOptions,
   type GestureTarget,
 } from "./input/GestureController";
@@ -113,7 +114,9 @@ export type CanvasRendererEvent =
   /** The backend changed (fallback, or a context released and reacquired). */
   | "backend"
   /** A click that is not a zoom, with click-to-zoom turned off. */
-  | "tap";
+  | "tap"
+  /** A gesture left to the page (`gestures.cooperative`): `"wheel"` or `"touch"`. */
+  | "hint";
 
 type Listener = (detail?: unknown) => void;
 
@@ -835,6 +838,10 @@ export class CanvasRenderer implements GestureTarget {
 
   tap(at: Point): void {
     this.emit("tap", at);
+  }
+
+  hint(kind: GestureHintKind): void {
+    this.emit("hint", kind);
   }
 
   private dismisser: (() => boolean) | null = null;

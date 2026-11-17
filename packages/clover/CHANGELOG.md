@@ -11,6 +11,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Cooperative gestures on the Canvas and the Map**, as an embedded Google map has them,
+  off by default. On, a plain wheel scrolls the page and a hint over the view says "Use
+  Ctrl + scroll to zoom" (⌘ on a Mac); Ctrl or ⌘ with the wheel zooms. On a touch screen
+  one finger's drag scrolls the page, with "Use two fingers to move the view", and two
+  fingers pinch and pan. In full screen the view takes both. Turn it on with
+  `options.gestures.cooperative` on the Canvas (`canvasOptions` in a template) or
+  `cooperative` on the Map (`cooperative` on `<clover-map>`). A Canvas's handle reports
+  each hint as a `hint` event (`"wheel"` or `"touch"`).
+
+### Fixed
+
+- **Ctrl with a mouse wheel zooms a notch at a time** on the Canvas, as a plain wheel
+  does with `scrollToZoom`, rather than at a trackpad pinch's rate, which jumped.
+
 ## [4.11.1] - 2026-11-16
 
 ### Added

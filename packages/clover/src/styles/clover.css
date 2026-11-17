@@ -20,6 +20,7 @@
 @import "../ui/ExitFullscreen.css";
 @import "../ui/Loading.css";
 @import "../ui/BodyUnloadable.css";
+@import "../ui/GestureHint.css";
 @import "../ui/Chevron.css";
 @import "../components/Canvas/Annotations.css";
 @import "../components/Canvas/Canvas.css";

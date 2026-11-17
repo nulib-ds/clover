@@ -28,6 +28,15 @@
   transition: opacity 200ms ease;
 }
 
+/*
+ * MapLibre's own words for a gesture its cooperative mode leaves to the page give way to
+ * Clover's (`GestureHint`). `!important`, as MapLibre's sheet is unlayered and this one is
+ * in `@layer clover`.
+ */
+.clover-geomap .maplibregl-cooperative-gesture-screen {
+  display: none !important;
+}
+
 .clover-geomap[data-status="loading"] .clover-geomap-canvas {
   opacity: 0;
 }

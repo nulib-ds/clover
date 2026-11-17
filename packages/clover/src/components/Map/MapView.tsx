@@ -39,6 +39,9 @@ import {
 import type { IIIFContent } from "../../core/load";
 import { type CloverRequest, sendsCredentials } from "../../core/request";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
+import useWithinFullscreen from "../../hooks/useWithinFullscreen";
+import { GestureHint, useGestureHint } from "../../ui/GestureHint";
+import { pageWheeling, watchWheels } from "../../lib/pointer";
 import { join } from "../../lib/classnames";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../i18n/useRootLanguage";
@@ -104,6 +107,12 @@ export interface MapProps
   workerUrl?: string;
   /** Zoom with the wheel or trackpad. Default false, so an embedded map never traps page scroll. */
   scrollZoom?: boolean;
+  /**
+   * The page keeps its own gestures: a plain wheel and one finger's drag scroll the page
+   * and say how to move the map (Ctrl or ⌘ with the wheel, two fingers). Default false;
+   * off in full screen, and wherever `scrollZoom` is on.
+   */
+  cooperative?: boolean;
   /**
    * How close it frames its places: a lone point at this zoom, and several no closer.
    * Default 8 for a point, a region around it, and 12 for several; 15 shows a point's
@@ -368,6 +377,7 @@ export function MapView({
   styleUrl,
   workerUrl,
   scrollZoom = false,
+  cooperative = false,
   zoom,
   onSelect,
   request,
@@ -391,6 +401,8 @@ export function MapView({
    * Canvas's images do: a map far down a page, or in a tab not yet open, loads none.
    */
   const [box, setBox] = useState<HTMLDivElement | null>(null);
+  const withinFullscreen = useWithinFullscreen(box);
+  const [hint, showHint] = useGestureHint();
   const near = useNearViewport(box);
   const [map, setMap] = useState<any>(null);
   // MapLibre's controls, each with Clover's glyph and popover in it.
@@ -1593,13 +1605,36 @@ export function MapView({
       else handler.disable();
     };
     turn(map.dragPan, navigable);
-    turn(map.scrollZoom, navigable && scrollZoom);
+    // Cooperative, a wheel zooms with Ctrl or ⌘ held, and in full screen without.
+    turn(map.scrollZoom, navigable && (scrollZoom || cooperative));
+    turn(
+      map.cooperativeGestures,
+      navigable && cooperative && !scrollZoom && !withinFullscreen,
+    );
     turn(map.boxZoom, navigable);
     turn(map.doubleClickZoom, navigable);
     turn(map.keyboard, navigable);
     turn(map.touchZoomRotate, navigable);
     map.getCanvas().tabIndex = navigable ? 0 : -1;
-  }, [map, navigable, scrollZoom]);
+  }, [map, navigable, scrollZoom, cooperative, withinFullscreen]);
+
+  // MapLibre's own words for a gesture it left to the page are hidden (`Map.css`).
+  useEffect(() => {
+    if (!map || typeof map.on !== "function") return;
+    watchWheels();
+    const blocked = (event: {
+      gestureType?: string;
+      originalEvent?: Event;
+    }) => {
+      if (event.gestureType === "touch_pan") return showHint("touch");
+      const wheel = event.originalEvent;
+      if (!(wheel instanceof WheelEvent) || !box) return;
+      if (Math.abs(wheel.deltaY) < Math.abs(wheel.deltaX)) return;
+      if (!pageWheeling(wheel, box)) showHint("wheel");
+    };
+    map.on("cooperativegestureprevented", blocked);
+    return () => map.off?.("cooperativegestureprevented", blocked);
+  }, [map, box, showHint]);
 
   // Whether it is ready, to what holds it as it changes, and not as it goes (`onReady`).
   const told = useRef(onReady);
@@ -1755,6 +1790,7 @@ export function MapView({
                 key,
               ),
             )}
+          <GestureHint kind={hint} />
           {failed && (
             <p
               className="clover-geomap-error"

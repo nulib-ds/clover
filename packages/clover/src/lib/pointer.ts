@@ -73,3 +73,39 @@ export function isInteractive(
   }
   return false;
 }
+
+/** The most time between two wheel events of one scroll. */
+const WHEEL_GAP_MS = 250;
+
+type Wheel = { at: number; target: EventTarget | null };
+let previousWheel: Wheel | null = null;
+let currentWheel: Wheel | null = null;
+let watching = false;
+
+const recordWheel = (event: WheelEvent) => {
+  previousWheel = currentWheel;
+  currentWheel = { at: event.timeStamp, target: event.target };
+};
+
+/** Records the page's wheel events, for `pageWheeling`. Once a page, however often called. */
+export function watchWheels(): void {
+  if (watching || typeof window === "undefined") return;
+  watching = true;
+  window.addEventListener("wheel", recordWheel, {
+    capture: true,
+    passive: true,
+  });
+}
+
+/**
+ * Whether a wheel belongs to a scroll that began outside `box`: the page scrolling it under
+ * a resting pointer. Read while handling the wheel, after `watchWheels` has recorded it.
+ */
+export function pageWheeling(event: WheelEvent, box: HTMLElement): boolean {
+  const previous = previousWheel;
+  return Boolean(
+    previous &&
+      event.timeStamp - previous.at < WHEEL_GAP_MS &&
+      !(previous.target instanceof Node && box.contains(previous.target)),
+  );
+}
