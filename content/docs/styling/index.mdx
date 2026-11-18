@@ -62,7 +62,8 @@ specificity. The last two leave the look to you: see [Base](/docs/styling/base).
 
 With Tailwind CSS 4, whose CSS is in layers of its own, name `clover` among them before
 any import, so Clover's styles win over Tailwind's reset and your utility classes win over
-Clover's:
+Clover's. Import `styles.css` there, in place of importing it from your code, so the order
+comes first:
 
 ```css
 @layer theme, base, clover, components, utilities;
