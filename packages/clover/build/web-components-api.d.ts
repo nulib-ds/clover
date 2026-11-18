@@ -292,4 +292,7 @@ export interface CloverControlButtons {
   rotateLeft?: (control: CloverControl) => Element;
   reset?: (control: CloverControl) => Element;
   choice?: (control: CloverControl) => Element;
+  /** clover-items' slider arrows. */
+  itemsPrev?: (control: CloverControl) => Element;
+  itemsNext?: (control: CloverControl) => Element;
 }

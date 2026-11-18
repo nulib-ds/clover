@@ -168,6 +168,34 @@ describe("Items in a Root", () => {
     expect(options[1]).toHaveAttribute("aria-selected", "true");
   });
 
+  it("draws the page's own arrows from controlButtons", async () => {
+    const arrow = (className: string) =>
+      function Arrow({ buttonProps, tip }: Clover.ControlButtonProps) {
+        return (
+          <button {...buttonProps} className={className}>
+            <span>arrow</span>
+            {tip}
+          </button>
+        );
+      };
+    renderInRoot({
+      controlButtons: {
+        itemsPrev: arrow("clover-items-scroll-prev"),
+        itemsNext: arrow("clover-items-scroll-next"),
+      },
+    });
+    const options = await screen.findAllByRole("option");
+    const previous = screen.getByRole("button", { name: "Previous" });
+    const next = screen.getByRole("button", { name: "Next" });
+    expect(next).toHaveTextContent("arrow");
+    expect(previous).toHaveAttribute("aria-disabled", "true");
+    expect(previous).toHaveAttribute("tabindex", "-1");
+    fireEvent.click(next);
+    expect(options[1]).toHaveAttribute("aria-selected", "true");
+    expect(previous).not.toHaveAttribute("aria-disabled");
+    expect(previous).not.toHaveAttribute("tabindex");
+  });
+
   it("hands onSelect the key's own event, which it may prevent", async () => {
     const seen: Array<{ key?: string; target: unknown; prevented: boolean }> =
       [];

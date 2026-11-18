@@ -11,6 +11,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Your own arrows on the Items slider.** `Items` takes `controlButtons`, with two new
+  keys, `itemsPrev` and `itemsNext`, given `buttonProps`, `icon`, `label` and `tip` as the
+  Canvas's control buttons are. Spread `buttonProps`: at an end it carries
+  `aria-disabled` and `tabIndex={-1}`. Keep the class `clover-items-scroll-prev` or
+  `clover-items-scroll-next` on the button to keep Clover's place and look.
+  `<clover-items>` takes them as its `controlButtons` property, functions that make each
+  button, as `<clover-body>` takes its controls.
+
+### Fixed
+
+- **A page's own control buttons in the web components carry `aria-disabled`** where the
+  control would do nothing (zoom in at the greatest zoom, reset at home), as React's do
+  when `buttonProps` is spread. Before, Clover never set it on them.
+
 ## [4.11.2] - 2026-11-17
 
 ### Added
