@@ -42,7 +42,8 @@ type Token =
   | "accent"
   | "accent-text"
   | "control"
-  | "control-glyph";
+  | "control-glyph"
+  | "control-pressed";
 
 type Palette = Record<Token, string>;
 
@@ -57,6 +58,7 @@ const TOKENS: { token: Token; paints: string }[] = [
   { token: "accent-text", paints: "Links" },
   { token: "control", paints: "Control fill" },
   { token: "control-glyph", paints: "Control glyph" },
+  { token: "control-pressed", paints: "Pressed control" },
 ];
 
 /** Clover's own colors, as its stylesheet falls back to them. */
@@ -70,6 +72,7 @@ const CLOVER: Palette = {
   "accent-text": "#0065c3",
   control: "#1a1d1e",
   "control-glyph": "#ffffff",
+  "control-pressed": "#0065c3",
 };
 
 const hexOf = (color: Rgb) =>
@@ -92,6 +95,7 @@ const SITE_BLUE = "#0f62fe";
 const worn = (accent: string): Palette => ({
   ...CLOVER,
   accent: accent.toLowerCase(),
+  "control-pressed": accent.toLowerCase(),
   "accent-text": hexOf(mix(rgb(accent), 0.82, BLACK)),
 });
 
@@ -345,6 +349,21 @@ const PAIRS: {
       colors: (p) => ({ fg: rgb(p["control-glyph"]), bg: rgb(p.control) }),
       needs: 4.5,
     },
+  },
+  {
+    name: "Glyphs on a pressed control",
+    tokens: (
+      <>
+        <C>control-glyph</C> on <C>control-pressed</C>
+      </>
+    ),
+    where: "A control while pressed",
+    sample: "glyph",
+    colors: (p) => ({
+      fg: rgb(p["control-glyph"]),
+      bg: rgb(p["control-pressed"]),
+    }),
+    needs: 4.5,
   },
   {
     name: "Hairlines",

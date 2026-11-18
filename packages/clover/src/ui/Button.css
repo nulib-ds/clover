@@ -78,6 +78,24 @@ button.clover-canvas-button svg {
 }
 
 /*
+ * Pressed. `--clover-color-control-pressed` falls back to the fill under the pointer, so
+ * nothing changes until a page sets it. A control with nowhere to go keeps its look.
+ */
+:is(
+    button.clover-canvas-button,
+    button.clover-items-scroll-prev,
+    button.clover-items-scroll-next,
+    button.clover-pager-previous,
+    button.clover-pager-next,
+    button.clover-panel-close
+  ):active:not([aria-disabled="true"]) {
+  background-color: var(
+    --clover-color-control-pressed,
+    var(--clover-color-accent, #0065c3)
+  );
+}
+
+/*
  * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
  * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
  * its own ring.
@@ -105,6 +123,21 @@ button.clover-canvas-button svg {
   ):hover:not(:focus-visible) {
   outline: var(--clover-accent-ring-hover);
   outline-offset: 1px;
+}
+
+:where([data-high-contrast])
+  :is(
+    button.clover-canvas-button,
+    button.clover-items-scroll-prev,
+    button.clover-items-scroll-next,
+    button.clover-pager-previous,
+    button.clover-pager-next,
+    button.clover-panel-close
+  ):active:not([aria-disabled="true"]) {
+  background-color: var(
+    --clover-color-control-pressed,
+    var(--clover-accent-fill)
+  );
 }
 
 /*
