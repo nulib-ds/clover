@@ -355,10 +355,24 @@ function useMyPopup() {
 ### Icons
 
 Give a control over the Body an icon of your own with `controlButtons`, on `Body` or
-`Canvas`: a component for each control you replace, by its key (`zoomIn`, `zoomOut`,
-`fullPage`, `rotateRight`, `rotateLeft`, `reset`, `choice`). Spread `buttonProps` on your
-button, for its name, keys and state, and put `tip` in it, last, for its popover. `icon`
-is Clover's own, for a button that keeps it.
+`Canvas`, by the control's key (`zoomIn`, `zoomOut`, `fullPage`, `rotateRight`,
+`rotateLeft`, `reset`, `choice`).
+
+<div data-code-flavor="react">
+
+Each is a component. Spread `buttonProps` on your button, for its name, keys and state,
+and put `tip` in it, last, for its popover. `icon` is Clover's own, for a button that
+keeps it.
+
+</div>
+
+<div data-code-flavor="web-components">
+
+Each is a function that returns your button, given the control's `name`, its `label` and
+Clover's `icon`. Clover names the button, keeps its state, presses the control with it and
+adds its popover.
+
+</div>
 
 ```jsx
 import * as Clover from "@nulib/clover";
