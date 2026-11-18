@@ -134,11 +134,8 @@ export default function SiteEffects() {
   // The site's higher-contrast mode, as the reader's system asks for more contrast.
   useEffect(watchReaderContrast, []);
 
-  /*
-   * A link into the flavor the page hides (a search result for words in the web
-   * components' tables, say) shows that flavor. Next moves between pages and anchors with
-   * the history API, which sends no `hashchange`, so a press on a link is followed too.
-   */
+  // Next moves between pages and anchors with the history API, which sends no
+  // `hashchange`, so a press on a link is followed too.
   useEffect(() => {
     const frame = requestAnimationFrame(showFlavorOfTarget);
     const followed = (event: MouseEvent) => {
