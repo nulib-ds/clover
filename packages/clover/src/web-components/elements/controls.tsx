@@ -105,6 +105,8 @@ function PageButton({
   const [button, setButton] = useState<HTMLElement | null>(null);
   const press = useRef(buttonProps.onClick);
   press.current = buttonProps.onClick;
+  // The page's own tab stop: Clover takes the button out only at an end of Items.
+  const ownTabIndex = useRef<string | null>(null);
 
   useLayoutEffect(() => {
     const at = mark.current;
@@ -119,6 +121,7 @@ function PageButton({
     const control = made.matches("button")
       ? made
       : (made.querySelector("button") ?? made);
+    ownTabIndex.current = control.getAttribute("tabindex");
     const click = (event: Event) => press.current?.(event as never);
     control.addEventListener("click", click);
     at.after(made);
@@ -135,8 +138,9 @@ function PageButton({
     if (!button) return;
     const given = buttonProps as Record<string, unknown>;
     for (const [attribute, prop] of Object.entries(WIRED)) {
-      const value = given[prop];
-      if (value === undefined) button.removeAttribute(attribute);
+      const value =
+        given[prop] ?? (attribute === "tabindex" ? ownTabIndex.current : null);
+      if (value == null) button.removeAttribute(attribute);
       else button.setAttribute(attribute, String(value));
     }
   });

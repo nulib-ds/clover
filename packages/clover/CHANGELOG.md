@@ -25,7 +25,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **A page's own control buttons in the web components carry `aria-disabled`** where the
   control would do nothing (zoom in at the greatest zoom, reset at home), as React's do
-  when `buttonProps` is spread. Before, Clover never set it on them.
+  when `buttonProps` is spread. Before, Clover never set it on them. A `tabindex` the
+  page gives its button is kept, but at an end of Items, where Clover sets `-1`.
 
 ## [4.11.2] - 2026-11-17
 

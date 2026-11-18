@@ -237,6 +237,7 @@ describe("The Body's controls, the page's own", () => {
         told(control);
         const button = document.createElement("button");
         button.className = "mine";
+        button.tabIndex = 0;
         button.append(control.icon);
         return button;
       },
@@ -253,6 +254,8 @@ describe("The Body's controls, the page's own", () => {
     expect(mine).toHaveAttribute("aria-label", "Zoom in");
     expect(mine).toHaveAttribute("aria-keyshortcuts", "Plus");
     expect(mine).toHaveAttribute("type", "button");
+    // The page's own tab stop is kept.
+    expect(mine).toHaveAttribute("tabindex", "0");
     expect(mine.querySelector("svg")).not.toBeNull();
     await waitFor(() =>
       expect(mine.lastElementChild).toHaveClass("clover-tip"),

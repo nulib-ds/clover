@@ -274,7 +274,7 @@ export interface CloverRenderer {
   ): void | (() => void);
 }
 
-/** What the function for one of the Body's controls is told. */
+/** What the function for one of the Body's controls, or Items' arrows, is told. */
 export interface CloverControl {
   name: keyof CloverControlButtons;
   /** Its name, as its `aria-label` says it. */
@@ -283,7 +283,7 @@ export interface CloverControl {
   icon: HTMLElement;
 }
 
-/** The Body's controls, each replaced by a button you make. */
+/** The Body's controls and Items' arrows, each replaced by a button you make. */
 export interface CloverControlButtons {
   zoomIn?: (control: CloverControl) => Element;
   zoomOut?: (control: CloverControl) => Element;
