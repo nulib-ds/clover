@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { restorePageTheme, watchReaderContrast } from "docs/lib/page-theme";
 import { basePath } from "docs/lib/router";
+import { showFlavorOfTarget } from "docs/lib/code-flavor";
 
 const SIDEBARS = ".nextra-sidebar, .nextra-mobile-nav";
 
@@ -132,6 +133,26 @@ export default function SiteEffects() {
 
   // The site's higher-contrast mode, as the reader's system asks for more contrast.
   useEffect(watchReaderContrast, []);
+
+  /*
+   * A link into the flavor the page hides (a search result for words in the web
+   * components' tables, say) shows that flavor. Next moves between pages and anchors with
+   * the history API, which sends no `hashchange`, so a press on a link is followed too.
+   */
+  useEffect(() => {
+    const frame = requestAnimationFrame(showFlavorOfTarget);
+    const followed = (event: MouseEvent) => {
+      if ((event.target as Element | null)?.closest?.("a[href*='#']"))
+        setTimeout(showFlavorOfTarget, 100);
+    };
+    window.addEventListener("hashchange", showFlavorOfTarget);
+    document.addEventListener("click", followed);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", showFlavorOfTarget);
+      document.removeEventListener("click", followed);
+    };
+  }, [pathname]);
 
   /*
    * Nextra's search takes a bare "/" page-wide, a single-key shortcut that cannot be
