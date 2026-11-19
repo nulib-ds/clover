@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { setCodeFlavor } from "docs/lib/code-flavor";
+import { setCodeFlavor, showFlavorOfTarget } from "docs/lib/code-flavor";
 import {
   CODE_FLAVOR_KEY,
   CODE_FLAVOR_SCRIPT,
@@ -11,6 +11,8 @@ const root = document.documentElement;
 afterEach(() => {
   localStorage.clear();
   delete root.dataset.code;
+  document.body.innerHTML = "";
+  history.replaceState(null, "", "/");
 });
 
 describe("the docs' code choice", () => {
@@ -39,5 +41,25 @@ describe("the docs' code choice", () => {
     setCodeFlavor("react");
     expect(root.dataset.code).toBeUndefined();
     expect(localStorage.getItem(CODE_FLAVOR_KEY)).toBeNull();
+  });
+
+  it("shows the flavor a link's target is in, for the visit only", () => {
+    setCodeFlavor("react");
+    document.body.innerHTML =
+      '<div data-code-flavor="web-components"><h3 id="element-clover-body">clover-body</h3></div>';
+    Element.prototype.scrollIntoView = () => {};
+    history.replaceState(null, "", "/docs/body#element-clover-body");
+    showFlavorOfTarget();
+    expect(root.dataset.code).toBe("web-components");
+    expect(localStorage.getItem(CODE_FLAVOR_KEY)).toBeNull();
+  });
+
+  it("leaves the flavor alone for a target both show", () => {
+    setCodeFlavor("react");
+    document.body.innerHTML =
+      '<div data-code-flavor="both"><h2 id="api-reference">API reference</h2></div>';
+    history.replaceState(null, "", "/docs/body#api-reference");
+    showFlavorOfTarget();
+    expect(root.dataset.code).toBeUndefined();
   });
 });

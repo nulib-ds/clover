@@ -81,6 +81,23 @@ export const setCodeFlavor = (flavor: CodeFlavor) => {
   listeners.forEach((listener) => listener());
 };
 
+/**
+ * Show the flavor that holds the address's target, for this visit only: a search result
+ * can match words in the flavor the page hides, and a link to it would open on nothing.
+ */
+export const showFlavorOfTarget = () => {
+  const id = decodeURIComponent(location.hash.slice(1));
+  const target = id ? document.getElementById(id) : null;
+  const flavor = target
+    ?.closest("[data-code-flavor]")
+    ?.getAttribute("data-code-flavor");
+  if (!target || !isFlavor(flavor) || flavor === getCodeFlavor()) return;
+  current = flavor;
+  apply(flavor);
+  listeners.forEach((listener) => listener());
+  target.scrollIntoView();
+};
+
 /** The code the docs show, re-rendering when the reader changes it. */
 export const useCodeFlavor = (): CodeFlavor =>
   useSyncExternalStore(subscribe, getCodeFlavor, () => DEFAULT);
