@@ -11,6 +11,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **A pressed state for the round controls**: the Canvas's controls, Items' arrows, the
+  Pager's Previous and Next, and the Panel's close. Set `--clover-color-control-pressed`
+  to fill a control while it is pressed, in the higher-contrast mode too; its glyph
+  must keep 4.5:1 on it. Unset, a control keeps the fill it has under the pointer, so
+  nothing changes. A control with nowhere to go ignores it.
+
 ## [4.11.2] - 2026-11-17
 
 ### Added
