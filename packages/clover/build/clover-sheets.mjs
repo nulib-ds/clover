@@ -139,6 +139,13 @@ const OWNERS = {
     "components/Annotations/Annotations.tsx",
     "components/Canvas/AnnotationMenu.tsx",
   ],
+  // An entry's picture, whichever draws it: an annotation's, a chapter's, or its own.
+  "ui/EntryThumbnail": [
+    "ui/EntryThumbnail.tsx",
+    "ui/AnnotationEntry.tsx",
+    "ui/AnnotationPicture.tsx",
+    "ui/ChapterEntry.tsx",
+  ],
   // What draws `.clover-geomap`, MapLibre with it: not the map's shell.
   "components/Map/Map": ["components/Map/MapView.tsx"],
   maplibre: ["components/Map/MapView.tsx"],

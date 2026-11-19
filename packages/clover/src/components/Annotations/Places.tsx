@@ -2,14 +2,14 @@ import React from "react";
 
 import { Place as PlaceGlyph } from "../Body/glyphs";
 import { overlayItems } from "../Map/overlayItems";
-import { georeferencesOf } from "../../core/geo";
+import { canvasGeoreferences, georeferencesOf } from "../../core/geo";
 import type { Manifest } from "../../core/presentation";
 import type { ThumbnailSource } from "../../core/thumbnail";
 import { type LocalizedValue, localize } from "../../core/value";
 import type { CloverRequest } from "../../core/request";
 import { langWithin } from "../../i18n/config";
 import { languageProps } from "../../i18n/direction";
-import { EntryThumbnail } from "../../ui/EntryThumbnail";
+import { EntryPicture } from "../../ui/AnnotationEntry";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
 /**
@@ -52,8 +52,27 @@ export function placesOf(
   language: string | undefined,
   untitled: (number: number) => LocalizedValue,
 ): Place[] {
-  const overlays = georeferencesOf(manifest);
-  if (!manifest || !overlays.length) return [];
+  return listPlaces(georeferencesOf(manifest), language, untitled);
+}
+
+/**
+ * The georeferenced images of the Canvases shown, as the Canvas's annotations menu lists
+ * them under their Canvas, keyed as the Annotations section keys them.
+ */
+export function placesOfCanvases(
+  canvases: ReadonlyArray<Record<string, any>>,
+  language: string | undefined,
+  untitled: (number: number) => LocalizedValue,
+): Place[] {
+  return listPlaces(canvases.flatMap(canvasGeoreferences), language, untitled);
+}
+
+function listPlaces(
+  overlays: ReturnType<typeof georeferencesOf>,
+  language: string | undefined,
+  untitled: (number: number) => LocalizedValue,
+): Place[] {
+  if (!overlays.length) return [];
   return overlayItems(
     overlays,
     language,
@@ -72,6 +91,44 @@ export function placesOf(
       },
     ];
   });
+}
+
+/**
+ * A georeferenced image's picture and name, as the Annotations section and the Canvas's
+ * annotations menu show it: its picture, the map it is, with the map control's pin over
+ * its corner (Mat, 2026-11-13: "overlay map icon in corner of thumbnail"), decorative, as
+ * the entry says it is on the map; then its name.
+ */
+export function PlaceContent({
+  place,
+  request,
+}: {
+  place: Place;
+  request?: CloverRequest;
+}) {
+  return (
+    <>
+      <span className="clover-annotations-place-picture">
+        <EntryPicture source={place.picture} request={request} />
+        <svg
+          className="clover-annotations-place-glyph"
+          viewBox="0 0 512 512"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <PlaceGlyph />
+        </svg>
+      </span>
+      <div className="clover-annotations-body clover-cue-text">
+        <span
+          className="clover-annotations-text"
+          {...languageProps(place.name.lang)}
+        >
+          {place.name.text}
+        </span>
+      </div>
+    </>
+  );
 }
 
 /**
@@ -120,29 +177,7 @@ export function PlaceEntry({
         onAsk(place);
       }}
     >
-      {/*
-        Its picture, the map it is, with the map control's pin over its corner
-        (Mat, 2026-11-13: "overlay map icon in corner of thumbnail"): decorative,
-        as its button says it is on the map.
-      */}
-      <span className="clover-annotations-place-picture">
-        <EntryThumbnail
-          className="clover-annotations-thumbnail"
-          source={place.picture}
-          request={request}
-        />
-        <svg
-          className="clover-annotations-place-glyph"
-          viewBox="0 0 512 512"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <PlaceGlyph />
-        </svg>
-      </span>
-      <div className="clover-annotations-body clover-cue-text">
-        <p {...languageProps(place.name.lang)}>{place.name.text}</p>
-      </div>
+      <PlaceContent place={place} request={request} />
       <button
         type="button"
         className="clover-annotations-show"

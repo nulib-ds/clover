@@ -11,6 +11,7 @@ import {
   Homepage,
   Id,
   Metadata,
+  PartOf,
   RequiredStatement,
   Rights,
   SeeAlso,
@@ -23,7 +24,7 @@ import { titleTag, titled } from "../../ui/heading";
 import { Label } from "../Label/Label";
 import { languageProps } from "../../i18n/direction";
 import { readDate } from "../../core/dates";
-import { selectVisibleCanvases } from "../../core/selectors";
+import { partOfCollection, selectVisibleCanvases } from "../../core/selectors";
 // Alone, outside a Panel, its downloads' links in a section of their own, drawn then.
 const DownloadGroups = lazy(() =>
   import("../Download/Download").then(({ DownloadGroups }) => ({
@@ -316,6 +317,16 @@ function AboutContent({
       {section("aboutRights", manifest.rights, <Rights />)}
       {section("aboutHomepage", hasAny("homepage"), <Homepage />)}
       {section("aboutSeeAlso", hasAny("seeAlso"), <SeeAlso />)}
+      {/*
+       * The Collection it is part of, a link and nothing more (nulib-ds/clover#439): it
+       * never fetches the Collection, which the Collection section lists where a page asks
+       * for it (`partOfCollection`). A lone Canvas names its Manifest above, at its top.
+       */}
+      {section(
+        "aboutPartOf",
+        !isLoneCanvas(manifest) && partOfCollection(manifest),
+        <PartOf />,
+      )}
       {section(
         "download",
         download && downloads.page.length + downloads.all.length > 0,

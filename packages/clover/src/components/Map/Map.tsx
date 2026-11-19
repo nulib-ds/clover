@@ -13,6 +13,7 @@ import { join } from "../../lib/classnames";
 const LoadedMap = lazy(() => import("./LoadedMap"));
 
 export type { MapProps } from "./MapView";
+export { useMapPutAway } from "./MapView";
 
 /**
  * A map of where a IIIF resource is: its navPlace features (Collection, Manifest, Canvas

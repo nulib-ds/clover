@@ -27,7 +27,7 @@ export interface ResolvedContentState {
   manifestId?: string;
   target?: Target;
   /**
-   * The content state annotation itself, where it carries a body (a note its sharer
+   * The content state annotation itself, where it carries a body (words its sharer
    * wrote, as Digital Collections' shared links do) and targets a Canvas: shown on the
    * Canvas as an annotation, and picked.
    */
@@ -39,7 +39,7 @@ export interface ResolvedContentState {
    */
   pick?: string;
   /**
-   * That annotation itself: listed with the content's own annotations, as a note is,
+   * That annotation itself: listed with the content's own annotations, as one of them,
    * where no search answers with it (Mat, 2026-11-12: "it should just relegate to an
    * annotation in the annotation pane").
    */

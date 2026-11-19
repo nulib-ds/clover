@@ -75,7 +75,7 @@ export interface MediaBodyProps {
    * Annotations on the recording's time (Cookbook 0103): each shows as a cue while its
    * stretch plays, as a caption does, under its AnnotationPage's label.
    */
-  notes?: TimedAnnotation[];
+  timed?: TimedAnnotation[];
   /**
    * The annotations placed on the picture: those that follow the recording
    * (`xywh=…&t=…`) are marked on the seek bar where they start, as those on its time are.
@@ -131,7 +131,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   highlightedChapter,
   onChapterHighlight,
   language: givenLanguage,
-  notes,
+  timed,
   marked,
   selectedAnnotation,
   onAnnotationSelect,
@@ -351,13 +351,13 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   const { currentTime } = controller;
   const playing = useMemo(
     () =>
-      (notes ?? []).filter(
-        (note) =>
-          note.label &&
-          currentTime >= note.start &&
-          currentTime < (note.end ?? note.start + MOMENT_SECONDS),
+      (timed ?? []).filter(
+        (each) =>
+          each.label &&
+          currentTime >= each.start &&
+          currentTime < (each.end ?? each.start + MOMENT_SECONDS),
       ),
-    [notes, currentTime],
+    [timed, currentTime],
   );
 
   /*
@@ -369,7 +369,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
     const byId = new Map<string, ListedAnnotation>();
     const marks: SeekMark[] = [];
     for (const annotation of [
-      ...(notes ?? []),
+      ...(timed ?? []),
       ...(marked ?? []).filter((each) => each.track?.length),
     ]) {
       // Its own start, or its track's (`startOf`, which would bring the hotspots here).
@@ -387,7 +387,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
     }
     marks.sort((a, b) => a.start - b.start);
     return { marks, byId };
-  }, [notes, marked]);
+  }, [timed, marked]);
 
   const transport = (
     <Transport
@@ -424,21 +424,21 @@ const MediaBody: React.FC<MediaBodyProps> = ({
       onMarkActivate={onAnnotationActivate}
     />
   );
-  const noteLines = playing.map((note) => (
+  const annotationLines = playing.map((annotation) => (
     <span
       className="clover-canvas-captions-cue"
       data-kind="annotation"
-      key={note.id}
+      key={annotation.id}
     >
-      {note.page && (
+      {annotation.page && (
         <span
           className="clover-canvas-captions-cue-label"
-          {...languageProps(note.page.lang)}
+          {...languageProps(annotation.page.lang)}
         >
-          {note.page.text}
+          {annotation.page.text}
         </span>
       )}
-      <span {...languageProps(note.lang)}>{note.label}</span>
+      <span {...languageProps(annotation.lang)}>{annotation.label}</span>
     </span>
   ));
   const captionLines = cues.map((text, index) => (
@@ -462,7 +462,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
    */
   const cuesShown = cues.length + playing.length > 0 && (
     <div className="clover-canvas-captions" aria-live="off">
-      {noteLines}
+      {annotationLines}
       {captionLines}
     </div>
   );

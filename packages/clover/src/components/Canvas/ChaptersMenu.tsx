@@ -9,8 +9,7 @@ import {
 import { formatTime } from "./media/useMediaController";
 import type { CloverRequest } from "../../core/request";
 import { languageProps } from "../../i18n/direction";
-import { useContainerName } from "../../i18n/useContainerName";
-import { EntryThumbnail } from "../../ui/EntryThumbnail";
+import { ChapterEntry } from "../../ui/ChapterEntry";
 
 interface ChaptersMenuProps {
   id: string;
@@ -37,10 +36,14 @@ interface ChaptersMenuProps {
  * the transport's menu until then): each with where it starts, as radio buttons, the one
  * playing checked and its picture under it, as Contents shows the current entry's. A
  * pointer's pick, or Enter, goes there and closes the menu; the arrow keys go from one to
- * the next and leave it open, as the transport's menus did. Over the recording's still
+ * the next and leave it open, as the transport's menus did. Where they have captured
+ * thumbnails, each is listed as Contents lists it (`ChapterEntry`, #441): its thumbnail at
+ * its start, its title over its time; the one playing marked as ever. Over the recording's still
  * (`overStill`), where going there opens the recording and plays it, the arrow keys only
  * move the check, so looking through the names never starts the sound (WCAG 3.2.2):
- * Enter or a press goes. Each label carries its language (WCAG 3.1.2).
+ * Enter or a press goes. Each label carries its language (WCAG 3.1.2). Titled at its top,
+ * as the annotations menu is, in Clover's interface language ("Chapters"), the title its
+ * group's name.
  */
 const ChaptersMenu: React.FC<ChaptersMenuProps> = ({
   id,
@@ -54,7 +57,6 @@ const ChaptersMenu: React.FC<ChaptersMenuProps> = ({
   request,
   onClose,
 }) => {
-  const name = useContainerName(label, labelLang);
   const [time, setTime] = useState(() => element?.currentTime ?? 0);
   useEffect(() => {
     if (!element) return;
@@ -68,6 +70,8 @@ const ChaptersMenu: React.FC<ChaptersMenuProps> = ({
     };
   }, [element]);
   const current = chapterAt(chapters, time);
+  // Captured thumbnails, each chapter's beside it, where any has one (#441).
+  const pictured = chapters.some(chapterPicture);
   // Whether the last press was a pointer's, whose pick closes the menu.
   const pointer = useRef(false);
   const go = (index: number) => {
@@ -81,7 +85,14 @@ const ChaptersMenu: React.FC<ChaptersMenuProps> = ({
       onClose={onClose}
       triggerId={triggerId}
     >
-      <fieldset className="clover-canvas-menu-group" {...name.props}>
+      <fieldset className="clover-canvas-menu-group">
+        {/* Titled as the annotations menu is, in Clover's interface language. */}
+        <legend
+          className="clover-canvas-menu-legend"
+          {...languageProps(labelLang)}
+        >
+          {label}
+        </legend>
         {chapters.map((chapter, index) => (
           <label
             className="clover-canvas-menu-item clover-canvas-chapters-item"
@@ -112,25 +123,31 @@ const ChaptersMenu: React.FC<ChaptersMenuProps> = ({
                 }
               }}
             />
-            <span className="clover-cue-time">{formatTime(chapter.start)}</span>{" "}
-            {/* Only the name carries its language: the time is in digits. */}
-            <span
-              className="clover-cue-text"
-              {...languageProps(chapter.lang || undefined)}
-            >
-              {chapter.label}
-            </span>
-            {index === current && (
-              <EntryThumbnail
-                source={chapterPicture(chapter)}
+            {pictured ? (
+              <ChapterEntry
+                label={chapter.label}
+                lang={chapter.lang || undefined}
+                start={chapter.start}
+                picture={chapterPicture(chapter)}
                 request={request}
-                large
               />
+            ) : (
+              <>
+                <span className="clover-cue-time">
+                  {formatTime(chapter.start)}
+                </span>{" "}
+                {/* Only the name carries its language: the time is in digits. */}
+                <span
+                  className="clover-cue-text"
+                  {...languageProps(chapter.lang || undefined)}
+                >
+                  {chapter.label}
+                </span>
+              </>
             )}
           </label>
         ))}
       </fieldset>
-      {name.node}
     </ControlMenu>
   );
 };

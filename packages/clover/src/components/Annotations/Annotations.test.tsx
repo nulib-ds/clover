@@ -485,7 +485,7 @@ describe("Annotations", () => {
       document.documentElement.lang = "";
     });
 
-    it("keeps the page's language for a note in none, and names its button in both", async () => {
+    it("keeps the page's language for an annotation in none, and names its button in both", async () => {
       document.documentElement.lang = "fr";
       const page = {
         "@context": "http://iiif.io/api/presentation/3/context.json",
@@ -509,14 +509,14 @@ describe("Annotations", () => {
       const button = await screen.findByRole("button", {
         name: "Find on the image: Une note",
       });
-      // Clover's words say they are English; the note, in none, keeps the page's French.
+      // Clover's words say they are English; the annotation, in none, keeps the page's French.
       expect(container.querySelector(".clover-root")).not.toHaveAttribute(
         "lang",
       );
-      const note = screen.getByText("Une note", {
+      const words = screen.getByText("Une note", {
         selector: ".clover-annotations-text",
       });
-      expect(note.closest("[lang]")).toBe(document.documentElement);
+      expect(words.closest("[lang]")).toBe(document.documentElement);
       expect(within(button).getByText("Find on the image:")).toHaveAttribute(
         "lang",
         "en",
@@ -553,7 +553,7 @@ describe("content state", () => {
 
 describe("Annotations, every Canvas's (scope all)", () => {
   const base = "https://example.org/all";
-  const note = (canvas: number, id: string, value: string) => ({
+  const textual = (canvas: number, id: string, value: string) => ({
     id: `${base}/annotation/${id}`,
     type: "Annotation",
     motivation: "commenting",
@@ -587,14 +587,14 @@ describe("Annotations, every Canvas's (scope all)", () => {
       items: [],
       annotations: [
         ...(n !== 2
-          ? [page(n, `tags-${n}`, [note(n, `tag-${n}`, `Tag ${n}`)])]
+          ? [page(n, `tags-${n}`, [textual(n, `tag-${n}`, `Tag ${n}`)])]
           : []),
         ...(n === 2
           ? [
               page(
                 n,
                 "comments-2",
-                [note(n, "comment-2", "Comment 2")],
+                [textual(n, "comment-2", "Comment 2")],
                 "Comments",
               ),
             ]
@@ -608,7 +608,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
   const referenced = page(
     3,
     "comments-3",
-    [note(3, "comment-3", "Comment 3")],
+    [textual(3, "comment-3", "Comment 3")],
     "Comments",
   );
 
@@ -778,7 +778,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
           annotations: [
             page(1, "notes-1", [
               {
-                ...note(1, "boxed", "Boxed"),
+                ...textual(1, "boxed", "Boxed"),
                 target: `${base}/canvas/1#xywh=10,20,30,40`,
               },
             ]),
@@ -827,7 +827,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
 
   /*
    * Mat, 2026-11-16: "they do relate to a targeted canvas and or region, yes?", then
-   * "Those and regions": a note on the whole Canvas pictured by all of it, and a region its
+   * "Those and regions": an annotation on the whole Canvas pictured by all of it, and a region its
    * server cannot cut (level 0) cut here from the whole image at a size the server lists.
    */
   describe("pictures where the server lists sizes alone, or for the whole Canvas", () => {
@@ -863,7 +863,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
             },
           ],
           annotations: [
-            page(1, "notes-1", [{ ...note(1, "noted", "Noted"), target }]),
+            page(1, "notes-1", [{ ...textual(1, "noted", "Noted"), target }]),
           ],
         },
       ],
@@ -888,7 +888,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
         ),
     );
 
-    it("pictures a note on the whole Canvas by all of it, at a size the server lists", async () => {
+    it("pictures an annotation on the whole Canvas by all of it, at a size the server lists", async () => {
       const { container } = render(
         <Clover.Root
           iiifContent={pictured(`${base}/canvas/1`)}
@@ -1040,7 +1040,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
             page(
               1,
               "comments-1",
-              [note(1, "comment-1", "Comment 1")],
+              [textual(1, "comment-1", "Comment 1")],
               "Comments",
             ),
           ],
@@ -1084,7 +1084,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
  * Mat, 2026-11-16: "make it so georeferencing annotations are handled by Page on other
  * items. don't categorize these annotations differently. do leave the map … map icon",
  * then "don't organize by motivation. always just organize by sheet". The Sanborn sheets:
- * on each Canvas a page of georeferences ("Georeferences") and one of notes ("Notes").
+ * on each Canvas a page of georeferences ("Georeferences") and one of other annotations ("Notes").
  */
 describe("Annotations, with georeferenced images", () => {
   const sheet = (n: number) =>
@@ -1102,7 +1102,7 @@ describe("Annotations, with georeferenced images", () => {
         <Clover.Annotations scope="all" />
       </Clover.Root>,
     );
-    // Its georeferenced images arrive with their reader, after its notes.
+    // Its georeferenced images arrive with their reader, after its other annotations.
     await screen.findByRole("button", {
       name: "Find on the map: Evanston, Illinois | 1920 | sanborn01857_004 p17",
     });
@@ -1115,7 +1115,7 @@ describe("Annotations, with georeferenced images", () => {
     expect(screen.queryByRole("region", { name: "Notes" })).toBeNull();
     expect(document.querySelector(".clover-annotations-places")).toBeNull();
     // Sheet 28's two maps first, each its picture with the map's pin over its corner,
-    // then its note.
+    // then its annotation.
     const rows = within(two).getAllByRole("listitem");
     expect(rows).toHaveLength(3);
     for (const row of rows.slice(0, 2))
@@ -1126,7 +1126,7 @@ describe("Annotations, with georeferenced images", () => {
       ).toHaveAttribute("aria-hidden", "true");
     expect(rows[2].querySelector(".clover-annotations-place-glyph")).toBeNull();
     expect(rows[2]).toHaveTextContent("Two maps on one sheet");
-    // One toggle for the notes the Canvas shows; the georeferenced images the map lays.
+    // One toggle for the annotations the Canvas shows; the georeferenced images the map lays.
     expect(screen.getAllByRole("checkbox")).toHaveLength(1);
     expect(
       screen.getByRole("checkbox", { name: "Hide annotations" }),
@@ -1153,7 +1153,7 @@ describe("Annotations, with georeferenced images", () => {
 
   /*
    * Mat, 2026-11-16: "this should be a rule for annotations as they relate to body. not a
-   * template specific thing." Sheet 24's note is on the whole sheet: picked in the list,
+   * template specific thing." Sheet 24's `commenting` annotation is on the whole sheet: picked in the list,
    * the Body goes to its Canvas, draws the line round it and frames it, as in any layout.
    */
   it("has the Body draw the line round a whole Canvas picked in the list, and frame it", async () => {
@@ -1232,7 +1232,7 @@ describe("Annotations in several languages", () => {
     target: `${base}/canvas/${canvas}`,
   });
   // A transcription and its translation, one annotation each, as Maktaba publishes them,
-  // and a note in no language on the first page.
+  // and an annotation in no language on the first page.
   const manifest = {
     "@context": "http://iiif.io/api/presentation/3/context.json",
     id: `${base}/manifest.json`,

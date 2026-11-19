@@ -1056,15 +1056,34 @@ every rule below.
     the Canvas each is on (`sheetsOf`), in sequence order, whatever page each was
     published on and whatever it is for (Mat, 2026-11-16: "don't organize by motivation.
     always just organize by sheet"; by layer, the pages sharing a label, from 2026-10-19),
-    so no page's label heads them in the list: one toggle at its head hides all it lists,
-    the Canvas's annotations menu hiding a page at a time, under its label. Later (Mat,
+    so no page's label heads them in the list: one toggle at its head hides all it lists.
+    The Canvas's annotations menu lists the view's the same way (Mat, 2026-11-19, #440;
+    a page at a time under its label until then): by the Canvas each is on, named where
+    the view shows several, its georeferenced images first, one toggle at its head, each
+    entry the section's own (`ui/AnnotationEntry.tsx`: `EntryContent`, its time, its
+    region's picture, `EntryPicture`, its square holding its room until it arrives, and
+    its words, the section's in full by `EntryBodies` and the menu's as plain text by
+    `EntryWords`, a radio's `label` holding only phrasing content), each a memoized row.
+    A georeferenced image, and an annotation whose body is a place (Cookbook 0139), whose
+    box opens over the Canvas as it is picked, a popup that would close the menu with focus
+    in it, are picked on a press, Enter or Space alone, the menu closed first, focus on its
+    control (WCAG 2.4.3), an arrow key's move only moving to them (3.2.2).
+    Every annotation's picture loads through one lazy module, `ui/AnnotationPicture.tsx`,
+    never `ui/EntryThumbnail`: the menu loads without a recording's transport, and an
+    import of that module from it split it out of the transport's chunk, 0.3 kB more on a
+    Timeline's first view (2026-11-19). Later (Mat,
     the same day): "in future we may want to better organize by motivation"; until then,
     nothing in the list sorts or names them by motivation or by page. `scope="view"` is
     the same, the view's Canvases alone. A page's label is its own, else its
     AnnotationCollection's (`pageLabel`; Cookbook 0309, Mat, 2026-10-29: "treat them like
     collections to a degree"), read from the Manifest's reference too (`embedPage` keeps
     what the reference says that the page does not), for the Canvas's menu and the
-    Collection's name. `selectAnnotationCollection` gives
+    Collection's name. As a rule, a page's label is shown as the resource gives it, and
+    Clover never assigns one (Mat, 2026-11-19: "rendering label as it comes from manifest
+    is allowed. just don't assign it from codebase. treat annotation page labels as they
+    come as a rule"); nor do Clover's own words, in code, docs or the interface, call
+    annotations notes (the same day: "they are textual annotations targeting the
+    canvas"). `selectAnnotationCollection` gives
     the first such Collection, its pages and its entries; `Items of="annotations"` (its own
     chunk, `AnnotationItems.tsx`) lists and steps them, and the Default header names it
     under the title with a pager, as a Collection's members, picking the first as the
@@ -1079,7 +1098,7 @@ every rule below.
     Manifest's Collection loads lazily, and a list reads the other Manifests it names for
     their pictures and titles;
     a Manifest of one Canvas gets no Canvas labels or `aria-current` (`grouped`), which
-    would only repeat the item and push a note's headings a level deeper.
+    would only repeat the item and push an annotation's headings a level deeper.
     The Canvases in view are `aria-current`; on a move the list scrolls their group to
     its start, and a picked entry to nearest, within its own scroller (`scrollerOf`,
     never the page), skipped while the pointer is over it or focus in it.
@@ -1090,8 +1109,8 @@ every rule below.
     read (`resolveThumbnail`), at 52 (twice the `l` square it is shown at) and never more
     than the region has. A service that cannot cut (level 0, as mapsnap's Sanborn sheets'
     is) has it cut here from the whole image (Mat, 2026-11-16: "Those and regions"; none
-    from 2026-10-19, to spare the download): `RegionThumbnail.tsx`, lazy, loaded only for
-    an entry with a region, takes the smallest size the server lists that gives the region
+    from 2026-10-19, to spare the download): `ui/AnnotationPicture.tsx`, lazy, which
+    draws every annotation's picture since #440, takes the smallest size the server lists that gives the region
     52 on its shorter side, else the largest, and places it in the square as `cover`
     fills it with a server's cut (`data-cut`, in shares of the square, its clipping inline so it never spills on a page without the stylesheet, and so in no sheet: in core it put 3 to 13 bytes on six budgets). A service-less
     image still gets none. One on the whole Canvas is pictured by all of it, at a size the
@@ -1171,7 +1190,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   layout, so before this a move's new hotspots lay over the last view and the camera
   glided in the wrong scene, then jumped at the swap. Framing is a cut
   (`fitAnnotation(world, true)`) unless `animateAnnotations`. A content state with a
-  note drops its region from the target, so the pick does the one framing.
+  body drops its region from the target, so the pick does the one framing.
 - **The upgrader and fragments.** `@iiif/parser`'s upgrader turns an object target with a
   fragment in its id into a path (`…/canvas/1/xywh=…`); `toPresentation4` runs
   `keepFragments` (lazy, with the upgrader) first, rewriting it as a SpecificResource.
@@ -1248,7 +1267,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `MediaBody` shows it among the caption cues while its stretch plays (a moment, three
     seconds), the menu lists it by its start, and a pick seeks (`sought`), never plays.
     Each cue carries its own `lang`, not the captions box. `CanvasAnnotation.pageLabel`
-    (its AnnotationPage's) labels its cue and groups the menu.
+    (its AnnotationPage's) labels its cue; the menu groups by Canvas (#440).
   - An annotation whose targets each give a region and a time, `xywh=…&t=…` (Mat,
     2026-10-19: a person followed through a film), is a track: `PlacedAnnotation.track`,
     its keys in time order (`Canvas/track.ts`, lazy with the hotspots, as is
@@ -1285,7 +1304,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `loadAnnotationSets` (a page's `next` followed too) and opens the Manifest of the first
   annotation whose target names one (`manifestOfAnnotation`: the Canvas's `partOf`), or
   the host's `manifestId` among them. `load` sets `stateSets` from the content (these, or
-  a content state's note) once per content; `arrive` never resets them, so moves between
+  a content state's own annotation) once per content; `arrive` never resets them, so moves between
   the Manifests they name keep them. `selectAnnotation` on a Canvas not in the Manifest
   leaves the pick `pending` and opens its `partOf` Manifest through `show` (which picks
   it, at its Canvas), or, when the host holds the Manifest, calls `onManifestChange` and
@@ -1293,11 +1312,11 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   The list's `useElsewhere` fetches the other Manifests (one promise per Root and id)
   only when the list shows, for names and thumbnails; `inOrder` keeps the annotations'
   order whenever any group is elsewhere.
-- **A content state's note.** `resolveContentState` keeps an Annotation's `body` as
+- **A content state's own annotation.** `resolveContentState` keeps an Annotation's `body` as
   `annotation` (its own id and target); `loadContent` returns it, and `arrive` makes it a
   set of its own (`${id}#content-state`, `source: "added"`) and picks it, when its
   Canvas is the one opened. The store's `addedSets` is `hostSets` then `stateSets`
-  (closures in `createClover`), so `loadAnnotations` never drops the note. Its body is
+  (closures in `createClover`), so `loadAnnotations` never drops it. Its body is
   read by its declared `format`: Digital Collections' links write `<em>` in a
   `text/plain` body, which shows as written.
 - **A content state's search result** (Mat, 2026-11-12: "target the tenth result for
@@ -1317,7 +1336,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     annotation with its `id`, that result is chosen with the answer (`annotationId`, in
     the same `store.set`), so Search keeps it ("10 / 10", where the page's first result
     would be "9 / 10") and it is listed nowhere else. Where none has, it joins
-    `stateSets` (`settle`), listed by Annotations as a note is, and the search goes to its
+    `stateSets` (`settle`), listed by Annotations as a content state's own annotation is, and the search goes to its
     first result as ever; where the search found nothing, or failed, it is chosen there.
     Settled once: a later search never moves it.
   - A search with nothing to ask (`clover.search`: no service, an empty query) lists it
@@ -1711,7 +1730,17 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     fills the Body, its zoom row ending where the Canvas's row did
     (`--clover-map-controls-right`), the page's picture in an Inset in the map's box
     (`Thumbnail` of its `owner`, else the Root's Canvas), no Close, and every child of the
-    Canvas but the box out of sight once the map has come in (`Body/Caption.css`). Each box
+    Canvas but the box out of sight once the map has come in (`Body/Caption.css`), but the
+    annotations control, the row's last over the map, its menu opening over it (Mat,
+    2026-11-19: "annotations toggle should come over to the map view as well. keep it in
+    same location as it is elsewhere"; the map's zoom row ending a control before it); so
+    expanded, a box is the Body's view, no popup (`useOneOpen` only while small). An
+    annotation picked while one fills the Body, in that menu, Annotations or Search, closes
+    it, bringing the Canvas back framed on it (Mat, 2026-11-19: "Bring it back";
+    `bringBack` in `CanvasView`, on the menu's pick and as the Root's selection or `refind`
+    changes, never as it mounts), rather than trading back into its box, a popup, which
+    would close the menu the pick came from, focus with it; a picked annotation's own
+    place (`place-of`) goes as another is picked. Each box
     gets its own `swapped`, and focus follows a swap to `swap-<id>`, its Expand map or the
     picture's Collapse map, frame by frame until it takes. Where the panel lies over the
     Body (a phone), `PanelPane` puts it away as a place is asked for, focus to its toggle
@@ -1763,7 +1792,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     we do on default viewer for the map control overlaying the image. one should be able
     to swap between the two"), with Close after it, as the map's box has after Expand map
     (Mat, 2026-11-16: "include close button here as well"; the Canvas's map box's picture
-    too), and the map's Image control, at the end of its zoom row, puts the picture away and
+    too), which puts the picture away, never the map (Mat, 2026-11-19: it "is toggling the
+    body and not closing the inset as expected"; `useMapPutAway`), and the map's Image
+    control, at the end of its zoom row, puts the picture away and
     brings it back (`held` in `MapView`, for any `children` while the map can be moved;
     "add an image icon above that toggles inset like we do for the map inset on and image
     itself"), as the Canvas's Map control does the map's box. Under the pointer, an Inset
@@ -1931,7 +1962,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     (Mat, 2026-11-13: "Keep zoom 12", shown the campus's outline 10× farther out than its
     sheet); a `zoom` given caps both.
   - Georeferences given as the content (an Annotation alone, or AnnotationPages or an
-    AnnotationCollection of them; Mat, 2026-11-12) are never notes or content states:
+    AnnotationCollection of them; Mat, 2026-11-12) are never shown as annotations or read as content states:
     `core/georeference-content.ts`, a chunk of its own, reached from the chunks that
     already read such content (`follow-content.ts` for one alone, `annotations-content.ts`
     for pages; `core/load.ts`, which every Viewer loads, carries none of it), opens what
@@ -2663,7 +2694,10 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   as Choice's and Annotations' are, loaded once it shows: each chapter set as Contents
   sets a Range on a recording's time (Mat, 2026-11-04: "render chapters like we do in the
   chapters/structures ranges component"), its start muted in a column and its title
-  wrapping beside it, the one playing tinted and bold with its picture under both, the
+  wrapping beside it, the one playing tinted and bold; where the chapters have captured
+  thumbnails, every one is a `ChapterEntry` (`ui/ChapterEntry.tsx`, #441, 2026-11-19), its
+  thumbnail at its start and its title over its time, as Contents and the seek bar's
+  popover list it, one size for all three (`CHAPTER_THUMBNAIL_SIZE`); the
   row the control (its radio unseen, the row ringed in the accent while it has focus,
   `ControlMenu.css`); a pointer's pick or Enter goes there
   and closes, the arrows move and leave it open. A lone recording draws the row for it.
@@ -3281,8 +3315,8 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   draw. The navigator (`overlays/Navigator.ts`) loads in `attachNavigator`, the latest
   call winning. Tests reach them with the `open()` / `loaded()` helpers in
   `Canvas/index.test.tsx`.
-- A hotspot's note is a `Tip` with `scrolls`: capped at the Body's height, it scrolls
-  (WCAG 1.4.10), by wheel or touch over it and, from the hotspot's keys, by `scrollNote`
+- A hotspot's Tip, its annotation's words, has `scrolls`: capped at the Body's height, it scrolls
+  (WCAG 1.4.10), by wheel or touch over it and, from the hotspot's keys, by `scrollTip`
   in `Canvas/Annotations.tsx` (kept there, out of the Tip every Canvas loads). A scroller
   cuts what passes its edge, so its gap to the hotspot is a clear border in its own box,
   not `::before`; mind both when moving it. It has `tabindex="-1"` and a

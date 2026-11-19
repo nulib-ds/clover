@@ -13,11 +13,11 @@
  *     the `helmert` transformation) and its SvgSelector as fetched, its target now the
  *     Canvas, as the Georeference Extension allows. Sheet 28 holds two maps, so it has
  *     two;
- *   - Sheet 17: a `describing` note on the National W.C.T.U. Headquarters' lot, and the
+ *   - Sheet 17: a `describing` annotation on the National W.C.T.U. Headquarters' lot, and the
  *     Evanston Public Library tagged with a GeoJSON Feature, a point (Cookbook 0139);
- *   - Sheet 24: a `commenting` note on the whole sheet, and "POST OFFICE" tagged where it
+ *   - Sheet 24: a `commenting` annotation on the whole sheet, and "POST OFFICE" tagged where it
  *     is printed;
- *   - Sheet 28: a `commenting` note on the whole sheet, in English and Spanish, a Choice
+ *   - Sheet 28: a `commenting` annotation on the whole sheet, in English and Spanish, a Choice
  *     (Cookbook 0346);
  *   - Sheet 115: "NORTHWESTERN UNIVERSITY" tagged where it is printed, and a `linking`
  *     annotation from the sheet's title, "EVANSTON, ILL." over "115", to the volume at the
@@ -61,7 +61,7 @@ const SIZE = { width: 1407, height: 2063 };
 const THUMBNAIL = { width: 352, height: 516 };
 
 /**
- * The sheets, by the number each prints, in the volume's order, and what each notes. A
+ * The sheets, by the number each prints, in the volume's order, and what its Notes page holds. A
  * region is `[x, y, w, h]` in the Canvas's pixels; `text` is a value by language.
  */
 const SHEETS = [
@@ -299,7 +299,7 @@ const textual = (value, language) => ({
   format: "text/plain",
 });
 
-/** What a note says: one TextualBody, or a Choice of them by language (Cookbook 0346). */
+/** What an annotation of the Notes page says: one TextualBody, or a Choice of them by language (Cookbook 0346). */
 function said(text) {
   const bodies = Object.entries(text).map(([language, value]) =>
     textual(value, language),
@@ -324,7 +324,7 @@ const georeference = (canvas, fit, index) => ({
   body: fit.body,
 });
 
-/** A note as an annotation on the Canvas, or on a region of it. */
+/** An entry of the Notes page as an annotation on the Canvas, or on a region of it. */
 function note(canvas, fits, number, entry, index) {
   const id = `${canvas}/notes/${index + 1}`;
   const target = entry.region

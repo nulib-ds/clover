@@ -480,7 +480,34 @@ describe("Panel", () => {
     expect(about).toHaveAttribute("aria-selected", "true");
   });
 
-  it("offers the Collection a Manifest is part of, fetching it only when opened", async () => {
+  // nulib-ds/clover#439: About names it, a link that fetches nothing; the section is
+  // the page's to ask for.
+  it("names the Collection a Manifest is part of in About, with no Collection section", async () => {
+    const SHELF = "https://example.org/letters";
+    const fetch = vi.fn();
+    render(
+      <Clover.Root
+        iiifContent={{
+          ...manifest,
+          partOf: [
+            { id: SHELF, type: "Collection", label: { en: ["Letters"] } },
+          ],
+        }}
+        request={{ fetch }}
+      >
+        <Clover.Panel layout="accordion" />
+      </Clover.Root>,
+    );
+    const heading = await screen.findByRole("heading", { name: "Part of" });
+    const group = heading.closest("section")!;
+    expect(
+      within(group).getByRole("link", { name: "Letters" }),
+    ).toHaveAttribute("href", SHELF);
+    expect(screen.queryByRole("button", { name: "Collection" })).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("offers the Collection a Manifest is part of where asked, fetching it only when opened", async () => {
     const SHELF = "https://example.org/letters";
     const letter = {
       ...manifest,
@@ -509,7 +536,7 @@ describe("Panel", () => {
     );
     render(
       <Clover.Root iiifContent={letter} request={{ fetch }}>
-        <Clover.Panel />
+        <Clover.Panel partOfCollection />
       </Clover.Root>,
     );
     const tab = await screen.findByRole("tab", { name: "Collection" });
@@ -577,9 +604,9 @@ describe("Panel", () => {
 describe("The sections a panel has", () => {
   const SHELF = "https://example.org/letters";
   /*
-   * The letter, reached through a Collection, with a Content Search service and a Range:
-   * About, Collection, Contents and Search have data; Views, a Map, the Transcript and
-   * Annotations have none.
+   * The letter, part of a Collection, with a Content Search service and a Range: About,
+   * Contents and Search have data, and the Collection where a page asks for it
+   * (`partOfCollection`); Views, a Map, the Transcript and Annotations have none.
    */
   const several = {
     ...manifest,
@@ -610,6 +637,16 @@ describe("The sections a panel has", () => {
     render(
       <Clover.Root iiifContent={several}>
         <Clover.Panel />
+      </Clover.Root>,
+    );
+    await screen.findByRole("tab", { name: "About" });
+    expect(tabs()).toEqual(["About", "Contents", "Search"]);
+  });
+
+  it("has the Collection a Manifest is part of where asked", async () => {
+    render(
+      <Clover.Root iiifContent={several}>
+        <Clover.Panel partOfCollection />
       </Clover.Root>,
     );
     await screen.findByRole("tab", { name: "About" });
@@ -675,12 +712,31 @@ describe("The sections a panel has", () => {
   });
 
   it("tells a layout of its own which sections it would have", async () => {
-    function Asked({ sections }: { sections?: Clover.PanelSection[] }) {
-      return <p>{Clover.usePanelSections(sections).join(" ") || "none"}</p>;
+    function Asked({
+      sections,
+      partOfCollection,
+    }: {
+      sections?: Clover.PanelSection[];
+      partOfCollection?: boolean;
+    }) {
+      return (
+        <p>
+          {Clover.usePanelSections(sections, { partOfCollection }).join(" ") ||
+            "none"}
+        </p>
+      );
     }
     const { rerender } = render(
       <Clover.Root iiifContent={several}>
         <Asked />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByText("about contents search"),
+    ).toBeInTheDocument();
+    rerender(
+      <Clover.Root iiifContent={several}>
+        <Asked partOfCollection />
       </Clover.Root>,
     );
     expect(

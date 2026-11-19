@@ -12,7 +12,7 @@
  *   import { Map } from "@nulib/clover/map";
  */
 
-export { CloverMap as Map } from "../components/Map/Map";
+export { CloverMap as Map, useMapPutAway } from "../components/Map/Map";
 export type { MapProps } from "../components/Map/Map";
 export { setMapWorkerUrl } from "../core/map-config";
 export {

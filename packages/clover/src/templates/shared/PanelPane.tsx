@@ -44,6 +44,8 @@ export interface PanelPaneOptions {
    * room for a panel with nothing in it.
    */
   sections?: readonly PanelSection[];
+  /** The Collection section for the Collection it is `partOf` (`Clover.Panel`'s). */
+  partOfCollection?: boolean;
   /**
    * The Panel, `Clover.Panel`, drawn at once, on the server too: Default's. Without it,
    * the pane loads the Panel's code itself (Mat, 2026-11-04: "always lazy if started
@@ -77,6 +79,7 @@ export function usePanelPane({
   followFocus,
   body,
   sections,
+  partOfCollection,
   panel,
 }: PanelPaneOptions) {
   const drawer = useDrawer({
@@ -114,6 +117,7 @@ export function usePanelPane({
   const toggle = (
     <PaneToggle
       sections={sections}
+      partOfCollection={partOfCollection}
       open={drawer.open}
       onOpenChange={(next) =>
         next && !Part
@@ -153,9 +157,13 @@ export type PanelPaneState = ReturnType<typeof usePanelPane>;
  */
 function PaneToggle({
   sections,
+  partOfCollection,
   ...props
-}: { sections?: readonly PanelSection[] } & PanelToggleProps) {
-  return Clover.usePanelSections(sections).length ? (
+}: {
+  sections?: readonly PanelSection[];
+  partOfCollection?: boolean;
+} & PanelToggleProps) {
+  return Clover.usePanelSections(sections, { partOfCollection }).length ? (
     <Clover.PanelToggle {...props} />
   ) : null;
 }
@@ -177,7 +185,8 @@ export function PanelPane({
   "onClose" | "closeOnEscape"
 >) {
   const { id, over, docked, side, Part } = pane;
-  const offered = Clover.usePanelSections(panel.sections);
+  // Its Collection section as the Panel's (`partOfCollection`).
+  const offered = Clover.usePanelSections(panel.sections, panel);
   useAwayForPlaces(pane);
   if (!offered.length) return null;
   // Between the panel and the main pane: after the panel on the start side.

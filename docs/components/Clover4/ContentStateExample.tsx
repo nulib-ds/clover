@@ -31,16 +31,19 @@ const SHOWN = [
 }));
 
 /**
- * The content state with a note of the page's own, where one is written (Mat,
+ * The content state with a comment of the page's own, where one is written (Mat,
  * 2026-11-01: "optional … text/plain … carry with the annotation if set"): the
  * annotation's body, plain text, as Digital Collections' shared links carry theirs, and
  * which Clover shows on the Canvas as it opens one.
  */
-function withNote(state: ContentStateOutput, note: string): ContentStateOutput {
-  if (!note.trim()) return state;
+function withComment(
+  state: ContentStateOutput,
+  comment: string,
+): ContentStateOutput {
+  if (!comment.trim()) return state;
   const json = {
     ...state.json,
-    body: { type: "TextualBody", value: note, format: "text/plain" },
+    body: { type: "TextualBody", value: comment, format: "text/plain" },
   };
   return { json, encoded: encodeContentState(json) };
 }
@@ -95,8 +98,8 @@ export function ContentStateExample({
   const mock = useMock(resource.mock ? resource.resource : "");
   const iiifContent = resource.mock ? mock : resource.resource;
   const [reported, setState] = useState<ContentStateOutput | null>(null);
-  const [note, setNote] = useState("");
-  const state = reported && withNote(reported, note);
+  const [comment, setComment] = useState("");
+  const state = reported && withComment(reported, comment);
   return (
     <>
       {!preview && (
@@ -127,19 +130,19 @@ export function ContentStateExample({
                 ) : (
                   <div className={styles.view} />
                 )}
-                <div className={styles.note}>
-                  <label htmlFor={`${id}-note`} className={styles.name}>
-                    Note (optional)
+                <div className={styles.comment}>
+                  <label htmlFor={`${id}-comment`} className={styles.name}>
+                    Comment (optional)
                   </label>
                   <textarea
-                    id={`${id}-note`}
+                    id={`${id}-comment`}
                     className={styles.field}
                     rows={2}
-                    value={note}
-                    aria-describedby={`${id}-note-hint`}
-                    onChange={(event) => setNote(event.target.value)}
+                    value={comment}
+                    aria-describedby={`${id}-comment-hint`}
+                    onChange={(event) => setComment(event.target.value)}
                   />
-                  <p id={`${id}-note-hint`} className={styles.hint}>
+                  <p id={`${id}-comment-hint`} className={styles.hint}>
                     Plain text, carried as the annotation&rsquo;s body.
                   </p>
                 </div>

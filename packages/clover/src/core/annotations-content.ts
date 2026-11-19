@@ -16,7 +16,7 @@ import { asArray } from "../lib/asArray";
  * Canvas's Manifest (`partOf`): the first one's is opened (or the host's choice among
  * them), at that annotation's Canvas, that annotation to be picked, and all of them come
  * back as sets to show wherever their Canvases are. Georeference Extension annotations
- * among them are not notes: they are placed on the Canvases or images they georeference
+ * among them are not shown as annotations: they are placed on the Canvases or images they georeference
  * (`georeferenceContent`), and the rest, if any, come back as sets as ever. Its own
  * module, loaded only for such content, so no other page carries it.
  */

@@ -3,18 +3,14 @@
   "id": "https://iiif.archive.org/iiif/bwb_T5-AFP-938/manifest.json",
   "type": "Manifest",
   "label": {
-    "none": [
-      "To the lighthouse "
-    ]
+    "none": ["To the lighthouse "]
   },
   "homepage": [
     {
       "format": "text/html",
       "id": "https://archive.org/details/bwb_T5-AFP-938",
       "label": {
-        "en": [
-          "Item Page on Internet Archive"
-        ]
+        "en": ["Item Page on Internet Archive"]
       },
       "type": "Text"
     }
@@ -26,18 +22,14 @@
           "format": "text/html",
           "id": "https://archive.org",
           "label": {
-            "en": [
-              "Internet Archive Homepage"
-            ]
+            "en": ["Internet Archive Homepage"]
           },
           "type": "Text"
         }
       ],
       "id": "https://archive.org",
       "label": {
-        "en": [
-          "The Internet Archive"
-        ]
+        "en": ["The Internet Archive"]
       },
       "logo": [
         {
@@ -88,9 +80,7 @@
         }
       ],
       "label": {
-        "none": [
-          "40"
-        ]
+        "none": ["40"]
       },
       "type": "Canvas",
       "width": 1641

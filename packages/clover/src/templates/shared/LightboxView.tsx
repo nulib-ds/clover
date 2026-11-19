@@ -23,6 +23,7 @@ export default function LightboxView({
   defaultPanelOpen = true,
   panelLayout = "accordion",
   panelSections,
+  partOfCollection,
   panelLabels,
   download = true,
   languages = true,
@@ -78,6 +79,7 @@ export default function LightboxView({
     defaultOpen: defaultPanelOpen,
     followFocus: useFollowFocus(),
     sections: panelSections,
+    partOfCollection,
     body: () =>
       panes.current?.querySelector<HTMLElement>(
         ".clover-template-lightbox-body",
@@ -123,6 +125,7 @@ export default function LightboxView({
           pane={pane}
           layout={panelLayout}
           sections={panelSections}
+          partOfCollection={partOfCollection}
           labels={panelLabels}
           download={download}
           languages={languages}

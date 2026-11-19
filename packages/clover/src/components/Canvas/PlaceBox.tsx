@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from "react";
 
 import { Close } from "../Body/glyphs";
-import { GivenMap, MapView, useRootMap } from "../Map/MapView";
+import { GivenMap, MapView, useMapPutAway, useRootMap } from "../Map/MapView";
 import { Thumbnail } from "../Primitives/Primitives";
 import { canvasGeoreferences } from "../../core/geo";
 import { isGeoreferencedContent } from "../../core/geo-detect";
@@ -104,7 +104,11 @@ export default function PlaceBox({
         : undefined,
     [georeferenced, canvases],
   );
-  useOneOpen(open, () => onClose(false));
+  /*
+   * A popup while it is a box over the Canvas, put away as another opens; filling the Body,
+   * it is the Body's view, and the annotations menu opens over it (`Controls`' `away`).
+   */
+  useOneOpen(open && !swapped, () => onClose(false));
   /*
    * Asked for from a list, focus goes back to what asked as it is put away (WCAG 2.4.3):
    * each ask's, as it comes; or, where that went away with what held it (a panel over the
@@ -141,7 +145,7 @@ export default function PlaceBox({
     focusSoon(() => document.getElementById(`swap-${id}`));
   }, [swapped, id]);
   if (!open) return null;
-  // Its Close, in whichever box is shown: the map's, or the page's picture's over it.
+  // Its Close, on the map's box: the page's picture over the map has its own.
   const closer = (
     <Button
       id={`close-${id}`}
@@ -155,7 +159,8 @@ export default function PlaceBox({
   /*
    * Expanded, the page's picture over the map, in its box under its zoom row (`Inset.css`),
    * with Close after its Collapse map, as the map's box has after Expand map (Mat,
-   * 2026-11-16: "include close button here as well").
+   * 2026-11-16: "include close button here as well"), which puts the picture away, as the
+   * map's Image control does (`useMapPutAway`), never the map under it.
    */
   const page = swapped && (
     <Inset
@@ -164,7 +169,7 @@ export default function PlaceBox({
       lang={langOf("mapCollapse")}
       expandId={`swap-${id}`}
       onExpand={onSwap}
-      actions={closer}
+      actions={<PageClose id={`close-page-${id}`} />}
     >
       <Thumbnail of="canvas" value={owner} alt="" size={720} />
     </Inset>
@@ -251,6 +256,22 @@ function backTo(from: Element | null): Element | null {
     if (reachable(opener)) return opener;
   }
   return null;
+}
+
+/** Close on the page's picture over the expanded map: puts the picture away. */
+function PageClose({ id }: { id: string }) {
+  const { t, langOf } = useCloverTranslation();
+  const putAway = useMapPutAway();
+  return (
+    <Button
+      id={id}
+      label={t("commonClose")}
+      lang={langOf("commonClose")}
+      onClick={() => putAway?.()}
+    >
+      <Close />
+    </Button>
+  );
 }
 
 /**

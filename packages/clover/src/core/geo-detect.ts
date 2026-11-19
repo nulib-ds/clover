@@ -62,7 +62,7 @@ export function canvasHasMapData(canvas: unknown): boolean {
 
 /**
  * Whether an annotation is a Georeference Extension annotation (motivation
- * `georeferencing`): a map to lay on what it targets, never a note or a place to go.
+ * `georeferencing`): a map to lay on what it targets, never an annotation to show or a place to go.
  */
 export const isGeoreferencing = (annotation: unknown): boolean =>
   asArray((annotation as Json | null)?.motivation).includes("georeferencing");

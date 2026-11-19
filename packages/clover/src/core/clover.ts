@@ -106,7 +106,7 @@ export interface CloverState {
   /**
    * Sets beside the Manifest's own pages: its images' own (Cookbook 0326, read once it is
    * shown, their module loaded then), the host's through `annotations`, and a content
-   * state's note.
+   * state's own annotation.
    */
   addedSets: AnnotationSet[];
   /** A Content Search of the Manifest: its query, progress and hits. */
@@ -354,7 +354,7 @@ export function createClover(options: CloverOptions = {}): Clover {
   let searching: AbortController | null = null;
   /*
    * The added sets: the Manifest's images' own (Cookbook 0326, `image-layers.ts`), the
-   * host's (`annotations`), and a content state's note. Each changes without the others,
+   * host's (`annotations`), and a content state's own annotation. Each changes without the others,
    * so the store holds them together.
    */
   let layerSets: AnnotationSet[] = [];
@@ -363,7 +363,7 @@ export function createClover(options: CloverOptions = {}): Clover {
   /**
    * The annotation a content state targets (a search's result, by its `id`), held while
    * a search is to answer: where the answer has it, it is the search's; where it has not,
-   * it is listed with the content's own, as a note is (Mat, 2026-11-12: "it should just
+   * it is listed with the content's own, as one of them (Mat, 2026-11-12: "it should just
    * relegate to an annotation in the annotation pane"). Which, the search's own code
    * decides (`searchInto`), and with no query to search for, the content state's lists it
    * from the start (`follow`): here, only what must outlive both, and the search with
@@ -489,11 +489,11 @@ export function createClover(options: CloverOptions = {}): Clover {
         canvases[0]?.id ??
         null);
     /*
-     * The content's own annotation to pick (a content state's note, the first of the
+     * The content's own annotation to pick (a content state's own, the first of the
      * annotations given as the content), on the Canvas it opens on, so it names itself
      * there and in the list. The link then opens its Canvas (past any placeholder) and
      * the pick frames it once the spread is drawn, as a pick from the list does: one move
-     * into it, not a cut to its region and a second move to the note.
+     * into it, not a cut to its region and a second move to the annotation.
      */
     const picked =
       pick && findEntry(stateSets, pick)?.canvasId === canvasId ? pick : null;
@@ -650,19 +650,19 @@ export function createClover(options: CloverOptions = {}): Clover {
       });
       if (signal.aborted) return;
       /*
-       * The content's own annotations: a content state's note, as a set of its own, or the
+       * The content's own annotations: a content state's own, as a set of its own, or the
        * annotations given as the content. They stay through moves to the other Manifests
        * they name, until the next content.
        */
-      const note = loaded.annotation;
-      const noted = note
-        ? readPage({ items: [note] }, `${note.id}#content-state`)
+      const stated = loaded.annotation;
+      const entries = stated
+        ? readPage({ items: [stated] }, `${stated.id}#content-state`)
         : [];
-      stateSets = noted.length
-        ? [{ id: `${note!.id}#content-state`, source: "added", entries: noted }]
+      stateSets = entries.length
+        ? [{ id: `${stated!.id}#content-state`, source: "added", entries }]
         : (loaded.annotationSets ?? []);
       sought = loaded.sought ?? null;
-      const pick = pending ?? noted[0]?.id ?? loaded.pick;
+      const pick = pending ?? entries[0]?.id ?? loaded.pick;
       pending = null;
       store.set({ throughCollection: Boolean(loaded.collection) });
       contentTargets = loaded.targets ?? null;

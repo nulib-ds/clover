@@ -20,7 +20,7 @@ import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
 import fullCanvasJson from "../../fixtures/iiif-cookbook/0266-full-canvas-annotation.json";
 import navPlaceJson from "../../fixtures/iiif-cookbook/0154-geo-extension.json";
-import { evanston } from "../../fixtures/georef";
+import { DC_CANVAS_ID, evanston } from "../../fixtures/georef";
 import missingImageJson from "../../fixtures/iiif-cookbook/0283-missing-image.json";
 import { initCloverI18n } from "../../i18n";
 import { IdPrefixContext } from "../../ui/useUniqueId";
@@ -367,7 +367,7 @@ describe("Canvas", () => {
     );
   });
 
-  it("loads the Canvas a content state names, its note drawn there", async () => {
+  it("loads the Canvas a content state names, its annotation drawn there", async () => {
     const BOOK = "https://example.org/book.json";
     const fetch = vi.fn(
       async () =>
@@ -558,6 +558,30 @@ describe("Canvas", () => {
     expect(box).not.toBeInTheDocument();
     expect(figure).not.toHaveAttribute("data-place");
     await waitFor(() => expect(control).toHaveFocus());
+
+    // Expanded, the Close on the page's picture puts the picture away, as the map's Image
+    // control does, never the map, which keeps the Body (Mat, 2026-11-19; Image and focus:
+    // `Map.test.tsx`).
+    fireEvent.click(control);
+    const again = await screen.findByTestId("clover-canvas-place");
+    await waitFor(() =>
+      expect(
+        within(again).getByRole("button", { name: "Expand map" }),
+      ).toBeInTheDocument(),
+    );
+    fireEvent.click(within(again).getByRole("button", { name: "Expand map" }));
+    const picture = await waitFor(() => {
+      const found = again.querySelector<HTMLElement>(
+        ".clover-canvas-place-page",
+      );
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    fireEvent.click(within(picture).getByRole("button", { name: "Close" }));
+    expect(again.querySelector(".clover-canvas-place-page")).toBeNull();
+    expect(again).toBeInTheDocument();
+    expect(figure).toHaveAttribute("data-place", "swapped");
+    expect(control).toHaveAttribute("aria-expanded", "true");
   });
 
   // Mat, 2026-11-13: a georeferenced image pressed in Annotations opens the map expanded.
@@ -610,6 +634,307 @@ describe("Canvas", () => {
     await waitFor(() => expect(asked()).toBeUndefined());
     expect(find).toHaveFocus();
     expect(find).toHaveAttribute("aria-pressed", "false");
+  });
+
+  // nulib-ds/clover#440: the menu over the Body lists the view's georeferenced images,
+  // each pictured with the map's pin as the Annotations section lists it.
+  it("lists a georeferenced image in the Canvas's annotations menu, filling the Body with the map from it", async () => {
+    render(
+      <Root iiifContent={evanston() as never}>
+        <Canvas />
+      </Root>,
+    );
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    await open();
+    fireEvent.click(await screen.findByRole("button", { name: "Annotations" }));
+    const menu = await screen.findByTestId("clover-canvas-annotation-menu");
+    const sheet = await waitFor(() => {
+      const found = menu.querySelector<HTMLElement>(
+        "label.clover-annotations-place",
+      );
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    expect(
+      sheet.querySelector(
+        ".clover-annotations-place-picture > .clover-annotations-place-glyph",
+      ),
+    ).toHaveAttribute("aria-hidden", "true");
+    // No page's title over the entries: by the Canvas alone.
+    expect(menu.querySelector(".clover-annotations-title")).toBeNull();
+    const radio = within(sheet).getByRole("radio");
+    expect(radio).not.toBeChecked();
+    // An arrow key's move only moves to it (WCAG 3.2.2).
+    fireEvent.keyDown(radio, { key: "ArrowDown" });
+    fireEvent.click(radio);
+    expect(screen.getByTestId("clover-canvas")).not.toHaveAttribute(
+      "data-place",
+    );
+    // Pressed: the map fills the Body, and the menu closes, focus on its control,
+    // which stays while the map shows (WCAG 2.4.3).
+    fireEvent.pointerDown(sheet);
+    fireEvent.click(radio);
+    const control = screen.getByRole("button", { name: "Annotations" });
+    expect(control).toHaveFocus();
+    expect(screen.queryByTestId("clover-canvas-annotation-menu")).toBeNull();
+    await loaded();
+    const figure = screen.getByTestId("clover-canvas");
+    await waitFor(() =>
+      expect(figure).toHaveAttribute("data-place", "swapped"),
+    );
+    // Over the map, its control stays, the row's last, and its menu opens over the map,
+    // which keeps the Body (Mat, 2026-11-19; their place: `Body/Caption.css`).
+    fireEvent.click(control);
+    await screen.findByTestId("clover-canvas-annotation-menu");
+    expect(figure).toHaveAttribute("data-place", "swapped");
+  });
+
+  /*
+   * Mat, 2026-11-19: "Bring it back". An annotation targeting the Canvas, a textual one or
+   * one whose body is a place, picked while a map fills the Body, brings the Canvas back,
+   * framed on it: the map closes.
+   */
+  describe("an annotation targeting the Canvas, picked over the map", () => {
+    const described = () => {
+      const manifest = evanston();
+      manifest.items[0].annotations.push({
+        id: "https://example.org/evanston/described",
+        type: "AnnotationPage",
+        items: [
+          {
+            id: "https://example.org/evanston/described/campus",
+            type: "Annotation",
+            motivation: "describing",
+            body: {
+              type: "TextualBody",
+              value: "Northwestern University",
+              format: "text/plain",
+            },
+            target: `${DC_CANVAS_ID}#xywh=3000,1500,800,600`,
+          },
+          // Cookbook 0139: a region tagged with the place it shows.
+          {
+            id: "https://example.org/evanston/described/lake",
+            type: "Annotation",
+            motivation: "tagging",
+            body: {
+              type: "Feature",
+              properties: { label: { en: ["Lake Michigan"] } },
+              geometry: { type: "Point", coordinates: [-87.66, 42.05] },
+            },
+            target: `${DC_CANVAS_ID}#xywh=5000,4000,900,700`,
+          },
+        ],
+      });
+      return manifest;
+    };
+    const figure = () => screen.getByTestId("clover-canvas");
+    const asked = () =>
+      screen
+        .queryAllByTestId("clover-canvas-place")
+        .find((box) => box.id.startsWith("place-asked-"));
+    const menu = () => screen.getByTestId("clover-canvas-annotation-menu");
+    const menuControl = () =>
+      screen.getByRole("button", { name: "Annotations" });
+    const openMenu = async () => {
+      fireEvent.click(menuControl());
+      return screen.findByTestId("clover-canvas-annotation-menu");
+    };
+    // A georeferenced image pressed in the menu: the Root's map fills the Body.
+    const showSheet = async () => {
+      const sheet = await waitFor(() => {
+        const found = menu().querySelector<HTMLElement>(
+          "label.clover-annotations-place",
+        );
+        expect(found).not.toBeNull();
+        return found!;
+      });
+      fireEvent.pointerDown(sheet);
+      fireEvent.click(within(sheet).getByRole("radio"));
+      await loaded();
+      await waitFor(() =>
+        expect(figure()).toHaveAttribute("data-place", "swapped"),
+      );
+      await waitFor(() => expect(asked()).toBeDefined());
+    };
+    const campus = () =>
+      within(menu()).getByRole("radio", { name: "Northwestern University" });
+    const press = (radio: HTMLElement) => {
+      fireEvent.pointerDown(radio.closest("label")!);
+      fireEvent.click(radio);
+    };
+
+    it("in the menu over the map: the Canvas comes back, the menu staying, focus with it", async () => {
+      render(
+        <Root iiifContent={described() as never}>
+          <Canvas />
+        </Root>,
+      );
+      await waitFor(
+        () =>
+          expect(
+            screen.getByTestId("clover-canvas-viewport"),
+          ).toBeInTheDocument(),
+        { timeout: 3000 },
+      );
+      await open();
+      await openMenu();
+      await showSheet();
+      await openMenu();
+      const radio = campus();
+      radio.focus();
+      renderer.fitAnnotation.mockClear();
+      press(radio);
+      await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
+      expect(asked()).toBeUndefined();
+      expect(renderer.fitAnnotation).toHaveBeenCalled();
+      expect(
+        screen.getByRole("button", { name: "Zoom in" }),
+      ).toBeInTheDocument();
+      // The menu stays open to move on, focus on what was picked (WCAG 2.4.3).
+      expect(campus()).toBeChecked();
+      expect(campus()).toHaveFocus();
+
+      // Picked already, and picked again over the map: back again.
+      fireEvent.keyDown(campus(), { key: "Escape" });
+      await openMenu();
+      await showSheet();
+      await openMenu();
+      expect(campus()).toBeChecked();
+      press(campus());
+      await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
+      expect(asked()).toBeUndefined();
+    });
+
+    // Cookbook 0139 over the map: the Canvas back, and the place's own box over it.
+    it("one whose body is a place: the Canvas comes back with its box, focus on the menu's control", async () => {
+      render(
+        <Root iiifContent={described() as never}>
+          <Canvas />
+        </Root>,
+      );
+      await waitFor(
+        () =>
+          expect(
+            screen.getByTestId("clover-canvas-viewport"),
+          ).toBeInTheDocument(),
+        { timeout: 3000 },
+      );
+      await open();
+      await openMenu();
+      await showSheet();
+      await openMenu();
+      const lake = within(menu()).getByRole("radio", {
+        name: /Lake Michigan/,
+      });
+      lake.focus();
+      press(lake);
+      // The menu closes first, focus on its control (WCAG 2.4.3).
+      expect(screen.queryByTestId("clover-canvas-annotation-menu")).toBeNull();
+      expect(menuControl()).toHaveFocus();
+      await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
+      expect(asked()).toBeUndefined();
+      await loaded();
+      const own = await waitFor(() => {
+        const found = screen
+          .queryAllByTestId("clover-canvas-place")
+          .find((box) => box.id.startsWith("place-of-"));
+        expect(found).toBeDefined();
+        return found!;
+      });
+      expect(own).not.toHaveAttribute("data-swapped");
+      expect(menuControl()).toHaveFocus();
+    });
+
+    it("over its Map control's map, and in the Annotations section, as in the menu", async () => {
+      render(
+        <Root iiifContent={described() as never}>
+          <Canvas />
+          <Annotations />
+        </Root>,
+      );
+      await waitFor(
+        () =>
+          expect(
+            screen.getByTestId("clover-canvas-viewport"),
+          ).toBeInTheDocument(),
+        { timeout: 3000 },
+      );
+      await open();
+      // The Map control's box, expanded, closes for it.
+      const map = await screen.findByRole("button", { name: "Map" });
+      fireEvent.click(map);
+      await loaded();
+      const box = await screen.findByTestId("clover-canvas-place");
+      const expand = await waitFor(() =>
+        within(box).getByRole("button", { name: "Expand map" }),
+      );
+      fireEvent.click(expand);
+      await waitFor(() =>
+        expect(figure()).toHaveAttribute("data-place", "swapped"),
+      );
+      await openMenu();
+      press(campus());
+      await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
+      expect(box).not.toBeInTheDocument();
+      expect(map).toHaveAttribute("aria-expanded", "false");
+
+      // From the section, a place found on the map, then the annotation on the image.
+      const find = screen.getByRole("button", { name: /^Find on the map: / });
+      fireEvent.click(find);
+      await loaded();
+      await waitFor(() =>
+        expect(figure()).toHaveAttribute("data-place", "swapped"),
+      );
+      const show = screen.getByRole("button", {
+        name: "Find on the image: Northwestern University",
+      });
+      show.focus();
+      fireEvent.click(show);
+      await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
+      await waitFor(() => expect(asked()).toBeUndefined());
+      expect(show).toHaveFocus();
+    });
+
+    // Alone, with no Root, its own menu's pick, the one picked already too.
+    it("on a Canvas alone, as in a Root", async () => {
+      render(<Canvas iiifContent={described() as never} />);
+      await waitFor(
+        () =>
+          expect(
+            screen.getByTestId("clover-canvas-viewport"),
+          ).toBeInTheDocument(),
+        { timeout: 3000 },
+      );
+      await open();
+      await openMenu();
+      press(campus());
+      expect(campus()).toBeChecked();
+      fireEvent.keyDown(campus(), { key: "Escape" });
+      const map = screen.getByRole("button", { name: "Map" });
+      fireEvent.click(map);
+      await loaded();
+      const box = await screen.findByTestId("clover-canvas-place");
+      fireEvent.click(
+        await waitFor(() =>
+          within(box).getByRole("button", { name: "Expand map" }),
+        ),
+      );
+      await waitFor(() =>
+        expect(figure()).toHaveAttribute("data-place", "swapped"),
+      );
+      await openMenu();
+      press(campus());
+      await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
+      expect(map).toHaveAttribute("aria-expanded", "false");
+      expect(campus()).toHaveFocus();
+    });
   });
 
   it("renders an accessible, focusable viewport", () => {
@@ -1617,7 +1942,7 @@ describe("Canvas", () => {
      * in: the spread fitted first, then the annotation.
      */
     it("waits for the next view to draw before its hotspots and a pick's framing", async () => {
-      const note = (canvas: any) => ({
+      const textual = (canvas: any) => ({
         targetIndex: 0,
         annotation: {
           id: `${canvas.id}/note`,
@@ -1629,7 +1954,7 @@ describe("Canvas", () => {
       const { rerender } = render(
         <Canvas
           canvases={[pages[0]]}
-          annotations={[note(pages[0])]}
+          annotations={[textual(pages[0])]}
           selectedAnnotation={null}
         />,
       );
@@ -1639,7 +1964,7 @@ describe("Canvas", () => {
       rerender(
         <Canvas
           canvases={[pages[1]]}
-          annotations={[note(pages[1])]}
+          annotations={[textual(pages[1])]}
           selectedAnnotation={`${pages[1].id}/note`}
         />,
       );
@@ -2277,7 +2602,7 @@ describe("Canvas", () => {
 
     // The reader asked to see it: a list beside the Canvas, or a link, picked it.
     it("opens past the still for a pick made outside it, once its annotation is in view", () => {
-      const note = {
+      const textual = {
         targetIndex: 0,
         annotation: {
           id: "https://example.org/anno/1",
@@ -2289,7 +2614,7 @@ describe("Canvas", () => {
       const { rerender } = render(
         <Canvas
           canvases={[first]}
-          annotations={[note]}
+          annotations={[textual]}
           selectedAnnotation={null}
         />,
       );
@@ -2297,7 +2622,7 @@ describe("Canvas", () => {
       rerender(
         <Canvas
           canvases={[first]}
-          annotations={[note]}
+          annotations={[textual]}
           selectedAnnotation="https://example.org/anno/elsewhere"
         />,
       );
@@ -2306,7 +2631,7 @@ describe("Canvas", () => {
       rerender(
         <Canvas
           canvases={[first]}
-          annotations={[note]}
+          annotations={[textual]}
           selectedAnnotation="https://example.org/anno/1"
         />,
       );
@@ -2316,7 +2641,7 @@ describe("Canvas", () => {
 
     // Its annotations are to hand over the still: picking one opens it there.
     it("keeps the annotations menu over the still; a pick from it opens the Canvas and frames it once drawn", async () => {
-      const note = {
+      const textual = {
         targetIndex: 0,
         annotation: {
           id: "https://example.org/anno/1",
@@ -2325,7 +2650,7 @@ describe("Canvas", () => {
           target: `${first.id}#xywh=10,20,30,40`,
         } as any,
       };
-      render(<Canvas canvases={[first]} annotations={[note]} />);
+      render(<Canvas canvases={[first]} annotations={[textual]} />);
       await loaded();
       const control = screen.getByRole("button", { name: "Annotations" });
       expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
@@ -2349,7 +2674,7 @@ describe("Canvas", () => {
     // Closed, nothing of the pick shows: it is let go, so picking it again reopens.
     it("lets go of the pick when the Canvas is closed back to its still", async () => {
       const onAnnotationSelect = vi.fn();
-      const note = {
+      const textual = {
         targetIndex: 0,
         annotation: {
           id: "https://example.org/anno/1",
@@ -2361,7 +2686,7 @@ describe("Canvas", () => {
       render(
         <Canvas
           canvases={[first]}
-          annotations={[note]}
+          annotations={[textual]}
           onAnnotationSelect={onAnnotationSelect}
         />,
       );
@@ -2436,6 +2761,39 @@ describe("Canvas", () => {
       renderer.isOpen = true;
       fireEvent.click(closeViewer());
       expect(stillImg()).toBe(still);
+    });
+
+    // nulib-ds/clover#438: a place is information about the item, so Map stays over the
+    // placeholder, as annotations do, and opens the place box without opening the image.
+    it("offers Map over the placeholder, opening the place box and not the image", async () => {
+      render(
+        <Canvas
+          canvases={[first]}
+          navPlace={{
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                properties: {},
+                geometry: { type: "Point", coordinates: [12.49, 41.9] },
+              },
+            ],
+          }}
+        />,
+      );
+      const control = await screen.findByRole("button", { name: "Map" });
+      // The image's own controls still wait for the image.
+      expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Rotate" })).toBeNull();
+      fireEvent.click(control);
+      expect(control).toHaveAttribute("aria-expanded", "true");
+      expect(
+        await screen.findByTestId("clover-canvas-place"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("clover-canvas-placeholder"),
+      ).not.toHaveAttribute("data-hidden", "true");
+      expect(renderer.setImages).not.toHaveBeenCalled();
     });
 
     it("opens straight away when told to skip the placeholder", () => {

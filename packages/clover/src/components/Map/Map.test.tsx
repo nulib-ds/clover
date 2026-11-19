@@ -31,6 +31,7 @@ import {
   georeferencesOf,
   navPlaceOf,
   readGeoreference,
+  useMapPutAway,
 } from "../../map";
 import { MapView } from "./MapView";
 import { drawOverlay } from "./overlayImage";
@@ -332,6 +333,38 @@ describe("Map", () => {
     // Holding nothing, none.
     rerender(<CloverMap navPlace={place} />);
     expect(screen.queryByRole("button", { name: "Image" })).toBeNull();
+  });
+
+  // Mat, 2026-11-19: Close on what the map holds puts it away, never the map under it.
+  it("lets what it holds put itself away, focus going to its Image control", async () => {
+    const place = {
+      type: "Feature",
+      properties: {},
+      geometry: { type: "Point", coordinates: [-87.69, 42.04] },
+    };
+    function Held() {
+      const putAway = useMapPutAway();
+      return (
+        <button type="button" onClick={() => putAway?.()}>
+          Close the page
+        </button>
+      );
+    }
+    render(
+      <CloverMap navPlace={place}>
+        <Held />
+      </CloverMap>,
+    );
+    const image = await screen.findByRole("button", { name: "Image" });
+    fireEvent.click(screen.getByRole("button", { name: "Close the page" }));
+    expect(image).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("button", { name: "Close the page" })).toBeNull();
+    await waitFor(() => expect(image).toHaveFocus());
+    // Brought back by Image, as it was put away.
+    fireEvent.click(image);
+    expect(
+      screen.getByRole("button", { name: "Close the page" }),
+    ).toBeInTheDocument();
   });
 
   it("keeps its credits over the map, and none where asked to leave them out", async () => {

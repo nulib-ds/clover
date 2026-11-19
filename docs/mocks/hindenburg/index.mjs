@@ -64,7 +64,7 @@ const CHAPTERS = [
 
 /**
  * What happens in the broadcast, a stretch at a time, as it tells it:
- * `[start, end, note]`, in seconds.
+ * `[start, end, words]`, in seconds.
  */
 const NOTES = [
   [

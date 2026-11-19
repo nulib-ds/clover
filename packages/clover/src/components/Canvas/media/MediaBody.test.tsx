@@ -422,7 +422,8 @@ describe("Canvas media", () => {
   });
 
   // Cookbook 0229: a chapter's picture beside it in the menu, and over it on the seek bar.
-  it("shows a chapter's picture in its menu and its popover", async () => {
+  // nulib-ds/clover#441: each chapter's captured thumbnail at its start, in both.
+  it("shows every chapter's picture in its menu and the one pointed at in its popover", async () => {
     const onMediaElement = vi.fn();
     const { container } = render(
       <Canvas
@@ -449,23 +450,21 @@ describe("Canvas media", () => {
       element.dispatchEvent(new Event("durationchange"));
     });
     fireEvent.click(screen.getByRole("button", { name: "Chapters" }));
-    // The chapter playing has its picture under it; the others none.
+    // Every chapter with its picture at its start, the one playing checked.
     const opening = screen
       .getByRole("radio", { name: /Opening/ })
       .closest("label")!;
     await waitFor(() =>
       expect(
-        opening.querySelector("img.clover-entry-thumbnail"),
+        opening.querySelector("img.clover-chapter-picture"),
       ).toHaveAttribute("src", "opening.png"),
     );
     const lunch = screen
       .getByRole("radio", { name: /Lunch/ })
       .closest("label")!;
-    expect(lunch.querySelector("img")).toBeNull();
-    // Named by its words alone.
-    expect(
-      screen.getByRole("radio", { name: "0:00 Opening" }),
-    ).toBeInTheDocument();
+    expect(lunch.querySelector(".clover-chapter-picture")).not.toBeNull();
+    // Named by its label, then its time, as it is laid out.
+    expect(screen.getByRole("radio", { name: "Opening 0:00" })).toBeChecked();
 
     const area = container.querySelector<HTMLElement>(
       ".clover-canvas-transport-seek-area",
@@ -476,11 +475,15 @@ describe("Canvas media", () => {
       area,
       new MouseEvent("pointermove", { bubbles: true, clientX: 20 }),
     );
+    // One row, as the menu's: its picture, its title, the time.
     await waitFor(() =>
       expect(
-        area.querySelector(":scope > .clover-tip img.clover-tip-image"),
+        area.querySelector(
+          ":scope > .clover-tip > .clover-chapter > img.clover-chapter-picture",
+        ),
       ).toHaveAttribute("src", "opening.png"),
     );
+    expect(area.querySelector(".clover-tip-image")).toBeNull();
   });
 
   it("keeps a menu open while the arrow keys move through it", async () => {
@@ -1028,13 +1031,15 @@ describe("Canvas media", () => {
       expect(media!.currentTime).toBe(702);
     });
 
-    it("lists them in the Canvas's annotations menu by time, under the page, and a pick goes there", async () => {
+    // By the Canvas alone, as the Annotations section lists them (#440): no page's title.
+    it("lists them in the Canvas's annotations menu by time, and a pick goes there", async () => {
       const element = await renderPoetry();
       fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
       const menu = screen.getByTestId("clover-canvas-annotation-menu");
       expect(
-        within(menu).getByRole("group", { name: "Environmental Noise" }),
+        within(menu).getByRole("group", { name: "Annotations" }),
       ).toBeInTheDocument();
+      expect(within(menu).queryByText("Environmental Noise")).toBeNull();
       const item = within(menu).getByRole("radio", {
         name: "11:42 Soft laughter, rustling",
       });
@@ -1100,9 +1105,9 @@ describe("Canvas media", () => {
         if (!screen.queryByTestId("clover-canvas-annotation-menu"))
           fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
         const menu = await screen.findByTestId("clover-canvas-annotation-menu");
-        return within(
-          within(menu).getByRole("group", { name: "Rudolf Hess" }),
-        ).getByRole("radio", { name: "0:12 Hess shows distress" });
+        return within(menu).getByRole("radio", {
+          name: "0:12 Hess shows distress",
+        });
       };
       // Over the film's still, the menu lists it already; a pick opens the film.
       pick(await item());
@@ -1168,7 +1173,7 @@ describe("Canvas media", () => {
      * opens the menu stays, and a pick still goes where the annotation is, and shows its
      * page again.
      */
-    it("hides a page's annotations from the picture by its eye in the menu", async () => {
+    it("hides the annotations from the picture by the eye at the menu's head", async () => {
       const onMediaElement = vi.fn();
       render(
         <Canvas
@@ -1183,9 +1188,7 @@ describe("Canvas media", () => {
       const menu = async () => {
         if (!screen.queryByTestId("clover-canvas-annotation-menu"))
           fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
-        return within(
-          await screen.findByTestId("clover-canvas-annotation-menu"),
-        ).getByRole("group", { name: "Rudolf Hess" });
+        return screen.findByTestId("clover-canvas-annotation-menu");
       };
       pick(within(await menu()).getByRole("radio", { name: /distress/ }));
       await transport();
@@ -1194,9 +1197,9 @@ describe("Canvas media", () => {
       seek(element, 14);
       expect(hess()).not.toHaveAttribute("hidden");
 
-      // Named "Hide" and its page's label, its popover the one word.
+      // One, as the Annotations section's: named for them all (#440).
       const eye = within(await menu()).getByRole("checkbox", {
-        name: "Hide Rudolf Hess",
+        name: "Hide annotations",
       });
       expect(
         eye.closest("label")!.querySelector(".clover-tip"),
@@ -1212,7 +1215,7 @@ describe("Canvas media", () => {
       expect(element.currentTime).toBe(85.67);
       expect(
         within(await menu()).getByRole("checkbox", {
-          name: "Hide Rudolf Hess",
+          name: "Hide annotations",
         }),
       ).not.toBeChecked();
 
@@ -1231,9 +1234,9 @@ describe("Canvas media", () => {
 
     /*
      * Mat, 2026-11-16: the list by sheet, one toggle hiding all it lists; the Canvas's
-     * menu, a page at a time. Both through the Root.
+     * menu the same since #440 (2026-11-19), every page it lists. Both through the Root.
      */
-    it("hides a page from the Canvas's menu, and all from the list's one toggle, through the Root", async () => {
+    it("hides every page the Canvas's menu lists by its one toggle, as the list's does, through the Root", async () => {
       let hidden: string[] = [];
       const Spy = () => {
         const { clover } = Clover.useClover("Spy");
@@ -1259,24 +1262,22 @@ describe("Canvas media", () => {
       });
       fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
       const menu = await screen.findByTestId("clover-canvas-annotation-menu");
-      fireEvent.click(
-        within(menu).getByRole("checkbox", { name: "Hide Rudolf Hess" }),
-      );
-      expect(hidden).toEqual([page.id]);
-      // One page of several: the list's toggle stays as it was.
-      expect(listed).not.toBeChecked();
-      // The page's items stay in the menu.
-      expect(
-        within(
-          within(menu).getByRole("group", { name: "Rudolf Hess" }),
-        ).getAllByRole("radio"),
-      ).toHaveLength(3);
-      // The list's toggle hides every page it lists, the other defendants' too.
-      fireEvent.click(listed);
-      expect(listed).toBeChecked();
+      const eye = within(menu).getByRole("checkbox", {
+        name: "Hide annotations",
+      });
+      const radios = within(menu).getAllByRole("radio").length;
+      fireEvent.click(eye);
+      // Every page the menu lists, the other defendants' too, as the list's toggle.
       expect(hidden).toEqual(
         expect.arrayContaining([page.id, film.annotations[1].id]),
       );
+      expect(listed).toBeChecked();
+      // Their items stay in the menu.
+      expect(within(menu).getAllByRole("radio")).toHaveLength(radios);
+      // And the list's shows them all again, the menu's following.
+      fireEvent.click(listed);
+      expect(hidden).toEqual([]);
+      expect(eye).not.toBeChecked();
     });
   });
 

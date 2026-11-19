@@ -66,6 +66,13 @@ export type GalleryProps = Omit<RootProps, "children"> & {
    */
   panelSections?: readonly PanelSection[];
   /**
+   * Default, Document and Gallery: the panel's Collection section for the Collection the
+   * Manifest is `partOf`, fetched as it opens, listing its members (the Panel's
+   * `partOfCollection`). Default `false`: only a Collection the Viewer was reached through
+   * has the section, and About names the one it is part of either way.
+   */
+  partOfCollection?: boolean;
+  /**
    * What a panel section's tab or heading says, in place of its word in Clover's interface language:
    * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
    * Panel's `labels`).
@@ -131,6 +138,7 @@ export function Gallery({
   defaultPanelOpen = true,
   panelLayout = "accordion",
   panelSections,
+  partOfCollection,
   panelLabels,
   download = true,
   languages = true,
@@ -185,6 +193,7 @@ export function Gallery({
         defaultPanelOpen={defaultPanelOpen}
         panelLayout={panelLayout}
         panelSections={panelSections}
+        partOfCollection={partOfCollection}
         panelLabels={panelLabels}
         download={download}
         languages={languages}

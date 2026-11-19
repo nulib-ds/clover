@@ -15,7 +15,7 @@
  *   `evanston/1899.json` and `evanston/1920.json`: the 1899 volume's sheets of the same
  *   ground, and those of 1920;
  * - `manifest.json`, a Manifest of four of the 1920 sheets whose Canvases carry pages of
- *   georeference annotations, with places and notes of many kinds beside them
+ *   georeference annotations, with places and other annotations of many kinds beside them
  *   (`manifest.mjs`, 2026-11-13).
  *
  * The sheets are the Library of Congress's, as mapsnap fitted them by machine

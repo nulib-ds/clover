@@ -56,7 +56,8 @@ describe("PlaceBox", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
 
     // Expanded: no box, the page's picture in one under the zoom row, its Collapse map
-    // trading them back and its Close putting the map away (Mat, 2026-11-16).
+    // trading them back (Mat, 2026-11-16) and its Close putting the picture away, never
+    // the map (Mat, 2026-11-19).
     rerender(box(true, true));
     expect(group).not.toHaveClass("clover-inset");
     const page = group.querySelector<HTMLElement>(
@@ -67,8 +68,8 @@ describe("PlaceBox", () => {
     expect(onSwap).toHaveBeenCalledTimes(3);
     expect(screen.getAllByRole("button", { name: "Close" })).toHaveLength(1);
     fireEvent.click(within(page).getByRole("button", { name: "Close" }));
-    expect(onClose).toHaveBeenCalledTimes(3);
-    expect(onClose).toHaveBeenLastCalledWith(true);
+    expect(group.querySelector(".clover-canvas-place-page")).toBeNull();
+    expect(onClose).toHaveBeenCalledTimes(2);
 
     // Closed, nothing.
     rerender(box(false));

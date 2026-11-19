@@ -42,9 +42,10 @@ it opens and closes them by the button at the end of its row; they start closed,
 the entries holding the current one, open from the top down to it and set in
 bold, so the way to it shows. An entry in parts, columns or pages out of order, steps
 through them in its Range's order while it is the current one, and the regions any Range
-names are drawn on the Canvas as annotations are. The current entry shows its
-Range's `thumbnail` under its words, as a chapter's shows over the seek bar and under it
-in the chapters' menu. It renders nothing without Ranges. Its other props, and its `ref`, go to its element. For the view itself, see
+names are drawn on the Canvas as annotations are. A recording's chapters each show their
+Range's `thumbnail` at the start of the row, the title over its time, as the chapters
+menu and the seek bar's popover show them; a chapter without one keeps the room, so the
+titles line up. A book's current entry shows its Range's `thumbnail` under its words. It renders nothing without Ranges. Its other props, and its `ref`, go to its element. For the view itself, see
 [`Body`](/docs/body).
 
 <ApiReference elements="clover-contents">

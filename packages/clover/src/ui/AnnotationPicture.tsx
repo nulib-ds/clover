@@ -1,25 +1,36 @@
 import React, { useEffect, useState } from "react";
 
-import type { CloverRequest } from "../../core/request";
-import { type ThumbnailSource, resolveThumbnail } from "../../core/thumbnail";
-import { join } from "../../lib/classnames";
-import { fetchInfo } from "../../lib/renderer/sources/imageService";
+import type { CloverRequest } from "../core/request";
+import { type ThumbnailSource, resolveThumbnail } from "../core/thumbnail";
+import { join } from "../lib/classnames";
+import { fetchInfo } from "../lib/renderer/sources/imageService";
 import {
   type RegionShare,
   sizedImageUrl,
-} from "../../lib/renderer/sources/sizedImage";
-import { ENTRY_THUMBNAIL_SIZE } from "../../ui/EntryThumbnail";
+} from "../lib/renderer/sources/sizedImage";
 
 /**
- * An annotation's region, pictured beside it in the list (`AnnotationItem`): cut by its
- * image's server where the server can cut, as `EntryThumbnail` asks; else, where it cannot
- * (a level 0 server, as mapsnap's Sanborn sheets are), the whole image at a size the server
+ * An annotation's picture, beside it wherever it is listed (`ui/AnnotationEntry`'s
+ * `EntryPicture`): the Annotations section and the Canvas's annotations menu, a
+ * georeferenced image's among them. Its region cut by its image's server where the server
+ * can cut, the whole image where it marks all of it; else, where the server cannot cut (a
+ * level 0 server, as mapsnap's Sanborn sheets are), the whole image at a size the server
  * lists, cut here (Mat, 2026-11-16: "Those and regions"; none, from 2026-10-19, to spare
  * the download). The size is the smallest listed that gives the region the picture's
  * pixels on its shorter side, else the largest, never more than the image has, so a small
- * region costs one of the larger sizes, shared by every region on its image. Its own
- * module, loaded only where an entry has a region to cut.
+ * region costs one of the larger sizes, shared by every region on its image.
+ *
+ * Its own module, loaded as a list first shows a picture, and never with a recording's
+ * transport (`ui/EntryThumbnail` is that): a menu that loads it without the transport
+ * would otherwise split that module into a chunk of its own (nulib-ds/clover#440). Its
+ * square holds its room while it is made, muted, and gives it up where none can be.
  */
+
+/**
+ * An annotation's picture: an `l` square (about a line), fetched at twice that for dense
+ * screens, the one size for every list, so the browser loads each once.
+ */
+const ENTRY_THUMBNAIL_SIZE = 52;
 
 /** Where to cut, and the whole image's width over its height. */
 interface Cut {
@@ -27,14 +38,14 @@ interface Cut {
   ratio: number;
 }
 
-async function resolveRegion(
+async function resolvePicture(
   source: ThumbnailSource,
   request?: CloverRequest,
-): Promise<{ src: string; cut?: Cut } | undefined> {
+): Promise<{ src: string; cut?: Cut } | null> {
   const src = await resolveThumbnail(source, ENTRY_THUMBNAIL_SIZE, request);
   const share = source.region;
   if (src || !source.service || !share || typeof share === "string")
-    return src ? { src } : undefined;
+    return src ? { src } : null;
   try {
     const info = await fetchInfo(source.service, { request });
     const shorter = Math.min(
@@ -48,13 +59,13 @@ async function resolveRegion(
     );
     return whole
       ? { src: whole, cut: { share, ratio: info.width / info.height } }
-      : undefined;
+      : null;
   } catch {
-    return undefined;
+    return null;
   }
 }
 
-export default function RegionThumbnail({
+export default function AnnotationPicture({
   source,
   request,
   className,
@@ -63,13 +74,14 @@ export default function RegionThumbnail({
   request?: CloverRequest;
   className?: string;
 }) {
-  const [picture, setPicture] = useState<{ src: string; cut?: Cut }>();
+  // Undefined while it is made, null where none can be.
+  const [picture, setPicture] = useState<{ src: string; cut?: Cut } | null>();
   // By what it asks for, so a source made again each render asks once.
   const key = JSON.stringify(source);
   useEffect(() => {
     setPicture(undefined);
     let live = true;
-    void resolveRegion(source, request).then(
+    void resolvePicture(source, request).then(
       (found) => live && setPicture(found),
     );
     return () => {
@@ -78,8 +90,9 @@ export default function RegionThumbnail({
     // `key` stands in for `source`; `request` is the Root's, the same for its life.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
-  if (!picture) return null;
   const classes = join("clover-entry-thumbnail", className);
+  if (picture === null) return null;
+  if (!picture) return <span className={classes} />;
   const { src, cut } = picture;
   if (!cut)
     return (

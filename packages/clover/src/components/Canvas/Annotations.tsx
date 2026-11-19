@@ -37,9 +37,10 @@ export interface CanvasAnnotation {
   place?: { index: number; total: number };
   /**
    * An annotation of one item of a `Choice` (Cookbook 0326): drawn while that item is the
-   * one chosen, by the choice's key and the item's place (`AnnotationEntry`'s).
+   * one chosen, by the choice's key and the item's place (`AnnotationEntry`'s), and the
+   * image's id, which its picture in the menu is cut from.
    */
-  layer?: { key: string; item: number };
+  layer?: { key: string; item: number; image?: string };
 }
 
 /**
@@ -82,6 +83,8 @@ export interface PlacedAnnotation {
   page?: { text: string; lang?: string };
   /** Its AnnotationPage's id, by which the menu hides and shows its page. */
   pageId?: string;
+  /** What it was placed from: the menu shows its words and the picture of its region. */
+  source?: CanvasAnnotation;
 }
 
 /**
@@ -97,6 +100,8 @@ export interface TimedAnnotation {
   end?: number;
   page?: { text: string; lang?: string };
   pageId?: string;
+  /** What it was read from, as a placed one's (`PlacedAnnotation`). */
+  source?: CanvasAnnotation;
 }
 
 /** What the Canvas's annotations menu lists: those on its picture, and on its time. */
@@ -169,7 +174,8 @@ export function timeAnnotations(
   language?: string,
 ): TimedAnnotation[] {
   const timed: TimedAnnotation[] = [];
-  for (const { annotation, pageLabel, pageId } of annotations) {
+  for (const source of annotations) {
+    const { annotation, pageLabel, pageId } = source;
     const target = parseAnnotationTarget([annotation?.target].flat()[0] as any);
     const time = parseTime(target?.t?.replace(/^npt:/, ""));
     if (!time || target.rect || target.point || target.svg) continue;
@@ -181,6 +187,7 @@ export function timeAnnotations(
       ...time,
       ...pageOf(pageLabel, language),
       ...(pageId ? { pageId } : {}),
+      source,
     });
   }
   return timed;
@@ -202,13 +209,14 @@ export function placeAnnotations(
   language?: string,
 ): PlacedAnnotation[] {
   const placed: PlacedAnnotation[] = [];
-  for (const {
-    annotation,
-    targetIndex,
-    pageLabel,
-    pageId,
-    place: partOf,
-  } of annotations) {
+  for (const source of annotations) {
+    const {
+      annotation,
+      targetIndex,
+      pageLabel,
+      pageId,
+      place: partOf,
+    } = source;
     const target = parseAnnotationTarget(annotation?.target as any);
     if (!target) continue;
     let rect: Rect | null = null;
@@ -256,6 +264,7 @@ export function placeAnnotations(
       ...pageOf(pageLabel, language),
       ...(pageId ? { pageId } : {}),
       ...(partOf ? { place: partOf } : {}),
+      source,
     });
   }
   return placed;
@@ -661,8 +670,8 @@ const AnnotationButton: React.FC<{
         });
       }}
       onBlur={() => onActivate(null)}
-      // A note longer than the Body scrolls, by the keys that scroll a box (WCAG 1.4.10).
-      onKeyDown={scrollNote}
+      // A Tip longer than the Body scrolls, by the keys that scroll a box (WCAG 1.4.10).
+      onKeyDown={scrollTip}
       onClick={(event) => {
         event.stopPropagation();
         if (web) return;
@@ -848,12 +857,12 @@ const SCROLL_KEYS: Record<string, (tip: HTMLElement) => number> = {
 };
 
 /**
- * From its hotspot, the keys that scroll a note longer than the Body (its `Tip`, which
- * `scrolls`), as they would a scrolling box: the arrows, the page keys, Home and End.
+ * From its hotspot, the keys that scroll its `Tip` where it runs longer than the Body
+ * (it `scrolls`), as they would a scrolling box: the arrows, the page keys, Home and End.
  * Returns whether the key was taken, which it is only while there is more to scroll
  * that way.
  */
-export function scrollNote(event: React.KeyboardEvent<HTMLElement>): boolean {
+export function scrollTip(event: React.KeyboardEvent<HTMLElement>): boolean {
   const tip = event.currentTarget.querySelector<HTMLElement>(
     ":scope > .clover-tip",
   );

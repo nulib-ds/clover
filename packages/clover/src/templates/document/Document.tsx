@@ -79,6 +79,13 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    */
   panelSections?: readonly PanelSection[];
   /**
+   * Default, Document and Gallery: the panel's Collection section for the Collection the
+   * Manifest is `partOf`, fetched as it opens, listing its members (the Panel's
+   * `partOfCollection`). Default `false`: only a Collection the Viewer was reached through
+   * has the section, and About names the one it is part of either way.
+   */
+  partOfCollection?: boolean;
+  /**
    * What a section's button and the aside's heading say, in place of its word in Clover's
    * interface language: `{ annotations: "Chapters" }`, or a word by language tag to say
    * it in several (the Panel's `labels`).
@@ -149,6 +156,7 @@ export function Document({
   singleItem = true,
   defaultPanelOpen = false,
   panelSections,
+  partOfCollection,
   panelLabels,
   download = true,
   headingLevel = 2,
@@ -182,6 +190,7 @@ export function Document({
         singleItem={singleItem}
         defaultPanelOpen={defaultPanelOpen}
         panelSections={panelSections}
+        partOfCollection={partOfCollection}
         panelLabels={panelLabels}
         download={download}
         languages={languages}
@@ -235,6 +244,7 @@ function DocumentLayout({
   headingLevel = 2,
   storageKey,
   panelSections,
+  partOfCollection,
   panelLabels,
   collapseControls,
   canvasOptions,
@@ -252,6 +262,7 @@ function DocumentLayout({
   | "headingLevel"
   | "storageKey"
   | "panelSections"
+  | "partOfCollection"
   | "panelLabels"
   | "collapseControls"
   | "canvasOptions"
@@ -351,7 +362,9 @@ function DocumentLayout({
    * pages (below).
    */
   const { clover, language } = Clover.useClover("Document");
-  const offered = Clover.usePanelSections(panelSections);
+  const offered = Clover.usePanelSections(panelSections, {
+    partOfCollection,
+  });
   const [section, setSection] = useState<PanelSection>("about");
   const asideId = `${id}-aside`;
   /*

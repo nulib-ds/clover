@@ -48,14 +48,22 @@ export function annotationName(
     return named(toPlainText(text).trim(), lang);
   }
   const body = bodyInLanguage(texts, language)!;
-  const value = body.value!;
+  const tag = tagOf(body);
+  return named(plainTextOf(body), tag === "none" ? undefined : tag);
+}
+
+/**
+ * A text body as plain text, read by its format (`readAs`): HTML for its text, never as
+ * markup; Markdown without its syntax; any other format as written.
+ */
+export function plainTextOf(body: AnnotationBodyEntry): string {
+  const value = body.value ?? "";
   const kind = readAs(body.format, value);
-  const text =
+  return (
     kind === "markdown"
       ? markdownToPlainText(value)
       : kind === "html"
         ? toPlainText(value)
-        : value;
-  const tag = tagOf(body);
-  return named(text.trim(), tag === "none" ? undefined : tag);
+        : value
+  ).trim();
 }

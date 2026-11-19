@@ -21,7 +21,7 @@ import { asArray } from "../lib/asArray";
  *
  * An annotation of any motivation (a comment, a tag, a highlight, an image) is read as a
  * content state is (`resolveContentState`): its target is where to go, a region and a
- * time in it, and its body, where it has one, the note shown and picked there. Beyond
+ * time in it, and the annotation, with its body where it has one, shown and picked there. Beyond
  * that, here: Presentation 2's (`oa:Annotation`, as Mirador 2 wrote them) read as 3's
  * (`readAnnotation`), an SvgSelector's box as the region to go to, and, once the
  * resource has loaded, a target that names a Range or an image service placed on its
@@ -91,8 +91,8 @@ export async function readAnnotation(json: Json): Promise<Json> {
 /**
  * A content state, or an annotation, followed: what it names loaded (by `load`, which is
  * `loadContent`, handed in so this chunk never imports the loader back), then opened at
- * its target, with its note. Where what it names was itself a content state, that one's
- * target and note stand, as they name a place in what loaded.
+ * its target, with its annotation. Where what it names was itself a content state, that
+ * one's target and annotation stand, as they name a place in what loaded.
  */
 export async function follow(
   state: Json,
@@ -141,7 +141,7 @@ export async function follow(
 }
 
 /**
- * The annotation a content state targets, as a set of its own, as its note's is
+ * The annotation a content state targets, as a set of its own, as its own annotation's is
  * (`${id}#content-state`): listed with the content's own annotations where no search
  * answers with it. Made here, not by `readPage`, which leaves out an annotation without a
  * body, as a search's result is: the list names one by its number. Its text bodies are
@@ -178,8 +178,8 @@ function soughtSet(annotation: Json | undefined): AnnotationSet | undefined {
 
 /**
  * What a content state, or an annotation, asks for (`resolveContentState`), with the box
- * an SvgSelector's shapes fill as its region where it names no other. Its note keeps the
- * annotation's `label` (an image body's text alternative), and an annotation that paints,
+ * an SvgSelector's shapes fill as its region where it names no other. Its own annotation keeps
+ * its `label` (an image body's text alternative), and an annotation that paints,
  * given alone, is shown as one, not painted into the Canvas.
  */
 export async function resolve(
@@ -195,17 +195,17 @@ export async function resolve(
       ? asArray((targeted as Json).target)[0]
       : targeted;
   const region = svgRegion(parseAnnotationTarget(first as any).svg);
-  const note = resolved.annotation;
+  const own = resolved.annotation;
   return {
     ...resolved,
     ...(resolved.target && !resolved.target.region && region
       ? { target: { ...resolved.target, region } }
       : {}),
-    ...(note
+    ...(own
       ? {
           annotation: {
-            ...note,
-            motivation: asArray(note.motivation).filter(
+            ...own,
+            motivation: asArray(own.motivation).filter(
               (motivation) => motivation !== "painting",
             ),
             ...(json.label ? { label: json.label } : {}),
@@ -295,7 +295,7 @@ function retarget(target: unknown, canvasId: string): unknown {
  * A content state's, or an annotation's, target placed on a Canvas of what loaded, where
  * it named something else: a Range (its first Canvas, with that Canvas's region or time
  * where the target gives none), or an image service (the one Canvas Clover shows it as).
- * Its note moves with it, so it is shown and picked there.
+ * Its annotation moves with it, so it is shown and picked there.
  */
 export function placeTarget(loaded: Loaded): Loaded {
   const { manifest, target } = loaded;
