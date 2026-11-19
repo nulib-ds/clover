@@ -207,14 +207,32 @@ export function servicePyramid(
       const level = ordered[address.level];
       const s = level.scaleFactor;
       const isWhole = level.cols === 1 && level.rows === 1;
+      // "The size of the tile is the region size divided by the scale factor, rounded up":
+      // so for the service's own tiles, which every viewer asks for alike. A tile only
+      // Clover asks for, joined or cut, is rounded down, as a size even a fraction of a
+      // pixel past its scale factor's has a server that reads an image at its levels read
+      // the next sharper one, four times the pixels (Yale's, fresh: 549 px of a 2195 px
+      // region at scale factor 4 in 2.8 s, 548 in 0.5 s). A whole image the service's own
+      // grid asks for at this scale too keeps its size.
+      const own =
+        derived &&
+        !level.whole &&
+        !(
+          isWhole &&
+          spec &&
+          Math.ceil(W / s) <= spec.width &&
+          Math.ceil(H / s) <= spec.height
+        );
+      const size = (n: number) =>
+        own ? Math.max(1, Math.floor(n)) : Math.ceil(n);
 
       let region: RegionRect;
       let w: number;
       let h: number;
       if (isWhole) {
         region = { x: 0, y: 0, width: W, height: H };
-        w = level.width;
-        h = level.height;
+        w = own ? size(W / s) : level.width;
+        h = own ? size(H / s) : level.height;
       } else {
         const x = Math.round(address.col * level.tileWidth * s);
         const y = Math.round(address.row * level.tileHeight * s);
@@ -224,9 +242,8 @@ export function servicePyramid(
           width: Math.min(Math.round(level.tileWidth * s), W - x),
           height: Math.min(Math.round(level.tileHeight * s), H - y),
         };
-        // "The size of the tile is the region size divided by the scale factor, rounded up."
-        w = Math.ceil(region.width / s);
-        h = Math.ceil(region.height / s);
+        w = size(region.width / s);
+        h = size(region.height / s);
       }
 
       return {

@@ -13,6 +13,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Faster tiles at an image's edges from servers that render them fresh.** Clover
+  rounded every tile's size up, as the Image API does for a service's own tiles. For the
+  tiles only Clover asks for (its joined tiles at an image's right and bottom edges, and
+  some whole-image levels), a size even a fraction of a pixel too large makes a server
+  that reads an image at fixed levels, such as Cantaloupe, read the next sharper level:
+  four times the pixels. On Yale's server one such tile took 2.8 s, and 0.5 s rounded
+  down. Those tiles are now rounded down, at most a pixel smaller. A service's own tiles,
+  and a whole image its grid shares, keep their sizes. Nothing to change.
+
 - **Images from a server that serves only its own tiles.** Clover joins a service's small
   tiles into larger requests (1024 px) wherever its `info.json` says it can cut any region
   at any size. Some servers answer those requests 403 anyway: the Art Institute of
