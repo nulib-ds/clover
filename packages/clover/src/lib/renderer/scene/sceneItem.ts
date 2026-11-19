@@ -15,7 +15,9 @@ import {
   type RegionRect,
   fetchInfo,
 } from "../sources/imageService";
+import { refusesDerivedTiles } from "../sources/refusals";
 import {
+  TILE_FLOOR,
   type TilePyramid,
   servicePyramid,
   staticPyramid,
@@ -124,8 +126,11 @@ export async function resolveItem(
 
   if (spec.service) {
     try {
+      const info = await fetchInfo(spec.service, context.infoOptions);
+      // A host that refused a tile Clover joined or cut is asked for its own grid.
       pyramid = servicePyramid(
-        await fetchInfo(spec.service, context.infoOptions),
+        info,
+        refusesDerivedTiles(info.id) ? 0 : TILE_FLOOR,
       );
     } catch (error) {
       serviceError = error;

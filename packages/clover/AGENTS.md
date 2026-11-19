@@ -2459,7 +2459,13 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   for tiles of at least `TILE_FLOOR` (1024 px; 2026-11-06): its smaller listed tiles
   joined, a whole number of them on its own grid (`joinedTile`), and its own cut that
   large where it lists none, each within `maxWidth`, `maxHeight` and `maxArea`; a level 0
-  service only ever gets its own tiles. A server answers a 1024 px tile in 1.1 to 1.4
+  service only ever gets its own tiles. A host that refuses a tile Clover joined or cut
+  (400, 403, 413 or 414: the Art Institute of Chicago's CDN serves only its 256 px grid,
+  though its `info.json` says level 2; 2026-11-18) gets its own grid: the pyramid's
+  `listed` replaces it from the next frame (`CanvasRenderer.refused`, from `TileCache`'s
+  `onFailed`), and `sources/refusals.ts` remembers the host for the visit, so
+  `resolveItem` builds its next images on the grid. A server answers a 1024 px tile in
+  1.1 to 1.4
   times a 256 px one's time (Northwestern's, e-codices' and Wellcome's, measured cold),
   and over HTTP/1.1 a browser sends six at a time, so 256 px tiles made a page's view a
   hundred round trips. Tests of the planner's choices build their pyramid on the

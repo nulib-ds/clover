@@ -81,6 +81,33 @@ describe("TileCache", () => {
     expect(pending).toHaveLength(2);
   });
 
+  it("reports a tile that failed for good, with its status, before it settles", async () => {
+    const onFailed = vi.fn();
+    const pending: Pending[] = [];
+    const onSettled = vi.fn(() => expect(onFailed).toHaveBeenCalled());
+    const cache = new TileCache({
+      load: (url, signal) =>
+        new Promise((resolve, reject) =>
+          pending.push({ url, signal, resolve, reject }),
+        ),
+      onSettled,
+      onEvict: vi.fn(),
+      onFailed,
+    });
+    cache.update([want("a"), want("b")]);
+    pending[0].reject({ status: 403 });
+    // A server error is retried once before it fails for good.
+    pending[1].reject({ status: 503 });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(onFailed).toHaveBeenCalledTimes(1);
+    expect(onFailed).toHaveBeenCalledWith("a", 403);
+    pending[2].reject({ status: 503 });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(onFailed).toHaveBeenLastCalledWith("b", 503);
+    expect(cache.failed("a")).toBe(true);
+    expect(cache.failed("b")).toBe(true);
+  });
+
   it("does not retry a 404 that has no other spelling", async () => {
     const { cache, pending, settle } = setup();
     cache.update([want("a")]);
