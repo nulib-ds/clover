@@ -90,7 +90,7 @@ Its other props, and its `ref`, go to its element.
 | `zoom`              | `number`                                             | `8` for a point, `12` for several | How close the map frames its places: a single point at this zoom, several no closer. `15` shows a point's streets.                                                                                                                                                                                                                                                          |
 | `animationDuration` | `number`                                             | `0.6`                             | Seconds the map takes to glide from what it frames to the next: another Canvas, a place or an image chosen, as the Canvas's `options.animationDuration` is for its camera. `0` goes there at once, as it always does where less motion is asked for.                                                                                                                        |
 | `navigable`         | `boolean`                                            | `true`                            | Whether the map can be moved at all: dragged, pinched, wheeled, double-clicked or keyed, with its zoom buttons, and its places named as they are pointed at or pressed, as the Canvas's `options.gestures.navigable` is for its view. `false` keeps it where it frames, its places marked, a press left to what holds it; turned `false`, it lets go of the place it named. |
-| `children`          | `ReactNode`                                          |                                   | Drawn over the map, in its box, under its controls, whose Tips lie over it: an `Inset` of what the map is the place of, say, placed by its own styles. While the map can be moved, an Image control at the end of its zoom row puts it away and brings it back.                                                                                                             |
+| `children`          | `ReactNode`                                          |                                   | Drawn over the map, in its box, under its controls, whose Tips lie over it: an `Inset` of what the map is the place of, say, placed by its own styles. While the map can be moved, an Image control at the end of its zoom row puts it away and brings it back, and a Close in it does the same with `useMapPutAway()`.                                                     |
 | `credits`           | `boolean`                                            | `true`                            | Shows the basemap's credits behind an ⓘ in the map's corner. The basemap's license may require them, so credit it on the page yourself before turning them off.                                                                                                                                                                                                             |
 | `onSelect`          | `(feature) => void`                                  | —                                 | Called when a place is chosen, on the map or in its list.                                                                                                                                                                                                                                                                                                                   |
 | `request`           | `{ credentials, headers, fetch }`                    | —                                 | With `iiifContent`: used for every request.                                                                                                                                                                                                                                                                                                                                 |
@@ -160,8 +160,14 @@ In the [Canvas](/docs/canvas), a georeferenced Canvas gets a Map control even wi
 [navPlace](https://iiif.io/api/extension/navplace/). It opens the map in a small box under
 the Canvas's controls, the image laid over it. A press on the box, or its Expand map, puts
 the map in the Canvas's place, and the page's picture, in a box under the map's zoom
-buttons, puts it back. Either way, the map keeps what it shows, fitted to its new size.
-Back in its box, it lets go of the place it named and of an annotation picked on it.
+buttons, puts it back; that box's Close puts the picture away, as the map's Image control
+does. Either way, the map keeps what it shows, fitted to its new size. Back in its box, it
+lets go of the place it named and of an annotation picked on it. While the map fills the
+Body, the Canvas's annotations control stays at the end of its row, and its menu opens
+over the map. Picking an annotation that targets the Canvas, there or in
+[Annotations](/docs/annotations), closes the map and brings the Canvas back, framed on
+it. The Map control shows over a Canvas's placeholder too, with its
+annotations, and opens the box without opening the image.
 
 <Example>
 <MapDemo mock="georeference/manifest.json" />

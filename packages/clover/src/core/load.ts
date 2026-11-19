@@ -19,7 +19,7 @@ import type { AnnotationSet } from "./annotation-sets";
  * state's target may be on its own, is followed to what it names (`isContentState`): a
  * Canvas's `partOf` Manifest, at the Canvas. A single Annotation, of any motivation,
  * is read as a content state is: what it targets is opened, at its region and time, its
- * body shown there as a note. A Georeference Extension annotation, alone or on pages, is
+ * body shown there as an annotation. A Georeference Extension annotation, alone or on pages, is
  * the exception: what it targets is opened with the map laid on it (`georeferenceContent`).
  * It may also be a IIIF Image service, its `info.json` or its
  * base URI, shown as the one image it is (`imageServiceContent`). Everything is fetched
@@ -122,7 +122,7 @@ export interface Loaded {
   collection?: Presentation4Collection;
   /** Where a content state, or a Canvas given directly, points. */
   target?: Target;
-  /** A content state's note, as an annotation to show and pick (`resolveContentState`). */
+  /** A content state's own annotation, to show and pick (`resolveContentState`). */
   annotation?: Record<string, any>;
   /**
    * Annotations given as the content (an AnnotationPage or AnnotationCollection), as sets:

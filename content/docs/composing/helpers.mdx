@@ -228,6 +228,7 @@ re-renders only when what it reads changes.
 | `useAnnotationPages({ listed })`     | Each AnnotationPage the Manifest's Canvases carry, and each the `Root`'s `annotations` adds: its `id`, `label` and annotations (`entries`). With `listed`, only those Annotations lists. |
 | `useCloverSelector(select, isEqual)` | Any value from the Root's state, by `select`, re-rendering only when it changes. `isEqual` compares it, where `select` returns a new object each time.                                   |
 | `useUniqueId()`                      | An id unique on the page, as Clover uses wherever it needs one.                                                                                                                          |
+| `useMapPutAway()`                    | Inside what a [Map](/docs/map) holds, puts it away, as the Map's Image control does, focus going to Image, which brings it back; `null` anywhere else. A Close in it calls it.           |
 
 `useClover()` gives the Root's state and actions, for components that act rather than
 read.
@@ -237,8 +238,8 @@ IIIF Cookbook's book (recipe 0009). Its comments show the first view.
 
 <div data-code-flavor="web-components">
 
-As web components, the root's `clover` has a method for each hook but `usePanelSections`
-and `useUniqueId`, and `subscribe` hears of every change.
+As web components, the root's `clover` has a method for each hook but `usePanelSections`,
+`useUniqueId` and `useMapPutAway`, and `subscribe` hears of every change.
 
 </div>
 

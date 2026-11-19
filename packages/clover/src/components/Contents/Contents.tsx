@@ -21,6 +21,7 @@ import { join } from "../../lib/classnames";
 import { playFrom } from "../../lib/time";
 import { Chevron } from "../../ui/Chevron";
 import { EntryThumbnail } from "../../ui/EntryThumbnail";
+import { ChapterEntry } from "../../ui/ChapterEntry";
 import { Steps } from "../../ui/Steps";
 import { Tip } from "../../ui/Tip";
 import { CueTime } from "../../ui/Cue";
@@ -45,8 +46,9 @@ export interface ContentsProps extends React.HTMLAttributes<HTMLElement> {
  * which opens. An article in parts (its columns, on pages out of order) has, while it is
  * the current entry, a step through them in its row ("2 / 4", `ui/Steps`); its
  * regions are drawn on the Canvas as annotations are (`range-regions.ts`). The current
- * entry shows its Range's `thumbnail` (Cookbook 0229) under its words, large, as the seek
- * bar's popover does, and the others none (`ui/EntryThumbnail`). Choosing an entry goes
+ * entry of a book shows its Range's `thumbnail` under its words, large, and the others
+ * none (`ui/EntryThumbnail`); a recording's chapters each show theirs (Cookbook 0229) at
+ * their start, as the chapters menu and the seek bar's popover do (`ui/ChapterEntry`). Choosing an entry goes
  * to its Canvas, and to its region or its moment.
  * Hovering or focusing one marks its chapter on the Canvas's seek bar, and the chapter
  * under the pointer there marks its entry here: one highlight, through the Root
@@ -62,6 +64,14 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
       rest["aria-label"] !== undefined || rest["aria-labelledby"] !== undefined,
     );
     const nodes = useCloverSelector((state) => tableOfContents(state.manifest));
+    /*
+     * A recording's chapters with captured thumbnails (Cookbook 0229, #441): every one on
+     * its time listed with its own at its start, its title over its time, as the chapters
+     * menu and the seek bar's popover list it (`ChapterEntry`); one without keeps the
+     * slot, so their words line up. A book's Ranges keep the current one's picture under
+     * its words.
+     */
+    const pictured = useMemo(() => chaptersPictured(nodes), [nodes]);
     const canvasId = useCloverSelector((state) => state.canvasId);
     const selected = useCloverSelector((state) => state.annotationId);
     const element = useSyncExternalStore(
@@ -179,8 +189,9 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
           const key = listId ? `${listId}-${index}` : `${id}-${index}`;
           const nested = node.children.length > 0;
           const open = nested && isOpen(node);
+          const chapter = pictured && Boolean(node.time);
           const picture =
-            node.id === current
+            node.id === current && !node.time
               ? imageSource(node.thumbnail as Record<string, any> | undefined)
               : null;
           return (
@@ -205,8 +216,9 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                   onBlur={() => clover.chapter.emit(null)}
                   // A Range on a recording's time leads with it, as a cue does (`CueTime`);
                   // the current one's picture goes under them.
-                  data-timed={node.time ? "true" : undefined}
+                  data-timed={node.time && !chapter ? "true" : undefined}
                   data-pictured={picture ? "true" : undefined}
+                  data-chapter={chapter ? "true" : undefined}
                   {...languageProps(
                     label.text && !node.time && !picture
                       ? label.lang
@@ -214,7 +226,17 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                   )}
                   onClick={() => choose(node)}
                 >
-                  {node.time || picture ? (
+                  {chapter ? (
+                    <ChapterEntry
+                      label={label.text || node.id}
+                      lang={label.text ? label.lang : undefined}
+                      start={node.time!.start}
+                      picture={imageSource(
+                        node.thumbnail as Record<string, any> | undefined,
+                      )}
+                      request={clover.request}
+                    />
+                  ) : node.time || picture ? (
                     <>
                       {node.time && (
                         <CueTime
@@ -231,7 +253,6 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                       <EntryThumbnail
                         source={picture}
                         request={clover.request}
-                        large
                       />
                     </>
                   ) : (
@@ -334,4 +355,16 @@ function useCurrent(
     };
   }, [nodes, canvasId, element, chosen]);
   return current;
+}
+
+/** Whether any Range on a recording's time has a captured thumbnail (#441). */
+function chaptersPictured(nodes: ContentsNode[]): boolean {
+  return nodes.some(
+    (node) =>
+      (Boolean(node.time) &&
+        Boolean(
+          imageSource(node.thumbnail as Record<string, any> | undefined),
+        )) ||
+      chaptersPictured(node.children),
+  );
 }

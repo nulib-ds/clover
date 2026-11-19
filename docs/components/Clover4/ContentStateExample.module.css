@@ -19,12 +19,12 @@
   gap: 1rem;
 }
 
-.note {
+.comment {
   display: grid;
   gap: 0.382rem;
 }
 
-.note .name,
+.comment .name,
 .hint {
   margin: 0;
 }

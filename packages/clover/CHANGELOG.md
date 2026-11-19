@@ -11,6 +11,49 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **`partOfCollection`** on the Panel, and on Default, Document and Gallery
+  (`part-of-collection` on `<clover-panel>` and `<clover-viewer>`): the Collection
+  section for the Collection a Manifest is `partOf`. Without it, the section shows only
+  for a Collection the Root was reached through (#439).
+- **Part of in About**: the Collection a Manifest is `partOf`, linked, as `PartOf`
+  renders it. It fetches nothing (#439).
+- **`useMapPutAway()`**: inside what a Map holds over itself, puts it away as the Map's
+  Image control does, focus going to Image.
+
+### Changed
+
+- **Map shows over a placeholder**, beside the annotations menu, and opens the place box
+  without opening the image (#438).
+- **The annotations menu over the Body lists as the Annotations section does**: each
+  entry with its region's picture, its words and its time, by Canvas rather than by
+  AnnotationPage, the view's georeferenced images among them, each showing on the map.
+  One eye at its head hides them all (#440).
+- **Every chapter shows its captured thumbnail** (a Range's `thumbnail`): in Contents, in
+  the chapters menu over the Body and in the seek bar's popover, at the row's start with
+  the title over its time. A chapter without one keeps the room (#441).
+- **The annotations and chapters menus over the Body are titled** "Annotations" and
+  "Chapters" at their top, in Clover's interface language, the annotations menu's eye
+  beside its title. A control's popover inside a menu opens below it, so the menu's
+  edge never cuts it off.
+- **Close on the page's picture over an expanded map puts the picture away**, in the
+  Canvas's map box and Document's map, as the map's Image control does, rather than
+  closing the map. Escape and the Map control still close it.
+- **The annotations control stays over an expanded map**, at the end of its row, as over
+  the Canvas, and its menu opens over the map rather than closing it.
+- **An annotation picked while a map fills the Body brings the Canvas back**, framed on
+  it, and closes the map: in the annotations menu over the map, in Annotations or in
+  Search, where the map kept it out of sight before.
+
+### Fixed
+
+- **Picking an annotation whose body is a place in the annotations menu keeps focus**
+  (Cookbook 0139): the menu closes first, focus on its control, and then the place's box
+  opens. The box used to close the menu with focus in it, which dropped focus to the
+  page. An arrow key now only moves to it, as to a georeferenced image, rather than
+  opening the box.
+
 ## [4.11.3] - 2026-11-19
 
 ### Added

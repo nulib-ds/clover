@@ -184,9 +184,7 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
           pageId: set.id,
           ...(set.label ? { pageLabel: set.label } : {}),
           ...(entry.place ? { place: entry.place } : {}),
-          ...(entry.layer
-            ? { layer: { key: entry.layer.key, item: entry.layer.item } }
-            : {}),
+          ...(entry.layer ? { layer: entry.layer } : {}),
         })),
     );
   }, [givenAnnotations, sets, canvases]);

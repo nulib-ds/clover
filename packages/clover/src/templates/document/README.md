@@ -78,19 +78,20 @@ import "@nulib/clover/templates.css";
 <Viewer iiifContent="https://example.org/manifest.json" template={Document} />;
 ```
 
-| Prop                 | Default                      | What it does                                                                           |
-| -------------------- | ---------------------------- | -------------------------------------------------------------------------------------- |
-| `defaultSidebarOpen` | Several pages                | Whether the page thumbnails start shown; a single page's put away; over the page, not. |
-| `singleItem`         | `true`                       | The page thumbnails and their toggle for a single page too; `false` leaves them.       |
-| `defaultPanelOpen`   | `false`                      | Whether the aside starts open on About beside the page; over it, closed.               |
-| `panelSections`      | All                          | Which sections the toolbar offers; of those, the ones the resource has.                |
-| `panelLabels`        |                              | Each section's name, in place of Clover's: `{ annotations: "Chapters" }`.              |
-| `download`           | `true`                       | The Download button, where there is a `rendering`.                                     |
-| `languages`          | `true`                       | The globe, where the resource comes in several languages.                              |
-| `interfaceLanguages` | `true`                       | Whether the globe also offers Clover's interface languages.                            |
-| `headingLevel`       | `2`                          | The title's level; the aside's name a level below, its section's under that.           |
-| `storageKey`         | `"clover-template-document"` | Where the bars' widths are remembered; `false` forgets them.                           |
-| …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…                        |
+| Prop                 | Default                      | What it does                                                                                     |
+| -------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `defaultSidebarOpen` | Several pages                | Whether the page thumbnails start shown; a single page's put away; over the page, not.           |
+| `singleItem`         | `true`                       | The page thumbnails and their toggle for a single page too; `false` leaves them.                 |
+| `defaultPanelOpen`   | `false`                      | Whether the aside starts open on About beside the page; over it, closed.                         |
+| `panelSections`      | All                          | Which sections the toolbar offers; of those, the ones the resource has.                          |
+| `partOfCollection`   | `false`                      | The panel's Collection section for the Collection the Manifest is `partOf`, fetched as it opens. |
+| `panelLabels`        |                              | Each section's name, in place of Clover's: `{ annotations: "Chapters" }`.                        |
+| `download`           | `true`                       | The Download button, where there is a `rendering`.                                               |
+| `languages`          | `true`                       | The globe, where the resource comes in several languages.                                        |
+| `interfaceLanguages` | `true`                       | Whether the globe also offers Clover's interface languages.                                      |
+| `headingLevel`       | `2`                          | The title's level; the aside's name a level below, its section's under that.                     |
+| `storageKey`         | `"clover-template-document"` | Where the bars' widths are remembered; `false` forgets them.                                     |
+| …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…                                  |
 
 `panelLayout` is not read: each section opens alone.
 

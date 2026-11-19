@@ -50,6 +50,7 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | `panelToggle`      | `true`                      | The toggle while the panel is open beside the Body; shut or over it, it always shows.                 |
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.                                                   |
 | `panelSections`    | All                         | Which of the panel's sections it may have; none with data, and there is no panel at all.              |
+| `partOfCollection` | `false`                     | The panel's Collection section for the Collection the Manifest is `partOf`, fetched as it opens.      |
 | `items`            | `"slider"`                  | The thumbnails: `"slider"`, `"list"`, `"grid"`, or `false`.                                           |
 | `singleItem`       | `false`                     | The thumbnails even where the resource has one view.                                                  |
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                            |

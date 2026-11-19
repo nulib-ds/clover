@@ -1,0 +1,39 @@
+/*
+ * A chapter with its captured thumbnail (`ui/ChapterEntry.tsx`), alike in Contents, the
+ * chapters menu over the Body and the seek bar's popover: the thumbnail at the row's
+ * start, then the label over its time, `s` apart, across the row wherever the row is a
+ * grid (the menu's). The thumbnail is an entry's picture (`ui/EntryThumbnail.css`),
+ * `2 × xl` wide at 16:9; a chapter without one keeps its room, empty, so the words line
+ * up.
+ */
+.clover-chapter {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: flex-start;
+  gap: var(--clover-space-s);
+}
+
+.clover-chapter > .clover-chapter-picture {
+  width: calc(2 * var(--clover-space-xl));
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.clover-chapter > [data-empty] {
+  background: none;
+}
+
+/* The label over its time, one to a line. */
+.clover-chapter-words {
+  display: grid;
+  min-width: 0;
+}
+
+/*
+ * In the seek bar's popover, the label in its own white, the time under it in its
+ * quieter light, `--clover-color-secondary-alt`, 10:1 on its ground (WCAG 1.4.3), as the
+ * popover sets its time and words apart (`ui/Tip.css`).
+ */
+.clover-tip .clover-chapter-time {
+  color: var(--clover-color-secondary-alt, #c1c8cd);
+}

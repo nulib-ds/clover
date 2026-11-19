@@ -23,8 +23,6 @@ import { showLink } from "../../core/show-link";
 import type { Manifest } from "../../core/presentation";
 import { selectSequence, selectVisibleCanvases } from "../../core/selectors";
 import { parseTime } from "../../core/ranges";
-import { regionSource } from "../../core/region";
-import type { ThumbnailSource } from "../../core/thumbnail";
 import {
   type LanguageMapLike,
   type LocalizedValue,
@@ -38,8 +36,7 @@ import { useClover, useCloverSelector } from "../../react/context";
 import { fetchManifest } from "../../react/fetchManifest";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { titleTag } from "../../ui/heading";
-import { CueTime } from "../../ui/Cue";
-import { EntryThumbnail } from "../../ui/EntryThumbnail";
+import { EntryContent, useRegionSource } from "../../ui/AnnotationEntry";
 import { useLoaded } from "../../hooks/useLoaded";
 import { HideToggle } from "../../ui/HideToggle";
 import { visuallyHidden } from "../../ui/visuallyHidden";
@@ -645,47 +642,6 @@ const AnnotationSheets = forwardRef<
 });
 
 /**
- * Where the picture of what an entry marks comes from: its region of the Canvas, or the box
- * its shape fills, cut small once its image's `info.json` is read (`regionSource`;
- * `RegionThumbnail`, which cuts it here where the server cannot); and one on the whole
- * Canvas, the whole of it, at a size the server lists (Mat, 2026-11-16: "they do relate
- * to a targeted canvas and or region"). None for an entry that shows an image of its own
- * (0377), a point, a stretch of a recording's time, or an image without a service.
- */
-function useRegionSource(
-  entry: AnnotationEntry,
-  canvas?: Record<string, any>,
-): ThumbnailSource | null {
-  // A shape (an SvgSelector, Cookbook 0261) by the box it fills, its reader loaded for one.
-  const { rect: own, svg: shape, point, t } = entry.target;
-  const svg = own ? undefined : shape;
-  const reader = useLoaded(loadSvgShape, Boolean(svg));
-  return useMemo(() => {
-    const box = svg ? reader?.readSvgShape(svg)?.box : undefined;
-    const rect =
-      own ??
-      (box
-        ? { x: box.x, y: box.y, w: box.width, h: box.height }
-        : !shape && !point && !t && canvas?.width && canvas?.height
-          ? { x: 0, y: 0, w: canvas.width, h: canvas.height }
-          : undefined);
-    if (!rect || !canvas || entry.bodies.some((body) => body.image))
-      return null;
-    return regionSource(canvas, rect, entry.layer?.image);
-  }, [entry, canvas, own, shape, point, t, svg, reader]);
-}
-
-const loadSvgShape = () => import("../../core/svg-shape");
-// A region cut where its image's server cannot cut it: loaded only for an entry with one.
-const loadRegionThumbnail = () => import("./RegionThumbnail");
-
-/** Whether a picture is of part of its image, not all of it (`regionSource`'s shares). */
-const cutsRegion = (source: ThumbnailSource | null) => {
-  const share = source?.region as { width: number; height: number } | undefined;
-  return !!share && share.width * share.height < 1;
-};
-
-/**
  * One annotation in the list: its content, pressed anywhere to frame it, and, for the
  * keyboard, a button out of sight that does the same, its focus drawn around the entry.
  */
@@ -732,10 +688,7 @@ function AnnotationItem({
   const oneLanguage = !show.lang && !langWithin(text.lang, hostLanguage);
   const name = text.text ? `${show.text}: ${text.text}` : show.text;
   const { clover } = useClover("Annotations");
-  const thumbnail = useRegionSource(entry, canvas);
-  // A region: cut where its server cannot (`RegionThumbnail`); nothing until that loads.
-  const region = cutsRegion(thumbnail);
-  const cutHere = useLoaded(loadRegionThumbnail, region);
+  const picture = useRegionSource(entry, canvas);
   return (
     <li
       className="clover-annotations-entry"
@@ -752,26 +705,12 @@ function AnnotationItem({
         onSelect(entry.id);
       }}
     >
-      {/* What it marks, beside what it says: decorative, as its text names it. */}
-      {time && (
-        <CueTime start={time.start} className="clover-annotations-time" />
-      )}
-      {region ? (
-        cutHere && (
-          <cutHere.default
-            className="clover-annotations-thumbnail"
-            source={thumbnail!}
-            request={clover.request}
-          />
-        )
-      ) : (
-        <EntryThumbnail
-          className="clover-annotations-thumbnail"
-          source={thumbnail}
-          request={clover.request}
-        />
-      )}
-      <div className="clover-annotations-body clover-cue-text">
+      {/* What it marks, beside what it says, as the Canvas's menu shows it. */}
+      <EntryContent
+        start={time?.start}
+        picture={picture}
+        request={clover.request}
+      >
         {renderEntry ? (
           renderEntry(entry)
         ) : (
@@ -782,7 +721,7 @@ function AnnotationItem({
           />
         )}
         <FollowLink annotation={entry.annotation} />
-      </div>
+      </EntryContent>
       {/*
         In two languages, named by its content rather than `aria-label`, so each part
         carries its own (WCAG 3.1.2).

@@ -19,6 +19,7 @@ export const panel: ElementSpec = {
     languages: { prop: "languages", type: "boolean" },
     "interface-languages": { prop: "interfaceLanguages", type: "boolean" },
     sections: { prop: "sections", type: "data" },
+    "part-of-collection": { prop: "partOfCollection", type: "boolean" },
     labels: { prop: "labels", type: "data" },
     closable: { prop: "closable", type: "boolean" },
     "close-on-escape": { prop: "closeOnEscape", type: "boolean" },
@@ -67,6 +68,11 @@ export const panelDocs: ElementDocs = {
       description:
         'Which of the default sections it may have, as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest; "map" gives the map a section of its own, whose georeferenced images Annotations lists otherwise. Each still shows only where the resource has data for it, and the panel draws nothing where none of them does. Its clover-tab children win over it.',
       default: "every section but the map",
+    },
+    "part-of-collection": {
+      description:
+        "The Collection section for the Collection the Manifest is partOf: opened, it fetches the Collection and lists its members. By default only a Collection the clover-root was reached through has the section; About names the one the Manifest is part of either way, as Part of, a link that fetches nothing.",
+      default: "false",
     },
     labels: {
       description:

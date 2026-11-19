@@ -167,6 +167,13 @@ export interface PanelProps
    */
   sections?: readonly PanelSection[];
   /**
+   * Offer the Collection section for the Collection the Manifest is `partOf`: opened, it
+   * fetches the Collection and lists its members. Default `false`: the section shows only
+   * for a Collection the Root was reached through, and About names the one the Manifest
+   * is part of either way, as Part of, a link that fetches nothing.
+   */
+  partOfCollection?: boolean;
+  /**
    * What a default section's tab or heading says, in place of its word in Clover's interface language:
    * `{ annotations: "Chapters" }`, or `{ annotations: { en: "Chapters", de: "Kapitel" } }`
    * to say it in several, read in the one Clover speaks and marked with its language
@@ -219,6 +226,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
     languages = true,
     interfaceLanguages = true,
     sections,
+    partOfCollection,
     labels,
     className,
     children,
@@ -272,7 +280,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
    * resource has data for, narrowed to `sections` where the page names its own
    * (`usePanelSections`, which a layout of its own can ask first).
    */
-  const offered = usePanelSections(sections);
+  const offered = usePanelSections(sections, { partOfCollection });
   const has = (section: PanelSection) => offered.includes(section);
   const given = React.Children.toArray(children).filter(
     (child): child is React.ReactElement<TabProps> =>

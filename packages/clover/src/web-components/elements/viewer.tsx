@@ -37,6 +37,7 @@ const ONLY: Record<string, readonly Named[]> = {
   defaultPanelOpen: ["default", "document", "gallery"],
   panelLayout: ["default", "document", "gallery"],
   panelSections: ["default", "document", "gallery"],
+  partOfCollection: ["default", "document", "gallery"],
   panelLabels: ["default", "document", "gallery"],
   download: ["default", "document", "gallery"],
   languages: ["default", "document", "gallery"],

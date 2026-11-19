@@ -108,6 +108,16 @@ interface CanvasControlsProps {
   request?: CloverRequest;
   /** The Canvas's annotations, on its picture and its time. With any, a control lists them. */
   annotations?: ListedAnnotation[];
+  /** The Canvases in view, by which the annotations menu groups and pictures its entries. */
+  canvases?: ReadonlyArray<
+    { id: string; label?: unknown } & Record<string, any>
+  >;
+  /**
+   * The view has georeferenced images, which the annotations menu lists too (with nothing
+   * else, a control lists them), each shown on the map: the Root's, filling the Body, else
+   * the Canvas's own place box (`onPlaceToggle`).
+   */
+  mapped?: boolean;
   /** The pages whose annotations are hidden, which the menu lists with their toggles. */
   hiddenPages?: string[];
   onPageVisibilityChange?: (pageIds: string[], visible: boolean) => void;
@@ -130,7 +140,10 @@ interface CanvasControlsProps {
   onPlaceToggle?: () => void;
   /**
    * The Canvas is put away, its place box's map filling the Body (`PlaceBox`'s swap): only
-   * what still means something stays, full screen, the place and the `i`.
+   * what still means something stays, full screen, the place, the `i` and the annotations,
+   * out of sight with the Canvas but the annotations, over the map at the row's end, its
+   * menu with it (Mat, 2026-11-19: "annotations toggle should come over to the map view as
+   * well. keep it in same location as it is elsewhere"; `Body/Caption.css`).
    */
   away?: boolean;
   /** The language to read the Choices' labels in. The reader's, by default. */
@@ -175,6 +188,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
   selectedAnnotation = null,
   onAnnotationSelect,
   onAnnotationActivate,
+  canvases,
+  mapped = false,
   captionId,
   captionOpen = false,
   onCaptionToggle,
@@ -204,7 +219,9 @@ const Controls: React.FC<CanvasControlsProps> = ({
     [annotationsId, onAnnotationActivate],
   );
   const showAnnotations =
-    config.annotations && annotations.length > 0 && onAnnotationSelect;
+    config.annotations &&
+    (annotations.length > 0 || mapped) &&
+    onAnnotationSelect;
   const [chaptersOpen, setChaptersOpen] = useState(false);
   const chaptersId = `chapters-${instance}`;
   const chaptersMenuId = `${chaptersId}-menu`;
@@ -475,7 +492,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
       Boolean(item) &&
       (!away ||
         (item as { id: string }).id === `place-${instance}` ||
-        (item as { id: string }).id === `information-${instance}`),
+        (item as { id: string }).id === `information-${instance}` ||
+        (item as { id: string }).id === annotationsId),
   );
   /*
    * The view's first, full screen last, then a placeholder's toggle: what waits behind
@@ -596,6 +614,11 @@ const Controls: React.FC<CanvasControlsProps> = ({
           label={annotationsLabel}
           labelLang={annotationsLang}
           annotations={annotations}
+          canvases={canvases}
+          language={language}
+          request={request}
+          places={mapped}
+          onPlace={onPlaceToggle}
           hiddenPages={hiddenPages}
           onPageVisibilityChange={onPageVisibilityChange}
           selected={selectedAnnotation}

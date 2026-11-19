@@ -401,7 +401,7 @@ export class GestureController {
         this.target.hint?.("wheel");
       return;
     }
-    // A box in the Body that scrolls that way (a long hotspot note) scrolls, not zooms.
+    // A box in the Body that scrolls that way (a hotspot's long Tip) scrolls, not zooms.
     if (!held && scrollsWithin(event.target, this.element, event.deltaY))
       return;
     event.preventDefault();

@@ -3,7 +3,7 @@ import React from "react";
 
 import { initCloverI18n } from "../i18n";
 import Button from "./Button";
-import { scrollNote } from "../components/Canvas/Annotations";
+import { scrollTip } from "../components/Canvas/Annotations";
 import { SHORTCUTS, Tip, forwardShortcut } from "./Tip";
 
 afterEach(() => initCloverI18n({ lng: "en" }));
@@ -179,14 +179,18 @@ describe("Tip", () => {
  * would measure it; `e2e/specs/tips.spec.ts` measures the real thing.
  */
 describe("Tip, longer than its room (WCAG 1.4.10)", () => {
-  /** A hotspot's note: 400px of text in 100px, scrolled `top` down. */
-  function longNote(top = 0) {
+  /** A hotspot's Tip: 400px of text in 100px, scrolled `top` down. */
+  function longTip(top = 0) {
     render(
-      <button type="button" aria-label="A long note" onKeyDown={scrollNote}>
-        <Tip label="A long note" scrolls />
+      <button
+        type="button"
+        aria-label="A long annotation"
+        onKeyDown={scrollTip}
+      >
+        <Tip label="A long annotation" scrolls />
       </button>,
     );
-    const button = screen.getByRole("button", { name: "A long note" });
+    const button = screen.getByRole("button", { name: "A long annotation" });
     const tip = button.querySelector<HTMLElement>(".clover-tip")!;
     Object.defineProperty(tip, "scrollHeight", { value: 400 });
     Object.defineProperty(tip, "clientHeight", { value: 100 });
@@ -196,7 +200,7 @@ describe("Tip, longer than its room (WCAG 1.4.10)", () => {
   }
 
   it("never takes focus: a press on it focuses its control", () => {
-    const { button, tip } = longNote();
+    const { button, tip } = longTip();
     expect(tip).toHaveAttribute("tabindex", "-1");
     expect(tip).toHaveAttribute("aria-hidden", "true");
     const pressed = fireEvent.mouseDown(tip);
@@ -205,7 +209,7 @@ describe("Tip, longer than its room (WCAG 1.4.10)", () => {
   });
 
   it("scrolls by the keys that scroll a box, from its control", () => {
-    const { button, tip } = longNote();
+    const { button, tip } = longTip();
     expect(fireEvent.keyDown(button, { key: "ArrowDown" })).toBe(false);
     expect(tip.scrollBy).toHaveBeenLastCalledWith({ top: 32 });
     fireEvent.keyDown(button, { key: "PageDown" });
@@ -215,7 +219,7 @@ describe("Tip, longer than its room (WCAG 1.4.10)", () => {
   });
 
   it("leaves a key alone where there is no more to scroll that way", () => {
-    const { button, tip } = longNote(0);
+    const { button, tip } = longTip(0);
     // At the top: up and Home go on to whatever else hears them.
     expect(fireEvent.keyDown(button, { key: "ArrowUp" })).toBe(true);
     expect(fireEvent.keyDown(button, { key: "Home" })).toBe(true);

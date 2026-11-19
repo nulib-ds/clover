@@ -158,6 +158,7 @@ describe("catalog", () => {
       "defaultPanelOpen",
       "panelLayout",
       "panelSections",
+      "partOfCollection",
       "panelLabels",
       "storageKey",
       // Its lightbox's Body's, when the view's controls wait behind More.

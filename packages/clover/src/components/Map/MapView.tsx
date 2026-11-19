@@ -1,6 +1,8 @@
 import React, {
+  createContext,
   lazy,
   Suspense,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -172,6 +174,17 @@ const NONE: Georeference[] = [];
 const NO_IDS: ReadonlySet<string> = new Set();
 
 /** GeoJSON and annotations handed in, with no Root to read. */
+/**
+ * Inside what a Map holds over itself (its `children`, as the Canvas's map box and
+ * Document's map hold the page's picture over the expanded map): the way to put it away,
+ * as the Map's Image control does, focus going to that control, which brings it back (WCAG
+ * 2.4.3). Its Close calls it, so Close puts away what it is on, never the map under it
+ * (Mat, 2026-11-19: it "is toggling the body and not closing the inset as expected"), as
+ * Close on the map's box over the page puts away the map. Null anywhere else.
+ */
+const MapPutAway = createContext<(() => void) | null>(null);
+export const useMapPutAway = () => useContext(MapPutAway);
+
 export function GivenMap({
   navPlace,
   georeferences,
@@ -242,7 +255,8 @@ function useGiven<T>(value: unknown, read: (value: unknown) => T): T {
 }
 
 /**
- * A place's picture, as large as a chapter's (`PICTURE_SIZE`, `ui/EntryThumbnail`): a copy,
+ * A place's picture, as large as a book's current entry's in Contents (`PICTURE_SIZE`,
+ * `ui/EntryThumbnail`): a copy,
  * as importing it would bring that module, and what it reads pictures with, into every
  * map's first load (the overlays' rows load it lazily, `OverlayPicture`).
  */
@@ -1430,6 +1444,18 @@ export function MapView({
   const holds = Boolean(children) && navigable;
   const [held, setHeld] = useState(true);
   const heldSlot = useControlSlot(map, holds, offered);
+  const heldButton = useRef<HTMLButtonElement>(null);
+  /*
+   * Put away from inside it (`useMapPutAway`): its Close, gone with it, hands focus to
+   * Image, which stays where it is, so focus goes at once.
+   */
+  const putAway = useMemo(
+    () => () => {
+      setHeld(false);
+      heldButton.current?.focus();
+    },
+    [],
+  );
   useEffect(() => {
     if (!holds) setHeld(true);
   }, [holds]);
@@ -1757,6 +1783,7 @@ export function MapView({
             heldSlot &&
             createPortal(
               <button
+                ref={heldButton}
                 type="button"
                 className="clover-geomap-held"
                 aria-label={t("canvasImage")}
@@ -1804,7 +1831,11 @@ export function MapView({
            * What it holds over the map: in its box, under its controls (`children`), unless
            * put away by Image (`held`).
            */}
-          {(held || !holds) && children}
+          {(held || !holds) && (
+            <MapPutAway.Provider value={holds ? putAway : null}>
+              {children}
+            </MapPutAway.Provider>
+          )}
         </div>
         {described && List && (
           <>

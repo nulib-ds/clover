@@ -133,15 +133,10 @@ export function ExpandedMap({
 }) {
   const t = Clover.useT();
   const langOf = Clover.useLangOf();
-  // Its Close, in whichever box is shown: the map's, or the page's picture's over it.
+  // Its Close, on the map's box: the page's picture over the map has its own.
   const closer = (
     <MapButton label="commonClose" onClick={onClose}>
-      <path
-        fill="none"
-        strokeLinecap="round"
-        strokeWidth="45"
-        d="M154 154L358 358M358 154L154 358"
-      />
+      {CLOSE}
     </MapButton>
   );
   return (
@@ -175,7 +170,8 @@ export function ExpandedMap({
        * hanging under its zoom row, whose Tips lie over it (Mat, 2026-11-14: "This is a
        * little too far off the controls above it."), with Close after its Collapse map, as
        * the map's box has after Expand map (Mat, 2026-11-16: "include close button here as
-       * well"); the map's Image control puts it away and brings it back.
+       * well"), which puts it away, as the map's Image control does, which brings it back
+       * (`Clover.useMapPutAway`), never the map under it.
        */}
       <Clover.Map navigable={!inset}>
         {!inset && (
@@ -185,13 +181,33 @@ export function ExpandedMap({
             lang={langOf("mapCollapse")}
             expandId={swapId}
             onExpand={onSwap}
-            actions={closer}
+            actions={<PageClose />}
           >
             <Clover.Thumbnail of="canvas" alt="" size={720} />
           </Clover.Inset>
         )}
       </Clover.Map>
     </Clover.Inset>
+  );
+}
+
+// Close's cross, as the Canvas's controls draw it.
+const CLOSE = (
+  <path
+    fill="none"
+    strokeLinecap="round"
+    strokeWidth="45"
+    d="M154 154L358 358M358 154L154 358"
+  />
+);
+
+/** Close on the page's picture over the map: puts the picture away, as Image does. */
+function PageClose() {
+  const putAway = Clover.useMapPutAway();
+  return (
+    <MapButton label="commonClose" onClick={() => putAway?.()}>
+      {CLOSE}
+    </MapButton>
   );
 }
 

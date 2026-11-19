@@ -74,7 +74,7 @@ export { SEARCH_SET_ID, searchServiceOf } from "./core/search-service";
  * Here, with the parts: exported by the main entry instead, it moved modules up front as
  * an app's bundler splits a template, about 130 B gzip on the Viewer's first view.
  */
-export { CloverMap as Map } from "./components/Map/Map";
+export { CloverMap as Map, useMapPutAway } from "./components/Map/Map";
 export type { MapProps } from "./components/Map/Map";
 export {
   affineTransform,

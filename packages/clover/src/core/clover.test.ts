@@ -93,10 +93,10 @@ describe("createClover: loading", () => {
   });
 
   /*
-   * A content state may carry a note its sharer wrote, as Digital Collections' shared
+   * A content state may carry words its sharer wrote, as Digital Collections' shared
    * links do: shown on its Canvas as an annotation of its own, and picked on arrival.
    */
-  it("shows a content state's note on its Canvas, picked, beside the host's annotations", async () => {
+  it("shows a content state's own annotation on its Canvas, picked, beside the host's annotations", async () => {
     const fetch = mockFetch({ [BOOK]: bookJson });
     const clover = createClover({ request: { fetch } });
     const state = "https://example.org/state/1";
@@ -122,7 +122,7 @@ describe("createClover: loading", () => {
     const { canvasId, annotationId, addedSets, target } = clover.store.get();
     expect(canvasId).toBe(canvasIds[1]);
     expect(annotationId).toBe(state);
-    // Its Canvas opens; the pick frames the note, in one move, once the spread is drawn.
+    // Its Canvas opens; the pick frames its annotation, in one move, once the spread is drawn.
     expect(target?.canvasId).toBe(canvasIds[1]);
     expect(target?.region).toBeUndefined();
     expect(addedSets).toHaveLength(1);

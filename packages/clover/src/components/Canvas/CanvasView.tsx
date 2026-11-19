@@ -513,6 +513,41 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const modelRef = useRef(model);
   modelRef.current = model;
   const releaseAnnotation = useCallback(() => modelRef.current.release(), []);
+  // The map control's box closed, and the box of a place asked for.
+  const closePlace = (restoreFocus: boolean) => {
+    setSwappedBox(null);
+    setPlaceOpen(false);
+    if (restoreFocus)
+      focusSoon(() => document.getElementById(`place-${instance}`));
+  };
+  const closeAsked = () => {
+    setSwappedBox(null);
+    props.onAskedPlaceClose?.();
+  };
+  /*
+   * An annotation picked while a map fills the Body brings the Canvas back, framed on it
+   * (Mat, 2026-11-19: "Bring it back"): in the annotations menu over the map, in the
+   * Annotations section or Search. The map closes, as its Close closes it, rather than
+   * going back to its box, a popup, which would close the menu the pick came from, focus
+   * with it (`useOneOpen`). A picked annotation's own place, filling the Body, goes as
+   * another is picked, and stays for it.
+   */
+  const bringBack = () => {
+    if (swappedBox === placeId) closePlace(false);
+    else if (swappedBox === askedId) closeAsked();
+  };
+  // Picked beside it, each pick, the one selected already too (`refind`); never as it mounts.
+  const picking = props.selectedAnnotation
+    ? `${props.selectedAnnotation} ${props.refind}`
+    : null;
+  const lastPicking = useRef(picking);
+  useEffect(() => {
+    if (lastPicking.current === picking) return;
+    lastPicking.current = picking;
+    if (picking) bringBack();
+    // Each pick as it comes, with the render that made it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picking]);
   // Comments on a whole Canvas (Cookbook 0266, 0019), for the caption.
   const { comments, listedCount } = model;
   const captioned = useMemo(
@@ -747,7 +782,9 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   /*
    * Over a placeholder, the annotations menu stays too: a pick from it opens the Canvas
    * and frames the annotation there, as a pick from a list beside it does. Over a lone
-   * video or sound, it lists those on the recording's time (Cookbook 0103).
+   * video or sound, it lists those on the recording's time (Cookbook 0103). Map stays
+   * as well, a place being information about the item as its annotations are: it opens
+   * the place box over the placeholder or the recording, never the image (#438).
    */
   /*
    * The placeholder's toggle in the row, as the `i` and annotations are (Mat, 2026-11-01):
@@ -763,6 +800,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       ? captioned.length ||
         hostControls ||
         listedCount ||
+        shownPlaces ||
         // A recording's chapters, offered over its still too.
         (media && chapters?.length)
         ? onlyInformation(controlsConfig, { annotations: true })
@@ -772,6 +810,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
           captioned.length ||
           hostControls ||
           listedCount ||
+          shownPlaces ||
           // A recording's chapters, listed by a control of its own (`ChaptersMenu`).
           (media && chapters?.length) ||
           (fullscreenExit && controlsConfig.fullPage)
@@ -1307,8 +1346,13 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             hiddenPages={model.hiddenPages}
             onPageVisibilityChange={model.setPagesVisible}
             selectedAnnotation={model.selected}
-            onAnnotationSelect={model.select}
+            onAnnotationSelect={(annotation, play) => {
+              bringBack();
+              model.select(annotation, play);
+            }}
             onAnnotationActivate={model.activate}
+            canvases={canvases}
+            mapped={Boolean(controlsConfig?.map && shownPlaces?.canvases)}
             captionId={hasCaption ? captionId : undefined}
             captionOpen={isCaptionOpen}
             onCaptionToggle={() => setCaptionOpen((open) => !open)}
@@ -1449,7 +1493,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
                 model.quietlyOpened !== canvasKey
               }
               language={language}
-              notes={model.timed}
+              timed={model.timed}
               marked={model.placed}
               selectedAnnotation={model.selected}
               onAnnotationSelect={hasAnnotations ? model.select : undefined}
@@ -1538,12 +1582,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
               open={placeOpen}
               swapped={placeSwapped && swappedBox === placeId}
               onSwap={() => swapPlace(placeId)}
-              onClose={(restoreFocus) => {
-                setSwappedBox(null);
-                setPlaceOpen(false);
-                if (restoreFocus)
-                  focusSoon(() => document.getElementById(`place-${instance}`));
-              }}
+              onClose={closePlace}
               feature={shownPlaces.feature}
               canvases={shownPlaces.canvases}
               owner={canvases?.[0]}
@@ -1559,10 +1598,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
               open
               swapped={placeSwapped && swappedBox === askedId}
               onSwap={() => swapPlace(askedId)}
-              onClose={() => {
-                setSwappedBox(null);
-                props.onAskedPlaceClose?.();
-              }}
+              onClose={closeAsked}
               feature={null}
               owner={canvases?.[0]}
               asked={asked}

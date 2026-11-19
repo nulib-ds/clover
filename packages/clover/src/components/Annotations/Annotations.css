@@ -15,20 +15,20 @@
 }
 
 /*
- * A set's header: the AnnotationPage's label when it has one, its languages, and its hide
- * toggle (`ui/HideToggle.tsx`) at the end (Mat, 2026-10-26: "place hide annotation button
- * on right side"), `2xs` apart on one line, the eye drawn out by its own inset so it
- * lines up with the end of what is under it; `s` over the entries.
+ * A set's header: its languages, and its hide toggle (`ui/HideToggle.tsx`) at the end
+ * (Mat, 2026-10-26: "place hide annotation button on right side"), `2xs` apart on one
+ * line, the eye drawn out by its own inset so it lines up with the end of what is under
+ * it; `s` over the entries. The Canvas's menu's is its legend, its title before the eye,
+ * set as the menu's legends are (`ControlMenu.css`), as the chapters menu's title is,
+ * across the menu as a legend is not by itself, so the eye reaches the end.
  */
-/* Element and class, over the menu's own rules for its legends and labels. */
-:is(div, legend).clover-annotations-set-header {
+.clover-annotations-set-header {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: var(--clover-space-2xs);
+  width: 100%;
   margin: 0 0 var(--clover-space-s);
-  padding: 0;
-  color: inherit;
-  font-size: inherit;
 }
 
 /* The menu's groups are its gap apart, as the list's sets are. */
@@ -62,12 +62,6 @@
   )
   .clover-annotations-entry:not(.clover-annotations-place) {
   background-color: var(--clover-color-secondary-muted, #e6e8eb);
-}
-
-.clover-annotations-title {
-  margin: 0;
-  font-size: inherit;
-  font-weight: 700;
 }
 
 /*
@@ -263,7 +257,7 @@ a.clover-annotations-link svg {
  * Canvas, with the map control's pin over its corner, as the Body's map control is drawn:
  * a disc in the controls' fill, the glyph theirs, at the end of the picture's foot, a
  * little past it (Mat, 2026-11-13: "overlay map icon in corner of thumbnail"; kept,
- * 2026-11-16: "do leave the map … map icon"). Decorative: its button says it is on the map.
+ * 2026-11-16: "do leave the map … map icon"). Decorative: its entry says it is on the map.
  */
 .clover-annotations-place-picture {
   position: relative;

@@ -56,8 +56,8 @@ const SCROLL_KEYS: Record<string, (words: HTMLElement) => number> = {
 
 /**
  * From a point, Up and Down and the page keys scroll its popover's words where they run
- * past its room (a short Body), as a hotspot's note scrolls from its hotspot
- * (`scrollNote`, `Annotations.tsx`, which would bring the hotspots' module here): only
+ * past its room (a short Body), as a hotspot's Tip scrolls from its hotspot
+ * (`scrollTip`, `Annotations.tsx`, which would bring the hotspots' module here): only
  * while there is more that way (WCAG 2.1.1). Left, Right, Home and End are the toolbar's.
  */
 function scrollWords(event: React.KeyboardEvent<HTMLElement>): boolean {

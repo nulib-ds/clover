@@ -265,7 +265,8 @@ describe("Contents", () => {
 
   // Cookbook 0229: the current entry's Range thumbnail under its time and label, unnamed;
   // the other entries none.
-  it("shows the current entry's thumbnail, and no other's", async () => {
+  // nulib-ds/clover#441: every chapter with its captured thumbnail at its start.
+  it("shows every chapter's captured thumbnail, the current one marked as ever", async () => {
     let clover: any;
     const Spy = () => {
       clover = Clover.useClover("Spy").clover;
@@ -278,28 +279,30 @@ describe("Contents", () => {
       </Clover.Root>,
     );
     const nav = await screen.findByRole("navigation", { name: "Contents" });
-    expect(nav.querySelectorAll("img")).toHaveLength(0);
-    // Playing at 6:00, in the second chapter.
+    const rows = [...nav.querySelectorAll(".clover-chapter")];
+    // Each its slot, its room set before its picture arrives, at the row's start.
+    for (const row of rows)
+      expect(row.firstElementChild).toHaveClass("clover-chapter-picture");
+    await waitFor(() =>
+      expect(nav.querySelectorAll("img").length).toBe(rows.length),
+    );
+    // Playing at 6:00, in the second chapter: marked, with no picture of its own size.
     const video = document.createElement("video");
     Object.defineProperty(video, "currentTime", { value: 360 });
     act(() => clover.media.emit(video));
+    // Named by its label, then its time, as it is laid out (WCAG 1.3.2).
     const second = within(nav).getByRole("button", {
-      name: /^5:05 305s – 610s$/,
+      name: /^305s – 610s 5:05$/,
     });
-    const picture = await waitFor(() => {
-      expect(second).toHaveAttribute("aria-current", "true");
-      const found = second.querySelector("img.clover-entry-thumbnail");
-      expect(found).not.toBeNull();
-      return found!;
-    });
+    await waitFor(() => expect(second).toHaveAttribute("aria-current", "true"));
+    const picture = second.querySelector("img")!;
     expect(picture).toHaveAttribute("alt", "");
+    expect(picture).toHaveAttribute("loading", "lazy");
     expect(picture).toHaveAttribute(
       "src",
       "https://fixtures.iiif.io/video/indiana/donizetti-elixir/thumbnails/thumb-nav-02.png",
     );
-    // After its time and label, and named by them alone.
-    expect(picture.previousElementSibling).toHaveClass("clover-cue-text");
-    expect(nav.querySelectorAll("img")).toHaveLength(1);
+    expect(nav.querySelectorAll("img").length).toBe(rows.length);
   });
 
   it("renders nothing without structures", async () => {

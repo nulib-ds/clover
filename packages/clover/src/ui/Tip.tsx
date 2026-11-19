@@ -65,13 +65,17 @@ export function Tip({
   lead,
   after,
 }: {
-  label: string;
+  /**
+   * What it says: its control's words, or, in the seek bar's popover, a chapter's row with
+   * its captured thumbnail (`ChapterEntry`, nulib-ds/clover#441), in place of its `lead`.
+   */
+  label: React.ReactNode;
   /** The language of `label`, where it is not its control's. */
   lang?: string;
   shortcut?: Shortcut;
   /**
-   * It may run longer than the room it is kept in (a hotspot's note, kept inside the
-   * Body): capped there, it scrolls (`scrollNote` in `Canvas/Annotations.tsx`). It never takes focus, which a scroller
+   * It may run longer than the room it is kept in (a hotspot's, its annotation's words, kept inside the
+   * Body): capped there, it scrolls (`scrollTip` in `Canvas/Annotations.tsx`). It never takes focus, which a scroller
    * might, hidden as it is from assistive technology: a press on it focuses its control.
    */
   scrolls?: boolean;
@@ -96,7 +100,8 @@ export function Tip({
   const { t } = useCloverTranslation();
   const ref = useRef<HTMLSpanElement>(null);
   const text = shortcut
-    ? t("controlShortcut", { label, shortcut: shortcut.glyph })
+    ? // A control's words, where it has a key of its own.
+      t("controlShortcut", { label: label as string, shortcut: shortcut.glyph })
     : label;
   useTips();
   // Its words change while it shows (Play, then Pause): measured again.

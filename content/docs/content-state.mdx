@@ -28,8 +28,8 @@ in both forms at once, `{ json, encoded }`: the annotation as an object, and the
 encoded for a link. Nothing is sent while the view is unchanged.
 
 Pan or zoom the catalog, or pick another of its pages under it; or play the film, pause
-it, or pick another reel. What it reports follows. Write a note, and it goes with the
-annotation, in both forms.
+it, or pick another reel. What it reports follows. Write a comment, and it goes with the
+annotation as its body, in both forms.
 
 <ContentStateExample>
 
@@ -39,20 +39,20 @@ annotation, in both forms.
 import { useState } from "react";
 import * as Clover from "@nulib/clover";
 
-// A note of your own, as the annotation's body: plain text, encoded with it.
-function withNote(state, note) {
-  if (!note.trim()) return state;
+// A comment of your own, as the annotation's body: plain text, encoded with it.
+function withComment(state, comment) {
+  if (!comment.trim()) return state;
   const json = {
     ...state.json,
-    body: { type: "TextualBody", value: note, format: "text/plain" },
+    body: { type: "TextualBody", value: comment, format: "text/plain" },
   };
   return { json, encoded: Clover.encodeContentState(json) };
 }
 
 export default function Catalog() {
   const [reported, setReported] = useState(null);
-  const [note, setNote] = useState("");
-  const state = reported && withNote(reported, note);
+  const [comment, setComment] = useState("");
+  const state = reported && withComment(reported, comment);
   return (
     <>
       <Clover.Root
@@ -62,11 +62,11 @@ export default function Catalog() {
         <Clover.Body style={{ height: 384 }} />
         <Clover.Items />
       </Clover.Root>
-      <label htmlFor="note">Note (optional)</label>
+      <label htmlFor="comment">Comment (optional)</label>
       <textarea
-        id="note"
-        value={note}
-        onChange={(event) => setNote(event.target.value)}
+        id="comment"
+        value={comment}
+        onChange={(event) => setComment(event.target.value)}
       />
       <pre>{state && JSON.stringify(state.json, null, 2)}</pre>
       <pre>{state?.encoded}</pre>
@@ -89,8 +89,8 @@ export default function Catalog() {
   <clover-body style="height: 384px"></clover-body>
   <clover-items></clover-items>
 </clover-root>
-<label for="note">Note (optional)</label>
-<textarea id="note"></textarea>
+<label for="comment">Comment (optional)</label>
+<textarea id="comment"></textarea>
 <pre id="json"></pre>
 <pre id="encoded"></pre>
 <a id="open" hidden>Open this content state in the homepage demo</a>
@@ -102,19 +102,19 @@ export default function Catalog() {
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
       .replace(/=+$/, "");
-  const note = document.getElementById("note");
+  const comment = document.getElementById("comment");
   let reported = null;
 
   function show() {
     if (!reported) return;
-    // A note of your own, as the annotation's body: plain text, encoded with it.
-    const written = note.value.trim();
+    // A comment of your own, as the annotation's body: plain text, encoded with it.
+    const written = comment.value.trim();
     const json = written
       ? {
           ...reported.json,
           body: {
             type: "TextualBody",
-            value: note.value,
+            value: comment.value,
             format: "text/plain",
           },
         }
@@ -133,7 +133,7 @@ export default function Catalog() {
       reported = detail;
       show();
     });
-  note.addEventListener("input", show);
+  comment.addEventListener("input", show);
 </script>
 ```
 
@@ -144,20 +144,20 @@ export default function Catalog() {
 import { useState } from "react";
 import * as Clover from "@nulib/clover";
 
-// A note of your own, as the annotation's body: plain text, encoded with it.
-function withNote(state, note) {
-  if (!note.trim()) return state;
+// A comment of your own, as the annotation's body: plain text, encoded with it.
+function withComment(state, comment) {
+  if (!comment.trim()) return state;
   const json = {
     ...state.json,
-    body: { type: "TextualBody", value: note, format: "text/plain" },
+    body: { type: "TextualBody", value: comment, format: "text/plain" },
   };
   return { json, encoded: Clover.encodeContentState(json) };
 }
 
 export default function Film() {
   const [reported, setReported] = useState(null);
-  const [note, setNote] = useState("");
-  const state = reported && withNote(reported, note);
+  const [comment, setComment] = useState("");
+  const state = reported && withComment(reported, comment);
   return (
     <>
       <Clover.Root
@@ -167,11 +167,11 @@ export default function Film() {
         <Clover.Body style={{ height: 384 }} />
         <Clover.Items />
       </Clover.Root>
-      <label htmlFor="note">Note (optional)</label>
+      <label htmlFor="comment">Comment (optional)</label>
       <textarea
-        id="note"
-        value={note}
-        onChange={(event) => setNote(event.target.value)}
+        id="comment"
+        value={comment}
+        onChange={(event) => setComment(event.target.value)}
       />
       <pre>{state && JSON.stringify(state.json, null, 2)}</pre>
       <pre>{state?.encoded}</pre>
@@ -194,8 +194,8 @@ export default function Film() {
   <clover-body style="height: 384px"></clover-body>
   <clover-items></clover-items>
 </clover-root>
-<label for="note">Note (optional)</label>
-<textarea id="note"></textarea>
+<label for="comment">Comment (optional)</label>
+<textarea id="comment"></textarea>
 <pre id="json"></pre>
 <pre id="encoded"></pre>
 <a id="open" hidden>Open this content state in the homepage demo</a>
@@ -207,19 +207,19 @@ export default function Film() {
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
       .replace(/=+$/, "");
-  const note = document.getElementById("note");
+  const comment = document.getElementById("comment");
   let reported = null;
 
   function show() {
     if (!reported) return;
-    // A note of your own, as the annotation's body: plain text, encoded with it.
-    const written = note.value.trim();
+    // A comment of your own, as the annotation's body: plain text, encoded with it.
+    const written = comment.value.trim();
     const json = written
       ? {
           ...reported.json,
           body: {
             type: "TextualBody",
-            value: note.value,
+            value: comment.value,
             format: "text/plain",
           },
         }
@@ -238,7 +238,7 @@ export default function Film() {
       reported = detail;
       show();
     });
-  note.addEventListener("input", show);
+  comment.addEventListener("input", show);
 </script>
 ```
 
@@ -292,10 +292,10 @@ own pixels) or the time (`t=`, in seconds), where there is one:
 }
 ```
 
-A note of your own goes in its `body`, as plain text:
+A comment of your own goes in its `body`, as plain text:
 `{ "type": "TextualBody", "value": "…", "format": "text/plain" }`. It is optional; Clover
-shows one on the Canvas as it opens the content state, read as plain text, never as
-markup.
+shows it with the annotation on the Canvas as the content state opens, read as plain
+text, never as markup.
 
 A Timeline or a Scene is named by its own `type`, and its context is the one that
 defines them. A Canvas shown on its own, outside any Manifest, is named without a
@@ -420,13 +420,13 @@ its Manifest.
 ## An annotation on its own
 
 Any annotation given as `iiifContent` opens the same way, whatever its motivation. Its
-target says where to go, and its body, where it has one, shows there as a note, picked
-as the view opens. This comment frames a region of a Canvas 42 seconds in:
+target says where to go, and there it shows as an annotation, picked as the view
+opens, with its body where it has one. This comment frames a region of a Canvas 42 seconds in:
 
 ```json
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://example.org/notes/1",
+  "id": "https://example.org/comments/1",
   "type": "Annotation",
   "motivation": "commenting",
   "body": {
@@ -463,7 +463,7 @@ as the view opens. This comment frames a region of a Canvas 42 seconds in:
   Canvas, at that Canvas's region or time) or a IIIF Image service (its image).
 - **What it shows.** A text body, an image body (named by the annotation's `label`), or a
   link to follow (`linking`). One with no body only opens at its place. An annotation
-  that paints, given alone, shows as a note and is never painted into the Canvas.
+  that paints, given alone, shows as other annotations do, never painted into the Canvas.
 - **Several targets** are held as a content state's are: the view opens on the first and
   goes to each in turn.
 - **Presentation 2's**, as Mirador 2 wrote them (`oa:Annotation`, `on`, `within`), are

@@ -1,34 +1,17 @@
 import React from "react";
 
 import type { AnnotationBodyEntry } from "../../core/annotation-bodies";
-import { bodyInLanguage } from "../../core/annotation-name";
-import { type LocalizedValue, localize } from "../../core/value";
-import { useCloverTranslation } from "../../i18n/useCloverTranslation";
+import { shownBodies } from "../../core/shown-bodies";
+import { useBodyAlt } from "../../ui/bodyAlt";
 import { Markup } from "../../ui/Markup";
 import { languageProps } from "../../i18n/direction";
 
 /**
  * What an annotation says, as the Annotations list shows it and the Canvas's caption: each
  * text body by its format (IIIF's limited HTML sanitized, Markdown, plain text) and each
- * image (Cookbook 0377).
+ * image (Cookbook 0377). The Canvas's annotations menu says it as plain words
+ * (`ui/AnnotationEntry`'s `EntryWords`), from the same bodies.
  */
-/** Whether there is text, which describes any image beside it (Cookbook 0377). */
-const hasText = (bodies: AnnotationBodyEntry[]) =>
-  bodies.some((body) => body.value?.trim());
-
-/** Of each `Choice`, the item in the language to read (Cookbook 0346); the rest as given. */
-const shownOf = (bodies: AnnotationBodyEntry[], language?: string) => {
-  const choices = new Map<number, AnnotationBodyEntry[]>();
-  for (const body of bodies)
-    if (body.choice !== undefined)
-      choices.set(body.choice, [...(choices.get(body.choice) ?? []), body]);
-  if (!choices.size) return bodies;
-  const shown = new Set(
-    [...choices.values()].map((items) => bodyInLanguage(items, language)),
-  );
-  return bodies.filter((body) => body.choice === undefined || shown.has(body));
-};
-
 export function EntryBodies({
   bodies,
   language,
@@ -39,19 +22,8 @@ export function EntryBodies({
   /** The level of a Markdown body's first heading. */
   headingLevel?: number;
 }) {
-  const { t, langOf } = useCloverTranslation();
-  const shown = shownOf(bodies, language);
-  /*
-   * An image's text alternative (WCAG 1.1.1): none beside text that describes it, which
-   * would say it twice; else its label, or its annotation's; else that it is an image.
-   */
-  const altOf = (body: AnnotationBodyEntry): LocalizedValue => {
-    if (hasText(shown)) return { text: "" };
-    const label = localize(body.label, language);
-    return label.text
-      ? label
-      : { text: t("annotationsImage"), lang: langOf("annotationsImage") };
-  };
+  const shown = shownBodies(bodies, language);
+  const altOf = useBodyAlt(shown, language);
   return (
     <>
       {shown.map((body, index) => {

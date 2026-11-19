@@ -133,11 +133,13 @@ label:has(> input:focus-visible):not([data-tip-hidden]) > .clover-tip {
 
 /*
  * Below a control along the top of what it sits on. The Canvas's information box
- * scrolls, so above its close button the box would cut the name off; the place box's
- * Expand map button and Close, in its top corner, likewise.
+ * scrolls, so above its close button the box would cut the name off; its menus scroll
+ * too (the annotations menu's eye, beside its title); the place box's Expand map button
+ * and Close, in its top corner, likewise.
  */
 :is(
     .clover-canvas-controls,
+    .clover-canvas-menu,
     .clover-panel,
     .clover-template-document-toolbar,
     .clover-template-lightbox-header
@@ -154,6 +156,7 @@ button.clover-template-document-sidebar-toggle > .clover-tip,
 
 :is(
     .clover-canvas-controls,
+    .clover-canvas-menu,
     .clover-panel,
     .clover-template-document-toolbar,
     .clover-template-lightbox-header
@@ -286,7 +289,7 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
 }
 
 /*
- * Below or above its hotspot, clear of the controls at the Body's top and foot. A note
+ * Below or above its hotspot, clear of the controls at the Body's top and foot. A Tip
  * too tall for the room between them (a Body 154px tall, at 400%) would be held under the
  * top controls and run off the Body's foot, as `clamp()` keeps its least where that is
  * past its most: the outer `min()` holds it inside the Body instead, `xs` from its foot,

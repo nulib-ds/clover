@@ -50,16 +50,23 @@ const PANEL_SECTIONS: readonly PanelSection[] = [
  * shown as its image, which says only the rights its `info.json` gave. None of these reads the section's own
  * module, so a section never opened is never fetched.
  */
-const HAS: Record<PanelSection, (state: CloverState) => boolean> = {
+const HAS: Record<
+  PanelSection,
+  (state: CloverState, partOf?: boolean) => boolean
+> = {
   about: (state) =>
     !isImageServiceManifest(state.manifest) ||
     Boolean(state.manifest?.rights || state.manifest?.requiredStatement),
   // A content state's several targets (Cookbook 0540), listed as a Collection's members are.
   targets: (state) => (state.targets?.items.length ?? 0) > 1,
-  // Reached through a Collection, or part of one: offered either way, fetched when opened.
-  collection: (state) =>
+  /*
+   * Reached through a Collection; a Manifest only `partOf` one, where the page asks
+   * (`partOfCollection`, nulib-ds/clover#439), as it loads the whole Collection. About
+   * names that Collection either way, as Part of.
+   */
+  collection: (state, partOf) =>
     (state.collection?.items?.length ?? 0) > 0 ||
-    Boolean(partOfCollection(state.manifest)),
+    Boolean(partOf && partOfCollection(state.manifest)),
   contents: (state) => tableOfContents(state.manifest).length > 0,
   search: (state) => Boolean(searchServiceOf(state.manifest)),
   map: (state) => hasMapData(state.manifest, state.collection),
@@ -81,6 +88,16 @@ const HAS: Record<PanelSection, (state: CloverState) => boolean> = {
 
 /** The sections offered only where a page names them. */
 const ASKED_ONLY: ReadonlySet<PanelSection> = new Set(["map"]);
+
+/** What else a page may ask of the default sections, beside naming them. */
+export interface PanelSectionOptions {
+  /**
+   * Offer the Collection section for the Collection a Manifest is `partOf`, which it
+   * fetches when opened, listing its members. By default only a Collection the Root was
+   * reached through has the section; About names the one it is part of either way.
+   */
+  partOfCollection?: boolean;
+}
 
 /**
  * Those of `PANEL_SECTIONS` with data, narrowed to the ones a page asked for. Anything
@@ -125,15 +142,17 @@ const narrow = (
  */
 export function usePanelSections(
   sections?: readonly PanelSection[],
+  options?: PanelSectionOptions,
 ): PanelSection[] {
   /*
    * One read for each section, never one for the list: a selector that returned an array
    * would be new every time, and re-render its reader on every change of the state.
    */
+  const partOf = options?.partOfCollection;
   const data: Record<PanelSection, boolean> = {
     about: useCloverSelector(HAS.about),
     targets: useCloverSelector(HAS.targets),
-    collection: useCloverSelector(HAS.collection),
+    collection: useCloverSelector((state) => HAS.collection(state, partOf)),
     contents: useCloverSelector(HAS.contents),
     search: useCloverSelector(HAS.search),
     map: useCloverSelector(HAS.map),

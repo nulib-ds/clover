@@ -3,8 +3,8 @@ import { encodeContentState } from "./content-state";
 
 /*
  * A single Annotation given as the content, of any motivation, read as a content state
- * is: what it targets opens, at its region and time, and its body, where it has one, is
- * shown there as a note, picked on arrival.
+ * is: what it targets opens, at its region and time, and it is shown there as an
+ * annotation, picked on arrival, with its body where it has one.
  */
 
 const P3 = "http://iiif.io/api/presentation/3/context.json";
@@ -156,7 +156,11 @@ async function open(annotation: Record<string, unknown>) {
   return clover.store.get();
 }
 
-const note = { type: "TextualBody", value: "A plate", format: "text/plain" };
+const plateText = {
+  type: "TextualBody",
+  value: "A plate",
+  format: "text/plain",
+};
 
 describe("a single Annotation as the content", () => {
   it("opens its Canvas at a region, with no body to show", async () => {
@@ -177,7 +181,7 @@ describe("a single Annotation as the content", () => {
       canvasId: PAGE_2,
       region: { x: 10, y: 20, w: 30, h: 40 },
     });
-    // Nothing to read, so no note: the region is gone to, as a content state's is.
+    // Nothing to read, so nothing shows: the region is gone to, as a content state's is.
     expect(state.addedSets).toEqual([]);
     expect(state.annotationId).toBeNull();
   });
@@ -187,7 +191,7 @@ describe("a single Annotation as the content", () => {
       id: "https://example.org/a/canvas",
       type: "Annotation",
       motivation: "commenting",
-      body: note,
+      body: plateText,
       target: inBook(PAGE_2),
     });
     expect(state.canvasId).toBe(PAGE_2);
@@ -207,7 +211,7 @@ describe("a single Annotation as the content", () => {
       id: "https://example.org/a/note",
       type: "Annotation",
       motivation: ["commenting"],
-      body: note,
+      body: plateText,
       target: {
         type: "SpecificResource",
         source: inBook(PAGE_2),
@@ -263,7 +267,7 @@ describe("a single Annotation as the content", () => {
     expect(state.target).toEqual({ canvasId: REEL, time: 30 });
   });
 
-  it("starts at its time on its region, with its note", async () => {
+  it("starts at its time on its region, with its annotation", async () => {
     const state = await open({
       id: "https://example.org/a/both",
       type: "Annotation",
@@ -387,7 +391,7 @@ describe("a single Annotation as the content", () => {
       id: "https://example.org/a/manifest",
       type: "Annotation",
       motivation: "commenting",
-      body: note,
+      body: plateText,
       target: { id: FILM, type: "Manifest" },
     });
     expect(state.manifest?.id).toBe(FILM);
@@ -423,7 +427,7 @@ describe("a single Annotation as the content", () => {
     });
   });
 
-  it("puts its note on the Range's first Canvas", async () => {
+  it("puts its annotation on the Range's first Canvas", async () => {
     const state = await open({
       id: "https://example.org/a/range-note",
       type: "Annotation",
@@ -487,7 +491,7 @@ describe("a single Annotation as the content", () => {
       id: "https://example.org/a/encoded",
       type: "Annotation",
       motivation: "commenting",
-      body: note,
+      body: plateText,
       target: `${PAGE_1}#xywh=1,2,3,4`,
     };
     await clover.load(

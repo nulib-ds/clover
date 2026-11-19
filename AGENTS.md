@@ -1045,7 +1045,7 @@ deadline.
     Hess annotated; no film strip) and a Scene (the Esu shrine, standing out of it), with
     no badge naming their medium ("the element should speak for itself"). Annotations
     are the accent's, never green or amber ("make annotations use accent color").
-    Nothing floats free of the Viewer: no Now note, no flying pages ("remove the stray
+    Nothing floats free of the Viewer: no stray Now annotation, no flying pages ("remove the stray
     annotation below",
     "remove the random stray thumbs"), and no Timeline, Hindenburg, language toggle, or
     the languages, accessibility terms and tests that once floated at its left ("remove
@@ -1674,7 +1674,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   2026-10-24), English captions transcribed by speech recognition and corrected by hand
   (`captions.json`, `[unclear]` where a word could not be told; not yet checked by a
   listener), nine chapters titled with the broadcast's own words, and a page of
-  `describing` notes on its time (Mat, 2026-10-24), the playground's Recording and
+  `describing` annotations on its time (Mat, 2026-10-24), the playground's Recording and
   Timeline's resource (static, and live in `npm run dev` under
   `pages/api/mocks/hindenburg/`, since its captions are its own); `transcripts`, Cookbook 0219's _Lunchroom Manners_ with its
   English captions and, as the Canvas's `rendering` (0017's way), the film's plain-text
@@ -1738,7 +1738,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   campus's 115) as a Manifest (`manifest.json`, from `manifest.mjs`; 2026-11-13, never
   called an atlas: Mat, the same day), for trying the Annotations list with places mixed
   in: on each Canvas a page of `georeferencing` annotations (mapsnap's fits, body and
-  SvgSelector as fetched, retargeted at the Canvas) and a page of notes (`describing`,
+  SvgSelector as fetched, retargeted at the Canvas) and a page of other annotations, labeled "Notes" (`describing`,
   `commenting`, one an English and Spanish Choice, `tagging` printed words and a GeoJSON
   Feature point, Cookbook 0139, and `linking` to the volume at the Library of Congress),
   every region read from the image; a navPlace on the Manifest and on Sheet 115's Canvas,

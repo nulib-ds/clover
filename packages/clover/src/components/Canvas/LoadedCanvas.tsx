@@ -37,7 +37,7 @@ type View =
  * state names, or its first), a Collection (its first Manifest's), a content state, or
  * annotations given as the content. A `Timeline` loads through it too (`of`), taking a
  * Manifest's first Timeline; a Scene is never a Canvas's to draw. It draws the Canvas's own annotations (embedded or
- * referenced, and a content state's note), unless the host gives its own, and follows a
+ * referenced, and a content state's own annotation), unless the host gives its own, and follows a
  * linking annotation (Cookbook 0022) to another of the Manifest's Canvases, or to the
  * Manifest its target is `partOf`, unless the host takes `onAnnotationLink`. As a Root's
  * Canvas does, it plays with the chapters the Manifest's Ranges give what it plays, and a
@@ -258,7 +258,7 @@ export default function LoadedCanvas({
 /**
  * The annotations on `canvas`: its own pages (embedded ones read as they are, since
  * upgrading them again breaks their targets' fragments; referenced ones fetched and
- * upgraded), a content state's note, and annotations given as the content.
+ * upgraded), a content state's own annotation, and annotations given as the content.
  */
 async function annotationsOf(
   canvas: IIIFCanvas,

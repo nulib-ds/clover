@@ -15,12 +15,8 @@ import { alongBar, gapMask, gapsOf, lengthOnBar, seekShare } from "./seekGaps";
 import { placeMenu } from "./placeMenu";
 import type { SeekMark } from "./SeekMarks";
 import type { CloverRequest } from "../../../core/request";
-import { type ThumbnailSource, imageSource } from "../../../core/thumbnail";
-import {
-  EntryThumbnail,
-  PICTURE_SIZE,
-  useThumbnail,
-} from "../../../ui/EntryThumbnail";
+import { imageSource } from "../../../core/thumbnail";
+import { useLoaded } from "../../../hooks/useLoaded";
 import { join } from "../../../lib/classnames";
 import { languageCode } from "../../../i18n/languageCode";
 import { SHORTCUTS, Tip } from "../../../ui/Tip";
@@ -132,8 +128,6 @@ interface TransportOption {
   time?: string;
   /** The language of what it chooses (a caption track's cues), shown as its code. */
   language?: string;
-  /** A picture of what it chooses (a chapter's), under it while it is chosen. */
-  thumbnail?: ThumbnailSource | null;
 }
 
 /**
@@ -169,7 +163,6 @@ function TransportMenu({
   options,
   selected,
   onSelect,
-  request,
   asMenu = false,
 }: {
   id: string;
@@ -184,8 +177,6 @@ function TransportMenu({
   options: TransportOption[];
   selected: number;
   onSelect: (index: number) => void;
-  /** How the options' pictures are fetched. */
-  request?: CloverRequest;
   /**
    * Drawn as the Canvas's other menus are (`ControlMenu.css`), on Clover's ground rather
    * than the bar's dark: the chapters', as the annotations' menu is (Mat, 2026-10-28).
@@ -352,14 +343,6 @@ function TransportMenu({
                 >
                   {option.label}
                 </span>
-                {/* The chosen one's picture under it, as Contents shows the current one's. */}
-                {selected === index && (
-                  <EntryThumbnail
-                    source={option.thumbnail}
-                    request={request}
-                    large
-                  />
-                )}
               </label>
             );
           })}
@@ -444,12 +427,17 @@ const Transport: React.FC<TransportProps> = ({
   const [pointing, setPointing] = useState(false);
   const previewed = pointing ? pointed : seekFocused ? chapter : -1;
   const tipShown = (pointing || seekFocused) && duration > 0;
-  // Its picture over its words, as a hotspot's popover shows its image.
-  const preview = useThumbnail(
-    chapterPicture(chapters[previewed]),
-    PICTURE_SIZE,
-    request,
-  );
+  /*
+   * A chapter with captured thumbnails among them, as Contents and the chapters menu list
+   * it (`ChapterEntry`, #441): its thumbnail at its start, its title over the time under
+   * the pointer, one row, the thumbnail the one those load, at one size, kept as the time
+   * moves. Its code only for such chapters, so a recording's first view weighs no more;
+   * without them, the title under the time, as ever.
+   */
+  const chapterRow = useLoaded(loadChapterEntry, chapters.some(chapterPicture));
+  // The time under the pointer, else where it plays; in the chapter's row where it has one.
+  const time = pointing ? pointedAt : currentTime;
+  const row = chapterRow && previewed >= 0;
   const marked =
     pointed >= 0
       ? pointed
@@ -579,7 +567,7 @@ const Transport: React.FC<TransportProps> = ({
                 "--clover-transport-preview": alongBar(
                   previewed >= 0
                     ? along(previewed).left + along(previewed).width / 2
-                    : ((pointing ? pointedAt : currentTime) / duration) * 100,
+                    : (time / duration) * 100,
                 ),
               } as React.CSSProperties)
             : undefined
@@ -639,10 +627,21 @@ const Transport: React.FC<TransportProps> = ({
           // Made anew for each chapter, so it measures itself into the Body each time.
           <Tip
             key={previewed}
-            lead={formatTime(pointing ? pointedAt : currentTime)}
-            label={chapters[previewed]?.label ?? ""}
+            lead={row ? undefined : formatTime(time)}
+            label={
+              row ? (
+                <chapterRow.ChapterEntry
+                  label={chapters[previewed].label}
+                  lang={chapters[previewed].lang}
+                  start={time}
+                  picture={chapterPicture(chapters[previewed])}
+                  request={request}
+                />
+              ) : (
+                (chapters[previewed]?.label ?? "")
+              )
+            }
             lang={chapters[previewed]?.lang}
-            image={previewed >= 0 ? preview : undefined}
           />
         )}
       </div>
@@ -780,3 +779,6 @@ const Transport: React.FC<TransportProps> = ({
 };
 
 export default Transport;
+
+// A chapter's row in the seek bar's popover, where the chapters have pictures (#441).
+const loadChapterEntry = () => import("../../../ui/ChapterEntry");

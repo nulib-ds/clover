@@ -33,6 +33,7 @@ export const viewer: ElementSpec = {
     "panel-toggle": { prop: "panelToggle", type: "boolean" },
     "panel-layout": { prop: "panelLayout", type: ["accordion", "tabs"] },
     "panel-sections": { prop: "panelSections", type: "data" },
+    "part-of-collection": { prop: "partOfCollection", type: "boolean" },
     "panel-labels": { prop: "panelLabels", type: "data" },
     "sidebar-open": { prop: "defaultSidebarOpen", type: "boolean" },
     "page-layout": { prop: "pageLayout", type: "boolean" },
@@ -164,6 +165,11 @@ export const viewerDocs: ElementDocs = {
       description:
         'Default, Document and Gallery: which of the panel\'s sections it may have (Document\'s toolbar\'s buttons), as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and there is no panel where none of them does. "map" gives the map a section of its own; else About names the places and Annotations lists the georeferenced images, each shown on the map over the clover-body (Document: over its pages) as it is pressed.',
       default: "every section but the map",
+    },
+    "part-of-collection": {
+      description:
+        "Default, Document and Gallery: the panel's Collection section for the Collection the Manifest is partOf, fetched as it opens, listing its members. By default only a Collection the viewer was reached through has the section; About names the one the Manifest is part of either way.",
+      default: "false",
     },
     "panel-labels": {
       description:

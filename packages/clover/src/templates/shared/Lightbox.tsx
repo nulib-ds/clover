@@ -50,6 +50,8 @@ export interface LightboxProps {
    * them. Default: every section but the Map, as a Panel's.
    */
   panelSections?: readonly PanelSection[];
+  /** The panel's Collection section for the one it is `partOf` (the Panel's `partOfCollection`). */
+  partOfCollection?: boolean;
   /**
    * What a panel section's tab or heading says, in place of its word in Clover's interface language:
    * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the

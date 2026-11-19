@@ -69,7 +69,7 @@ There are 79 verified findings in the package. 75 are fixed (20 serious, 40 mode
 - **Status messages:** Status's region stays mounted and Search's stays in the accessibility tree, so Loading and fast errors are announced (4.1.3; P41, P95).
 - **Collections:** CollectionSelect loads only on Enter or a choice from its own list (3.2.2; P54).
 - **Tips:** they wrap and move inside what clips them (1.4.12; P110).
-- **Long hotspot notes:** a note taller than the Body is capped inside it and scrolls, by wheel, touch and the keys from its hotspot, still hoverable across the gap, never taking focus (1.4.10, 1.4.13; P13).
+- **Long hotspot Tips:** a hotspot's Tip taller than the Body is capped inside it and scrolls, by wheel, touch and the keys from its hotspot, still hoverable across the gap, never taking focus (1.4.10, 1.4.13; P13).
 - **Long titles under thumbnails:** a slider's or grid's title cut at three lines shows in full over its picture while its item is hovered or focused, and Escape hides it. Default's rail titles wrap (1.4.12, 1.4.13; P57).
 - **Sliders in forced colors,** found since the audit: the transport's seek and volume sliders draw in system colors, with an outline on focus, and its buttons keep their edge (1.4.11, 2.4.7).
 - **Focus rings over pictures,** found since the audit: the viewport's and the map's rings are a dark edge, the accent and a light band at full strength, `primary` and `secondary` 9:1 apart, so one keeps 3:1 over any picture (1.4.11, C40; N1).

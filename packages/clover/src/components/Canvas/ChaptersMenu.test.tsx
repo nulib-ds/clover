@@ -39,6 +39,14 @@ function arrowTo(radio: HTMLElement) {
 }
 
 describe("ChaptersMenu", () => {
+  // Titled at its top, as the annotations menu is, the title naming its group.
+  it("shows its title, which names the group of chapters", () => {
+    menu(false);
+    const group = screen.getByRole("group", { name: "Chapters" });
+    expect(group.querySelector("legend")).toHaveTextContent("Chapters");
+    expect(group).not.toHaveAttribute("aria-label");
+  });
+
   it("goes to each chapter the arrow keys reach while the recording is open", () => {
     const { onChapter } = menu(false);
     arrowTo(screen.getByRole("radio", { name: /Landing/ }));
