@@ -46,13 +46,14 @@ edge; `<Clover.Status loading={false} />` announces it. The table of contents is
 
 <ApiReference elements="clover-body">
 
-| Prop                   | Type                                 | Default    | Description                                                                                   |
-| ---------------------- | ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------- |
-| `renderers`            | `BodyRenderer[]`                     | The Root's | Components of yours that draw the views they claim.                                           |
-| `onContentStateChange` | `(state: { json, encoded }) => void` | —          | The Root's view, as a [content state](/docs/content-state), as it changes, whatever draws it. |
-| `style`                | `React.CSSProperties`                | —          | On its box, merged over its inline `height`.                                                  |
-| `className`            | `string`                             | —          | Added to `clover-body`.                                                                       |
-| `children`             | `ReactNode`                          | —          | Controls after Clover's own, or the renderer's `children`.                                    |
+| Prop                   | Type                                 | Default            | Description                                                                                   |
+| ---------------------- | ------------------------------------ | ------------------ | --------------------------------------------------------------------------------------------- |
+| `renderers`            | `BodyRenderer[]`                     | The Root's         | Components of yours that draw the views they claim.                                           |
+| `label`                | language map or `string`             | The Canvas's label | The viewport's accessible name.                                                               |
+| `onContentStateChange` | `(state: { json, encoded }) => void` | —                  | The Root's view, as a [content state](/docs/content-state), as it changes, whatever draws it. |
+| `style`                | `React.CSSProperties`                | —                  | On its box, merged over its inline `height`.                                                  |
+| `className`            | `string`                             | —                  | Added to `clover-body`.                                                                       |
+| `children`             | `ReactNode`                          | —                  | Controls after Clover's own, or the renderer's `children`.                                    |
 
 </ApiReference>
 

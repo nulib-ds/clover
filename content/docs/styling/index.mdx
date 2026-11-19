@@ -60,6 +60,18 @@ examples show `base.css` and `spacing.css` on the Viewer and on a layout you com
 Clover's stylesheets sit in `@layer clover`, so your CSS wins without a fight over
 specificity. The last two leave the look to you: see [Base](/docs/styling/base).
 
+With Tailwind CSS 4, whose CSS is in layers of its own, name `clover` among them before
+any import, so Clover's styles win over Tailwind's reset and your utility classes win over
+Clover's. Import `styles.css` there, in place of importing it from your code, so the order
+comes first:
+
+```css
+@layer theme, base, clover, components, utilities;
+
+@import "tailwindcss";
+@import "@nulib/clover/styles.css";
+```
+
 A recording, a Scene, a map and a vertical slider load their styles with their code, so a
 page without them loads none. With `base.css`, they load none of Clover's.
 

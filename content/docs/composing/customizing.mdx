@@ -1,6 +1,6 @@
 ---
 title: Customizing layouts
-description: "Fit a layout to your page: the Panel's sections, panes side by side, templates, your own components and renderers, and languages."
+description: "Fit a layout to your page: the Panel's sections, panes side by side, templates, your own components, icons and renderers, and languages."
 ---
 
 import { Example } from "docs/components/Clover4/ViewerDocs";
@@ -351,6 +351,79 @@ function useMyPopup() {
   };
 </script>
 ```
+
+### Icons
+
+Give a control over the Body an icon of your own with `controlButtons`, on `Body` or
+`Canvas`, by the control's key (`zoomIn`, `zoomOut`, `fullPage`, `rotateRight`,
+`rotateLeft`, `reset`, `choice`).
+
+<div data-code-flavor="react">
+
+Each is a component. Spread `buttonProps` on your button, for its name, keys and state,
+and put `tip` in it, last, for its popover. `icon` is Clover's own, for a button that
+keeps it.
+
+</div>
+
+<div data-code-flavor="web-components">
+
+Each is a function that returns your button, given the control's `name`, its `label` and
+Clover's `icon`. Clover names the button, keeps its state, presses the control with it and
+adds its popover.
+
+</div>
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function ZoomIn({ buttonProps, tip }) {
+  return (
+    <button {...buttonProps} className="clover-canvas-button">
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      {tip}
+    </button>
+  );
+}
+
+export default function Layout() {
+  return (
+    <Clover.Root iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json">
+      <Clover.Body controlButtons={{ zoomIn: ZoomIn }} />
+    </Clover.Root>
+  );
+}
+```
+
+```html twin
+<clover-root
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+>
+  <clover-body></clover-body>
+</clover-root>
+
+<script type="module">
+  import "@nulib/clover/web-components";
+
+  document.querySelector("clover-body").controlButtons = {
+    zoomIn: () => {
+      const button = document.createElement("button");
+      button.className = "clover-canvas-button";
+      button.innerHTML =
+        '<svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path d="M12 5v14M5 12h14" /></svg>';
+      return button;
+    },
+  };
+</script>
+```
+
+The class `clover-canvas-button` keeps Clover's round button. Clover fills and strokes the
+icon in it in the glyph's color, so an icon drawn with fills alone sets `stroke: none` on
+its paths. To change the controls' colors and size and keep Clover's icons, set
+`--clover-color-control`, `--clover-color-control-glyph` and `--clover-control`
+([Variables](/docs/styling/variables)).
 
 ### Custom renderer
 

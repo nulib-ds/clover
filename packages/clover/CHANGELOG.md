@@ -13,6 +13,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **A pressed state for the round controls**: the Canvas's controls, Items' arrows, the
+  Pager's Previous and Next, and the Panel's close. Set `--clover-color-control-pressed`
+  to fill a control while it is pressed, in the higher-contrast mode too; its glyph
+  must keep 4.5:1 on it. Unset, a control keeps the fill it has under the pointer, so
+  nothing changes. A control with nowhere to go ignores it.
 - **Your own arrows on the Items slider.** `Items` takes `controlButtons`, with two new
   keys, `itemsPrev` and `itemsNext`, given `buttonProps`, `icon`, `label` and `tip` as the
   Canvas's control buttons are. Spread `buttonProps`: at an end it carries
