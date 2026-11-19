@@ -28,6 +28,8 @@ export type ControlButtonProps = {
     /** On a control that opens a menu (the Choice control): its state and target. */
     "aria-expanded"?: boolean;
     "aria-controls"?: string;
+    /** Items' arrows at an end: out of the tab order, as a disabled button would be. */
+    tabIndex?: -1;
   };
   icon: React.ReactNode;
   label: string;
@@ -39,9 +41,10 @@ export type ControlButtonProps = {
 };
 
 /**
- * Replacements for the controls over a Canvas. Each key is optional, so a consumer can
- * override one control and leave the rest as they are. A replacement owns the whole
- * button, not just the glyph, so it can change shape as well as appearance.
+ * Replacements for the controls over a Canvas, and for Items' arrows. Each key is
+ * optional, so a consumer can override one control and leave the rest as they are. A
+ * replacement owns the whole button, not just the glyph, so it can change shape as well
+ * as appearance.
  */
 export type ControlButtons = {
   zoomIn?: React.ComponentType<ControlButtonProps>;
@@ -54,4 +57,10 @@ export type ControlButtons = {
   rotateDown?: React.ComponentType<ControlButtonProps>;
   reset?: React.ComponentType<ControlButtonProps>;
   choice?: React.ComponentType<ControlButtonProps>;
+  /**
+   * Items' slider arrows, given to `Items` rather than the Canvas. Keep the class
+   * `clover-items-scroll-prev` or `clover-items-scroll-next` to keep Clover's place for it.
+   */
+  itemsPrev?: React.ComponentType<ControlButtonProps>;
+  itemsNext?: React.ComponentType<ControlButtonProps>;
 };

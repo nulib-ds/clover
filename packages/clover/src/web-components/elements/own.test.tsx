@@ -237,6 +237,7 @@ describe("The Body's controls, the page's own", () => {
         told(control);
         const button = document.createElement("button");
         button.className = "mine";
+        button.tabIndex = 0;
         button.append(control.icon);
         return button;
       },
@@ -253,6 +254,8 @@ describe("The Body's controls, the page's own", () => {
     expect(mine).toHaveAttribute("aria-label", "Zoom in");
     expect(mine).toHaveAttribute("aria-keyshortcuts", "Plus");
     expect(mine).toHaveAttribute("type", "button");
+    // The page's own tab stop is kept.
+    expect(mine).toHaveAttribute("tabindex", "0");
     expect(mine.querySelector("svg")).not.toBeNull();
     await waitFor(() =>
       expect(mine.lastElementChild).toHaveClass("clover-tip"),
@@ -293,6 +296,47 @@ describe("The Body's controls, the page's own", () => {
     );
     expect(share.lastElementChild).toHaveTextContent("Share (S)");
     expect(share.lastElementChild).toHaveAttribute("aria-hidden", "true");
+  });
+});
+
+describe("Items' arrows, the page's own", () => {
+  it("take the page's buttons, named, kept in their state and pressed as Clover's", async () => {
+    const { root, ready } = rootOf("<clover-items></clover-items>");
+    const items = root.querySelector("clover-items") as HTMLElement & {
+      controlButtons: unknown;
+    };
+    const arrow =
+      (step: string) =>
+      ({ icon }: { icon: HTMLElement }) => {
+        const button = document.createElement("button");
+        button.className = `clover-items-scroll-${step} mine`;
+        button.append(icon);
+        return button;
+      };
+    items.controlButtons = {
+      itemsPrev: arrow("prev"),
+      itemsNext: arrow("next"),
+    };
+    document.body.append(root);
+    await ready;
+    const options = await within(root).findAllByRole("option");
+    const [previous, next] = await waitFor(() => {
+      const found = [
+        ...root.querySelectorAll<HTMLButtonElement>("button.mine"),
+      ];
+      expect(found).toHaveLength(2);
+      return found;
+    });
+    expect(previous).toHaveAttribute("aria-label", "Previous");
+    expect(next).toHaveAttribute("aria-label", "Next");
+    expect(previous).toHaveAttribute("aria-disabled", "true");
+    expect(previous).toHaveAttribute("tabindex", "-1");
+    fireEvent.click(next);
+    await waitFor(() =>
+      expect(options[1]).toHaveAttribute("aria-selected", "true"),
+    );
+    await waitFor(() => expect(previous).not.toHaveAttribute("aria-disabled"));
+    expect(previous).not.toHaveAttribute("tabindex");
   });
 });
 

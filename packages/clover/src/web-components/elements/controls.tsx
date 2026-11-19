@@ -8,7 +8,7 @@ import type {
 
 /** What the page's function for one of the Body's controls is told. */
 export interface PageControl {
-  /** Which control: `zoomIn`, `zoomOut`, `fullPage`, `rotateRight`, `rotateLeft`, `reset`, `choice`. */
+  /** Which control, by its key in `controlButtons`. */
   name: keyof ControlButtons;
   /** Its name, as its `aria-label` says it. */
   label: string;
@@ -68,15 +68,17 @@ export function toControlButtons(value: unknown): ControlButtons | undefined {
 }
 
 /** What Clover keeps on the page's button: its wiring, as `buttonProps` spreads it. */
-const WIRED = [
-  "id",
-  "type",
-  "aria-label",
-  "lang",
-  "aria-keyshortcuts",
-  "aria-expanded",
-  "aria-controls",
-] as const;
+const WIRED = {
+  id: "id",
+  type: "type",
+  "aria-label": "aria-label",
+  lang: "lang",
+  "aria-keyshortcuts": "aria-keyshortcuts",
+  "aria-expanded": "aria-expanded",
+  "aria-controls": "aria-controls",
+  "aria-disabled": "aria-disabled",
+  tabindex: "tabIndex",
+} as const;
 
 /**
  * The page's button, in the cluster where Clover's would be: right after a hidden mark
@@ -103,6 +105,8 @@ function PageButton({
   const [button, setButton] = useState<HTMLElement | null>(null);
   const press = useRef(buttonProps.onClick);
   press.current = buttonProps.onClick;
+  // The page's own tab stop: Clover takes the button out only at an end of Items.
+  const ownTabIndex = useRef<string | null>(null);
 
   useLayoutEffect(() => {
     const at = mark.current;
@@ -117,6 +121,7 @@ function PageButton({
     const control = made.matches("button")
       ? made
       : (made.querySelector("button") ?? made);
+    ownTabIndex.current = control.getAttribute("tabindex");
     const click = (event: Event) => press.current?.(event as never);
     control.addEventListener("click", click);
     at.after(made);
@@ -132,9 +137,10 @@ function PageButton({
   useLayoutEffect(() => {
     if (!button) return;
     const given = buttonProps as Record<string, unknown>;
-    for (const attribute of WIRED) {
-      const value = given[attribute];
-      if (value === undefined) button.removeAttribute(attribute);
+    for (const [attribute, prop] of Object.entries(WIRED)) {
+      const value =
+        given[prop] ?? (attribute === "tabindex" ? ownTabIndex.current : null);
+      if (value == null) button.removeAttribute(attribute);
       else button.setAttribute(attribute, String(value));
     }
   });

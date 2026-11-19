@@ -27,7 +27,13 @@ export const items: ElementSpec = {
     language: { prop: "language", type: "string" },
     "high-contrast": { prop: "highContrast", type: "boolean" },
   },
-  properties: ["iiifContent", "items", "request", "renderItem"],
+  properties: [
+    "iiifContent",
+    "items",
+    "request",
+    "renderItem",
+    "controlButtons",
+  ],
   events: {
     "clover-select": { prop: "onSelect", detail: ["item"], cancelable: true },
   },
@@ -126,6 +132,11 @@ export const itemsDocs: ElementDocs = {
       type: "((item: { id: string; label?: string | Record<string, string[]>; summary?: string | Record<string, string[]>; href?: string }, state: { selected: boolean }) => Node | string | null | undefined) | null",
       description:
         "Your own figure for an item, in place of its thumbnail and label: a node or text, which names the item. A new node each time.",
+    },
+    controlButtons: {
+      type: "CloverControlButtons | null",
+      description:
+        "The slider's arrows, itemsPrev and itemsNext, each replaced by a button you make: a function given the arrow's name, label and Clover's icon, returning the button. Clover keeps it named and in its state, presses the arrow with it, and adds its popover; at an end it carries aria-disabled and leaves the tab order. Give it the class clover-items-scroll-prev or clover-items-scroll-next to keep its place.",
     },
   },
   events: {

@@ -12,6 +12,7 @@ import { ItemFigure, type ItemSecondary } from "./Item";
 import type { Steps } from "./Position";
 import type { PagerProps } from "./PagerLayout";
 import { Tip } from "../../ui/Tip";
+import type { ControlButtons } from "../../ui/controlButtons";
 import {
   type ItemModel,
   itemsOfCollection,
@@ -149,6 +150,11 @@ export interface ItemsProps
     item: ItemModel,
     state: { selected: boolean },
   ) => React.ReactNode;
+  /**
+   * Buttons of your own for the slider's arrows, `itemsPrev` and `itemsNext`, as the
+   * Canvas takes them for its controls. Other keys are ignored here.
+   */
+  controlButtons?: ControlButtons;
   as?: React.ElementType;
 }
 
@@ -507,6 +513,7 @@ function DrawnItems({
   heading,
   headingLevel = 2,
   renderItem,
+  controlButtons,
   onActivate,
   pointed,
   onPoint,
@@ -740,6 +747,56 @@ function DrawnItems({
       if (followFocus) followFocus(item);
       else onActivate(item, event);
     };
+    const icon = (
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d={
+            vertical
+              ? (step === "next") !== upward
+                ? "M3 6l5 5 5-5"
+                : "M3 10l5-5 5 5"
+              : (step === "next") !== rtl
+                ? "M6 3l5 5-5 5"
+                : "M10 3L5 8l5 5"
+          }
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+    const Custom =
+      controlButtons?.[step === "prev" ? "itemsPrev" : "itemsNext"];
+    if (Custom) {
+      const lang = langOf(labelKey);
+      return (
+        <Custom
+          buttonProps={{
+            id: `${id}-${step}`,
+            type: "button",
+            "aria-label": label,
+            ...(lang && { lang }),
+            onClick: can ? onClick : undefined,
+            ...(!can && {
+              "aria-disabled": true as const,
+              tabIndex: -1 as const,
+            }),
+            ...(!stepping && { "aria-controls": `${id}-viewport` }),
+          }}
+          icon={icon}
+          label={label}
+          tip={<Tip label={label} />}
+        />
+      );
+    }
     return (
       <button
         type="button"
@@ -750,30 +807,7 @@ function DrawnItems({
         tabIndex={can ? undefined : -1}
         onClick={onClick}
       >
-        <svg
-          aria-hidden="true"
-          focusable="false"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d={
-              vertical
-                ? (step === "next") !== upward
-                  ? "M3 6l5 5 5-5"
-                  : "M3 10l5-5 5 5"
-                : (step === "next") !== rtl
-                  ? "M6 3l5 5-5 5"
-                  : "M10 3L5 8l5 5"
-            }
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        {icon}
         <span style={visuallyHidden}>{label}</span>
         <Tip label={label} />
       </button>
