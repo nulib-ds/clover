@@ -2471,7 +2471,20 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   such as Cantaloupe, reads the next sharper one for a size even a fraction of a pixel
   past the scale factor's, four times the pixels (Yale's, fresh: 549 px of a 2195 px
   region at scale factor 4 in 2.8 s, 548 in 0.5 s). The service's own tiles and listed
-  sizes keep theirs, as every viewer asks for them alike. A server answers a 1024 px tile in
+  sizes keep theirs, as every viewer asks for them alike. A host that answers its own grid far
+  faster than joined tiles gets it too (2026-11-19, Mat: "yes, build it"): every load is
+  timed (`sources/hostTiles.ts`; past a host's six connections, from when one frees), small
+  answers (300 kpx or less) against large tiles (600 kpx or more; a whole image is never
+  large, as a server that keeps what it has served sends its listed sizes at once), and
+  once it has two of each a host gets its grid where a large answer is slower than 250 ms
+  and than `max(2.5, join² / 2)` small ones, `join` the tiles a side Clover joins
+  (`TilePyramid.join`); the answer may change twice, then holds.
+  `CanvasRenderer.applyHostChoices` swaps an image's pyramid (`listed`, or `joined` back)
+  only once nothing is on its way from that host, keeping the old one as
+  `SceneItem.previous`, whose tiles in are drawn under the target level and stand in for
+  the new tiles they cover, at their scale or finer, coarsest level included, which are not
+  asked for (`planFrame`), so the picture never steps back and a view already whole asks
+  for nothing. A server answers a 1024 px tile in
   1.1 to 1.4
   times a 256 px one's time (Northwestern's, e-codices' and Wellcome's, measured cold),
   and over HTTP/1.1 a browser sends six at a time, so 256 px tiles made a page's view a

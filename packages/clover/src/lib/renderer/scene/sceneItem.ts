@@ -15,9 +15,9 @@ import {
   type RegionRect,
   fetchInfo,
 } from "../sources/imageService";
+import { prefersGrid } from "../sources/hostTiles";
 import { refusesDerivedTiles } from "../sources/refusals";
 import {
-  TILE_FLOOR,
   type TilePyramid,
   servicePyramid,
   staticPyramid,
@@ -80,6 +80,12 @@ export interface SceneItem {
   id: string;
   spec: SceneImage;
   pyramid: TilePyramid;
+  /**
+   * The pyramid it had before its tiles changed form (`CanvasRenderer.swapPyramid`): its
+   * tiles already in are drawn under the new one's until those replace them, and none
+   * they cover is asked for again.
+   */
+  previous?: TilePyramid;
   /** For a media item: its element, as a drawable source. */
   media?: LoadedImage;
   /** The image's own coordinate space: its declared size, or its full pixel size. */
@@ -127,11 +133,14 @@ export async function resolveItem(
   if (spec.service) {
     try {
       const info = await fetchInfo(spec.service, context.infoOptions);
-      // A host that refused a tile Clover joined or cut is asked for its own grid.
-      pyramid = servicePyramid(
-        info,
-        refusesDerivedTiles(info.id) ? 0 : TILE_FLOOR,
-      );
+      // A host that refused a tile Clover joined or cut, or answers its own grid far
+      // faster, is asked for its own grid.
+      pyramid = servicePyramid(info);
+      if (
+        pyramid.listed &&
+        (refusesDerivedTiles(info.id) || prefersGrid(info.id, pyramid.join))
+      )
+        pyramid = pyramid.listed();
     } catch (error) {
       serviceError = error;
     }
