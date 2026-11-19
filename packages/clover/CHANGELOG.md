@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.11.4] - 2026-11-19
+
 ### Added
 
 - **`partOfCollection`** on the Panel, and on Default, Document and Gallery
