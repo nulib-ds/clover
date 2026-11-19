@@ -152,6 +152,37 @@ describe("servicePyramid", () => {
     );
     expect(pyramid.levels[pyramid.levels.length - 1].tileWidth).toBe(256);
   });
+
+  it("offers the service's own grid where it joins tiles, for a server that refuses them", () => {
+    const pyramid = servicePyramid(parseInfo(NORTHWESTERN));
+    expect(pyramid.service).toBe(NORTHWESTERN.id);
+    const listed = pyramid.listed!();
+    const finest = listed.levels.length - 1;
+    expect(listed.levels[finest]).toMatchObject({ tileWidth: 256 });
+    expect(listed.tile({ level: finest, col: 1, row: 0 }).url).toBe(
+      `${NORTHWESTERN.id}/256,0,256,256/256,256/0/default.jpg`,
+    );
+    // The grid is the service's own, so it has nothing further to fall back to.
+    expect(listed.listed).toBeUndefined();
+  });
+
+  it("offers a smaller cut where it cuts its own tiles, and nothing where it asks the grid", () => {
+    const untiled = servicePyramid(parseInfo(LEVEL2_UNTILED_V2)).listed!();
+    expect(untiled.levels[untiled.levels.length - 1].tileWidth).toBe(512);
+    expect(
+      servicePyramid(parseInfo({ ...NORTHWESTERN, profile: "level0" })).listed,
+    ).toBeUndefined();
+    expect(servicePyramid(parseInfo(NORTHWESTERN), 0).listed).toBeUndefined();
+    // 1024 px listed tiles are past the floor: nothing joined, nothing to offer.
+    expect(
+      servicePyramid(
+        parseInfo({
+          ...NORTHWESTERN,
+          tiles: [{ width: 1024, height: 1024, scaleFactors: [1, 2, 4, 8] }],
+        }),
+      ).listed,
+    ).toBeUndefined();
+  });
 });
 
 describe("chooseLevel", () => {

@@ -11,6 +11,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **Images from a server that serves only its own tiles.** Clover joins a service's small
+  tiles into larger requests (1024 px) wherever its `info.json` says it can cut any region
+  at any size. Some servers answer those requests 403 anyway: the Art Institute of
+  Chicago's serves its 256 px grid and listed sizes only, so Clover never showed more
+  than an enlarged whole image there. Now a tile refused with 400, 403, 413 or 414 sends
+  that host's images to their own listed tiles from the next frame, and the host is
+  remembered for the visit, so its other images start there. Nothing to change.
+
 ## [4.11.3] - 2026-11-19
 
 ### Added

@@ -39,6 +39,11 @@ export interface TileCacheOptions {
   load: TileLoader;
   /** A tile finished loading (or failed for good): the picture can improve. */
   onSettled: () => void;
+  /**
+   * A tile failed for good, with its HTTP status where it had one: called before
+   * `onSettled`, so the next frame can plan other tiles in its place.
+   */
+  onFailed?: (url: string, status?: number) => void;
   /** Decoded pixels left memory; drop anything derived from them (a texture). */
   onEvict: (url: string) => void;
   /** Decoded bytes to keep, across required and cached tiles. */
@@ -248,6 +253,10 @@ export class TileCache {
         entry.state = "failed";
         entry.controller = undefined;
         entry.pinned = false;
+        this.options.onFailed?.(
+          entry.url,
+          (error as { status?: number } | undefined)?.status,
+        );
         this.settle(entry);
       },
     );

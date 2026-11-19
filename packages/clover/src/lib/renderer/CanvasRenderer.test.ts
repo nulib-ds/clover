@@ -2,6 +2,7 @@ import { GOTTINGEN_V2_1, GOTTINGEN_V3 } from "../../fixtures/iiif-image/info";
 import { CanvasRenderer } from "./CanvasRenderer";
 import { MAX_CONTEXTS } from "./backends/contexts";
 import { clearInfoCache } from "./sources/imageService";
+import { resetRefusals } from "./sources/refusals";
 import { loadImage } from "./io/decode";
 import { createFakeGl, type FakeGl } from "./testing/fakeGl";
 
@@ -653,6 +654,50 @@ describe("CanvasRenderer", () => {
     ).toHaveLength(4);
     expect(fake.count("drawArrays")).toBeGreaterThan(0);
     renderer.dispose();
+  });
+
+  it("asks a server that refuses its joined tiles for its own grid, from then on", async () => {
+    resetRefusals();
+    onTestFinished(() => resetRefusals());
+    serveInfo(GOTTINGEN_V3);
+    // A server that serves its own 512 px grid and whole images, and refuses any other
+    // tile (the Art Institute of Chicago's, whose info.json promises any size).
+    mockedLoad.mockImplementation(async (url: string) => {
+      const size = url.match(/\/(\d+),(\d*)\/0\//);
+      const w = size ? Number(size[1]) : 512;
+      const h = size && size[2] ? Number(size[2]) : w;
+      if (/\/\d+,\d+,\d+,\d+\//.test(url) && w > 512)
+        throw Object.assign(new Error("Image request failed with 403"), {
+          status: 403,
+        });
+      return bitmap(w, h);
+    });
+    const joined = (urls: string[]) =>
+      urls.filter((u) => /\/\d+,\d+,\d+,\d+\/1024,\d+\//.test(u));
+    // Scale factor 2 on the service's own grid: 1024 px regions (960 at the right edge,
+    // 976 at the foot) asked at 512 px (480, 488).
+    const grid = (urls: string[]) =>
+      urls.filter((u) => /\/\d+,\d+,(1024|960),(1024|976)\/(512|480),/.test(u));
+
+    const renderer = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
+    await renderer.setImages([{ id: "g", service: GOTTINGEN_V3.id }]);
+    await frames(8);
+    const urls = mockedLoad.mock.calls.map(([url]) => url);
+    expect(joined(urls).length).toBeGreaterThan(0);
+    // Refused, the view is asked of the service's own grid: at scale factor 2, its
+    // 512 px tiles cover the whole image in 4 × 3.
+    expect(grid(urls)).toHaveLength(12);
+    renderer.dispose();
+
+    // The host is remembered: the next image from it goes to the grid at once.
+    mockedLoad.mockClear();
+    const next = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
+    await next.setImages([{ id: "h", service: GOTTINGEN_V3.id }]);
+    await frames(8);
+    const later = mockedLoad.mock.calls.map(([url]) => url);
+    expect(joined(later)).toHaveLength(0);
+    expect(grid(later)).toHaveLength(12);
+    next.dispose();
   });
 
   it("asks for a new scene's view while its coarsest tile is still on its way", async () => {
