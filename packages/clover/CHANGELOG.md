@@ -11,6 +11,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Tiles in the form each image server answers fastest.** Clover joins a service's
+  small tiles into 1024 px requests, which saves round trips wherever every request costs
+  about the same. A server that keeps what it has rendered, though, holds its own grid for
+  anyone who has viewed an image before, while Clover's joined tiles are new to it. Now
+  Clover times each server's answers and asks for its own grid where a joined tile costs
+  more than the grid tiles it saves, from then on for that server's images during the
+  visit. What is on screen stays drawn while the tiles change form. Nothing to change.
+
 ### Fixed
 
 - **Faster tiles at an image's edges from servers that render them fresh.** Clover

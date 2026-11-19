@@ -233,6 +233,49 @@ describe("servicePyramid", () => {
   });
 });
 
+describe("a pyramid's two forms", () => {
+  it("knows how far it joins, and turns from joined tiles to the grid and back", () => {
+    const joined = servicePyramid(parseInfo(NORTHWESTERN));
+    expect(joined.join).toBe(4);
+    expect(joined.joined).toBeUndefined();
+    const grid = joined.listed!();
+    expect(grid.join).toBe(4);
+    expect(grid.listed).toBeUndefined();
+    expect(grid.levels[grid.levels.length - 1].tileWidth).toBe(256);
+    const again = grid.joined!();
+    expect(again.levels[again.levels.length - 1].tileWidth).toBe(1024);
+    expect(again.listed).toBeDefined();
+  });
+
+  it("has one form where it cannot join: listed tiles past the floor, or level 0", () => {
+    const large = servicePyramid(
+      parseInfo({
+        ...NORTHWESTERN,
+        tiles: [{ width: 1024, height: 1024, scaleFactors: [1, 2, 4, 8] }],
+      }),
+    );
+    expect([large.join, large.listed, large.joined]).toEqual([
+      1,
+      undefined,
+      undefined,
+    ]);
+    const level0 = servicePyramid(
+      parseInfo({ ...NORTHWESTERN, profile: "level0" }),
+    );
+    expect([level0.join, level0.listed, level0.joined]).toEqual([
+      1,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  it("counts the tiles Clover cuts, for a service that lists none", () => {
+    const cut = servicePyramid(parseInfo(LEVEL2_UNTILED_V2));
+    expect(cut.join).toBe(2);
+    expect(cut.listed!().joined).toBeDefined();
+  });
+});
+
 describe("chooseLevel", () => {
   const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3), 0);
 

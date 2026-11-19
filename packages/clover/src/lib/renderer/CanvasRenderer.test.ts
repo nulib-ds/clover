@@ -3,6 +3,7 @@ import { CanvasRenderer } from "./CanvasRenderer";
 import { MAX_CONTEXTS } from "./backends/contexts";
 import { clearInfoCache } from "./sources/imageService";
 import { resetRefusals } from "./sources/refusals";
+import { resetHosts, timeLoad } from "./sources/hostTiles";
 import { loadImage } from "./io/decode";
 import { createFakeGl, type FakeGl } from "./testing/fakeGl";
 
@@ -78,6 +79,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
   clearInfoCache();
+  resetHosts();
 });
 
 function serveInfo(json: unknown) {
@@ -698,6 +700,100 @@ describe("CanvasRenderer", () => {
     expect(joined(later)).toHaveLength(0);
     expect(grid(later)).toHaveLength(12);
     next.dispose();
+  });
+
+  /** Göttingen's host, timed as a server that keeps its grid: small 0.14 s, joined 0.9 s. */
+  const keepsItsGrid = () => {
+    let now = 0;
+    const answer = (pixels: number, ms: number) => {
+      const done = timeLoad(
+        `${GOTTINGEN_V3.id}/0,0,2048,2048/1024,/0/default.jpg`,
+        () => now,
+      );
+      now += ms;
+      done(pixels);
+    };
+    answer(512 * 384, 140);
+    answer(512 * 384, 150);
+    answer(1024 * 1024, 900);
+    answer(1024 * 1024, 950);
+  };
+  const regionTiles = (urls: string[]) =>
+    urls.filter((u) => /\/\d+,\d+,\d+,\d+\//.test(u));
+  const loadedUrls = () => mockedLoad.mock.calls.map(([url]) => url);
+
+  it("turns to the grid of a host that answers it far faster, keeping what is drawn", async () => {
+    resetHosts();
+    onTestFinished(() => resetHosts());
+    // Göttingen, with two whole sizes listed, on a server that keeps its grid: anything
+    // small in 140 ms, a tile Clover joins in 900 ms (a clock the loads move).
+    serveInfo({
+      ...GOTTINGEN_V3,
+      sizes: [
+        { width: 252, height: 189 },
+        { width: 504, height: 378 },
+      ],
+    });
+    let elapsed = 0;
+    const real = performance.now.bind(performance);
+    vi.spyOn(performance, "now").mockImplementation(() => real() + elapsed);
+    mockedLoad.mockImplementation(async (url: string) => {
+      const size = url.match(/\/(\d+),(\d*)\/0\//);
+      const w = size ? Number(size[1]) : 512;
+      const h = size && size[2] ? Number(size[2]) : w;
+      elapsed += /\/\d+,\d+,\d+,\d+\//.test(url) && w > 512 ? 900 : 140;
+      return bitmap(w, h);
+    });
+    // One request at a time, so each is timed alone.
+    const renderer = new CanvasRenderer(host(1600, 1200), {
+      animationTime: 0,
+      maxInFlight: 1,
+    });
+    onTestFinished(() => renderer.dispose());
+    await renderer.setImages([{ id: "g", service: GOTTINGEN_V3.id }]);
+    await frames(12);
+    // Opened on joined tiles: four at scale factor 2, the first 1024 px.
+    expect(regionTiles(loadedUrls())).toHaveLength(4);
+    expect(loadedUrls()).toContainEqual(
+      expect.stringMatching(/\/0,0,2048,2048\/1024,1024\//),
+    );
+
+    // Timed, it is on the grid now, but the joined tiles in cover the view: a move that
+    // stays at scale factor 2 is painted from them, and none is asked for again.
+    mockedLoad.mockClear();
+    const drawn = fake.count("drawArrays");
+    renderer.fitBounds({ x: 100, y: 75, width: 3832, height: 2874 }, true);
+    await frames(6);
+    expect(fake.count("drawArrays")).toBeGreaterThan(drawn);
+    expect(regionTiles(loadedUrls())).toHaveLength(0);
+
+    // Zoomed in, its own 512 px tiles, and no joined ones.
+    renderer.fitBounds({ x: 1000, y: 750, width: 1600, height: 1200 }, true);
+    await frames(12);
+    const zoomed = regionTiles(loadedUrls());
+    expect(zoomed.some((u) => /\/\d+,\d+,512,512\/512,512\//.test(u))).toBe(
+      true,
+    );
+    expect(zoomed.some((u) => /\/\d+,\d+,\d+,\d+\/1024,/.test(u))).toBe(false);
+  });
+
+  it("starts the next image of a host known to answer its grid faster on that grid", async () => {
+    resetHosts();
+    onTestFinished(() => resetHosts());
+    keepsItsGrid();
+    serveInfo(GOTTINGEN_V3);
+    serveTiles();
+    const renderer = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
+    onTestFinished(() => renderer.dispose());
+    await renderer.setImages([{ id: "g", service: GOTTINGEN_V3.id }]);
+    await frames(6);
+    const urls = regionTiles(loadedUrls());
+    expect(urls.some((u) => /\/\d+,\d+,\d+,\d+\/1024,/.test(u))).toBe(false);
+    // Scale factor 2 on its own grid: 4 × 3 tiles of 512 px (480 and 488 at the edges).
+    expect(
+      urls.filter((u) => /\/\d+,\d+,(1024|960),(1024|976)\/(512|480),/.test(u)),
+    ).toHaveLength(12);
+    renderer.dispose();
   });
 
   it("asks for a new scene's view while its coarsest tile is still on its way", async () => {

@@ -213,6 +213,90 @@ describe("planFrame", () => {
     expect(complete.draws.every((d) => !/\/full\//.test(d.url))).toBe(true);
   });
 
+  it("after a swap, draws the previous pyramid's tiles and asks for none they cover", () => {
+    // On the grid now; before, its 512 px tiles were joined into one 1008 px tile at
+    // scale factor 4, which is in.
+    const item = gottingen();
+    item.previous = servicePyramid(parseInfo(GOTTINGEN_V3));
+    const camera = fitCamera(item.rect, viewport);
+    const before = everything({ ...item, pyramid: item.previous });
+    const plan = planFrame({
+      items: [item],
+      camera,
+      viewport,
+      pixelRatio: 1,
+      getTile: before,
+    });
+    // Nothing is asked for: the joined tile covers the grid's four at the target, and
+    // stands in for its thumbnail too, which a view already whole has no use for.
+    expect(plan.wants).toEqual([]);
+    // And the picture is the one tile that covers them, as before the swap.
+    expect(plan.draws.map((d) => d.url)).toEqual([
+      expect.stringMatching(/\/full\/1008,756\//),
+    ]);
+  });
+
+  it("after a swap, asks for every tile the previous pyramid does not hold", () => {
+    const item = gottingen();
+    item.previous = servicePyramid(parseInfo(GOTTINGEN_V3));
+    const camera = fitCamera(item.rect, viewport);
+    const plan = planFrame({
+      items: [item],
+      camera,
+      viewport,
+      pixelRatio: 1,
+      getTile: () => undefined,
+    });
+    expect(plan.wants).toHaveLength(1 + 4);
+    expect(plan.draws).toHaveLength(0);
+  });
+
+  it("after a swap, paints the previous tiles under the new target while it loads", () => {
+    const item = gottingen();
+    item.previous = servicePyramid(parseInfo(GOTTINGEN_V3));
+    // Zoomed in a quarter: the target is finer than anything the previous pyramid had in.
+    const camera = fitCamera(
+      { x: 1000, y: 750, width: 1008, height: 756 },
+      viewport,
+    );
+    const before = everything({ ...item, pyramid: item.previous });
+    const plan = planFrame({
+      items: [item],
+      camera,
+      viewport,
+      pixelRatio: 1,
+      getTile: (url) =>
+        /\/full\/1008,756\//.test(url) ? before(url) : undefined,
+    });
+    expect(plan.draws.map((d) => d.url)).toEqual([
+      expect.stringMatching(/\/full\/1008,756\//),
+    ]);
+    expect(
+      plan.wants.some((w) => /\/\d+,\d+,512,512\/512,512\//.test(w.url)),
+    ).toBe(true);
+  });
+
+  it("after a swap back, asks for a sharper coarse tile than the previous one in", () => {
+    // Joined again; on the grid before, only its 512 px thumbnail had come in, which is
+    // coarser than the joined pyramid's own and so does not stand in for it.
+    const item = gottingen();
+    item.previous = item.pyramid;
+    item.pyramid = servicePyramid(parseInfo(GOTTINGEN_V3));
+    const thumbnail = item.previous.tile({ level: 0, col: 0, row: 0 }).url;
+    const before = everything({ ...item, pyramid: item.previous });
+    const plan = planFrame({
+      items: [item],
+      camera: fitCamera(item.rect, viewport),
+      viewport,
+      pixelRatio: 1,
+      getTile: (url) => (url === thumbnail ? before(url) : undefined),
+    });
+    expect(plan.wants.map((w) => w.url)).toEqual([
+      expect.stringMatching(/\/full\/1008,756\//),
+    ]);
+    expect(plan.draws.map((d) => d.url)).toEqual([thumbnail]);
+  });
+
   it("places tiles edge to edge on screen, with a bleed only between neighbors", () => {
     const item = gottingen();
     const camera = fitCamera(item.rect, viewport);

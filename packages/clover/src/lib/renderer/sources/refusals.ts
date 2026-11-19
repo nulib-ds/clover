@@ -6,7 +6,8 @@
  */
 const refusing = new Set<string>();
 
-function originOf(url: string): string {
+/** A URL's origin, the host a refusal or a timing is kept by. */
+export function originOf(url: string): string {
   try {
     return new URL(url).origin;
   } catch {
