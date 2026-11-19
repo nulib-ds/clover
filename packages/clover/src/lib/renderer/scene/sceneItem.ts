@@ -12,6 +12,7 @@ import { type Rect, transformRect, union } from "../math/rect";
 import { type Rotation, parseRegion, parseRotation } from "./regions";
 import {
   type FetchInfoOptions,
+  type ImageServiceInfo,
   type RegionRect,
   fetchInfo,
 } from "../sources/imageService";
@@ -109,6 +110,8 @@ export interface PrepareContext {
   cache: TileCache;
   loadStatic: (url: string) => Promise<LoadedImage>;
   infoOptions?: FetchInfoOptions;
+  /** The least tile edge to ask of a service, for the view it is shown in. */
+  tileFloor?: (info: ImageServiceInfo) => number;
 }
 
 /**
@@ -130,7 +133,9 @@ export async function resolveItem(
       // A host that refused a tile Clover joined or cut is asked for its own grid.
       pyramid = servicePyramid(
         info,
-        refusesDerivedTiles(info.id) ? 0 : TILE_FLOOR,
+        refusesDerivedTiles(info.id)
+          ? 0
+          : (context.tileFloor?.(info) ?? TILE_FLOOR),
       );
     } catch (error) {
       serviceError = error;

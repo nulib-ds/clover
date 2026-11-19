@@ -53,6 +53,8 @@ import {
   sameSpec,
 } from "./scene/sceneItem";
 import { isSizeRefusal, noteRefusal, sameHost } from "./sources/refusals";
+import type { ImageServiceInfo } from "./sources/imageService";
+import { tileFloorFor } from "./sources/tilePyramid";
 
 export type { SceneImage } from "./scene/sceneItem";
 
@@ -578,10 +580,21 @@ export class CanvasRenderer implements GestureTarget {
   }
 
   private prepareContext() {
+    const { width, height } = this.viewport;
+    const ratio = this.pixelRatio;
     return {
       cache: this.cache,
       loadStatic: (url: string) => this.loadTile(url),
       infoOptions: { request: this.options.request },
+      // Tiles sized for the view the image is shown in, once it has a size to go by.
+      tileFloor:
+        width > 64 && height > 64
+          ? (info: ImageServiceInfo) =>
+              tileFloorFor(info, {
+                width: width * ratio,
+                height: height * ratio,
+              })
+          : undefined,
     };
   }
 

@@ -11,6 +11,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Tiles sized for the view.** Clover joined a service's small tiles into 1024 px
+  requests whatever the size of the view. Now it keeps the service's own tiles wherever
+  the view needs no more than 12 of them (two rounds of a browser's six connections), and
+  otherwise joins them just far enough, never past half the view's longer edge or 1024 px.
+  A small view asks for fewer pixels and for the addresses a server's cache already holds;
+  a large one still makes few requests. A level 5% short of one level pixel a screen pixel
+  is now taken where the next would fetch four times the pixels. Nothing to change.
+
 ### Fixed
 
 - **Images from a server that serves only its own tiles.** Clover joins a service's small

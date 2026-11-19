@@ -29,6 +29,7 @@ import {
   chooseLevel,
   servicePyramid,
   staticPyramid,
+  tileFloorFor,
   tilesInRegion,
 } from "./tilePyramid";
 
@@ -185,6 +186,46 @@ describe("servicePyramid", () => {
   });
 });
 
+describe("tileFloorFor", () => {
+  const northwestern = parseInfo(NORTHWESTERN);
+
+  it("keeps a service's own tiles where a view needs few of them", () => {
+    // A 431 × 246 frame at 2×: eight 256 px tiles.
+    expect(tileFloorFor(northwestern, { width: 862, height: 492 })).toBe(0);
+    // Yale's and Princeton's 512 px tiles, a 757 × 510 frame at 2×: six.
+    expect(
+      tileFloorFor(parseInfo(GOTTINGEN_V3), { width: 1514, height: 1020 }),
+    ).toBe(0);
+  });
+
+  it("joins them just far enough, never past half the view's longer edge", () => {
+    // 757 × 510 at 2×: 24 tiles of 256 px, 6 of 512 px.
+    expect(tileFloorFor(northwestern, { width: 1514, height: 1020 })).toBe(512);
+    // 1269 × 728 at 2×: 15 of 512 px, 8 of 768 px.
+    expect(tileFloorFor(northwestern, { width: 2538, height: 1456 })).toBe(768);
+    // However large the view, no more than the floor.
+    expect(tileFloorFor(northwestern, { width: 7680, height: 4320 })).toBe(
+      1024,
+    );
+    // 1000 px square needs 16 tiles, but half its edge is under two of them: the grid.
+    expect(tileFloorFor(northwestern, { width: 1000, height: 1000 })).toBe(0);
+  });
+
+  it("counts a service that lists no tiles in the ones Clover cuts", () => {
+    const untiled = parseInfo(LEVEL2_UNTILED_V2);
+    expect(tileFloorFor(untiled, { width: 1514, height: 1020 })).toBe(0);
+    expect(tileFloorFor(untiled, { width: 2538, height: 1456 })).toBe(1024);
+  });
+
+  it("builds a pyramid of the size it gives", () => {
+    const pyramid = servicePyramid(
+      northwestern,
+      tileFloorFor(northwestern, { width: 2538, height: 1456 }),
+    );
+    expect(pyramid.levels[pyramid.levels.length - 1].tileWidth).toBe(768);
+  });
+});
+
 describe("chooseLevel", () => {
   const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3), 0);
 
@@ -195,6 +236,15 @@ describe("chooseLevel", () => {
     expect(pyramid.levels[chooseLevel(pyramid, 100)].scaleFactor).toBeCloseTo(
       7.875,
     );
+  });
+
+  it("takes a level up to 5% short of a level pixel a device pixel, never more", () => {
+    // Göttingen's scale factors 1, 2 and 4 on its own grid, past its 512 px whole image.
+    const at = (s: number) =>
+      pyramid.levels[chooseLevel(pyramid, s)].scaleFactor;
+    expect(at(4 * 0.99)).toBe(4);
+    expect(at(4 * 0.951)).toBe(4);
+    expect(at(4 * 0.94)).toBe(2);
   });
 
   it("stays at full resolution when zoomed in past it", () => {

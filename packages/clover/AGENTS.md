@@ -2425,9 +2425,16 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   server's.
   `sources/tilePyramid.ts` builds levels from `tiles`, from `sizes`, or from tiles Clover
   derives itself. A service that cuts any region at any size (level 1 and up) is asked
-  for tiles of at least `TILE_FLOOR` (1024 px; 2026-11-06): its smaller listed tiles
-  joined, a whole number of them on its own grid (`joinedTile`), and its own cut that
-  large where it lists none, each within `maxWidth`, `maxHeight` and `maxArea`; a level 0
+  for tiles sized for the view it is shown in (`tileFloorFor`; Mat, 2026-11-18: "smartly
+  decide tilesize depending on width/height of screen as it relates to canvas size"): its
+  own listed tiles where the view needs no more than `VIEW_TILE_BUDGET` (12) of them, else
+  joined, a whole number of them on its own grid (`joinedTile`), just far enough to need no
+  more, never past half the view's longer device edge nor `TILE_FLOOR` (1024 px;
+  2026-11-06), and its own cut where it lists none, each within `maxWidth`, `maxHeight`
+  and `maxArea`; `chooseLevel` takes a level down to `LEVEL_MARGIN` (0.95) level pixels a
+  device pixel ("always opt for slightly better fidelity over `mb` cost savings, but not
+  so much that it becomes expensive"). The race of 2026-11-18 found the 1024 px floor cost
+  small views twice the pixels they could show and missed servers' caches; a level 0
   service only ever gets its own tiles. A host that refuses a tile Clover joined or cut
   (400, 403, 413 or 414: the Art Institute of Chicago's CDN serves only its 256 px grid,
   though its `info.json` says level 2; 2026-11-18) gets its own grid: the pyramid's

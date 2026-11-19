@@ -71,9 +71,43 @@ export const DERIVED_TILE_SIZE = 512;
  * CPU, no longer a frame than 256 px tiles, the upload budget taking one a frame).
  */
 export const TILE_FLOOR = 1024;
-
+/**
+ * How many of a service's tiles a view may need before Clover joins them: twice the six
+ * a browser sends a server at a time over HTTP/1.1. A small view on a grid's own tiles
+ * then waits on no more than two round trips, asks for addresses a server's cache already
+ * holds, and fetches nothing far past its edge (Mat, 2026-11-18: "smartly decide
+ * tilesize depending on width/height of screen as it relates to canvas size").
+ */
+export const VIEW_TILE_BUDGET = 12;
+/**
+ * The least level pixels a level gives a device pixel and is still taken: 5% short of
+ * one, never seen, where the next finer level costs four times the pixels. Fidelity first,
+ * within reason (Mat, 2026-11-18: "always opt for slightly better fidelity over `mb`
+ * cost savings, but not so much that it becomes expensive").
+ */
+export const LEVEL_MARGIN = 0.95;
 /** The largest full-size image a level 0 service is asked for in one piece. */
 const MAX_SINGLE_IMAGE_PIXELS = 16_000_000;
+
+/**
+ * The least tile edge to ask of a service for a view of `view` device pixels: 0 (its own
+ * grid) where the view needs no more than `VIEW_TILE_BUDGET` of its tiles, else its tiles
+ * joined just far enough to need no more, never past half the view's longer edge nor
+ * `TILE_FLOOR`. A service that lists no tiles is counted in the ones Clover cuts.
+ */
+export function tileFloorFor(
+  info: ImageServiceInfo,
+  view: { width: number; height: number },
+): number {
+  const spec = info.tiles[0];
+  const unit = spec ? Math.max(spec.width, spec.height) : DERIVED_TILE_SIZE;
+  const count = (edge: number) =>
+    Math.ceil(view.width / edge) * Math.ceil(view.height / edge);
+  const cap = Math.min(TILE_FLOOR, Math.max(view.width, view.height) / 2);
+  let edge = unit;
+  while (count(edge) > VIEW_TILE_BUDGET && edge + unit <= cap) edge += unit;
+  return edge > unit ? edge : 0;
+}
 
 /** A static image: one level, one tile, at its own URL. */
 export function staticPyramid(
@@ -277,8 +311,8 @@ function dedupe<T extends PyramidLevel>(levels: T[]): T[] {
 }
 
 /**
- * The coarsest level that still has at least one level pixel per device pixel — or the
- * finest level, when even that is not enough.
+ * The coarsest level that still has at least `LEVEL_MARGIN` level pixels per device pixel
+ * — or the finest level, when even that is not enough.
  *
  * @param imagePixelsPerDevicePixel full-size image pixels spanned by one device pixel
  */
@@ -288,7 +322,10 @@ export function chooseLevel(
 ): number {
   const levels = pyramid.levels;
   for (let i = 0; i < levels.length; i++) {
-    if (levels[i].scaleFactor <= imagePixelsPerDevicePixel * (1 + 1e-6)) {
+    if (
+      levels[i].scaleFactor * LEVEL_MARGIN <=
+      imagePixelsPerDevicePixel * (1 + 1e-6)
+    ) {
       return i;
     }
   }

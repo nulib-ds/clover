@@ -631,10 +631,11 @@ describe("CanvasRenderer", () => {
           "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen",
       },
     ]);
-    // Its 512 px tiles joined two by two: the quarter-resolution level is one 1008 px
-    // tile, the whole image, which opening waited for.
+    // A 1600 × 1200 Body needs twelve of its 512 px tiles, no more than the view's
+    // budget, so they are asked as listed; its coarsest level is then 2 × 2 of them, and
+    // the first picture one whole 512 px image, which opening waited for.
     expect(mockedLoad.mock.calls[0][0]).toMatch(
-      /\/full\/1008,756\/0\/default\.jpg$/,
+      /\/full\/512,384\/0\/default\.jpg$/,
     );
     expect(renderer.getHomeBounds()).toEqual({
       x: 0,
@@ -645,13 +646,13 @@ describe("CanvasRenderer", () => {
 
     await frames(4);
     const urls = mockedLoad.mock.calls.map(([url]) => url);
-    // A 1600 px wide Body at 1x: scale factor 2, its four tiles of up to 1024 px.
+    // At 1x: scale factor 2, its twelve 512 px tiles.
     expect(
-      urls.filter((u) => /\/0,0,2048,2048\/1024,1024\//.test(u)),
+      urls.filter((u) => /\/0,0,1024,1024\/512,512\//.test(u)),
     ).toHaveLength(1);
     expect(
       urls.filter((u) => /\/\d+,\d+,\d+,\d+\/\d+,\d+\//.test(u)),
-    ).toHaveLength(4);
+    ).toHaveLength(12);
     expect(fake.count("drawArrays")).toBeGreaterThan(0);
     renderer.dispose();
   });
@@ -659,25 +660,29 @@ describe("CanvasRenderer", () => {
   it("asks a server that refuses its joined tiles for its own grid, from then on", async () => {
     resetRefusals();
     onTestFinished(() => resetRefusals());
-    serveInfo(GOTTINGEN_V3);
-    // A server that serves its own 512 px grid and whole images, and refuses any other
+    // Göttingen on a 256 px grid, which a 1600 × 1200 view joins into 512 px tiles.
+    serveInfo({
+      ...GOTTINGEN_V3,
+      tiles: [{ width: 256, height: 256, scaleFactors: [1, 2, 4, 8] }],
+    });
+    // A server that serves its own 256 px grid and whole images, and refuses any other
     // tile (the Art Institute of Chicago's, whose info.json promises any size).
     mockedLoad.mockImplementation(async (url: string) => {
       const size = url.match(/\/(\d+),(\d*)\/0\//);
       const w = size ? Number(size[1]) : 512;
       const h = size && size[2] ? Number(size[2]) : w;
-      if (/\/\d+,\d+,\d+,\d+\//.test(url) && w > 512)
+      if (/\/\d+,\d+,\d+,\d+\//.test(url) && w > 256)
         throw Object.assign(new Error("Image request failed with 403"), {
           status: 403,
         });
       return bitmap(w, h);
     });
     const joined = (urls: string[]) =>
-      urls.filter((u) => /\/\d+,\d+,\d+,\d+\/1024,\d+\//.test(u));
-    // Scale factor 2 on the service's own grid: 1024 px regions (960 at the right edge,
-    // 976 at the foot) asked at 512 px (480, 488).
+      urls.filter((u) => /\/\d+,\d+,\d+,\d+\/(512|504|448),\d+\//.test(u));
+    // Scale factor 2 on the service's own grid: 512 px regions (448 at the right edge,
+    // 464 at the foot) asked at 256 px (224, 232).
     const grid = (urls: string[]) =>
-      urls.filter((u) => /\/\d+,\d+,(1024|960),(1024|976)\/(512|480),/.test(u));
+      urls.filter((u) => /\/\d+,\d+,(512|448),(512|464)\/(256|224),/.test(u));
 
     const renderer = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
     await renderer.setImages([{ id: "g", service: GOTTINGEN_V3.id }]);
@@ -685,8 +690,8 @@ describe("CanvasRenderer", () => {
     const urls = mockedLoad.mock.calls.map(([url]) => url);
     expect(joined(urls).length).toBeGreaterThan(0);
     // Refused, the view is asked of the service's own grid: at scale factor 2, its
-    // 512 px tiles cover the whole image in 4 × 3.
-    expect(grid(urls)).toHaveLength(12);
+    // 256 px tiles cover the whole image in 8 × 6.
+    expect(grid(urls)).toHaveLength(48);
     renderer.dispose();
 
     // The host is remembered: the next image from it goes to the grid at once.
@@ -696,8 +701,9 @@ describe("CanvasRenderer", () => {
     await frames(8);
     const later = mockedLoad.mock.calls.map(([url]) => url);
     expect(joined(later)).toHaveLength(0);
-    expect(grid(later)).toHaveLength(12);
+    expect(grid(later)).toHaveLength(48);
     next.dispose();
+    resetRefusals();
   });
 
   it("asks for a new scene's view while its coarsest tile is still on its way", async () => {
@@ -719,13 +725,13 @@ describe("CanvasRenderer", () => {
       },
     ]);
     await frames(4);
-    // Not open yet, but the four half-resolution tiles of its home view are asked for.
+    // Not open yet, but the twelve half-resolution tiles of its home view are asked for.
     expect(opened).not.toHaveBeenCalled();
     const urls = mockedLoad.mock.calls.map(([url]) => url);
-    expect(urls[0]).toMatch(/\/full\/1008,756\//);
+    expect(urls[0]).toMatch(/\/full\/512,384\//);
     expect(
       urls.filter((u) => /\/\d+,\d+,\d+,\d+\/\d+,\d+\//.test(u)),
-    ).toHaveLength(4);
+    ).toHaveLength(12);
 
     release();
     await setting;
@@ -848,15 +854,15 @@ describe("CanvasRenderer", () => {
         .filter((url) => pageOf(url) === "b");
     // Its coarsest, never its sharp tile.
     expect(loads()).toEqual([
-      "https://example.org/iiif/b/full/1008,756/0/default.jpg",
+      "https://example.org/iiif/b/full/512,384/0/default.jpg",
     ]);
 
     // The turn to it reads neither again.
     await renderer.setImages([page("b", 0)], { fit: true });
     expect(asked().filter((url) => pageOf(url) === "b")).toHaveLength(1);
-    expect(
-      loads().filter((url) => /\/full\/1008,756\//.test(url)),
-    ).toHaveLength(1);
+    expect(loads().filter((url) => /\/full\/512,384\//.test(url))).toHaveLength(
+      1,
+    );
     expect(renderer.isReady("b")).toBe(true);
     renderer.dispose();
   });
@@ -895,9 +901,9 @@ describe("CanvasRenderer", () => {
     ]);
     await frames(4);
     const urls = mockedLoad.mock.calls.map(([url]) => url);
-    expect(urls[0]).toMatch(/\/full\/1008,\/0\/default\.jpg$/);
+    expect(urls[0]).toMatch(/\/full\/512,\/0\/default\.jpg$/);
     expect(
-      urls.some((u) => /\/0,0,2048,2048\/1024,\/0\/default\.jpg$/.test(u)),
+      urls.some((u) => /\/0,0,1024,1024\/512,\/0\/default\.jpg$/.test(u)),
     ).toBe(true);
     renderer.dispose();
   });
