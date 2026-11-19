@@ -46,6 +46,13 @@ export interface TilePyramid {
   /** Coarsest first. */
   levels: PyramidLevel[];
   tile(address: TileAddress): TileRequest;
+  /** The image service whose tiles these are (its `info.json` id). */
+  service?: string;
+  /**
+   * Where Clover joins the service's tiles or cuts its own: the pyramid of the service's
+   * own grid, for a server that refuses any other size (`sources/refusals.ts`).
+   */
+  listed?: () => TilePyramid;
 }
 
 /**
@@ -64,6 +71,7 @@ export const DERIVED_TILE_SIZE = 512;
  * CPU, no longer a frame than 256 px tiles, the upload budget taking one a frame).
  */
 export const TILE_FLOOR = 1024;
+
 /** The largest full-size image a level 0 service is asked for in one piece. */
 const MAX_SINGLE_IMAGE_PIXELS = 16_000_000;
 
@@ -132,11 +140,15 @@ export function servicePyramid(
     whole: true,
   });
 
+  // Whether Clover asks for tiles of its own making (joined, or cut where none are
+  // listed) rather than the service's own grid.
+  let derived = false;
   const spec = info.tiles[0];
   if (spec) {
     const { width: tw, height: th } = arbitrary
       ? joinedTile(info, spec, tileFloor)
       : spec;
+    derived = tw !== spec.width || th !== spec.height;
     for (const s of spec.scaleFactors) {
       levels.push(tileLevel(s, tw, th));
     }
@@ -145,6 +157,7 @@ export function servicePyramid(
     let edge = Math.max(DERIVED_TILE_SIZE, tileFloor);
     while (edge > DERIVED_TILE_SIZE && !withinLimits(info, edge, edge))
       edge /= 2;
+    derived = edge > DERIVED_TILE_SIZE;
     for (let s = 1; ; s *= 2) {
       const level = tileLevel(s, edge, edge);
       levels.push(level);
@@ -188,6 +201,8 @@ export function servicePyramid(
     width: W,
     height: H,
     levels: ordered,
+    service: info.id,
+    listed: derived ? () => servicePyramid(info, 0) : undefined,
     tile(address) {
       const level = ordered[address.level];
       const s = level.scaleFactor;

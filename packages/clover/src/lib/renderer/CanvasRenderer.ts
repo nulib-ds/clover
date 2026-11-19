@@ -52,6 +52,7 @@ import {
   resolveItem,
   sameSpec,
 } from "./scene/sceneItem";
+import { isSizeRefusal, noteRefusal, sameHost } from "./sources/refusals";
 
 export type { SceneImage } from "./scene/sceneItem";
 
@@ -324,6 +325,7 @@ export class CanvasRenderer implements GestureTarget {
         this.contentVersion++;
         this.invalidate();
       },
+      onFailed: (url, status) => this.refused(url, status),
       onEvict: (url) => this.backend?.release(url),
       byteBudget: this.options.byteBudget,
       maxInFlight: this.options.maxInFlight,
@@ -556,6 +558,23 @@ export class CanvasRenderer implements GestureTarget {
       (want) => want.priority < TARGET_BAND - LANDING_AHEAD,
     );
     await this.cache.prefetch(wants);
+  }
+
+  /**
+   * A tile was refused. Where it is one Clover joined or cut itself and the server says it
+   * will not make that size, every image of that host is asked for its own grid from the
+   * next frame, and the host is remembered for the visit (`sources/refusals.ts`).
+   */
+  private refused(url: string, status?: number): void {
+    if (!isSizeRefusal(status)) return;
+    let swapped = false;
+    for (const item of this.items) {
+      const { listed, service } = item.pyramid;
+      if (!listed || !sameHost(service, url)) continue;
+      item.pyramid = listed();
+      swapped = true;
+    }
+    if (swapped) noteRefusal(url);
   }
 
   private prepareContext() {
