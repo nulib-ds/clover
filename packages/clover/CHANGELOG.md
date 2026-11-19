@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.11.3] - 2026-11-19
+
 ### Added
 
 - **A pressed state for the round controls**: the Canvas's controls, Items' arrows, the
