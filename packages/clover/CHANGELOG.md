@@ -34,6 +34,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
   where it read `{ "type": "RotateTransform", "x": 30, "y": 45, "z": 60 }`.
 
+### Changed
+
+- **Four size budgets rise by 50 B**, each crossed by a few bytes as the Scene's
+  renamed chunk changed the names the pages import: the Gallery template's first view
+  (53,751 B gzip, now 53,800), the four parts as elements (107,213 B, 107,250), a
+  `<clover-canvas>` alone (93,852 B, 93,900) and the Document template as an element
+  (149,401 B, 149,450) (`build/size-budget.json`).
+
 ## [4.12.0] - 2026-11-20
 
 ### Changed
