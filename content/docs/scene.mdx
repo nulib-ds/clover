@@ -194,7 +194,10 @@ The IIIF Cookbook's [0608, Simplest Manifest: 3D](https://iiif.io/api/cookbook/r
 draws as it asks: one model at the Scene's origin, lit and framed by Clover, since the
 Scene names no camera or light. Models placed by a `PointSelector` on their target, and
 turned, scaled and moved by the transforms on their `SpecificResource`, in order, are
-drawn too.
+drawn too. A `RotateTransform` that turns about more than one axis is an intrinsic Euler
+rotation in XYZ order: `x`, then `y` about the axes the `x` turn left, then `z`. This
+matches three.js's `XYZ` and the other Presentation 4 viewers
+([IIIF/api#2504](https://github.com/IIIF/api/issues/2504)).
 
 ## Accessibility
 
