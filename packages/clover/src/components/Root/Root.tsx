@@ -107,7 +107,7 @@ export const Root = forwardRef<HTMLElement, RootProps>(function Root(
   ref,
 ) {
   // What it holds: its Clover, the effects that keep it in step, its parts' context.
-  const [context, status, rest] = useRootState(props);
+  const [context, status, rest, shown] = useRootState(props);
   /*
    * The page's language, for Clover's interface strings to be marked where they are in another.
    * The Root carries none of its own: what the host puts in it is in the page's.
@@ -123,6 +123,12 @@ export const Root = forwardRef<HTMLElement, RootProps>(function Root(
           ref={root.ref}
           className={join("clover-root", className)}
           data-status={status}
+          /*
+           * Until it shows its first content, or why it has none: nothing in a layout is
+           * yet where that content will put it (a title of two lines, a Collection's
+           * line), so a layout may hold its room unseen, as the templates do.
+           */
+          data-pending={shown ? undefined : ""}
           {...highContrastProps(contrast)}
           {...rest}
         >

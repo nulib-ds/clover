@@ -224,6 +224,26 @@
   position: relative;
 }
 
+/*
+ * Until the Root shows its first content (`data-pending`: its first Manifest, or the
+ * failure to load it), nothing in the panes is where that content will put it: a title of
+ * two lines or a Collection's line moves the Body down, a single page gives back the room
+ * held for its thumbnails, the strip and the bar grow with the layout. So the panes hold
+ * their room unseen, but for the Body's loading mark along its top and the status, and
+ * show at once with the content, which moves nothing drawn (Mat, 2026-11-20: pages move
+ * as little as possible while they load). As Gallery, which shows its loading mark alone
+ * until its grid is in. Later loads keep the room the last content took.
+ */
+.clover-root[data-pending] > .clover-template-panes {
+  visibility: hidden;
+}
+
+.clover-root[data-pending]
+  > .clover-template-panes
+  :is(.clover-loading, .clover-status) {
+  visibility: visible;
+}
+
 .clover-template-panel {
   contain: size;
   overflow-y: auto;
@@ -607,15 +627,6 @@
  */
 .clover-template-panes .clover-template-spine > * {
   transition-property: background-color, color, outline-color;
-}
-
-/*
- * Before the Root has anything to show (`idle`), what is over the Body is empty and the
- * Body's top is not where it will be: the toggle waits unseen, then shows level with the
- * Body once the resource fills the layout, rather than drop as it fills.
- */
-.clover-root[data-status="idle"] .clover-template-spine {
-  visibility: hidden;
 }
 
 .clover-template-spine:dir(rtl) > * {

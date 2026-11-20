@@ -80,7 +80,7 @@ function LoadedRoot({
     () => toRenderers?.(renderers),
     [toRenderers, renderers],
   );
-  const [context, status] = useRootState({
+  const [context, status, , shown] = useRootState({
     ...rest,
     defaultCanvasId: canvasId,
     defaultManifestId: manifestId,
@@ -116,6 +116,11 @@ function LoadedRoot({
   useLayoutEffect(() => {
     element.setAttribute("data-status", status);
   }, [element, status]);
+  // Until it shows its first content, or why it has none, as React's `Root` marks it.
+  useLayoutEffect(() => {
+    element.toggleAttribute("data-pending", !shown);
+    return () => element.removeAttribute("data-pending");
+  }, [element, shown]);
   useLayoutEffect(() => {
     element.toggleAttribute("data-high-contrast", contrast);
     return () => element.removeAttribute("data-high-contrast");

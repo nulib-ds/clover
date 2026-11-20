@@ -32,7 +32,22 @@ export function useSpineTop(
     for (const child of Array.from(split.children)) resized.observe(child);
     const top = from();
     if (top) resized.observe(top);
-    return () => resized.disconnect();
+    /*
+     * Its Root's first content in (`data-pending` gone, the panes shown): placed before the
+     * browser lays that out, as a mutation is heard straight after the change, a resize
+     * only once it is laid out, by when the toggle had shown where the Body had been.
+     */
+    const root = node.closest(".clover-root");
+    const shown = new MutationObserver(place);
+    if (root)
+      shown.observe(root, {
+        attributes: true,
+        attributeFilter: ["data-pending"],
+      });
+    return () => {
+      resized.disconnect();
+      shown.disconnect();
+    };
     // `from` is read when measuring.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [element, enabled]);

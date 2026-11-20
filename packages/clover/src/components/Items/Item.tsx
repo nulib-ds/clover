@@ -3,7 +3,11 @@ import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 import type { ItemModel, ItemPart } from "../../core/items";
 import { isSound } from "../../core/annotations";
 import type { CloverRequest } from "../../core/request";
-import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
+import {
+  pictureShape,
+  resolveThumbnail,
+  thumbnailSource,
+} from "../../core/thumbnail";
 import { localize } from "../../core/value";
 import { NEAR_VIEWPORT_MARGIN, useNearViewport } from "../Body/useNearViewport";
 import { watchClamp } from "./clamped";
@@ -96,16 +100,14 @@ function Picture({
   const { src, none } = useThumbnail(part, size, request, near);
   const [loaded, setLoaded] = useState(false);
   /*
-   * The Canvas's own shape, as the image's width and height attributes, so its card has
-   * its width before the thumbnail arrives: no shift as it loads, and a strip never
-   * holds hundreds of zero-wide cards (all "in view", all fetched). Square where the
-   * resource has no size (sound, a Collection's member) until its image arrives.
+   * The Canvas's own shape (or, for sound, its artwork's: `pictureShape`), as the image's
+   * width and height attributes, so its card has its width before the thumbnail
+   * arrives: no shift as it loads, and a strip never holds hundreds of zero-wide cards
+   * (all "in view", all fetched). Square where nothing says (a Collection's member with
+   * no `thumbnail` size) until its image arrives.
    */
-  const { width, height } = (part.resource ?? {}) as {
-    width?: number;
-    height?: number;
-  };
-  const ratio = width && height ? width / height : 1;
+  const shape = pictureShape(part.resource);
+  const ratio = shape ?? 1;
   /*
    * Nothing to show yet, or ever (sound with no picture): the picture keeps the box an
    * image would have, so its cell does not collapse to its caption. Sound says so.
@@ -116,9 +118,9 @@ function Picture({
       className="clover-items-picture"
       data-loaded={loaded}
       data-empty={src ? undefined : true}
-      // Its Canvas's shape, kept once its image is in, for a layout that holds to it.
+      // Its known shape, kept once its image is in, for a layout that holds to it.
       style={
-        src && !(width && height)
+        src && !shape
           ? undefined
           : ({ "--clover-items-ratio": ratio } as React.CSSProperties)
       }

@@ -137,8 +137,12 @@ every rule below.
   what it styles, a tie it would flip, a property it reads that another part sets, and
   a server's HTML holding what it styles. What is drawn before that code comes keeps its
   rules up front: the Canvas held back behind a placeholder (`data-placeholder`) and the
-  overlay layer the hotspots share with a picture's text (`Canvas.css`), and the count a
-  header draws where no pager is (`Position.css`).
+  overlay layer the hotspots share with a picture's text (`Canvas.css`), the count a
+  header draws where no pager is (`Position.css`), and the pager's room while its code
+  loads (`PagerRoom` in `Items.tsx`, `Position.css`): its box unseen, its widest count, a
+  count menu's chevron and its two steps, so a header's line neither grows nor wraps as
+  the pager comes (a Collection's line did, 2026-11-20). Change the pager's sizes in
+  `Pager.css`, and its room's with them.
   A sheet several such parts draw with is a part sheet of its own (`SHARED`; Mat,
   2026-11-20: "Shared sheets"), adopted by each of its owners, so it comes with whichever
   is first: the sections' rows (`Panel/Rows.css`) and the language codes (`ui/Codes.css`).
@@ -533,6 +537,24 @@ every rule below.
   it has none. A container is no stacking context (`container-type` no longer contains
   layout), so nothing in the pane changes how it stacks; what floats over it is isolated
   as above.
+- **The first load holds still** (2026-11-20, as Mat wants pages to move as little as
+  possible while they load). A Root carries `data-pending` until it shows its first
+  content, or why it has none (`useRootState`'s `shown`, set with the status; `Root` and
+  `<clover-root>` write it). Until then nothing under a template's header is where that
+  content will put it (a title of two lines, a Collection's line, a single page giving
+  back Document's thumbnails' room), so the panes hold their room unseen, all but the
+  Body's loading mark and the status (`Default.css`, on `.clover-template-panes`, for
+  every template with panes), as does Document's toolbar (`Document.css`), and show at
+  once with the content; the Gallery shows its loading mark alone already. Unseen, never
+  removed: `visibility`, so the room stays and Chrome counts no shift. Later loads keep
+  the room the last content took. The
+  panel's toggle on the spine is placed again as `data-pending` goes (`useSpineTop`'s
+  mutation observer, heard before the browser lays the change out; a resize is heard only
+  after, by when the toggle had shown where the Body had been). The Viewer's own height
+  still follows its content (a title's lines, a Collection's line, the strip), so a
+  page's content after it moves unless it gives the Viewer a box and `fill`. Measured with
+  every `layout-shift` entry and its sources in a current Chrome, over a React page built
+  from `dist` as an app imports it.
 - Heights from the window are of its smallest height where a browser knows it (`svh`, in
   an `@supports` beside the `vh` one, as a custom property cannot fall back by itself),
   and a popup's or dialog's maximum of the window as it shows now (`dvh`, after the `vh`
@@ -1656,7 +1678,23 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   as wide, cropped past that. `alt=""` beside the label, the label's name without it.
   Tried and taken out the same day ("too much movement"): the thumbnail on About's
   accordion heading, growing as it opened and scrolling back with the words; don't bring
-  it back unasked. The Default header has no thumbnail (title and provider).
+  it back unasked. The Default header has no thumbnail (title and provider). The head is
+  a part of its own (`AboutHead`), which writes the label's height and the thumbnail's
+  width to About in a layout effect, so before the summary's `ReadMore` counts its lines
+  (layout effects run in the tree's order; About's own ran after the summary's, and its
+  Read more came a frame late, moving the metadata; 2026-11-20). The thumbnail keeps its
+  shape's room before its image is in (`Thumbnail`, below), so the label wraps once.
+- **A picture keeps its room** (2026-11-20, as Mat wants pages to move as little as
+  possible while they load): `pictureShape` (`core/thumbnail.ts`) is the shape a
+  resource's picture has before its image is in: its own size (a Canvas's), the Canvas
+  it stands for (a Manifest's first), that one's placeholder or accompanying Canvas (sound
+  shows its artwork), and only then its `thumbnail`'s own `width` and `height`, which
+  some publishers give as the square the picture fits in (Northwestern's say 300 by 300 of
+  a picture 300 by 200). `Thumbnail` is an empty `svg` of that shape (`width`, `height`
+  and `viewBox`, so it sizes as the image will, by the same classes; `aria-hidden`) while
+  its image is found, then the image with that `width` and `height`; nothing where no
+  shape is known. Items' `Picture` takes the same shape, kept once its image is in. A
+  new picture of a resource takes its room from it too, never from its image's load.
 - **Cue times** (Mat, 2026-10-26: "make sure cues in vtt transcripts and annotations on
   time use the same component. DRY"): `ui/Cue.tsx`'s `CueTime` and `ui/Cue.css`, the one
   time element wherever a row starts on a recording's time (Transcript cues, annotations

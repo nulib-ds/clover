@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import React from "react";
 
 import CaptionDetails from "../Body/CaptionDetails";
+import * as Clover from "../../parts";
 import { Summary, Thumbnail } from "./Primitives";
 
 const manifest = {
@@ -26,6 +27,73 @@ describe("Thumbnail", () => {
     const img = document.querySelector("img.clover-thumbnail");
     expect(img).toHaveAttribute("alt", "");
     expect(img).not.toHaveAttribute("lang");
+  });
+
+  // Its room from the first, so nothing beside it moves as its image comes (2026-11-20).
+  it("keeps its shape's room, unseen and unheard, while its image is found", async () => {
+    let answer!: (response: Response) => void;
+    const fetch = vi.fn(
+      () => new Promise<Response>((resolve) => (answer = resolve)),
+    );
+    const service = "https://example.org/iiif/thumbnail-room";
+    const canvas = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/canvas",
+      type: "Canvas",
+      label: { en: ["Plate"] },
+      width: 3000,
+      height: 2000,
+      items: [
+        {
+          id: "https://example.org/page",
+          type: "AnnotationPage",
+          items: [
+            {
+              id: "https://example.org/painting",
+              type: "Annotation",
+              motivation: "painting",
+              target: "https://example.org/canvas",
+              body: {
+                id: `${service}/full/max/0/default.jpg`,
+                type: "Image",
+                service: [{ id: service, type: "ImageService3" }],
+              },
+            },
+          ],
+        },
+      ],
+    };
+    render(
+      <Clover.Root iiifContent={canvas} request={{ fetch }}>
+        <Thumbnail of="canvas" size={300} className="mine" />
+      </Clover.Root>,
+    );
+    const room = await waitFor(() => {
+      const found = document.querySelector("svg.clover-thumbnail.mine");
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    expect(room).toHaveAttribute("aria-hidden", "true");
+    expect(room).toHaveAttribute("width", "300");
+    expect(room).toHaveAttribute("height", "200");
+    expect(room).toHaveAttribute("viewBox", "0 0 300 200");
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    answer(
+      new Response(
+        JSON.stringify({
+          id: service,
+          type: "ImageService3",
+          protocol: "http://iiif.io/api/image",
+          profile: "level2",
+          width: 3000,
+          height: 2000,
+        }),
+      ),
+    );
+    const img = await screen.findByRole("img", { name: "Plate" });
+    expect(img).toHaveAttribute("width", "300");
+    expect(img).toHaveAttribute("height", "200");
+    expect(document.querySelector("svg.clover-thumbnail")).toBeNull();
   });
 });
 

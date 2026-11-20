@@ -415,6 +415,39 @@ describe("Clover.Root and its parts", () => {
     );
   });
 
+  // Its first content may move what is drawn before it (2026-11-20): a layout holds still.
+  it("is pending until its first content shows, and only then: a later load keeps its room", async () => {
+    const LETTER = "https://example.org/letter";
+    const fetch = vi.fn(() => new Promise<Response>(() => {}));
+    const draw = (content: Clover.RootProps["iiifContent"]) => (
+      <Clover.Root iiifContent={content} request={{ fetch }}>
+        <Clover.Label as="h1" />
+      </Clover.Root>
+    );
+    const { container, rerender } = render(draw(LETTER));
+    const root = container.querySelector(".clover-root");
+    expect(root).toHaveAttribute("data-pending");
+    rerender(draw(bookJson));
+    await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+    expect(root).not.toHaveAttribute("data-pending");
+    rerender(draw(LETTER));
+    expect(root).toHaveAttribute("data-status", "loading");
+    expect(root).not.toHaveAttribute("data-pending");
+  });
+
+  it("is not pending once its first load fails, as it shows why", async () => {
+    const fetch = vi.fn(async () => new Response("nope", { status: 500 }));
+    const { container } = render(
+      <Clover.Root iiifContent="https://example.org/broken" request={{ fetch }}>
+        <Clover.Status />
+      </Clover.Root>,
+    );
+    const root = container.querySelector(".clover-root");
+    expect(root).toHaveAttribute("data-pending");
+    await screen.findByRole("alert");
+    expect(root).not.toHaveAttribute("data-pending");
+  });
+
   it("opens a Collection at defaultManifestId, and lets the reader move on from it", async () => {
     const BOOK = bookJson.id;
     const LETTER = "https://example.org/letter";

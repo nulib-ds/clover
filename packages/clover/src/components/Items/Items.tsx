@@ -402,9 +402,33 @@ const CountMenu = lazy(() =>
 /** Items' `pager` layout, standalone or in a Root, as it arrives (`PagerLayout`). */
 export function Pager(props: PagerProps) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<PagerRoom {...props} />}>
       <PagerLayout {...props} />
     </Suspense>
+  );
+}
+
+/**
+ * The pager's room while its code loads: its box drawn unseen (`Position.css`), its
+ * widest count (with a menu's chevron, where the count opens one) and its two steps, so
+ * the line it sits in neither grows nor wraps as the pager comes in its place (a
+ * Collection's line in a header grew as its pager came). Nothing where the pager draws
+ * nothing, and nothing without the stylesheet (`hidden`).
+ */
+function PagerRoom({ steps, size, className, position }: PagerProps) {
+  if (steps.total < 2) return null;
+  return (
+    <span
+      className={join("clover-pager-hold", className)}
+      data-size={size === "small" ? "small" : undefined}
+      aria-hidden="true"
+      hidden
+    >
+      <span data-menu={position ? "" : undefined}>
+        {steps.total} / {steps.total}
+      </span>
+      <span />
+    </span>
   );
 }
 
