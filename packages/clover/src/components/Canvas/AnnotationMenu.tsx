@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useRef } from "react";
 
-import { type ListedAnnotation, startOf } from "./Annotations";
+import type { ListedAnnotation } from "./Annotations";
 import ControlMenu from "./ControlMenu";
 import type { Place } from "../Annotations/Places";
 import { readBodies } from "../../core/annotation-bodies";
@@ -62,6 +62,13 @@ interface AnnotationMenuProps {
 // The georeferenced images, with their reader, only where the view has any.
 const loadPlaces = () => import("../Annotations/Places");
 const NO_PLACES: Place[] = [];
+
+/**
+ * Where an annotation on a recording's time starts: its own start, or its track's. Here,
+ * never beside the hotspots, whose code and sheet it would bring with the menu.
+ */
+const startOf = (annotation: ListedAnnotation): number | undefined =>
+  "start" in annotation ? annotation.start : annotation.track?.[0]?.start;
 
 /**
  * The view's annotations, as the Annotations section lists them (nulib-ds/clover#440): by

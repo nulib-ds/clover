@@ -9,10 +9,10 @@ import {
   type AnnotationSet,
   findEntry,
   manifestOfAnnotation,
-  selectAnnotationPages,
   selectListedSets,
   selectHiddenSets,
 } from "../../core/annotation-sets";
+import { selectAnnotationPages } from "../../core/annotation-pages";
 import { usePagesReached } from "../../react/usePagesReached";
 import { ListEnd } from "../../ui/ListEnd";
 import { annotationName } from "../../core/annotation-name";

@@ -1,8 +1,7 @@
 /*
  * Content Search: a field, its status, and the hits grouped by Canvas. The field and its
  * submit are one pill, as the docs' homepage select is (`ui/FieldPill.css`; Mat,
- * 2026-10-26), the steps through the hits `ui/Steps.css`, the hits rows (`Panel.css`,
- * "Rows").
+ * 2026-10-26), the steps through the hits `ui/Steps.css`, the hits rows (`Panel/Rows.css`).
  *
  * On the scale: field, status and results `s` apart; a Canvas's heading `xs` over its
  * hits.
@@ -11,10 +10,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-s);
+  animation: var(--clover-arrive);
 }
 
 /*
- * Held in view (`sticky`): the field, on the panel's own color with `xs` of it above and
+ * Held in view (`sticky`): the field, on Clover's background with `xs` of it above and
  * below (drawn back by as much, so nothing moves at rest), so it reads as one with the
  * heading over it (Mat, 2026-10-26: "modern is the look"), at the top of the box that
  * scrolls the hits (`--clover-content-search-top` to set it lower, under a page's own
@@ -27,8 +27,8 @@
 
 .clover-sections[data-layout="accordion"] .clover-content-search {
   --clover-content-search-at: calc(
-    var(--clover-sections-inset-start, 0px) + var(--clover-sections-total) -
-      var(--clover-sections-after)
+    var(--clover-sections-inset-start, 0px) +
+      var(--clover-sections-total, 0px) - var(--clover-sections-after, 0px)
   );
 }
 
@@ -51,7 +51,7 @@
 
 /*
  * Hits passing under the held field fade into it rather than being cut at its foot: a
- * band of the panel's own color, `l` deep, clearing to nothing, once the hits have
+ * band of Clover's background, `l` deep, clearing to nothing, once the hits have
  * scrolled. Its opacity alone changes, driven by the scroll, no script; where
  * scroll-driven animation is not supported, the hits meet the field's foot plainly. In
  * an accordion it takes the place of the open heading's shadow (`ui/Sections.css`), so

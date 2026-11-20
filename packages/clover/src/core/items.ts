@@ -1,8 +1,4 @@
-import type {
-  Presentation4Collection,
-  Container,
-  Manifest,
-} from "./presentation";
+import type { Presentation4Collection, Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
 import { type LanguageMapLike, hrefLangOf, localize } from "./value";
 import { paintedBodies } from "./painted-bodies";
@@ -129,19 +125,4 @@ export function itemsOfCollection(
     memberItems.set(collection, items);
   }
   return items;
-}
-
-/** Items from any resource: a Manifest's views, a Collection's members, or a list. */
-export function itemsOf(
-  resource: Manifest | Presentation4Collection | Container[] | null,
-): ItemModel[] {
-  if (!resource) return [];
-  if (Array.isArray(resource)) {
-    return itemsOfCollection({
-      items: resource,
-    } as unknown as Presentation4Collection);
-  }
-  return resource.type === "Collection"
-    ? itemsOfCollection(resource as Presentation4Collection)
-    : itemsOfManifest(resource as Manifest);
 }

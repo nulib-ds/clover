@@ -20,6 +20,22 @@ describe("adoptSheet", () => {
     expect(sheets()).toEqual(["media"]);
   });
 
+  it("gives its <style> the nonce the page names, as the elements' are", () => {
+    const meta = document.createElement("meta");
+    meta.setAttribute("property", "csp-nonce");
+    meta.nonce = "n0nce";
+    document.head.append(meta);
+    try {
+      adoptSheet("sections", ".clover-content-search{display:block}");
+      const style = document.head.querySelector<HTMLStyleElement>(
+        'style[data-clover="sections"]',
+      );
+      expect(style?.nonce).toBe("n0nce");
+    } finally {
+      meta.remove();
+    }
+  });
+
   it("brings none of Clover's part sheets on a page with base.css, but MapLibre's", () => {
     // What base.css sets on the page's root (`build/tiers.mjs`).
     document.documentElement.style.setProperty("--clover-stylesheet", "base");

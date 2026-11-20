@@ -2,7 +2,9 @@
  * Items' pager: Position, then Previous and Next (mirrored in a right-to-left book).
  * Previous and Next are round controls (`ui/Button.css`), as Items' arrows are. The
  * buttons carry sized icons and their names, so the pager reads without this file; this
- * only spaces it. A flex row: move a piece with `order`.
+ * only spaces it. A flex row: move a piece with `order`. Loaded with the pager's code,
+ * which alone draws it, after Items' sheet; its count is `Position.css`'s, as a header
+ * draws one where no pager is.
  */
 .clover-pager {
   display: flex;
@@ -11,33 +13,14 @@
   /* The Canvas's controls' gap, so a pager over a Body lines up with them. */
   gap: var(--clover-space-s);
   padding-block: var(--clover-space-s);
+  animation: var(--clover-arrive);
 }
 
 /* Nowhere to go (the first item, or the last): shown disabled, in `ui/Button.css`. */
 
-/*
- * The count keeps the room of its widest ("17 / 17"), drawn unseen in the same cell, so
- * nothing beside it moves as it grows: its digits are all one width (`tabular-nums`). It
- * sits at the end of its room, by the arrows; in a mirrored pager, at the start.
- */
-.clover-pager-position {
-  display: inline-grid;
-  justify-items: end;
-  font-variant-numeric: tabular-nums;
-  color: var(--clover-color-primary-muted, #26292b);
-}
-
+/* The count (`Position.css`) in a mirrored pager: at the start of its room. */
 .clover-pager[data-direction="right-to-left"] .clover-pager-position {
   justify-items: start;
-}
-
-.clover-pager-position > [aria-hidden] {
-  grid-area: 1 / 1;
-}
-
-.clover-pager-position > .clover-pager-room[hidden] {
-  display: block;
-  visibility: hidden;
 }
 
 /*
@@ -205,9 +188,11 @@
 
 /*
  * The list in it, as the Collection's in the Panel, with no room of its own around it
- * (the Collection's margin over its list), its items `m` apart (Mat, 2026-10-29).
+ * (the Collection's margin over its list), its items `m` apart (Mat, 2026-10-29). Named
+ * by the menu it is in, as this sheet comes after every other: so it outweighs a
+ * template's Items wherever the two might meet, rather than tying with it.
  */
-.clover-pager-list.clover-collection > .clover-items {
+.clover-pager-menu > .clover-pager-list.clover-collection > .clover-items {
   /* `m` between the items' own boxes: their rings' room is given back already. */
   --clover-items-gap: var(--clover-space-m);
   margin: 0;

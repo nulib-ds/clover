@@ -148,99 +148,6 @@
   inset-inline: calc(-0.618 * var(--clover-control)) auto;
 }
 
-/*
- * Rows: what a reader picks from a list in the panel (an annotation, a Range, a cue, a
- * search hit), written once. `xs` by `s` inside, an accent edge at
- * the start when it is the current one. Each part keeps only its own layout. A Contents
- * entry's toggle, beside its row, takes the rows' tint under the pointer.
- */
-:is(
-  .clover-annotations-entry,
-  button.clover-contents-button,
-  .clover-transcript-cue > button,
-  button.clover-content-search-hit
-) {
-  box-sizing: border-box;
-  width: 100%;
-  margin: 0;
-  padding: var(--clover-space-xs) var(--clover-space-s);
-  border: 0;
-  border-inline-start: 3px solid transparent;
-  border-radius: var(--clover-radius, 3px);
-  background: none;
-  color: inherit;
-  text-align: start;
-  cursor: pointer;
-  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
-}
-
-:is(
-    .clover-annotations-entry,
-    button.clover-contents-button,
-    .clover-transcript-cue > button,
-    button.clover-content-search-hit,
-    button.clover-contents-toggle
-  ):is(:hover, [data-highlighted="true"]):not(:disabled) {
-  background-color: var(--clover-color-secondary-muted, #e6e8eb);
-}
-
-:is(
-  .clover-annotations-entry[data-selected="true"],
-  button.clover-contents-button[aria-current="true"],
-  .clover-transcript-cue[aria-current="true"] > button,
-  button.clover-content-search-hit[aria-current="true"]
-) {
-  border-inline-start-color: var(--clover-color-accent, #0065c3);
-  /* The accent, faintly: whatever the accent is, never a color of its own. */
-  background-color: color-mix(
-    in srgb,
-    var(--clover-color-accent, #0065c3) 8%,
-    transparent
-  );
-}
-
-/*
- * Forced colors drop the tint and draw every row's edge in the text color: the others'
- * in the ground, so only the current one's shows, in the highlight.
- */
-@media (forced-colors: active) {
-  :is(
-    .clover-annotations-entry,
-    button.clover-contents-button,
-    .clover-transcript-cue > button,
-    button.clover-content-search-hit
-  ) {
-    border-inline-start-color: Canvas;
-  }
-
-  :is(
-    .clover-annotations-entry[data-selected="true"],
-    button.clover-contents-button[aria-current="true"],
-    .clover-transcript-cue[aria-current="true"] > button,
-    button.clover-content-search-hit[aria-current="true"]
-  ) {
-    border-inline-start-color: Highlight;
-  }
-}
-
-/*
- * Lists of rows: no bullets, no indent, the rows `2xs` apart (they are one list); a
- * nested list of Ranges steps in by `m`.
- */
-:is(
-  .clover-annotations-list,
-  .clover-contents-list,
-  .clover-transcript-cues,
-  .clover-content-search-hits
-) {
-  display: flex;
-  flex-direction: column;
-  gap: var(--clover-space-2xs);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 /* ---------- About ---------- */
 
 /*
@@ -314,7 +221,10 @@ button.clover-about-download-button:is(
     :focus-visible,
     [aria-expanded="true"]
   ) {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
   color: var(--clover-color-control-glyph, #fff);
 }
 
@@ -323,15 +233,6 @@ button.clover-about-download-button:is(
  * the accent as Items rings an item, 1px clear: whole while its menu is open, at half
  * strength under the pointer. Focused, its own ring.
  */
-:where([data-high-contrast])
-  button.clover-about-download-button:is(
-    :hover,
-    :focus-visible,
-    [aria-expanded="true"]
-  ) {
-  background-color: var(--clover-accent-fill);
-}
-
 :where([data-high-contrast])
   button.clover-about-download-button:hover:not(
     :focus-visible,

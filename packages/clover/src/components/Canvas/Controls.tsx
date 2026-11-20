@@ -72,6 +72,10 @@ export const NO_LIMITS: ViewLimits = {
   atHome: false,
 };
 
+/**
+ * `CanvasView` is the one to draw them, and gives every prop it always has a value for
+ * (the rest are optional): no defaults or guards for what it always gives.
+ */
 interface CanvasControlsProps {
   /** The camera the zoom, rotation and reset controls move; none offers them. */
   renderer: CanvasRenderer | null;
@@ -79,26 +83,26 @@ interface CanvasControlsProps {
   config: Required<CanvasControlsConfig>;
   controlButtons?: ControlButtons;
   /** Which of zoom in, zoom out and reset would do nothing now: shown unavailable. */
-  limits?: ViewLimits;
+  limits: ViewLimits;
   /** A placeholder's toggle (`PlaceholderToggle`), last of the Canvas's own. */
   placeholder?: React.ReactNode;
   /**
    * That toggle is an image's, opening and closing its viewer: More, the tray of the
    * view's controls opening and closing with it.
    */
-  placeholderIsMore?: boolean;
+  placeholderIsMore: boolean;
   /** The Canvas's `Choice`s. With any, a control to pick among their items appears. */
-  choices?: ChoiceGroup[];
-  selections?: ChoiceSelections;
-  onSelect?: (key: string, index: number) => void;
+  choices: ChoiceGroup[];
+  selections: ChoiceSelections;
+  onSelect: (key: string, index: number) => void;
   /**
    * A recording's chapters, and its element: with any, a control lists them, left of the
    * annotations' (`ChaptersMenu`; Mat, 2026-11-01).
    */
   chapters?: TransportChapter[];
-  mediaElement?: HTMLMediaElement | null;
+  mediaElement: HTMLMediaElement | null;
   /** Go to a chapter's start: the Canvas opens the recording first, over its still. */
-  onChapter?: (start: number) => void;
+  onChapter: (start: number) => void;
   /**
    * The recording's still shows: going to a chapter opens the recording and plays it, so
    * the chapters' arrow keys only move the check, and Enter or a press goes there.
@@ -107,7 +111,7 @@ interface CanvasControlsProps {
   /** How the chapters' pictures are fetched. */
   request?: CloverRequest;
   /** The Canvas's annotations, on its picture and its time. With any, a control lists them. */
-  annotations?: ListedAnnotation[];
+  annotations: ListedAnnotation[];
   /** The Canvases in view, by which the annotations menu groups and pictures its entries. */
   canvases?: ReadonlyArray<
     { id: string; label?: unknown } & Record<string, any>
@@ -117,27 +121,27 @@ interface CanvasControlsProps {
    * else, a control lists them), each shown on the map: the Root's, filling the Body, else
    * the Canvas's own place box (`onPlaceToggle`).
    */
-  mapped?: boolean;
+  mapped: boolean;
   /** The pages whose annotations are hidden, which the menu lists with their toggles. */
   hiddenPages?: string[];
   onPageVisibilityChange?: (pageIds: string[], visible: boolean) => void;
-  selectedAnnotation?: string | null;
-  onAnnotationSelect?: (annotation: ListedAnnotation, play?: boolean) => void;
-  onAnnotationActivate?: (id: string | null) => void;
+  selectedAnnotation: string | null;
+  onAnnotationSelect: (annotation: ListedAnnotation, play?: boolean) => void;
+  onAnnotationActivate: (id: string | null) => void;
   /**
    * The id of the Canvas's caption when it has information to show (`Caption`, which the
    * Canvas renders in its `<figure>`), whether it is open, and the toggle.
    */
   captionId?: string;
-  captionOpen?: boolean;
-  onCaptionToggle?: () => void;
+  captionOpen: boolean;
+  onCaptionToggle: () => void;
   /**
    * The id of the box of the Canvas's place (its `navPlace`, else its Manifest's) when it
    * has one (`PlaceBox`), whether it is open, and the toggle.
    */
   placeId?: string;
-  placeOpen?: boolean;
-  onPlaceToggle?: () => void;
+  placeOpen: boolean;
+  onPlaceToggle: () => void;
   /**
    * The Canvas is put away, its place box's map filling the Body (`PlaceBox`'s swap): only
    * what still means something stays, full screen, the place, the `i` and the annotations,
@@ -145,13 +149,13 @@ interface CanvasControlsProps {
    * menu with it (Mat, 2026-11-19: "annotations toggle should come over to the map view as
    * well. keep it in same location as it is elsewhere"; `Body/Caption.css`).
    */
-  away?: boolean;
+  away: boolean;
   /** The language to read the Choices' labels in. The reader's, by default. */
   language?: string;
   /** One row, the rest behind More: a Canvas's. A Timeline's wraps onto rows, as yet. */
-  fit?: boolean;
+  fit: boolean;
   /** When the view's controls wait behind More: where the row is full, or always. */
-  more?: "auto" | "always";
+  more: "auto" | "always";
   children?: React.ReactNode;
 }
 
@@ -171,35 +175,35 @@ const Controls: React.FC<CanvasControlsProps> = ({
   instance,
   config,
   controlButtons,
-  limits = NO_LIMITS,
+  limits,
   placeholder,
-  placeholderIsMore = false,
-  choices = [],
-  selections = {},
+  placeholderIsMore,
+  choices,
+  selections,
   onSelect,
-  annotations = [],
+  annotations,
   chapters = [],
-  mediaElement = null,
+  mediaElement,
   onChapter,
   overStill,
   request,
   hiddenPages,
   onPageVisibilityChange,
-  selectedAnnotation = null,
+  selectedAnnotation,
   onAnnotationSelect,
   onAnnotationActivate,
   canvases,
-  mapped = false,
+  mapped,
   captionId,
-  captionOpen = false,
+  captionOpen,
   onCaptionToggle,
-  away = false,
+  away,
   placeId,
-  placeOpen = false,
+  placeOpen,
   onPlaceToggle,
   language,
-  fit = true,
-  more: moreWhen = "auto",
+  fit,
+  more: moreWhen,
   children,
 }) => {
   const { t, langOf } = useCloverTranslation();
@@ -213,19 +217,17 @@ const Controls: React.FC<CanvasControlsProps> = ({
   const closeAnnotations = useCallback(
     (restoreFocus: boolean) => {
       setAnnotationsOpen(false);
-      onAnnotationActivate?.(null);
+      onAnnotationActivate(null);
       if (restoreFocus) document.getElementById(annotationsId)?.focus();
     },
     [annotationsId, onAnnotationActivate],
   );
   const showAnnotations =
-    config.annotations &&
-    (annotations.length > 0 || mapped) &&
-    onAnnotationSelect;
+    config.annotations && (annotations.length > 0 || mapped);
   const [chaptersOpen, setChaptersOpen] = useState(false);
   const chaptersId = `chapters-${instance}`;
   const chaptersMenuId = `${chaptersId}-menu`;
-  const showChapters = chapters.length > 0 && Boolean(onChapter);
+  const showChapters = chapters.length > 0;
   /*
    * Its control gone while it had focus (the next recording has no chapters, or nothing
    * the row would show, so the row goes too): focus goes to the transport's Play, as the
@@ -263,8 +265,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
     },
     [chaptersId],
   );
-  const showInformation = config.information && captionId && onCaptionToggle;
-  const showPlace = config.map && placeId && onPlaceToggle;
+  const showInformation = config.information && captionId;
+  const showPlace = config.map && placeId;
   const choiceId = `choice-${instance}`;
   /*
    * The control is named by the Manifest where it can be: the Choice's own `label` when
@@ -278,15 +280,19 @@ const Controls: React.FC<CanvasControlsProps> = ({
     ? ownChoiceLabel.lang
     : langOf("canvasChoice");
   const menuId = `${choiceId}-menu`;
+  /*
+   * The annotations menu's code, with its look, as its control is first pointed at,
+   * focused or pressed (Mat, 2026-11-20: "do both"), never just as the Canvas has
+   * annotations, so a page that never opens it never loads it; a press before it has
+   * come opens it as it comes.
+   */
+  const [annotationsWanted, setAnnotationsWanted] = useState(false);
   const AnnotationMenu = useLoaded(
     loadAnnotationMenu,
-    Boolean(showAnnotations),
+    Boolean(showAnnotations) && (annotationsWanted || annotationsOpen),
   )?.default;
   const ChaptersMenu = useLoaded(loadChaptersMenu, showChapters)?.default;
-  const ChoiceMenu = useLoaded(
-    loadChoiceMenu,
-    choices.length > 0 && Boolean(onSelect),
-  )?.default;
+  const ChoiceMenu = useLoaded(loadChoiceMenu, choices.length > 0)?.default;
   const closeChoice = useCallback(
     (restoreFocus: boolean) => {
       setChoiceOpen(false);
@@ -307,14 +313,14 @@ const Controls: React.FC<CanvasControlsProps> = ({
    */
   const isFullscreen = useWithinFullscreen(cluster);
   const [moreOpen, setMoreOpen] = useState(false);
-  const annotationsButton = (className?: string) => (
+  const annotationsButton = () => (
     <Button
       key="annotations"
-      className={className}
       id={annotationsId}
       label={annotationsLabel}
       lang={annotationsLang}
       onClick={() => setAnnotationsOpen((open) => !open)}
+      onPrepare={() => setAnnotationsWanted(true)}
       expanded={annotationsOpen}
       controls={annotationsMenuId}
     >
@@ -324,30 +330,64 @@ const Controls: React.FC<CanvasControlsProps> = ({
   const controls = (): ControlSpec[] => {
     const specs: ControlSpec[] = [];
     const camera = renderer;
-    if (config.zoom && camera) {
+    // One of the view's: its id, shortcut and words by its key.
+    const view = (
+      key: "zoomIn" | "zoomOut" | "rotateRight" | "rotateLeft" | "reset",
+      words: string,
+      glyph: React.ReactElement,
+      onClick: () => void,
+      unavailable?: boolean,
+    ): ControlSpec => ({
+      key,
+      id: `${key}-${instance}`,
+      shortcut: SHORTCUTS[key],
+      label: t(words),
+      lang: langOf(words),
+      glyph,
+      unavailable,
+      onClick,
+    });
+    if (config.zoom && camera)
       specs.push(
-        {
-          key: "zoomIn",
-          id: `zoomIn-${instance}`,
-          shortcut: SHORTCUTS.zoomIn,
-          label: t("imageZoomIn"),
-          lang: langOf("imageZoomIn"),
-          glyph: <ZoomIn />,
-          unavailable: limits.atMax,
-          onClick: () => camera.zoomBy(ZOOM_PER_CLICK),
-        },
-        {
-          key: "zoomOut",
-          id: `zoomOut-${instance}`,
-          shortcut: SHORTCUTS.zoomOut,
-          label: t("imageZoomOut"),
-          lang: langOf("imageZoomOut"),
-          glyph: <ZoomOut />,
-          unavailable: limits.atMin,
-          onClick: () => camera.zoomBy(1 / ZOOM_PER_CLICK),
-        },
+        view(
+          "zoomIn",
+          "imageZoomIn",
+          <ZoomIn />,
+          () => camera.zoomBy(ZOOM_PER_CLICK),
+          limits.atMax,
+        ),
+        view(
+          "zoomOut",
+          "imageZoomOut",
+          <ZoomOut />,
+          () => camera.zoomBy(1 / ZOOM_PER_CLICK),
+          limits.atMin,
+        ),
       );
-    }
+    if (config.rotation && camera)
+      specs.push(
+        view("rotateRight", "imageRotateRight", <Rotate />, () =>
+          camera.rotateBy(90),
+        ),
+        view("rotateLeft", "imageRotateLeft", <Rotate />, () =>
+          camera.rotateBy(-90),
+        ),
+      );
+    if (config.reset && camera)
+      specs.push(
+        // Home also turns the image upright, as `Image`'s reset does.
+        view(
+          "reset",
+          "imageResetZoom",
+          <Reset />,
+          () => camera.home(),
+          limits.atHome,
+        ),
+      );
+    /*
+     * Full screen ends the view's controls, over every picture alike, whichever of them a
+     * Canvas offers (Mat, 2026-10-29), before the Canvas's own (below).
+     */
     if (config.fullPage && canFullscreen) {
       specs.push({
         key: "fullPage",
@@ -357,41 +397,6 @@ const Controls: React.FC<CanvasControlsProps> = ({
         glyph: isFullscreen ? <ZoomExitFullScreen /> : <ZoomFullScreen />,
         // Straight from the click: the Fullscreen API only honors a user gesture.
         onClick: (event) => void toggleFullscreen(event.currentTarget),
-      });
-    }
-    if (config.rotation && camera) {
-      specs.push(
-        {
-          key: "rotateRight",
-          id: `rotateRight-${instance}`,
-          shortcut: SHORTCUTS.rotateRight,
-          label: t("imageRotateRight"),
-          lang: langOf("imageRotateRight"),
-          glyph: <Rotate />,
-          onClick: () => camera.rotateBy(90),
-        },
-        {
-          key: "rotateLeft",
-          id: `rotateLeft-${instance}`,
-          shortcut: SHORTCUTS.rotateLeft,
-          label: t("imageRotateLeft"),
-          lang: langOf("imageRotateLeft"),
-          glyph: <Rotate />,
-          onClick: () => camera.rotateBy(-90),
-        },
-      );
-    }
-    if (config.reset && camera) {
-      specs.push({
-        key: "reset",
-        id: `reset-${instance}`,
-        shortcut: SHORTCUTS.reset,
-        label: t("imageResetZoom"),
-        lang: langOf("imageResetZoom"),
-        glyph: <Reset />,
-        unavailable: limits.atHome,
-        // Home also turns the image upright, as `Image`'s reset does.
-        onClick: () => camera.home(),
       });
     }
     if (choices.length) {
@@ -408,15 +413,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
     }
     return specs;
   };
-  /*
-   * Full screen ends the view's controls, over every picture alike, whichever of them a
-   * Canvas offers (Mat, 2026-10-29), before the Canvas's own (below).
-   */
   const specs = controls().filter((spec) => !away || spec.key === "fullPage");
-  const view = [
-    ...specs.filter((spec) => spec.key !== "fullPage"),
-    ...specs.filter((spec) => spec.key === "fullPage"),
-  ].map((spec) => ({
+  const view = specs.map((spec) => ({
     id: spec.id,
     view: VIEW.has(spec.key),
     node: renderControl(spec, controlButtons),

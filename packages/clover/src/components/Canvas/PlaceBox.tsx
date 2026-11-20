@@ -50,11 +50,17 @@ export default function PlaceBox({
   language,
   asked,
   onReady,
+  returnFocus,
 }: {
   id: string;
   open: boolean;
   /** Close, giving focus back to what opened it when `restoreFocus`. */
   onClose: (restoreFocus: boolean) => void;
+  /**
+   * What opened it, by id, which focus goes back to once it has gone, as the Canvas's
+   * controls come back into sight with it, where it closes giving focus back.
+   */
+  returnFocus?: string;
   /** Whether its map and the Canvas have traded places: the map fills the Body. */
   swapped?: boolean;
   /** Trade them, or trade them back. */
@@ -125,6 +131,8 @@ export default function PlaceBox({
     // Once it has gone, as the Canvas's controls come back into sight with it.
     const from = asker.current;
     if (asked && restoreFocus) focusSoon(() => backTo(from));
+    if (returnFocus && restoreFocus)
+      focusSoon(() => document.getElementById(returnFocus));
   };
   const heading = localize(name, language);
   // A place with no label: the box is named for what it holds, in Clover's language.

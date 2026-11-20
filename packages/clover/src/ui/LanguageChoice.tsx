@@ -28,6 +28,19 @@ export interface LanguageRowFit {
   box: Element;
 }
 
+/**
+ * In a Panel's heading, what About's toggle must leave room for: the section's label, and
+ * the box over the heading's end that holds About's controls (`Sections`), whose width the
+ * heading keeps clear (`Panel/LanguageToggle.tsx`).
+ */
+export const besideHeading = (place: HTMLElement): LanguageRowFit | null => {
+  const box = place.closest(".clover-sections-actions");
+  const label = box
+    ?.closest(".clover-sections-item")
+    ?.querySelector(".clover-sections-heading .clover-sections-label");
+  return box && label ? { box, label } : null;
+};
+
 /** Where a label's words end on one line, in its inline direction. */
 function naturalEnd(label: HTMLElement, rtl: boolean): number {
   const was = label.style.whiteSpace;
@@ -113,7 +126,7 @@ export function LanguageChoice({
   onChange: (tag: string) => void;
   /** The key of Clover's string the row is named by. */
   nameKey: string;
-  /** The part's class the row's are named for (`clover-annotations`). */
+  /** The root class of the part the row is in, which names the row's: `${part}-languages`. */
   part: string;
   /**
    * The label the row sits beside and the box it is drawn in, found from the row: it

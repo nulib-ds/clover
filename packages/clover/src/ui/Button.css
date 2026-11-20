@@ -74,7 +74,10 @@ button.clover-canvas-button svg {
   button.clover-pager-next,
   button.clover-panel-close
 ):is(:hover, :focus-visible) {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
 }
 
 /*
@@ -91,7 +94,7 @@ button.clover-canvas-button svg {
   ):active:not([aria-disabled="true"]) {
   background-color: var(
     --clover-color-control-pressed,
-    var(--clover-color-accent, #0065c3)
+    var(--clover-accent-fill, var(--clover-color-accent, #0065c3))
   );
 }
 
@@ -108,36 +111,9 @@ button.clover-canvas-button svg {
     button.clover-pager-previous,
     button.clover-pager-next,
     button.clover-panel-close
-  ):is(:hover, :focus-visible) {
-  background-color: var(--clover-accent-fill);
-}
-
-:where([data-high-contrast])
-  :is(
-    button.clover-canvas-button,
-    button.clover-items-scroll-prev,
-    button.clover-items-scroll-next,
-    button.clover-pager-previous,
-    button.clover-pager-next,
-    button.clover-panel-close
   ):hover:not(:focus-visible) {
   outline: var(--clover-accent-ring-hover);
   outline-offset: 1px;
-}
-
-:where([data-high-contrast])
-  :is(
-    button.clover-canvas-button,
-    button.clover-items-scroll-prev,
-    button.clover-items-scroll-next,
-    button.clover-pager-previous,
-    button.clover-pager-next,
-    button.clover-panel-close
-  ):active:not([aria-disabled="true"]) {
-  background-color: var(
-    --clover-color-control-pressed,
-    var(--clover-accent-fill)
-  );
 }
 
 /*
@@ -206,7 +182,6 @@ button.clover-canvas-button[aria-disabled="true"]:hover:not(:focus-visible) {
 
 :where([data-high-contrast])
   button.clover-canvas-button[aria-disabled="true"]:hover:not(:focus-visible) {
-  background-color: var(--clover-color-control, #1a1d1e);
   outline: none;
 }
 

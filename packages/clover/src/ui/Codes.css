@@ -21,6 +21,7 @@
   border: 0;
   font-size: var(--clover-text-xs);
   line-height: 1;
+  animation: var(--clover-arrive);
 }
 
 .clover-transcript-languages > .clover-transcript-language,
@@ -46,7 +47,10 @@
   .clover-annotations-language,
   .clover-about-language
 ):is(:has(input:checked), :hover, :has(input:focus-visible)) {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
   /* On the accent, the round controls' glyph color: kept 4.5:1 from it in either mode. */
   color: var(--clover-color-control-glyph, #fff);
 }
@@ -56,15 +60,6 @@
  * the accent as Items rings an item, 1px clear: whole when chosen, at half strength under
  * the pointer. Focused, its own ring.
  */
-:where([data-high-contrast])
-  :is(
-    .clover-transcript-language,
-    .clover-annotations-language,
-    .clover-about-language
-  ):is(:has(input:checked), :hover, :has(input:focus-visible)) {
-  background-color: var(--clover-accent-fill);
-}
-
 :where([data-high-contrast])
   :is(
     .clover-transcript-language,
@@ -185,17 +180,11 @@ button.clover-languages-button:is(
     :focus-visible,
     [aria-expanded="true"]
   ) {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
   color: var(--clover-color-control-glyph, #fff);
-}
-
-:where([data-high-contrast])
-  button.clover-languages-button:is(
-    :hover,
-    :focus-visible,
-    [aria-expanded="true"]
-  ) {
-  background-color: var(--clover-accent-fill);
 }
 
 :where([data-high-contrast])
@@ -218,8 +207,12 @@ button.clover-languages-button:focus-visible {
   outline-offset: 2px;
 }
 
+/*
+ * Its states in `:where()`, so a template's own colors for the button (the Document's
+ * toolbar) keep their place over it whichever sheet comes in first.
+ */
 @media (forced-colors: active) {
-  button.clover-languages-button:is(
+  button.clover-languages-button:where(
       :hover,
       :focus-visible,
       [aria-expanded="true"]

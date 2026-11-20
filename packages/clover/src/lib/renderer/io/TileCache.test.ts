@@ -31,6 +31,9 @@ function setup(options: { byteBudget?: number; maxInFlight?: number } = {}) {
       ),
     onSettled,
     onEvict,
+    onFailed: vi.fn(),
+    byteBudget: 192 * 1024 * 1024,
+    maxInFlight: 16,
     ...options,
   });
   const settle = () => new Promise((r) => setTimeout(r, 0));
@@ -93,6 +96,8 @@ describe("TileCache", () => {
       onSettled,
       onEvict: vi.fn(),
       onFailed,
+      byteBudget: 192 * 1024 * 1024,
+      maxInFlight: 16,
     });
     cache.update([want("a"), want("b")]);
     pending[0].reject({ status: 403 });
@@ -123,14 +128,14 @@ describe("TileCache", () => {
     cache.update([want("a"), want("b"), want("c")]);
     pending.forEach((p) => p.resolve(image()));
     await settle();
-    expect(cache.byteSize).toBe(1200);
+    expect(cache["bytes"]).toBe(1200);
 
     // Only "c" is still wanted: "a" (oldest) goes first, then "b" fits.
     cache.get("b");
     cache.update([want("c")]);
     expect(onEvict).toHaveBeenCalledWith("a");
     expect(cache.has("b")).toBe(true);
-    expect(cache.byteSize).toBe(800);
+    expect(cache["bytes"]).toBe(800);
   });
 
   it("never evicts a required tile, even over budget", async () => {

@@ -1,15 +1,11 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 import { join } from "../lib/classnames";
 import { useOptionalClover } from "../react/context";
 import { Tip } from "./Tip";
 import { visuallyHidden } from "./visuallyHidden";
+import { useIsomorphicLayoutEffect as useLayout } from "../hooks/useIsomorphicLayoutEffect";
 
 export interface InsetProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onClick"> {
@@ -45,8 +41,6 @@ export interface InsetProps
   container?: Element | "body" | null;
 }
 
-/* Layout effects only where there is a layout: a server render has none. */
-const useLayout = typeof window === "undefined" ? useEffect : useLayoutEffect;
 const noBody = () => () => {};
 const none = () => null;
 

@@ -16,6 +16,10 @@ function setup(options = DEFAULT_GESTURES) {
     home: vi.fn(),
     rotateBy: vi.fn(),
     setInteracting: vi.fn(),
+    atMaxZoom: () => false,
+    tap: vi.fn(),
+    dismiss: () => false,
+    hint: vi.fn(),
   };
   const controller = new GestureController(element, target, options);
   return { element, target, controller };

@@ -86,11 +86,6 @@ export function apply(m: Affine, p: Point): Point {
   return { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f };
 }
 
-/** A CSS `matrix()` value. Rounded so the DOM does not carry 17-digit noise. */
-export function toCssMatrix(m: Affine): string {
-  return `matrix(${[m.a, m.b, m.c, m.d, m.e, m.f].map(roundCss).join(",")})`;
-}
-
 /**
  * Column-major `mat3` for `uniformMatrix3fv`, mapping CSS pixels to clip space (−1…1,
  * y up) on the way, so the vertex shader is a single multiply.
@@ -113,9 +108,4 @@ export function toClipMat3(
   out[7] = m.f * sy + 1;
   out[8] = 1;
   return out;
-}
-
-function roundCss(value: number): string {
-  const rounded = Math.round(value * 1e6) / 1e6;
-  return Object.is(rounded, -0) ? "0" : String(rounded);
 }

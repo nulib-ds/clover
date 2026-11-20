@@ -1,18 +1,24 @@
+import { cspNonce } from "./cspNonce";
+
 /**
  * A part sheet that loads with its part's code rather than in styles.css: a recording's,
- * a Scene's, a map's, a vertical slider's (`lazySheets`, `build/clover-sheets.mjs`). The
- * package's build calls this from the modules that draw what the sheet styles, so the
- * sheet is in the page before anything they draw, and a page that draws none of them
- * loads none of it. Package code calls it only for MapLibre's stylesheet
- * (`components/Map/sheet.ts`), and imports no CSS: the docs and the tests take
- * styles.css whole.
+ * a Scene's, a map's, a vertical slider's, the pager's, the Panel's sections', a Canvas's
+ * hotspots' and placeholder's, and those several share, the sections' rows and the
+ * language codes (`lazySheets`, `SHARED`, `build/clover-sheets.mjs`). The package's
+ * build calls this from the modules that draw
+ * what the sheet styles, so the sheet is in the page before anything they draw, and a
+ * page that draws none of them loads none of it. Package code calls it only for
+ * MapLibre's stylesheet (`components/Map/sheet.ts`), and imports no CSS: the docs and the
+ * tests take styles.css whole.
  *
  * Adopted, it comes after every stylesheet of the document, as if imported last, which
  * the part sheets cascade alike in (`build/styles.test.mjs`), and a strict CSP allows it.
  * Where a browser cannot adopt one (Safari before 16.4, Firefox before 101), it is a
- * `<style>` at the end of the head, which a strict CSP refuses: a page for those browsers
- * imports the part sheet itself. A page that imports the sheet too (to have it in a
- * server's HTML) gets the same rules twice, in the same order.
+ * `<style>` at the end of the head, given the page's nonce where it names one
+ * (`cspNonce`), as the elements' are; a strict CSP that names none refuses it, so a page
+ * with such a policy, for those browsers, imports the part sheet itself. A page that
+ * imports the sheet too (to have it in a server's HTML) gets the same rules twice, in the
+ * same order.
  *
  * A page on base.css (`@nulib/clover/base.css`, `build/tiers.mjs`) has every part's
  * structure already and brings its own look, so none of Clover's part sheets is adopted
@@ -44,6 +50,8 @@ export function adoptSheet(name: string, css: string): void {
   }
   const style = document.createElement("style");
   style.dataset.clover = name;
+  const nonce = cspNonce(document);
+  if (nonce) style.nonce = nonce;
   style.textContent = css;
   document.head.append(style);
 }

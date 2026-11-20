@@ -5,11 +5,8 @@ import React from "react";
 
 import { createPortal } from "react-dom";
 
-import {
-  Sections as HeldSections,
-  type SectionsLayout,
-  useSectionActions,
-} from "./Sections";
+import { useSectionActions } from "./sectionContext";
+import { Sections as HeldSections, type SectionsLayout } from "./Sections";
 
 /** Sections as the Panel holds them: the section open in its state, the first to start. */
 function Sections(

@@ -26,6 +26,8 @@ import { gzipSync } from "node:zlib";
 import { chromium } from "playwright";
 import { build } from "vite";
 
+import { BROWSERS } from "./browsers.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const elements = join(root, "dist/web-components");
 const sizes = JSON.parse(readFileSync(join(root, "build/sizes.json"), "utf8"));
@@ -304,7 +306,8 @@ async function buildApp(code) {
     build: {
       outDir,
       emptyOutDir: true,
-      // As `consumer-bundle.mjs` builds: no polyfill, which is not Clover's.
+      // As `consumer-bundle.mjs` builds: for Clover's browsers, no polyfill, which is not Clover's.
+      target: BROWSERS,
       modulePreload: { polyfill: false },
       chunkSizeWarningLimit: Infinity,
       rollupOptions: {

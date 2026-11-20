@@ -4,15 +4,9 @@ import type { ViewingDirection } from "../../core/sequence";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { Tip } from "../../ui/Tip";
-import { useContainerName } from "../../i18n/useContainerName";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { languageProps } from "../../i18n/direction";
-import {
-  PositionText,
-  type Steps,
-  type StepsOf,
-  useRootSteps,
-} from "./Position";
+import { type Steps, type StepsOf, useRootSteps } from "./Position";
 
 export {
   Position,
@@ -21,8 +15,9 @@ export {
   type StepsOf,
 } from "./Position";
 /**
- * Stepping through Items one at a time: `Previous`, `Next` and `Position`, and the three
- * together as Items' `pager` layout (`<Clover.Items layout="pager" />`).
+ * Stepping through Items one at a time: `Previous`, `Next` and `Position`, which the three
+ * together draw as Items' `pager` layout (`<Clover.Items layout="pager" />`,
+ * `PagerLayout.tsx`).
  *
  * They step through what Items lists: the Root's views (a paged book a spread at a time),
  * or with `of="members"` the Collection's Manifests. The arrows follow the Manifest's
@@ -35,7 +30,9 @@ export {
  *
  * This module reads no thumbnails: a layout with a pager and no strip carries none of it.
  * `Position` and the steps the three read are `Position.tsx`, which a page counting its
- * views loads without the rest.
+ * views loads without the rest; the layout, with its sheet, is `PagerLayout.tsx`, which a
+ * page drawing `Previous` and `Next` alone, as the Document template's toolbar does, never
+ * loads.
  */
 
 type ButtonProps = Omit<
@@ -75,7 +72,7 @@ function Chevron({ rotate, size = 16 }: { rotate: number; size?: number }) {
   );
 }
 
-const StepButton = forwardRef<
+export const StepButton = forwardRef<
   HTMLButtonElement,
   ButtonProps & {
     steps: Steps;
@@ -150,71 +147,3 @@ export const Next = forwardRef<HTMLButtonElement, StepProps>(function Next(
   const steps = useRootSteps(of, "Next");
   return <StepButton ref={ref} {...props} steps={steps} step="next" />;
 });
-
-/**
- * Items' `pager` layout: `Position`, then `Previous` and `Next`, over the items it is
- * handed, in a `nav` named as Items' list is. Laid out as the book reads: a right-to-left
- * book mirrors it, `Next` first and the count last. It is a flex row, so a page moves its
- * pieces with `order`, or composes the three parts in its own.
- */
-export function ItemsPager({
-  steps,
-  as: Tag = "nav",
-  className,
-  forwardedRef,
-  hostLanguage,
-  position,
-  nameKey = "itemsLabel",
-  size = "large",
-  ...rest
-}: React.HTMLAttributes<HTMLElement> & {
-  steps: Steps;
-  as?: React.ElementType;
-  forwardedRef?: React.Ref<HTMLElement>;
-  hostLanguage?: string;
-  /** In place of the count: one that opens a menu of the items (a content state's targets). */
-  position?: React.ReactNode;
-  /** The string naming its `nav`, where it is not Items' ("Views", for the targets). */
-  nameKey?: string;
-  /**
-   * `large` (the default): round controls, as the strip's arrows are. `small`: its steps
-   * and count as Search's and Contents' are (`ui/Steps`), for a header's line.
-   */
-  size?: "large" | "small";
-}) {
-  const { t, langOf } = useCloverTranslation(undefined, hostLanguage);
-  const name = useContainerName(
-    t(nameKey),
-    langOf(nameKey),
-    rest["aria-label"] !== undefined || rest["aria-labelledby"] !== undefined,
-    hostLanguage,
-  );
-  if (steps.total < 2) return null;
-  const rtl = steps.direction === "right-to-left";
-  return (
-    <Tag
-      ref={forwardedRef}
-      {...name.props}
-      className={join("clover-items clover-pager", className)}
-      data-layout="pager"
-      data-direction={steps.direction}
-      data-size={size === "small" ? "small" : undefined}
-      {...rest}
-    >
-      {name.node}
-      {/* A right-to-left book reads leftwards: "next" on the left, the count on the right. */}
-      {!rtl && (position ?? <PositionText steps={steps} />)}
-      <StepButton
-        steps={steps}
-        step={rtl ? "next" : "previous"}
-        small={size === "small"}
-      />
-      <StepButton
-        steps={steps}
-        step={rtl ? "previous" : "next"}
-        small={size === "small"}
-      />
-      {rtl && (position ?? <PositionText steps={steps} />)}
-    </Tag>
-  );
-}

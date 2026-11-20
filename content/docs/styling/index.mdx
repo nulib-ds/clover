@@ -93,23 +93,35 @@ import "@nulib/clover/styles/core.css";
 import "@nulib/clover/styles/items.css";
 ```
 
-| Sheet                          | Components                                                                                                                  |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `styles/core.css`              | `Root`, `Body` and `Canvas`, `Status`, `Label`, the Primitives                                                              |
-| `styles/items.css`             | `Items` and `Position`, and the items in `Collection`, the Panel's Views section and the list under a `Map`                 |
-| `styles/items-vertical.css`    | `Items` as a vertical slider, as the `Default` template shows it for a Manifest read down the page                          |
-| `styles/panel.css`             | `Panel`, and `About`, `Annotations`, `Collection`, `Contents`, `Download`, `Search` and `Transcript`, in the Panel or alone |
-| `styles/media.css`             | Video, sound, `Timeline` and animations, in a `Body` or a `Canvas` too                                                      |
-| `styles/scene.css`             | `Scene`, and a 3D model in a `Body`                                                                                         |
-| `styles/map.css`               | `Map`, the Panel's Map section, and the map a Canvas opens for a place                                                      |
-| `styles/text.css`              | The text a `Body` or a `Canvas` reads from its picture, to select and copy                                                  |
-| `styles/split.css`             | `Split`                                                                                                                     |
-| `styles/collection-select.css` | `CollectionSelect`                                                                                                          |
-| `styles/default.css`           | The `Default` template, and `PanelPane`, the information panel every template shares                                        |
+| Sheet                          | Components                                                                                                  |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `styles/core.css`              | `Root`, `Body` and `Canvas`, `Status`, `Label`, the Primitives                                              |
+| `styles/items.css`             | `Items`, `Position` and `Collection`, and the items in the Panel's Views section and the list under a `Map` |
+| `styles/pager.css`             | `Items` as a pager, and its count, which lists a Collection's members or a content state's targets          |
+| `styles/items-vertical.css`    | `Items` as a vertical slider, as the `Default` template shows it for a Manifest read down the page          |
+| `styles/panel.css`             | `Panel` and `About`                                                                                         |
+| `styles/annotations.css`       | `Annotations`, and the annotations menu in a `Canvas`                                                       |
+| `styles/contents.css`          | `Contents`                                                                                                  |
+| `styles/download.css`          | `Download`                                                                                                  |
+| `styles/search.css`            | `Search`, and the find field in `Transcript`                                                                |
+| `styles/rows.css`              | The rows of `Annotations`, `Contents`, `Search` and `Transcript`, and of the annotations menu in a `Canvas` |
+| `styles/codes.css`             | The language codes of `About`, `Transcript` and `Annotations`, folded or not                                |
+| `styles/transcript.css`        | `Transcript`                                                                                                |
+| `styles/media.css`             | Video, sound, a recording's chapters, `Timeline` and animations, in a `Body` or a `Canvas` too              |
+| `styles/scene.css`             | `Scene`, and a 3D model in a `Body`                                                                         |
+| `styles/map.css`               | `Map`, the Panel's Map section, and the map a Canvas opens for a place                                      |
+| `styles/text.css`              | The text a `Body` or a `Canvas` reads from its picture, to select and copy                                  |
+| `styles/hotspots.css`          | The annotations a `Body` or a `Canvas` marks on its picture                                                 |
+| `styles/placeholder.css`       | The still a `Body` or a `Canvas` shows until it is opened, and its toggle                                   |
+| `styles/split.css`             | `Split`                                                                                                     |
+| `styles/collection-select.css` | `CollectionSelect`                                                                                          |
+| `styles/default.css`           | The `Default` template, and `PanelPane`, the information panel every template shares                        |
 
 For Document or Gallery, add `styles/default.css` and `templates.css`. The sheets that load
-with their code (`media`, `scene`, `map`, `items-vertical`, `text`) need importing only where a
-server renders their component, to style its first paint.
+with their code (`pager`, `items-vertical`, `annotations`, `contents`, `download`,
+`search`, `rows`, `codes`, `transcript`, `media`, `scene`, `map`, `text`,
+`hotspots`, `placeholder` and `collection-select`) need importing only where a server
+renders their component, to style its first paint.
 
 </div>
 

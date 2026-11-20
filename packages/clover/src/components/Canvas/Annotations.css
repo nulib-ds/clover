@@ -4,36 +4,9 @@
  * focus, or once picked, an accent band between a dark edge and a light one, and a
  * dimmed surround. The dark and the light are `primary` and `secondary`, 9:1 apart or
  * more, so one of them keeps 3:1 against whatever is behind (C40). A hotspot's name is
- * its popover (`Tip`, placed in `ui/Tip.css`).
+ * its popover (`Tip`, placed in `ui/Tip.css`). Loaded with the hotspots' code, which
+ * alone draws them; the layer they are pinned to is the Canvas's (`Canvas.css`).
  */
-/*
- * The layer's geometry is inline (`OverlayLayer`): over the viewport, passing input through
- * (only the hotspots take it), and clipped, so focusing a hotspot out of view never
- * scrolls the layer. Where `clip` is unknown the inline value is dropped, and this hidden
- * stands in.
- */
-.clover-canvas-overlays {
-  overflow: hidden;
-  /*
-   * Its own stacking layer, so the hotspots' depths never rise over the viewport's
-   * focus ring or the controls; and the box their popovers keep within.
-   */
-  isolation: isolate;
-  container-type: size;
-  /*
-   * What of it the controls cover (`Canvas.css`), which a picked annotation is framed
-   * clear of (the renderer's `fitAnnotation`) and a hotspot's Tip kept clear of
-   * (`ui/Tip.css`). It scrolls nothing: it is clipped, never a scroller.
-   */
-  scroll-padding-block: var(--clover-canvas-clear-top, 0)
-    var(--clover-canvas-clear-bottom, 0);
-}
-
-/* A hotspot's place is inline too (`OverlayLayer.add`). */
-.clover-canvas-overlay {
-  transform-origin: center;
-}
-
 .clover-canvas-annotation {
   box-sizing: border-box;
   margin: 0;
@@ -56,6 +29,7 @@
   mask-position: center;
   mask-size: 120% 120%;
   mask-clip: no-clip;
+  animation: var(--clover-arrive);
 }
 
 /*

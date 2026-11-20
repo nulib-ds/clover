@@ -21,7 +21,6 @@ export interface DrawCommand {
   transform: Affine;
   /** The part of the source to draw, in source pixels. Defaults to all of it. */
   crop?: Rect;
-  opacity: number;
   /**
    * Stretch the right and/or bottom edge by one device pixel. Set on a tile that has a
    * neighbor on that side: two quads that meet exactly can still leave a hairline of

@@ -373,7 +373,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
       ...(timed ?? []),
       ...(marked ?? []).filter((each) => each.track?.length),
     ]) {
-      // Its own start, or its track's (`startOf`, which would bring the hotspots here).
+      // Its own start, or its track's (`startOf`, which would bring the annotations menu here).
       const start =
         "start" in annotation ? annotation.start : annotation.track?.[0]?.start;
       if (start === undefined || !annotation.label || byId.has(annotation.id))

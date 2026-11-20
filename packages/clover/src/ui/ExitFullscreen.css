@@ -52,7 +52,10 @@ button.clover-canvas-exit-full-screen {
 
 .clover-canvas-exit-full-screen:hover,
 .clover-canvas-exit-full-screen:focus-visible {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
 }
 
 /*
@@ -60,11 +63,6 @@ button.clover-canvas-exit-full-screen {
  * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
  * its own ring.
  */
-:where([data-high-contrast])
-  .clover-canvas-exit-full-screen:is(:hover, :focus-visible) {
-  background-color: var(--clover-accent-fill);
-}
-
 :where([data-high-contrast])
   .clover-canvas-exit-full-screen:hover:not(:focus-visible) {
   outline: var(--clover-accent-ring-hover);

@@ -152,7 +152,10 @@ button.clover-field-pill-submit {
   border: 0;
   /* The round controls' corner (`ui/Button.css`), one variable for all of them. */
   border-radius: var(--clover-radius-pill, 2rem);
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
   color: var(--clover-color-control-glyph, #fff);
   cursor: pointer;
   transition: background-color 120ms;
@@ -180,10 +183,13 @@ button.clover-field-pill-submit svg {
 }
 
 button.clover-field-pill-submit:is(:hover, :focus-visible) {
-  background-color: color-mix(
-    in srgb,
-    var(--clover-color-accent, #0065c3) 85%,
-    var(--clover-color-primary, #1a1d1e)
+  background-color: var(
+    --clover-accent-fill,
+    color-mix(
+      in srgb,
+      var(--clover-color-accent, #0065c3) 85%,
+      var(--clover-color-primary, #1a1d1e)
+    )
   );
 }
 
@@ -193,10 +199,7 @@ button.clover-field-pill-submit:is(:hover, :focus-visible) {
  * the accent's ring at half strength, 1px clear, as Items rings an item. Focused, its own
  * ring.
  */
-:where([data-high-contrast]) button.clover-field-pill-submit,
-:where([data-high-contrast])
-  button.clover-field-pill-submit:is(:hover, :focus-visible) {
-  background-color: var(--clover-accent-fill);
+:where([data-high-contrast]) button.clover-field-pill-submit {
   transition: none;
 }
 

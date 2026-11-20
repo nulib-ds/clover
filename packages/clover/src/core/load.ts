@@ -197,7 +197,11 @@ export const isImageServiceManifest = (manifest: Json | null | undefined) =>
 const ANNOTATIONS = /^(oa:)?Annotation(Page|Collection)$/;
 
 export class CloverContentError extends Error {
-  name = "CloverContentError";
+  // Assigned, as `CloverRequestError`'s is, rather than a field (`lib/renderer/tsconfig.json`).
+  constructor(message: string) {
+    super(message);
+    this.name = "CloverContentError";
+  }
 }
 
 const P4_CONTEXT = "http://iiif.io/api/presentation/4/context.json";

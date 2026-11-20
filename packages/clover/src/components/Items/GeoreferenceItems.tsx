@@ -12,7 +12,7 @@ import type { ItemModel } from "../../core/items";
 import { selectVisibleCanvases } from "../../core/selectors";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { useClover, useCloverSelector } from "../../react/context";
-import { overlayItems } from "../Map/overlayItems";
+import { overlayItems, pointing } from "../Map/overlayItems";
 
 /**
  * The Root's georeferenced images (`georeferencesOf`), as Items lists a Collection's
@@ -73,14 +73,14 @@ export default function GeoreferenceItems({
       forwardedRef={forwardedRef}
       items={items}
       selected={selected}
-      pointed={overlays.findIndex((overlay) => overlay.id === highlighted)}
+      optionProps={pointing(
+        overlays.findIndex((overlay) => overlay.id === highlighted),
+        (item) => clover.highlight.emit((item && overlayOf(item)?.id) ?? null),
+      )}
       navigation="id"
       language={language}
       request={clover.request}
       onActivate={choose}
-      onPoint={(item) =>
-        clover.highlight.emit((item && overlayOf(item)?.id) ?? null)
-      }
     />
   );
 }

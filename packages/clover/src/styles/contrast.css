@@ -8,7 +8,9 @@
  * What it fills under a glyph or words (a control under the pointer or focused, the
  * chosen language, the submit) takes the controls' own dark fill instead, `control-glyph`
  * on `control`, 4.5:1 in either mode (WCAG 1.4.3), and keeps the accent as its ring. Each
- * part sets that beside its own fill, under `[data-high-contrast]`, from these. Text in
+ * part's fill reads `--clover-accent-fill` first, which is set here alone, so the mode's
+ * fill takes the accent's place inside the mode, and gives its rings under
+ * `[data-high-contrast]`, from these. Text in
  * the accent is the page's `accent-text` where it sets one, which a page keeps at 4.5:1,
  * else the text's own color.
  *

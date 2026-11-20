@@ -120,7 +120,7 @@ button.clover-sections-button {
  * The arrows, small steps as Search's are (`clover-steps-step`, `ui/Steps.css`; Mat,
  * 2026-11-01: "small like search result nav"): 26px, no fill, the muted glyph, the
  * accent under the pointer or focused. Centered on the row at its ends, over the fade,
- * on the panel's own ground at rest, so the tabs fading under them never show through.
+ * on Clover's background at rest, so the tabs fading under them never show through.
  * Hidden while nothing lies past their end. Written with the row's class: Steps.css
  * comes later and places its steps in the flow.
  */
@@ -224,7 +224,7 @@ button.clover-sections-scroll-next {
  * sets to where its headings rest), so the first heading holds where it rests from the
  * first pixel of scrolling. Each is offset by the headings before it (top) or after it
  * (bottom), so a stuck heading sits exactly where it rests and never shifts as it comes
- * unstuck. They are on the panel's own color, and each carries its 3px line under it as
+ * unstuck. They are on Clover's background, and each carries its 3px line under it as
  * its own padding, as the next carries the space between them (below): nothing can show
  * between two stuck headings. Padding, not a border, since a border's width snaps to
  * device pixels.

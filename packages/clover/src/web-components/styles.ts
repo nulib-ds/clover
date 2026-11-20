@@ -1,3 +1,5 @@
+import { cspNonce } from "../ui/cspNonce";
+
 /**
  * What the build hands the elements. Not stylesheets: each of Clover's sheets loads with
  * the code that draws what it styles, and registers itself (`addSheet`); a page's own CSS,
@@ -42,19 +44,6 @@ export function addSheet(
  */
 const adoptable = (css: string) =>
   `@layer clover,maplibre;@layer maplibre{${css}}`;
-
-/**
- * The nonce a page's Content Security Policy gives the styles Clover writes, where the
- * page names one: on `<meta property="csp-nonce">` (as Vite writes it), else its
- * scripts' own. Empty where it names none.
- */
-function cspNonce(doc: Document): string {
-  return (
-    doc.querySelector<HTMLMetaElement>('meta[property="csp-nonce"]')?.nonce ||
-    doc.querySelector<HTMLScriptElement>("script[nonce]")?.nonce ||
-    ""
-  );
-}
 
 /**
  * Clover's styles in one document, whichever elements it holds: each sheet injected once,

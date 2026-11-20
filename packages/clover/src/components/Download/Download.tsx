@@ -46,8 +46,6 @@ function save(url: string, request: CloverRequest | undefined) {
 }
 
 export interface DownloadGroupsProps {
-  page: Rendering[];
-  all: Rendering[];
   /** The level of each group's title ("This page", "All pages"). Default 3. */
   headingLevel?: number;
   /**
@@ -63,11 +61,10 @@ export interface DownloadGroupsProps {
  * has one: what Download's panel lists, and what About shows in its own section.
  */
 export function DownloadGroups({
-  page,
-  all,
   headingLevel = 3,
   inPopover = false,
 }: DownloadGroupsProps) {
+  const { page, all } = useDownloads();
   const { t, langOf } = useCloverTranslation();
   const { clover } = useClover("Download");
   const id = useUniqueId();
@@ -149,11 +146,12 @@ export function Download({
   headingLevel = 3,
   ...rest
 }: DownloadProps) {
+  // Its own list's, as it draws the links anyway: no check of its own to load.
   const { page, all } = useDownloads();
   if (!page.length && !all.length) return null;
   return (
     <div {...rest} className={join("clover-download", className)}>
-      <DownloadGroups page={page} all={all} headingLevel={headingLevel} />
+      <DownloadGroups headingLevel={headingLevel} />
     </div>
   );
 }

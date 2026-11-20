@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { getCloverRoot, toggleFullscreen } from "./fullscreen";
+import { enterNativeFullscreen } from "./videoFullscreen";
 
 /** iPhone Safari: no element full screen, and a video that has its own. */
 function iphone() {
@@ -53,7 +54,9 @@ describe("toggleFullscreen on iPhone", () => {
   it("hands a video on the page to the system player as it is", async () => {
     const { root, button, video, placed } = iphone();
     root.appendChild(video);
-    await toggleFullscreen(button, video);
+    await toggleFullscreen(button, (from) =>
+      enterNativeFullscreen(video, from),
+    );
     expect(placed).toEqual([true]);
     expect(video.parentElement).toBe(root);
     expect(video.getAttribute("style")).toBeNull();
@@ -62,7 +65,9 @@ describe("toggleFullscreen on iPhone", () => {
   it("places a video drawn into the canvas on the page while the player has it", async () => {
     const { root, button, video, placed } = iphone();
     video.setAttribute("style", "color: red");
-    await toggleFullscreen(button, video);
+    await toggleFullscreen(button, (from) =>
+      enterNativeFullscreen(video, from),
+    );
     // A frame later, once the placed video has been laid out.
     await vi.waitFor(() => expect(placed).toHaveLength(1));
     // On the page when the player was asked: first in its Canvas, under the viewport,
@@ -81,7 +86,9 @@ describe("toggleFullscreen on iPhone", () => {
   it("does nothing for a video with no player of its own", async () => {
     const { button } = iphone();
     const plain = document.createElement("video");
-    await toggleFullscreen(button, plain);
+    await toggleFullscreen(button, (from) =>
+      enterNativeFullscreen(plain, from),
+    );
     expect(plain.isConnected).toBe(false);
   });
 });

@@ -28,7 +28,10 @@ label.clover-hide svg {
 }
 
 label.clover-hide:is(:hover, :has(input:focus-visible)) {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
   color: var(--clover-color-control-glyph, #fff);
 }
 
@@ -37,11 +40,6 @@ label.clover-hide:is(:hover, :has(input:focus-visible)) {
  * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
  * its own ring.
  */
-:where([data-high-contrast])
-  label.clover-hide:is(:hover, :has(input:focus-visible)) {
-  background-color: var(--clover-accent-fill);
-}
-
 :where([data-high-contrast])
   label.clover-hide:hover:not(:has(input:focus-visible)) {
   outline: var(--clover-accent-ring-hover);

@@ -244,7 +244,8 @@ describe("the Canvas's languages", () => {
       "de",
     );
     fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
-    const menu = screen.getByTestId("clover-canvas-annotation-menu");
+    // Its code comes as its control is first used (`Controls`).
+    const menu = await screen.findByTestId("clover-canvas-annotation-menu");
     expect(within(menu).getByText("Fontaine")).toHaveAttribute("lang", "fr");
   });
 

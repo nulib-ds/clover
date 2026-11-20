@@ -20,19 +20,19 @@ export interface GestureTarget {
   zoomBy(factor: number, at: Point | undefined, animate: boolean): void;
   home(): void;
   /** The view is zoomed in as far as it goes. */
-  atMaxZoom?(): boolean;
+  atMaxZoom(): boolean;
   rotateBy(degrees: number): void;
   /** A pointer is down (true) or the last one lifted (false). */
   setInteracting(interacting: boolean): void;
   /** A mouse click that is not a zoom (click-to-zoom is off): video toggles playback. */
-  tap?(at: Point): void;
+  tap(at: Point): void;
   /**
    * A tap or click off every control and hotspot: whether it put something away (a
    * picked annotation). If it did, the tap does nothing more: no zoom, no `tap`.
    */
-  dismiss?(): boolean;
+  dismiss(): boolean;
   /** A gesture `cooperative` left to the page: a plain wheel, or one finger's drag. */
-  hint?(kind: GestureHintKind): void;
+  hint(kind: GestureHintKind): void;
 }
 
 export type GestureHintKind = "wheel" | "touch";
@@ -107,7 +107,7 @@ interface Sample {
 
 /** Whether a press landed on the picture's text, which is selected, not dragged. */
 const onText = (event: Event) =>
-  Boolean((event.target as Element).closest?.("[data-clover-canvas-text]"));
+  Boolean((event.target as Element).closest("[data-clover-canvas-text]"));
 
 /**
  * Pointer, wheel and keyboard input on the Body, turned into camera intents.
@@ -234,7 +234,7 @@ export class GestureController {
         this.down.moved = true;
       }
       if (this.down?.moved && this.leftToPage(event.pointerType)) {
-        if (!this.pinched) this.target.hint?.("touch");
+        if (!this.pinched) this.target.hint("touch");
       } else if (this.down?.moved && this.options.navigable) {
         this.target.panBy(dx, dy, !this.tracksPointer(event.pointerType));
       }
@@ -296,7 +296,7 @@ export class GestureController {
 
     if (isTap) {
       // Off a picked annotation, the first tap lets it go and does nothing else.
-      if (this.target.dismiss?.()) {
+      if (this.target.dismiss()) {
         this.lastTap = null;
         return;
       }
@@ -326,7 +326,7 @@ export class GestureController {
         if (event.shiftKey) this.target.zoomBy(1 / CLICK_ZOOM, p, true);
         else this.zoomIn(p);
       } else {
-        this.target.tap?.(p);
+        this.target.tap(p);
       }
       return;
     }
@@ -337,7 +337,7 @@ export class GestureController {
     // A drag the browser took over (to scroll the page) is the page's: no fling after it.
     if (event.type === "pointercancel") {
       if (this.leftToPage(event.pointerType) && !pinched)
-        this.target.hint?.("touch");
+        this.target.hint("touch");
       return;
     }
     if (this.leftToPage(event.pointerType)) return;
@@ -372,7 +372,7 @@ export class GestureController {
    * controls the host shows (WCAG 2.5.1).
    */
   private zoomIn(at: Point) {
-    if (this.target.atMaxZoom?.()) this.target.home();
+    if (this.target.atMaxZoom()) this.target.home();
     else this.target.zoomBy(CLICK_ZOOM, at, true);
   }
 
@@ -398,7 +398,7 @@ export class GestureController {
         !pageWheeling(event, this.element) &&
         !scrollsWithin(event.target, this.element, delta)
       )
-        this.target.hint?.("wheel");
+        this.target.hint("wheel");
       return;
     }
     // A box in the Body that scrolls that way (a hotspot's long Tip) scrolls, not zooms.

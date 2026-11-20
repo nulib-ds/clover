@@ -219,6 +219,37 @@
 }
 
 /*
+ * The overlay layer, made the first time something is pinned to it (`overlaysOf`): the
+ * hotspots (`Annotations.css`) and a picture's text (`text/TextLayer.css`), each loaded
+ * apart. Its geometry is inline (`OverlayLayer`): over the viewport, passing input through
+ * (only what is pinned to it takes it), and clipped, so focusing a hotspot out of view
+ * never scrolls the layer. Where `clip` is unknown the inline value is dropped, and this
+ * hidden stands in.
+ */
+.clover-canvas-overlays {
+  overflow: hidden;
+  /*
+   * Its own stacking layer, so the hotspots' depths never rise over the viewport's
+   * focus ring or the controls; and the box their popovers keep within.
+   */
+  isolation: isolate;
+  container-type: size;
+  /*
+   * What of it the controls cover (`--clover-canvas-clear-top` and `-bottom`), which a
+   * picked annotation is framed clear of (the renderer's `fitAnnotation`) and a
+   * hotspot's Tip kept clear of (`ui/Tip.css`). It scrolls nothing: it is clipped, never
+   * a scroller.
+   */
+  scroll-padding-block: var(--clover-canvas-clear-top, 0)
+    var(--clover-canvas-clear-bottom, 0);
+}
+
+/* What is pinned to it is placed inline too (`OverlayLayer.add`). */
+.clover-canvas-overlay {
+  transform-origin: center;
+}
+
+/*
  * Sound with no picture names itself in its Body (`CanvasView`; Mat, 2026-10-23), in the
  * room over its transport, which `--clover-transport-room` keeps clear: on the Body's
  * ground, over the viewport and under the controls. The viewport is named by the same
@@ -251,23 +282,6 @@
 .clover-canvas-dom-media {
   display: block;
   -webkit-user-drag: none;
-}
-
-/*
- * Text an animation paints at a time (Cookbook 0489), in its region: laid out in the
- * scene's units, its size fitted to the region (`FrameAnimation`), and set in the page's
- * own face and color.
- */
-.clover-canvas-dom-media.clover-canvas-painted-text {
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  color: var(--clover-color-primary, currentColor);
-  line-height: 1.2;
-}
-
-.clover-canvas-painted-text > * {
-  margin: 0;
 }
 
 /* ============================ Controls ============================= */
@@ -935,4 +949,20 @@
     outline: 3px solid CanvasText;
     outline-offset: -3px;
   }
+}
+
+/*
+ * Held back behind a placeholder's still (`data-placeholder`), from the Canvas's first
+ * paint, before the still's code and its sheet come (`Placeholder.css`): nothing of the
+ * Canvas shows behind it, nor takes focus, until it is opened; and over it the cluster,
+ * holding only the information control, stays to hand beside the toggle rather than
+ * fading.
+ */
+.clover-canvas[data-placeholder="true"] > .clover-canvas-viewport {
+  visibility: hidden;
+}
+
+.clover-canvas[data-placeholder="true"] > .clover-canvas-controls > * {
+  --clover-controls-shown: 1;
+  --clover-controls-events: auto;
 }

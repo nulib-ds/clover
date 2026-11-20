@@ -28,6 +28,7 @@
 @import "../components/Body/Caption.css";
 @import "../components/Canvas/Placeholder.css";
 @import "../components/Canvas/ControlMenu.css";
+@import "../components/Canvas/ChaptersMenu.css";
 @import "../components/Canvas/media/MediaBody.css";
 @import "../components/Canvas/media/Transport.css";
 @import "../components/Canvas/media/Player.css";
@@ -52,11 +53,14 @@
 @import "../components/Status/Status.css";
 @import "../components/Items/Items.css";
 @import "../components/Items/vertical/ItemsVertical.css";
+@import "../components/Items/Position.css";
 @import "../components/Items/Pager.css";
 @import "../components/Panel/Panel.css";
+@import "../components/Panel/Rows.css";
 @import "../components/Collection/Collection.css";
 @import "../components/Split/Split.css";
 @import "../components/Annotations/Annotations.css";
+@import "../components/Annotations/EntryBodies.css";
 @import "../components/Download/Download.css";
 @import "../components/Transcript/Transcript.css";
 @import "../components/Contents/Contents.css";

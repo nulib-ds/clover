@@ -13,6 +13,7 @@
    * the Body's size whatever it holds, so containing its height changes nothing.
    */
   container-type: size;
+  animation: var(--clover-arrive);
 }
 
 /*
@@ -134,4 +135,21 @@
   .clover-canvas-captions-cue {
     font-size: var(--clover-text-l);
   }
+}
+
+/*
+ * Text an animation paints at a time (Cookbook 0489), in its region: laid out in the
+ * scene's units, its size fitted to the region (`FrameAnimation`), and set in the page's
+ * own face and color.
+ */
+.clover-canvas-dom-media.clover-canvas-painted-text {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  color: var(--clover-color-primary, currentColor);
+  line-height: 1.2;
+}
+
+.clover-canvas-painted-text > * {
+  margin: 0;
 }

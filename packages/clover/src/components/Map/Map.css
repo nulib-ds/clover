@@ -1,12 +1,13 @@
 /*
  * Map: MapLibre's own stylesheet (`maplibre-gl/dist/maplibre-gl.css`, the page's, or
  * brought with MapLibre where it has none, `sheet.ts`) styles the map; this frames it, over its places, and draws its controls and popups as Clover's own. Size it with
- * `--clover-map-height`. The places are the panel's rows (`Panel.css`,
- * "Rows"), `s` under the map: two parts of one.
+ * `--clover-map-height`. The places are the panel's rows (`Panel/Rows.css`), `s` under
+ * the map: two parts of one.
  */
 .clover-geomap {
   display: grid;
   gap: var(--clover-space-s);
+  animation: var(--clover-arrive);
 }
 
 /* The map's box: its first child. */
@@ -74,22 +75,12 @@
 }
 
 [data-map-host]:has(.clover-geomap[data-status="ready"]) {
-  animation: clover-map-in 200ms ease;
-}
-
-@keyframes clover-map-in {
-  from {
-    opacity: 0;
-  }
+  animation: var(--clover-arrive);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .clover-geomap-canvas {
     transition: none;
-  }
-
-  [data-map-host]:has(.clover-geomap[data-status="ready"]) {
-    animation: none;
   }
 }
 

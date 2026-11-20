@@ -1,10 +1,7 @@
-import React, { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useRef } from "react";
 
-import { join } from "../lib/classnames";
 import { enterPass } from "./loadingPass";
-
-const useIsomorphicLayoutEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
+import { useIsomorphicLayoutEffect } from "../hooks/useIsomorphicLayoutEffect";
 
 /**
  * Clover's loading mark: a 3px line in the accent that makes one pass however long the
@@ -15,13 +12,7 @@ const useIsomorphicLayoutEffect =
  * along the top edge of its positioned parent and takes no room, so nothing around it
  * moves and the Body keeps its own background.
  */
-export function Loading({
-  overlay = false,
-  className,
-}: {
-  overlay?: boolean;
-  className?: string;
-}) {
+export function Loading({ overlay = false }: { overlay?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
   useIsomorphicLayoutEffect(() => {
     const mark = ref.current;
@@ -31,7 +22,7 @@ export function Loading({
     <span
       ref={ref}
       aria-hidden="true"
-      className={join("clover-loading", className)}
+      className="clover-loading"
       data-overlay={overlay || undefined}
     >
       <span />

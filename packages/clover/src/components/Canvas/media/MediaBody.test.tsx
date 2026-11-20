@@ -1035,7 +1035,8 @@ describe("Canvas media", () => {
     it("lists them in the Canvas's annotations menu by time, and a pick goes there", async () => {
       const element = await renderPoetry();
       fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
-      const menu = screen.getByTestId("clover-canvas-annotation-menu");
+      // Its code comes as its control is first used (`Controls`).
+      const menu = await screen.findByTestId("clover-canvas-annotation-menu");
       expect(
         within(menu).getByRole("group", { name: "Annotations" }),
       ).toBeInTheDocument();

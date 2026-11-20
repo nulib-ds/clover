@@ -193,9 +193,11 @@ export type {
 export type { AnnotationsInput } from "./core/annotation-collection";
 export { cueAt, parseVtt } from "./core/vtt";
 export type { Cue } from "./core/vtt";
-export { chaptersOf, currentContents, tableOfContents } from "./core/ranges";
+export { chaptersOf } from "./core/ranges";
+export { currentContents, tableOfContents } from "./core/contents";
 export { CONTENTS_SET_ID } from "./core/annotation-sets";
-export type { Chapter, ContentsNode, ContentsPart } from "./core/ranges";
+export type { Chapter } from "./core/ranges";
+export type { ContentsNode, ContentsPart } from "./core/contents";
 export { localize } from "./core/value";
 export { readAs, toPlainText } from "./core/text";
 export type { ItemModel, ItemPart } from "./core/items";

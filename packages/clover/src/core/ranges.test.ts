@@ -6,7 +6,8 @@ import operaJson from "../fixtures/iiif-cookbook/0026-toc-opera.json";
 import { p4 } from "../fixtures/presentation4";
 import { CONTENTS_SET_ID } from "./annotation-sets";
 import { contentsSet } from "./range-regions";
-import { chaptersOf, currentContents, tableOfContents } from "./ranges";
+import { chaptersOf, hasContents } from "./ranges";
+import { currentContents, tableOfContents } from "./contents";
 
 describe("tableOfContents", () => {
   it("unwraps a single top Range and nests the rest", () => {
@@ -154,5 +155,54 @@ describe("tableOfContents", () => {
     expect(tableOfContents(manifest)[0].thumbnail).toMatchObject(thumbnail);
     // One without a thumbnail has none.
     expect(tableOfContents(p4(operaJson))[0]).not.toHaveProperty("thumbnail");
+  });
+});
+
+describe("hasContents", () => {
+  const range = (id: string, items: unknown[], behavior?: string) => ({
+    id,
+    type: "Range",
+    items,
+    ...(behavior ? { behavior: [behavior] } : {}),
+  });
+  const manifest = (structures: unknown[]) =>
+    ({ id: "m", type: "Manifest", items: [], structures }) as any;
+  const agrees = (resource: any, name?: string) =>
+    expect(hasContents(resource), name).toBe(
+      tableOfContents(resource).length > 0,
+    );
+
+  it("says whether there is a table of contents, as tableOfContents finds one, for every fixture", () => {
+    const resources = import.meta.glob<{ default: unknown }>(
+      "../fixtures/**/*.json",
+      { eager: true },
+    );
+    let checked = 0;
+    for (const [path, json] of Object.entries(resources)) {
+      let resource: any;
+      try {
+        resource = p4(json.default);
+      } catch {
+        continue;
+      }
+      if (resource?.type !== "Manifest") continue;
+      agrees(resource, path);
+      checked++;
+    }
+    expect(checked).toBeGreaterThan(20);
+  });
+
+  it("walks no-nav Ranges and cycles as the table does", () => {
+    for (const structures of [
+      [],
+      [range("a", [], "no-nav")],
+      [range("a", [range("b", [])], "no-nav")],
+      [range("a", [range("b", [range("a", [])], "no-nav")], "no-nav")],
+      // A Range walked inside another is not walked again where it is listed itself.
+      [range("a", [range("b", [], "no-nav")], "no-nav"), range("b", [])],
+      [null, range("c", [])],
+    ])
+      agrees(manifest(structures));
+    expect(hasContents(null)).toBe(false);
   });
 });

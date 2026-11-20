@@ -4,7 +4,8 @@ import { resolve } from "node:path";
 import { canvasTextTranscripts } from "../components/Canvas/layout";
 import hessJson from "../fixtures/mocks/rudolf-hess-nuremberg/manifest.json";
 import { p4 } from "../fixtures/presentation4";
-import { chaptersOf, tableOfContents } from "./ranges";
+import { chaptersOf } from "./ranges";
+import { tableOfContents } from "./contents";
 import { parseVtt } from "./vtt";
 
 /*

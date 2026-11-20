@@ -1,21 +1,22 @@
 /*
  * A transcript: cues as rows of time and text, the current one marked. The rows and the
- * list are the panel's (`Panel.css`, "Rows"). The track menu sits `s` above the
- * cues.
+ * list are the panel's (`Panel/Rows.css`). The track menu sits `s` above the cues.
  */
 .clover-transcript {
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-s);
+  animation: var(--clover-arrive);
 }
 
 /*
  * The cues as one grid of two columns, the times' and the texts': the times' is as wide
  * as the widest time in the list ("0:22", or "1:02:03" where there is one), so every
  * cue's text starts on one line, `s` past it. Each row, and its button, shares the list's
- * columns (`subgrid`); the rows stay the list's `2xs` apart.
+ * columns (`subgrid`); the rows stay the list's `2xs` apart. Named by the Transcript,
+ * so it outweighs the rows' list (`Rows.css`) whichever of the two sheets comes in first.
  */
-.clover-transcript-cues {
+.clover-transcript .clover-transcript-cues {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   column-gap: var(--clover-space-s);
@@ -118,7 +119,7 @@
 
 /*
  * Held in view (`sticky`; Mat, 2026-10-26: as the Panel's Search is): the find field and
- * its steps, on the panel's own color with `xs` of it above and below (drawn back by as
+ * its steps, on Clover's background with `xs` of it above and below (drawn back by as
  * much, so nothing moves at rest), at the top of the box that scrolls the cues
  * (`--clover-transcript-top` to set it lower), or in an accordion under the stuck
  * headings, up to its own (`ui/Sections.css`). A cue scrolled to or followed lands clear
@@ -130,8 +131,8 @@
 
 .clover-sections[data-layout="accordion"] .clover-transcript {
   --clover-transcript-at: calc(
-    var(--clover-sections-inset-start, 0px) + var(--clover-sections-total) -
-      var(--clover-sections-after)
+    var(--clover-sections-inset-start, 0px) +
+      var(--clover-sections-total, 0px) - var(--clover-sections-after, 0px)
   );
 }
 

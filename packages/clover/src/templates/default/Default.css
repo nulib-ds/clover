@@ -216,6 +216,9 @@
  * containment keeps its content from making the row taller, and it scrolls within. At
  * its foot or its top, the next wheel or swipe scrolls the page (Mat, 2026-11-05: "once
  * it hits bottom. the window should begin to scroll"), so nothing contains its overscroll.
+ * No ground of its own beside the rest (Mat, 2026-11-20: "don't set a default bg to the
+ * panel"): the page's shows through, as it does around every part; only the Body has one.
+ * Over the rest, as a drawer, it keeps Clover's (below), as it covers what is under it.
  */
 .clover-template-panes {
   position: relative;
@@ -224,7 +227,6 @@
 .clover-template-panel {
   contain: size;
   overflow-y: auto;
-  background-color: var(--clover-color-secondary, #fff);
 }
 
 .clover-template-panel[hidden] {

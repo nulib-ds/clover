@@ -84,8 +84,8 @@ export class Canvas2DBackend implements Backend {
 
     const bleed = bleedInSourcePixels(command, r);
 
+    // At full opacity, as `begin` left it.
     ctx.setTransform(r * m.a, r * m.b, r * m.c, r * m.d, r * m.e, r * m.f);
-    ctx.globalAlpha = command.opacity;
     ctx.drawImage(
       command.source as CanvasImageSource,
       crop.x,

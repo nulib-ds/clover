@@ -99,5 +99,5 @@ export function useRovingFocus(
     onFocus: () => setFocused(index),
   });
 
-  return { focused: clamped, itemProps };
+  return { itemProps };
 }

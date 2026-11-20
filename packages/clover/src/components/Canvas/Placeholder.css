@@ -5,6 +5,9 @@
  * The frame is sized from the Body (a size container, inside the Canvas's inset as the
  * renderer's home view is) and the stills' combined aspect (`--ratio`), so a spread of
  * several stills is fitted as one picture, edge to edge.
+ *
+ * Loaded with the placeholder's code, which alone draws the still and its toggle; what
+ * the Canvas holds back meanwhile (`data-placeholder`) is the Canvas's (`Canvas.css`).
  */
 .clover-canvas-placeholder {
   position: absolute;
@@ -20,6 +23,7 @@
   justify-content: center;
   container-type: size;
   cursor: zoom-in;
+  animation: var(--clover-arrive);
 }
 
 /* Opened, and waiting for the first tiles: still in view, but the Canvas's to use. */
@@ -68,11 +72,6 @@
   width: 100%;
 }
 
-/* Nothing of the Canvas shows behind it, nor takes focus, until it is opened. */
-.clover-canvas[data-placeholder="true"] > .clover-canvas-viewport {
-  visibility: hidden;
-}
-
 /*
  * Its toggle is one of the row's controls (`PlaceholderToggle`, drawn by `Controls.tsx`),
  * as the `i` and annotations are (Mat, 2026-11-01: "placeholder should not be a special
@@ -92,6 +91,11 @@
   transform: translate(50%, -50%);
   box-shadow: 0 4px 16px #0003;
   transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* Either toggle arrives with the still, as the placeholder's code draws them all. */
+button.clover-canvas-placeholder-toggle {
+  animation: var(--clover-arrive);
 }
 
 /* Its icon in proportion, as a control's: 1rem of its 1rem and `s` around it. */
@@ -138,15 +142,6 @@
   > button.clover-canvas-placeholder-toggle:not(:focus-visible) {
   outline: var(--clover-accent-ring-hover);
   outline-offset: 1px;
-}
-
-/*
- * Over the placeholder the cluster holds only the information control, which stays to
- * hand beside the toggle rather than fading.
- */
-.clover-canvas[data-placeholder="true"] > .clover-canvas-controls > * {
-  --clover-controls-shown: 1;
-  --clover-controls-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

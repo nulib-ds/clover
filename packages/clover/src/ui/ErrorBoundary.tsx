@@ -19,7 +19,11 @@ export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  state: ErrorBoundaryState = { error: null };
+  // Assigned, as the renderer's fields are (`lib/renderer/tsconfig.json`), not a field.
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { error: null };
+  }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { error };

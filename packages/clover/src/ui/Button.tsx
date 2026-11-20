@@ -21,6 +21,8 @@ interface ButtonProps {
   unavailable?: boolean;
   /** The side what it opens is on (the panel's toggle): `data-side`, for its corner. */
   side?: "start" | "end";
+  /** As it is pointed at, focused or pressed, before it is used: to load what it opens. */
+  onPrepare?: () => void;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -35,6 +37,7 @@ const Button: React.FC<ButtonProps> = ({
   lang,
   unavailable,
   side,
+  onPrepare,
 }) => {
   // Extract button type from id (e.g., "rotateLeft-abc123" → "rotate-left")
   // This ensures data-button is language-independent for CSS selectors
@@ -51,6 +54,9 @@ const Button: React.FC<ButtonProps> = ({
       data-button={dataButton}
       data-side={side}
       onClick={onClick}
+      onPointerEnter={onPrepare}
+      onPointerDown={onPrepare}
+      onFocus={onPrepare}
       aria-disabled={unavailable || undefined}
       aria-expanded={expanded}
       aria-controls={controls}

@@ -31,14 +31,12 @@ export class WebGL2Backend implements Backend {
   readonly maxTextureSize: number;
 
   private gl: WebGL2RenderingContext;
-  private program: WebGLProgram | null = null;
-  private vao: WebGLVertexArrayObject | null = null;
+  private program: WebGLProgram;
+  private vao: WebGLVertexArrayObject | null;
   private uniforms: {
     matrix: WebGLUniformLocation | null;
     crop: WebGLUniformLocation | null;
-    opacity: WebGLUniformLocation | null;
-    texture: WebGLUniformLocation | null;
-  } = { matrix: null, crop: null, opacity: null, texture: null };
+  };
   private textures = new Map<string, TextureEntry>();
   private cssWidth = 1;
   private cssHeight = 1;
@@ -54,13 +52,10 @@ export class WebGL2Backend implements Backend {
   ): WebGL2Backend | null {
     let gl: WebGL2RenderingContext | null = null;
     try {
+      // The rest as WebGL's defaults are: alpha, premultiplied, no stencil, not preserved.
       gl = canvas.getContext("webgl2", {
-        alpha: true,
-        premultipliedAlpha: true,
         antialias: false,
         depth: false,
-        stencil: false,
-        preserveDrawingBuffer: false,
       }) as WebGL2RenderingContext | null;
     } catch {
       gl = null;
@@ -85,11 +80,10 @@ export class WebGL2Backend implements Backend {
     this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 4096;
     const program = linkProgram(gl, VERTEX_SHADER, FRAGMENT_SHADER);
     this.program = program;
+    // The sampler reads texture unit 0, as a linked program's samplers start out.
     this.uniforms = {
       matrix: gl.getUniformLocation(program, "u_matrix"),
       crop: gl.getUniformLocation(program, "u_crop"),
-      opacity: gl.getUniformLocation(program, "u_opacity"),
-      texture: gl.getUniformLocation(program, "u_texture"),
     };
 
     const vao = gl.createVertexArray();
@@ -107,15 +101,15 @@ export class WebGL2Backend implements Backend {
     gl.bindVertexArray(null);
     this.vao = vao;
 
-    // Premultiplied throughout, so edges of transparent PNGs don't fringe.
+    /*
+     * Premultiplied throughout, so edges of transparent PNGs don't fringe. The rest of the
+     * unpacking (unflipped, the browser's color conversion) and the clear color, the texture
+     * unit and each texture's magnifying filter (linear) are a new context's own, which
+     * nothing changes: this backend's context is its canvas's alone.
+     */
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    gl.pixelStorei(
-      gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,
-      gl.BROWSER_DEFAULT_WEBGL,
-    );
     canvas.addEventListener("webglcontextlost", this.handleLost);
   }
 
@@ -141,12 +135,9 @@ export class WebGL2Backend implements Backend {
     if (this.isLost) return;
     const gl = this.gl;
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(this.program);
     gl.bindVertexArray(this.vao);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.uniform1i(this.uniforms.texture, 0);
   }
 
   draw(command: DrawCommand): DrawResult {
@@ -185,7 +176,6 @@ export class WebGL2Backend implements Backend {
       crop.width / command.width,
       crop.height / command.height,
     );
-    gl.uniform1f(this.uniforms.opacity, command.opacity);
     gl.bindTexture(gl.TEXTURE_2D, entry.texture);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     return "drawn";
@@ -211,8 +201,8 @@ export class WebGL2Backend implements Backend {
     this.canvas.removeEventListener("webglcontextlost", this.handleLost);
     if (!this.isLost) {
       for (const key of [...this.textures.keys()]) this.release(key);
-      if (this.program) this.gl.deleteProgram(this.program);
-      if (this.vao) this.gl.deleteVertexArray(this.vao);
+      this.gl.deleteProgram(this.program);
+      this.gl.deleteVertexArray(this.vao);
     }
     this.textures.clear();
     /*
@@ -262,7 +252,6 @@ export class WebGL2Backend implements Backend {
       gl.TEXTURE_MIN_FILTER,
       gl.LINEAR_MIPMAP_LINEAR,
     );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
@@ -286,43 +275,33 @@ export class WebGL2Backend implements Backend {
   };
 }
 
+/*
+ * The one program, linked, or a throw, which `create` turns into no backend: a shader that
+ * does not compile fails the link, and a lost context's null objects throw in the next
+ * call. Nothing reads the logs, so none are kept.
+ */
 function linkProgram(
   gl: WebGL2RenderingContext,
   vertexSource: string,
   fragmentSource: string,
 ): WebGLProgram {
-  const vertex = compileShader(gl, gl.VERTEX_SHADER, vertexSource);
-  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-  const program = gl.createProgram();
-  if (!program) throw new Error("Could not create WebGL program");
-  gl.attachShader(program, vertex);
-  gl.attachShader(program, fragment);
+  const program = gl.createProgram()!;
+  const shaders = (
+    [
+      [gl.VERTEX_SHADER, vertexSource],
+      [gl.FRAGMENT_SHADER, fragmentSource],
+    ] as const
+  ).map(([type, source]) => {
+    const shader = gl.createShader(type)!;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    gl.attachShader(program, shader);
+    return shader;
+  });
   gl.linkProgram(program);
-  gl.deleteShader(vertex);
-  gl.deleteShader(fragment);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const log = gl.getProgramInfoLog(program);
-    gl.deleteProgram(program);
-    throw new Error(`Could not link WebGL program: ${log}`);
-  }
+  shaders.forEach((shader) => gl.deleteShader(shader));
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error();
   return program;
-}
-
-function compileShader(
-  gl: WebGL2RenderingContext,
-  type: number,
-  source: string,
-): WebGLShader {
-  const shader = gl.createShader(type);
-  if (!shader) throw new Error("Could not create WebGL shader");
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const log = gl.getShaderInfoLog(shader);
-    gl.deleteShader(shader);
-    throw new Error(`Could not compile WebGL shader: ${log}`);
-  }
-  return shader;
 }
 
 function isSecurityError(error: unknown): boolean {

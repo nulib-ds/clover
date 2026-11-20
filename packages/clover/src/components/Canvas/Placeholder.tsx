@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { CloseViewer, OpenViewer, Play } from "../Body/glyphs";
+import { CloseViewer, OpenViewer, Play } from "../Body/placeholderGlyphs";
 import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import type { CloverRequest } from "../../core/request";

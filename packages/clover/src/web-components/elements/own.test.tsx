@@ -12,7 +12,7 @@ import tocJson from "../../fixtures/iiif-cookbook/0024-book-4-toc.json";
 import commentJson from "../../fixtures/iiif-cookbook/0266-full-canvas-annotation.json";
 import { stubViewport } from "../../components/Canvas/testing/viewport";
 import { initCloverI18n } from "../../i18n";
-import { tableOfContents } from "../../core/ranges";
+import { tableOfContents } from "../../core/contents";
 
 type Listener = (detail?: unknown) => void;
 
