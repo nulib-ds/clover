@@ -13,9 +13,10 @@
  * The cues as one grid of two columns, the times' and the texts': the times' is as wide
  * as the widest time in the list ("0:22", or "1:02:03" where there is one), so every
  * cue's text starts on one line, `s` past it. Each row, and its button, shares the list's
- * columns (`subgrid`); the rows stay the list's `2xs` apart.
+ * columns (`subgrid`); the rows stay the list's `2xs` apart. Named by the Transcript,
+ * so it outweighs the rows' list (`Rows.css`) whichever of the two sheets comes in first.
  */
-.clover-transcript-cues {
+.clover-transcript .clover-transcript-cues {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   column-gap: var(--clover-space-s);
@@ -130,8 +131,8 @@
 
 .clover-sections[data-layout="accordion"] .clover-transcript {
   --clover-transcript-at: calc(
-    var(--clover-sections-inset-start, 0px) + var(--clover-sections-total) -
-      var(--clover-sections-after)
+    var(--clover-sections-inset-start, 0px) +
+      var(--clover-sections-total, 0px) - var(--clover-sections-after, 0px)
   );
 }
 

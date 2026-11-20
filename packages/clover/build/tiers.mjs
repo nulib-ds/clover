@@ -213,8 +213,9 @@ const BAR_RULE = `:where(${BARS.map((name) => `.${name}`).join(",")}){background
 
 /**
  * Base.css says it is in the page, for the sheets that load with their parts' code (a
- * recording's, a Scene's, a map's, a vertical slider's, `ui/adoptSheet.ts`): it holds
- * their structure already, and the page brings its own look, so none of them is adopted.
+ * recording's, a Scene's, a map's, a vertical slider's, the Panel's sections',
+ * `ui/adoptSheet.ts`): it holds their structure already, and the page brings its own
+ * look, so none of them is adopted.
  */
 export const MARK = "--clover-stylesheet";
 const MARK_RULE = `:root{${MARK}:base}`;
@@ -542,8 +543,8 @@ export function tiersOf(css, { scale, scripts } = {}) {
 /**
  * Every one of Clover's sheets in tiers, in the cascade's order: styles.css's list, the
  * sheets that load with their parts' code among them (a recording's, a Scene's, a map's,
- * a vertical slider's), then templates.css's, so base.css and spacing.css serve every
- * part and every template.
+ * a vertical slider's, the Panel's sections'), then templates.css's, so base.css and
+ * spacing.css serve every part and every template.
  * MapLibre's own stylesheet is MapLibre's, and comes with the map as before.
  */
 export async function tierSheets() {

@@ -108,10 +108,11 @@ button.clover-contents-button[aria-current="true"] {
 /*
  * The current entry is marked by its tint and its weight, with no accent edge at its
  * start, as the panel's other rows have (Mat, 2026-10-28: "don't add the left border full
- * accent"). Forced colors drop the tint, so there the edge stays (`Panel.css`).
+ * accent"). Forced colors drop the tint, so there the edge stays (`Rows.css`). Named by
+ * its list, so it outweighs the rows' edge whichever of the two sheets comes in first.
  */
 @media (forced-colors: none) {
-  button.clover-contents-button[aria-current="true"] {
+  .clover-contents-list button.clover-contents-button[aria-current="true"] {
     border-inline-start-color: transparent;
   }
 }

@@ -1,0 +1,10 @@
+/*
+ * An image an annotation gives (Cookbook 0377): sized as every picture over an
+ * annotation's words is (`ui/Tip.css`), no taller than Items' pictures, with the list's
+ * corners. Its bodies are drawn in the Annotations list and in a Canvas's information
+ * (`Body/CaptionDetails.tsx`), so this loads with `EntryBodies` itself, as every entry's
+ * parts do (`build/clover-sheets.mjs`, `SHARED`).
+ */
+.clover-annotations-image {
+  border-radius: var(--clover-radius, 3px);
+}

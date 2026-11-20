@@ -7,16 +7,17 @@
  * keeps server rendering free of a flash of unstyled content, works under a strict CSP,
  * and suits frameworks (Next's Pages Router) that only allow global CSS in one place.
  * Every part still lays out plainly without it. Only the part sheets of what loads as it
- * draws (a recording, a Scene, a map, a vertical slider) come with their code instead,
- * adopted by the document as it loads (`lazySheets`, `src/ui/adoptSheet.ts`), which a
- * strict CSP allows and no framework sees.
+ * draws (a recording, a Scene, a map, a vertical slider, the Panel's sections) come with
+ * their code instead, adopted by the document as it loads (`lazySheets`,
+ * `src/ui/adoptSheet.ts`), which a strict CSP allows and no framework sees.
  */
 import { build } from "esbuild";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { lazyParts, partSheets, rulesOf } from "./clover-sheets.mjs";
+import { BROWSERS } from "./browsers.mjs";
+import { lazyParts, partSheets, rulesOf, tidy } from "./clover-sheets.mjs";
 import { tierSheets } from "./tiers.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -36,9 +37,9 @@ async function bundle(source, output) {
     write: false,
     logLevel: "warning",
     // The cascade-layer baseline: a browser without `@layer` drops every rule inside one.
-    target: ["chrome99", "edge99", "firefox97", "safari15.4"],
+    target: BROWSERS,
   });
-  const css = outputFiles[0].text.trim();
+  const css = tidy(outputFiles[0].text.trim());
   if (/@(import|charset)\b/.test(css)) {
     throw new Error(
       `${output}: an @import or @charset cannot sit inside @layer`,
@@ -50,9 +51,9 @@ async function bundle(source, output) {
 
 /*
  * styles.css is the list's sheets but the part sheets that load with their parts' code
- * (`lazyParts`: a recording's, a Scene's, a map's, a vertical slider's), which the
- * package's build hands to the page as those parts load (`lazySheets`). The docs, from
- * source, take the list whole.
+ * (`lazyParts`: a recording's, a Scene's, a map's, a vertical slider's, the Panel's
+ * sections'), which the package's build hands to the page as those parts load
+ * (`lazySheets`). The docs, from source, take the list whole.
  */
 const groups = partSheets();
 const lazy = new Set(lazyParts(groups).flatMap((name) => groups[name]));

@@ -27,8 +27,8 @@
 
 .clover-sections[data-layout="accordion"] .clover-content-search {
   --clover-content-search-at: calc(
-    var(--clover-sections-inset-start, 0px) + var(--clover-sections-total) -
-      var(--clover-sections-after)
+    var(--clover-sections-inset-start, 0px) +
+      var(--clover-sections-total, 0px) - var(--clover-sections-after, 0px)
   );
 }
 

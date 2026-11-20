@@ -5,6 +5,9 @@
  * The frame is sized from the Body (a size container, inside the Canvas's inset as the
  * renderer's home view is) and the stills' combined aspect (`--ratio`), so a spread of
  * several stills is fitted as one picture, edge to edge.
+ *
+ * Loaded with the placeholder's code, which alone draws the still and its toggle; what
+ * the Canvas holds back meanwhile (`data-placeholder`) is the Canvas's (`Canvas.css`).
  */
 .clover-canvas-placeholder {
   position: absolute;
@@ -66,11 +69,6 @@
   > .clover-canvas-placeholder-frame
   > img {
   width: 100%;
-}
-
-/* Nothing of the Canvas shows behind it, nor takes focus, until it is opened. */
-.clover-canvas[data-placeholder="true"] > .clover-canvas-viewport {
-  visibility: hidden;
 }
 
 /*
@@ -138,15 +136,6 @@
   > button.clover-canvas-placeholder-toggle:not(:focus-visible) {
   outline: var(--clover-accent-ring-hover);
   outline-offset: 1px;
-}
-
-/*
- * Over the placeholder the cluster holds only the information control, which stays to
- * hand beside the toggle rather than fading.
- */
-.clover-canvas[data-placeholder="true"] > .clover-canvas-controls > * {
-  --clover-controls-shown: 1;
-  --clover-controls-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

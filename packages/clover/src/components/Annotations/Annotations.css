@@ -31,11 +31,6 @@
   margin: 0 0 var(--clover-space-s);
 }
 
-/* The menu's groups are its gap apart, as the list's sets are. */
-.clover-canvas-annotation-menu > fieldset + fieldset {
-  margin-top: 0;
-}
-
 .clover-annotations-set-header > .clover-hide {
   margin-inline-start: auto;
   margin-inline-end: calc(-1 * var(--clover-space-xs));
@@ -66,9 +61,10 @@
 
 /*
  * A set's languages, where its annotations come one per language (`LanguageChoice`),
- * drawn as the Transcript's codes are (`ui/Codes.css`), at the end of its header.
+ * drawn as the Transcript's codes are (`ui/Codes.css`), at the end of its header: named
+ * by the section, so it outweighs the codes' margin whichever sheet comes in first.
  */
-.clover-annotations-languages {
+.clover-annotations .clover-annotations-languages {
   margin-inline-start: auto;
 }
 
@@ -190,15 +186,6 @@ a.clover-annotations-link svg {
 :is(a, button).clover-annotations-link:focus-visible {
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 2px;
-  border-radius: var(--clover-radius, 3px);
-}
-
-/*
- * An image an annotation gives (Cookbook 0377): sized as every picture over an
- * annotation's words is (`ui/Tip.css`), no taller than Items' pictures, with the list's
- * corners.
- */
-.clover-annotations-image {
   border-radius: var(--clover-radius, 3px);
 }
 

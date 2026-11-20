@@ -4,6 +4,8 @@ import { createRequire } from "node:module";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { BROWSERS } from "./browsers.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const src = resolve(root, "src");
 
@@ -30,19 +32,16 @@ const OWNERS = {
   "styles/scale": ["web-components/host.tsx"],
   // Every element's too: the higher-contrast mode's values, which its parts' rules read.
   "styles/contrast": ["web-components/host.tsx"],
-  // The Body's box while its code loads, then the Canvas, a Timeline's or a Scene's.
+  // The Body's box while its code loads, then the Canvas, a Timeline's or a Scene's, and
+  // the overlay layer that the first hotspot or a picture's text makes (`overlaysOf`).
   "components/Canvas/Canvas": [
     "components/Canvas/CanvasView.tsx",
     "components/Body/Pending.tsx",
     "components/Scene/SceneView.tsx",
+    "lib/renderer/overlays/OverlayLayer.ts",
   ],
   // A Scene's own, with its view (`Body` loads the view, never the part's module).
   "components/Scene/Scene": ["components/Scene/SceneView.tsx"],
-  // The hotspots and their layer, which the first hotspot makes (`overlaysOf`).
-  "components/Canvas/Annotations": [
-    "components/Canvas/Annotations.tsx",
-    "lib/renderer/overlays/OverlayLayer.ts",
-  ],
   "components/Canvas/ControlMenu": [
     "components/Canvas/ControlMenu.tsx",
     "components/Canvas/ChoiceMenu.tsx",
@@ -72,19 +71,22 @@ const OWNERS = {
     "components/Canvas/FrameAnimation.tsx",
   ],
   // The scrolling edge's shadow, which the sections, Search, a Transcript, Items' slider
-  // and the pager cast.
+  // and the pager's count menu cast.
   "ui/Shade": [
     "ui/Sections.tsx",
     "components/Search/Search.tsx",
     "components/Transcript/Transcript.tsx",
     "components/Items/Items.tsx",
-    "components/Items/Pager.tsx",
+    "components/Items/CountMenu.tsx",
   ],
   "ui/ReadMore": ["ui/ReadMore.tsx", "web-components/elements/read-more.tsx"],
-  // A row of language codes: a Transcript's files, an annotation set's languages.
+  // A row of language codes: a Transcript's files, an annotation set's languages, and the
+  // choice of languages (About's, a Transcript's and an annotation set's) folded or not.
   "ui/Codes": [
     "components/Transcript/Transcript.tsx",
     "components/Annotations/Annotations.tsx",
+    "ui/LanguageChoice.tsx",
+    "ui/LanguageMenu.tsx",
   ],
   // Its links' rule reaches About's, a caption's and an annotation's text.
   "components/Primitives/Primitives": [
@@ -104,12 +106,18 @@ const OWNERS = {
   // The pager is Items' (`clover-items clover-pager`).
   "components/Items/Items": [
     "components/Items/Items.tsx",
-    "components/Items/Pager.tsx",
+    "components/Items/PagerLayout.tsx",
   ],
-  // The pager's, and `Position`'s, which counts views where no pager draws.
-  "components/Items/Pager": [
-    "components/Items/Pager.tsx",
+  // The count: `Position`'s, where no pager draws, and the pager's count menu's.
+  "components/Items/Position": [
     "components/Items/Position.tsx",
+    "components/Items/CountMenu.tsx",
+  ],
+  // The pager and its count menu, which load as a pager draws, never with `Previous` and
+  // `Next` alone (`Pager.tsx`, whose round controls are `ui/Button.css`'s).
+  "components/Items/Pager": [
+    "components/Items/PagerLayout.tsx",
+    "components/Items/CountMenu.tsx",
   ],
   // The Collection's list, which Items' targets and count menu draw too.
   "components/Collection/Collection": [
@@ -117,17 +125,12 @@ const OWNERS = {
     "components/Items/TargetItems.tsx",
     "components/Items/CountMenu.tsx",
   ],
-  // The panel's own, and the lists of its sections and About's, anywhere.
+  // The panel's own and About's, anywhere; the sections' rows are `Rows.css`.
   "components/Panel/Panel": [
     "components/Panel/Panel.tsx",
     "components/Panel/About.tsx",
     "components/Panel/PartOfManifest.tsx",
     "components/Collection/Collection.tsx",
-    "components/Annotations/Annotations.tsx",
-    "components/Canvas/AnnotationMenu.tsx",
-    "components/Contents/Contents.tsx",
-    "components/Transcript/Transcript.tsx",
-    "components/Search/Search.tsx",
     "components/Map/MapView.tsx",
   ],
   // The Split's elements are its boxes (`native`), drawn without `Split`.
@@ -139,12 +142,25 @@ const OWNERS = {
     "components/Annotations/Annotations.tsx",
     "components/Canvas/AnnotationMenu.tsx",
   ],
+  // An annotation's bodies, in the Annotations list and in a Canvas's information.
+  "components/Annotations/EntryBodies": [
+    "components/Annotations/EntryBodies.tsx",
+    "components/Body/CaptionDetails.tsx",
+  ],
   // An entry's picture, whichever draws it: an annotation's, a chapter's, or its own.
   "ui/EntryThumbnail": [
     "ui/EntryThumbnail.tsx",
     "ui/AnnotationEntry.tsx",
     "ui/AnnotationPicture.tsx",
     "ui/ChapterEntry.tsx",
+  ],
+  // The sections' rows, and the Canvas's annotations menu's, which lists them as they do.
+  "components/Panel/Rows": [
+    "components/Annotations/Annotations.tsx",
+    "components/Canvas/AnnotationMenu.tsx",
+    "components/Contents/Contents.tsx",
+    "components/Transcript/Transcript.tsx",
+    "components/Search/Search.tsx",
   ],
   // What draws `.clover-geomap`, MapLibre with it: not the map's shell.
   "components/Map/Map": ["components/Map/MapView.tsx"],
@@ -180,12 +196,13 @@ export const SHEETS = [
 /**
  * Where each sheet rides. The light parts' sheets each in their own code's chunk, so a
  * page of labels, or of a record's properties, loads only theirs. The sheets of media,
- * Scenes, maps, a vertical slider and the other templates in their lazy code's, so they
- * load as those draw. Every other sheet in one chunk, `styles`, which loads with the
- * first part to draw any of them, in a few runs, each the sheets between those apart:
- * thirty small sheets gzip to 19.1 kB apart and to 10.1 kB as one, so a sheet apart in
- * each owner's chunk cost a viewer's page 4 kB, and a `<style>` of each in one chunk
- * still 1 kB more.
+ * Scenes, maps, a vertical slider, the pager, the Panel's sections, a Canvas's hotspots
+ * and the other templates in their lazy code's, so they load as those draw
+ * (`LAZY_PARTS`). Every other sheet in one chunk,
+ * `styles`, which loads with the first part to draw any of them, in a few runs, each the
+ * sheets between those apart: thirty small sheets gzip to 19.1 kB apart and to 10.1 kB as
+ * one, so a sheet apart in each owner's chunk cost a viewer's page 4 kB, and a `<style>`
+ * of each in one chunk still 1 kB more.
  */
 const APART = new Set([
   "styles/scale",
@@ -199,16 +216,67 @@ const APART = new Set([
   "ui/ReadMore",
   "components/Status/Status",
 ]);
-const LAZY = new Set([
-  "maplibre",
-  "components/Canvas/media/MediaBody",
-  "components/Canvas/media/Transport",
-  "components/Canvas/media/Player",
-  "components/Map/Map",
-  "components/Scene/Scene",
-  "components/Items/vertical/ItemsVertical",
-  "components/Canvas/text/TextLayer",
+/**
+ * The part sheets (`PART_SHEETS`) that load with their code, as only code that loads as it
+ * draws draws what they style: a recording's and its chapters menu's, a Scene's, a
+ * picture's text and hotspots, a placeholder's still, a map's, a vertical slider's, the
+ * pager's and the Panel's sections', which no template's first view draws, and
+ * `CollectionSelect`'s, which no template draws. So each is in the page before its code's
+ * first paint and restyles nothing drawn before it (Mat, 2026-11-20: no layout shifts):
+ * nothing else draws what it styles, and a server's HTML, which holds no content (the Root
+ * loads it as the page hydrates), holds none of it but a Map's box
+ * (`build/styles.test.mjs`). What is drawn before that code comes keeps its rules up
+ * front: the Canvas held back behind a placeholder and the overlay layer the hotspots
+ * share with a picture's text (`Canvas.css`), and the count a header draws where no pager
+ * is (`Position.css`). The elements load each of their sheets with that code too
+ * (`grouped`), and MapLibre's with the map's.
+ */
+const LAZY_PARTS = new Set([
+  "items-vertical",
+  "pager",
+  "annotations",
+  "contents",
+  "download",
+  "search",
+  "transcript",
+  "media",
+  "scene",
+  "text",
+  "hotspots",
+  "placeholder",
+  "map",
+  "collection-select",
 ]);
+/**
+ * Sheets that parts of several part sheets draw with, all of which load as they draw:
+ * each a part sheet of its own, which loads with whichever of its owners' code comes
+ * first (Mat, 2026-11-20: "Shared sheets"), never in styles.css. The language codes of
+ * About, a Transcript and an annotation set, and the sections' rows. Not a sheet a first
+ * view draws, or a module that draws it from its first paint: `ui/Steps.css` (the Panel's
+ * tab row and the Canvas's tray step with its buttons), a menu's own rules and a cue's
+ * (a recording's transport writes them, and every Timeline would carry them from its
+ * first view), nor one a public part draws with what a page hands it, which a server may
+ * draw (`ui/Inset.css`). `build/styles.test.mjs` fails on a module that draws what one
+ * styles without bringing it.
+ */
+export const SHARED = {
+  codes: ["ui/Codes"],
+  rows: ["components/Panel/Rows"],
+};
+/** The keys of the lazy part sheets' sheets, and MapLibre's (`LAZY_PARTS`, `SHARED`). */
+let lazyKeys;
+function isLazy(key) {
+  if (!lazyKeys) {
+    const groups = partSheets();
+    lazyKeys = new Set([
+      "maplibre",
+      ...lazyParts(groups).flatMap((name) =>
+        groups[name].map((sheet) => sheet.key),
+      ),
+    ]);
+  }
+  return lazyKeys.has(key);
+}
 
 /**
  * Whether a sheet rides with the others, in the `styles` chunk. `whole`: a build for a
@@ -217,7 +285,7 @@ const LAZY = new Set([
  */
 const grouped = (sheet, { whole = false } = {}) =>
   (whole || !APART.has(sheet.key)) &&
-  !LAZY.has(sheet.key) &&
+  !isLazy(sheet.key) &&
   !(
     sheet.key.startsWith("templates/") &&
     sheet.key !== "templates/default/Default"
@@ -282,9 +350,30 @@ export async function rulesOf(...sheets) {
     write: false,
     logLevel: "warning",
     // As `build/styles.mjs`: the cascade-layer baseline.
-    target: ["chrome99", "edge99", "firefox97", "safari15.4"],
+    target: BROWSERS,
   });
-  return outputFiles[0].text.trim();
+  return tidy(outputFiles[0].text.trim());
+}
+
+/*
+ * What esbuild leaves as written in a custom property's value and a `var()`'s fallback,
+ * which it cannot parse: the space after the colon and inside the parentheses, and after
+ * the fallback's comma. None of it is significant once substituted (no `var()` in the
+ * sheets sits against an operator), and gzip cannot fold it, as it varies.
+ */
+export function tidy(css) {
+  // Its patterns never meet a string: one holding `var(` or `--` would be changed too.
+  for (const [string] of css.matchAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g))
+    if (/var\(|--/.test(string))
+      throw new Error(`tidy would change the string ${string}: read it apart`);
+  return css
+    .replace(/([{;]--[\w-]+):\s+/g, "$1:")
+    .replace(
+      /([{;]--[\w-]+:)([^;{}]*)/g,
+      (_, name, value) =>
+        name + value.replace(/\(\s+/g, "(").replace(/\s+\)/g, ")"),
+    )
+    .replace(/var\((--[\w-]+),\s+(?=[^\s)])/g, "var($1,");
 }
 
 /**
@@ -361,14 +450,13 @@ export function cloverSheets(options = {}) {
 
 /**
  * The part sheets that load with their part's code, and are left out of styles.css
- * (`build/styles.mjs`): those whose every sheet the elements load lazily too (`LAZY`), a
- * recording's, a Scene's, a map's and a vertical slider's, which only code loaded as
- * they draw draws.
+ * (`build/styles.mjs`): `LAZY_PARTS`, a recording's, a Scene's, a map's, a vertical
+ * slider's, the pager's, the Panel's sections', a Canvas's hotspots and the others only
+ * code loaded as it draws draws, and the sheets several of them share (`SHARED`).
  */
 export function lazyParts(groups = partSheets()) {
   return Object.keys(groups).filter(
-    (name) =>
-      groups[name].length && groups[name].every(({ key }) => LAZY.has(key)),
+    (name) => groups[name].length && (LAZY_PARTS.has(name) || name in SHARED),
   );
 }
 
@@ -464,27 +552,42 @@ export const PART_SHEETS = {
     "components/Primitives",
     "components/Viewer",
   ],
-  items: ["components/Items"],
+  // The Collection's list is Items' (`MemberItems`), which Items' count menu draws too.
+  items: ["components/Items", "components/Collection"],
+  // Items' `pager` layout and its count menu, which Items loads as it draws one.
+  pager: ["components/Items/PagerLayout", "components/Items/CountMenu"],
   // A vertical slider's own, apart, as few Manifests run down the page (Mat, 2026-11-06).
   "items-vertical": ["components/Items/vertical"],
-  panel: [
-    "components/Panel",
-    "components/Annotations",
-    "components/Collection",
-    "components/Contents",
-    "components/Download",
-    "components/Search",
-    "components/Transcript",
-  ],
-  // Recordings' Body and transport, and an animation's, which plays with the same bar.
+  panel: ["components/Panel"],
+  /*
+   * The Panel's sections, each its own, which the Panel loads as it shows them, in the
+   * Panel or alone: Annotations' with the Canvas's annotations menu, which lists them as
+   * it does, loaded as it opens; Search's with its field, which a Transcript's find draws
+   * too.
+   */
+  annotations: ["components/Annotations", "components/Canvas/AnnotationMenu"],
+  contents: ["components/Contents"],
+  download: ["components/Download"],
+  search: ["components/Search", "ui/FieldPill"],
+  transcript: ["components/Transcript"],
+  /*
+   * Recordings' Body and transport, and an animation's, which plays with the same bar; and
+   * a recording's chapters menu, which brings the transport's code with it, over the
+   * recording's still too.
+   */
   media: [
     "components/Canvas/media",
     "components/Canvas/FrameAnimation",
+    "components/Canvas/ChaptersMenu",
     "components/Timeline",
   ],
   scene: ["components/Scene"],
   // The text a Canvas reads from its picture, to select and copy (`TextLayer.tsx`).
   text: ["components/Canvas/text"],
+  // A Canvas's annotations on its picture, which it loads where it has any.
+  hotspots: ["components/Canvas/Annotations"],
+  // A Canvas's placeholder still and its toggle, which it loads where it has one.
+  placeholder: ["components/Canvas/Placeholder"],
   map: ["components/Map"],
   split: ["components/Split"],
   "collection-select": ["components/CollectionSelect"],
@@ -530,14 +633,33 @@ function importersOf() {
 
 /**
  * The part sheets a page of a part needs besides core's and its own, for the parts it
- * draws inside it, where it draws them: a Canvas's recordings, animations and map of a
- * place, and a Body's Scene; the Panel's Collection and Views sections' items, and its Map
- * section; and a Map's list of places, drawn by Items. Styling's table says the same. `build/styles.test.mjs` fails on a part that
- * draws what another part's sheet styles unnamed here, and on a name here it never needs.
+ * draws inside it, where it draws them: a Canvas's recordings and their chapters,
+ * animations, hotspots, placeholder, map of a place and annotations menu, and a Body's
+ * Scene; the Panel's sections, its Views section's items and its Map section; a
+ * Transcript's find field, Search's; and a Map's list of places, drawn by Items. Styling's
+ * table says the same. `build/styles.test.mjs` fails on a part that draws what another
+ * part's sheet styles unnamed here, and on a name here it never needs.
  */
 export const DRAWN_INSIDE = {
-  core: ["media", "scene", "map", "text"],
-  panel: ["items", "map"],
+  core: [
+    "media",
+    "scene",
+    "map",
+    "text",
+    "hotspots",
+    "placeholder",
+    "annotations",
+  ],
+  panel: [
+    "items",
+    "map",
+    "annotations",
+    "contents",
+    "download",
+    "search",
+    "transcript",
+  ],
+  transcript: ["search"],
   // Its list of places and images, drawn by Items (`MapItems`).
   map: ["items"],
 };
@@ -545,11 +667,13 @@ export const DRAWN_INSIDE = {
 /**
  * A part sheet for a way another part draws that is seldom wanted, which that part's code
  * loads apart, after its sheet, before it draws that way: a vertical slider's, which
- * Items loads (`ItemsView`). It reads what that sheet sets, styles only what that part
- * draws, and wins where the two tie, as it did in styles.css's order, where it came
- * after. A part drawing that part inside it never needs it: it comes with that part.
+ * Items loads (`ItemsView`), and the pager's, which Items loads as it draws one
+ * (`PagerLayout`). It reads what that sheet sets, styles only what that part draws, and
+ * wins where the two tie, as it did in styles.css's order, where it came after. A part
+ * drawing that part inside it never needs it: it comes with that part. A sheet that both
+ * draw with is that part's (`partSheets`).
  */
-export const EXTENDING = { "items-vertical": "items" };
+export const EXTENDING = { "items-vertical": "items", pager: "items" };
 
 /**
  * The parts that draw what a module draws: its own part (`PART_SHEETS`), or, for a module
@@ -589,19 +713,42 @@ export function partsDrawing({ inside = false } = {}) {
 
 /**
  * Each of `PART_SHEETS`' sheets with the sheets in it, in the cascade's order: together,
- * styles.css's. The other templates' stay in templates.css alone, for the Viewer.
+ * styles.css's. The other templates' stay in templates.css alone, for the Viewer. A sheet
+ * that a part extending another (`EXTENDING`) draws with besides is that part's, which is
+ * always in first, and a shared sheet its own (`SHARED`).
  */
 export function partSheets() {
   const drawing = partsDrawing();
+  const shared = new Map(
+    Object.entries(SHARED).flatMap(([name, keys]) =>
+      keys.map((key) => [key, name]),
+    ),
+  );
+  for (const key of shared.keys())
+    if (!SHEETS.some((sheet) => sheet.key === key && sheet.inStyles))
+      throw new Error(
+        `part sheets: SHARED names ${key}.css, which styles.css's list does not import`,
+      );
   const groups = Object.fromEntries(
-    Object.keys(PART_SHEETS).map((name) => [name, []]),
+    [...Object.keys(PART_SHEETS), ...Object.keys(SHARED)].map((name) => [
+      name,
+      [],
+    ]),
   );
   for (const sheet of SHEETS.filter(({ inStyles }) => inStyles)) {
-    const users = new Set(
+    if (shared.has(sheet.key)) {
+      groups[shared.get(sheet.key)].push(sheet);
+      continue;
+    }
+    const drawn = new Set(
       ownersOf(sheet)
         .filter((file) => !file.startsWith(resolve(src, "web-components")))
         .flatMap((file) => [...drawing(file)]),
     );
+    const users =
+      drawn.size > 1
+        ? new Set([...drawn].map((part) => EXTENDING[part] ?? part))
+        : drawn;
     groups[users.size === 1 ? [...users][0] : "core"].push(sheet);
   }
   return groups;

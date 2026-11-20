@@ -107,14 +107,6 @@ export interface TimedAnnotation {
 /** What the Canvas's annotations menu lists: those on its picture, and on its time. */
 export type ListedAnnotation = PlacedAnnotation | TimedAnnotation;
 
-export const isTimed = (
-  annotation: ListedAnnotation,
-): annotation is TimedAnnotation => "start" in annotation;
-
-/** Where an annotation on a recording's time starts: its own start, or its track's. */
-export const startOf = (annotation: ListedAnnotation): number | undefined =>
-  isTimed(annotation) ? annotation.start : annotation.track?.[0]?.start;
-
 /**
  * Whether a tracked annotation is on the recording at `time`; true for any other, whose
  * hotspot does not come and go.
