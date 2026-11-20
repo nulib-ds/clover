@@ -54,3 +54,26 @@ export function transformRect(m: Affine, rect: Rect): Rect {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
+
+/**
+ * The largest rectangle of `size`'s aspect centered inside `box`; `box` until it is known.
+ * A box of no area (a Canvas that gives a `duration` and no `width` or `height`, Cookbook
+ * 0015) has nothing to fit inside: the picture or video at its own size, where the box starts.
+ */
+export function containAspect(
+  box: Rect,
+  size: { width: number; height: number } | null,
+): Rect {
+  if (!size) return box;
+  if (!box.width || !box.height)
+    return { x: box.x, y: box.y, width: size.width, height: size.height };
+  const scale = Math.min(box.width / size.width, box.height / size.height);
+  const width = size.width * scale;
+  const height = size.height * scale;
+  return {
+    x: box.x + (box.width - width) / 2,
+    y: box.y + (box.height - height) / 2,
+    width,
+    height,
+  };
+}

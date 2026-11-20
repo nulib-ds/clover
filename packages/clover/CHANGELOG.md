@@ -11,6 +11,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **Images keep their shape inside their Canvas.** Clover stretched an image to fill the
+  region it paints, so a Manifest that declares a size its file does not have (a
+  1024 × 1024 Canvas for a 1024 × 690 photograph) showed it squashed or stretched. Now the
+  image is fitted inside that region at its own shape and centered, as a video already
+  was. Annotations stay where the Canvas puts them. Nothing to change.
+
 ## [4.11.5] - 2026-11-19
 
 ### Changed
