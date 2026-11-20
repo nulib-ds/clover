@@ -126,7 +126,7 @@ export function LanguageChoice({
   onChange: (tag: string) => void;
   /** The key of Clover's string the row is named by. */
   nameKey: string;
-  /** The part's class the row's are named for (`clover-annotations`). */
+  /** The root class of the part the row is in, which names the row's: `${part}-languages`. */
   part: string;
   /**
    * The label the row sits beside and the box it is drawn in, found from the row: it

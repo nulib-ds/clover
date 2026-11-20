@@ -5,6 +5,14 @@
  */
 
 /*
+ * Its view and its controls arrive as its code does. Not the figure, which takes the
+ * place of the Body's waiting box (`Body/Pending.tsx`) on the same ground.
+ */
+.clover-scene > :is(.clover-canvas-viewport, .clover-scene-navigation) {
+  animation: var(--clover-arrive);
+}
+
+/*
  * The Scene's controls, in the Body's lower right, inset as the cluster is in its top
  * right (Mat, 2026-10-23): zoom and full screen in a row (`.clover-scene-tools`), and the
  * rotate pad (`RotatePad.tsx`), the row ending in the pad's empty corner, `s` left of its

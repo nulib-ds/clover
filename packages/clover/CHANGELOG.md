@@ -22,11 +22,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   components, which a page loads as they are built, no longer run in Chrome 80–84 (2020),
   where they drew without their styles. Sizes are measured as an app for these browsers
   builds (`build/browsers.mjs`).
-- **A lighter first view.** The Viewer in its Default template loads 95.7 kB gzip to
-  its first view of an image, 11.0 kB less than it did (106.7 kB); Document 102.9 kB
+- **A lighter first view.** The Viewer in its Default template loads 95.8 kB gzip to
+  its first view of an image, 10.9 kB less than it did (106.7 kB); Document 102.9 kB
   (114.0), a Canvas alone 51.3 kB (55.0), a Timeline alone 54.8 kB (57.6), and a page of
-  `<clover-viewer>` 129.2 kB (140.2), with the browsers above. Nothing is drawn
-  differently, and nothing later but the Canvas's annotations menu (below):
+  `<clover-viewer>` 129.2 kB (140.2), with the browsers above. Nothing is drawn later
+  but the Canvas's annotations menu, and nothing differently but how what loads with its
+  code comes in (both below):
   - The Panel's sections bring their own styles, as a recording's and a map's do:
     Annotations (and the annotations menu in a Canvas), Contents, Download, Search (and
     a Transcript's find field) and Transcript each load theirs with their code, as the
@@ -50,6 +51,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     first pointed at, focused or pressed, not as soon as the Canvas has annotations: 5.9
     kB less to the first view of a resource with annotations. A press before its code
     has come opens the menu as it comes, a moment later on a slow connection.
+  - What loads with its code comes in softly: a Panel section, a recording's player, a
+    Scene's view, a map, Items' pager, `CollectionSelect`, a Canvas's hotspots and its
+    placeholder's still fade up from nothing as they first show (`--clover-arrive`,
+    320ms, opacity alone), into room that was there already, so nothing moves. A menu a
+    press opens, and what a first view shows, still show at once. Set `--clover-arrive`
+    to an `animation` of your own, or to `none`; where the system asks for reduced
+    motion it is `none`.
   - An image an annotation gives keeps its rounded corners in a Canvas's information too,
     where it drew without them unless the Panel's Annotations or the annotations menu had
     loaded (`.clover-annotations-image`, now in `styles/core.css`).

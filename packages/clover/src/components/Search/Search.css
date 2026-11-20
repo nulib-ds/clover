@@ -1,8 +1,7 @@
 /*
  * Content Search: a field, its status, and the hits grouped by Canvas. The field and its
  * submit are one pill, as the docs' homepage select is (`ui/FieldPill.css`; Mat,
- * 2026-10-26), the steps through the hits `ui/Steps.css`, the hits rows (`Panel.css`,
- * "Rows").
+ * 2026-10-26), the steps through the hits `ui/Steps.css`, the hits rows (`Panel/Rows.css`).
  *
  * On the scale: field, status and results `s` apart; a Canvas's heading `xs` over its
  * hits.
@@ -11,6 +10,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-s);
+  animation: var(--clover-arrive);
 }
 
 /*

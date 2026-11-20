@@ -13,6 +13,7 @@
   /* The Canvas's controls' gap, so a pager over a Body lines up with them. */
   gap: var(--clover-space-s);
   padding-block: var(--clover-space-s);
+  animation: var(--clover-arrive);
 }
 
 /* Nowhere to go (the first item, or the last): shown disabled, in `ui/Button.css`. */

@@ -23,6 +23,7 @@
   justify-content: center;
   container-type: size;
   cursor: zoom-in;
+  animation: var(--clover-arrive);
 }
 
 /* Opened, and waiting for the first tiles: still in view, but the Canvas's to use. */
@@ -90,6 +91,11 @@
   transform: translate(50%, -50%);
   box-shadow: 0 4px 16px #0003;
   transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* Either toggle arrives with the still, as the placeholder's code draws them all. */
+button.clover-canvas-placeholder-toggle {
+  animation: var(--clover-arrive);
 }
 
 /* Its icon in proportion, as a control's: 1rem of its 1rem and `s` around it. */

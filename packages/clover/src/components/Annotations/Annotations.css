@@ -1,7 +1,7 @@
 /*
  * Annotations: sets of entries, each entry its content and a button to find it. The rows
- * and their list are the panel's (`Panel.css`, "Rows"). The Canvas's
- * annotations menu (`AnnotationMenu.tsx`) takes the same classes, so these rules: its
+ * and their list are the panel's (`Panel/Rows.css`). The Canvas's annotations menu
+ * (`AnnotationMenu.tsx`) takes the same classes, so these rules: its
  * pages are fieldsets, a page's header its legend, and an entry a radio's label, the
  * radio out of sight, the picked one marked as the list marks it.
  *
@@ -12,6 +12,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-l);
+}
+
+/* The list arrives as its code does; the menu, opened by a press, shows at once. */
+.clover-annotations {
+  animation: var(--clover-arrive);
 }
 
 /*

@@ -21,6 +21,7 @@
   border: 0;
   font-size: var(--clover-text-xs);
   line-height: 1;
+  animation: var(--clover-arrive);
 }
 
 .clover-transcript-languages > .clover-transcript-language,

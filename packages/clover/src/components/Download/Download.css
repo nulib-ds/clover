@@ -8,6 +8,11 @@
   gap: var(--clover-space-s);
 }
 
+/* The part arrives as its code does; About's downloads, opened by a press, show at once. */
+.clover-download {
+  animation: var(--clover-arrive);
+}
+
 .clover-download-title {
   display: block;
   margin: 0 0 var(--clover-space-2xs);

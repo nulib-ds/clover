@@ -13,6 +13,7 @@
    * the Body's size whatever it holds, so containing its height changes nothing.
    */
   container-type: size;
+  animation: var(--clover-arrive);
 }
 
 /*

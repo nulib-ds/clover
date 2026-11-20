@@ -156,6 +156,17 @@ every rule below.
   longhand (`margin` and `margin-inline-start`), not only by one name. A module that
   imports a helper from one that adopts a sheet brings that sheet: keep the helper
   beside its only reader (`startOf` in `AnnotationMenu.tsx`, apart from the hotspots).
+  What such a sheet styles comes in softly as its code comes (Mat, 2026-11-20: "very
+  subtle … to evoke content loading … almost the absence of something but with the
+  expectation there will be something"): its roots take `animation: var(--clover-arrive)`
+  (`styles/scale.css`: 320ms, opacity alone from nothing, the token and its keyframes in
+  core, `none` where the system asks for reduced motion), never the room they are drawn
+  in, which was there already and keeps still: a Scene's view and controls, never its
+  figure, which takes the place of the Body's waiting box (`Body/Pending.tsx`). What a
+  press opens shows at once (a menu, About's downloads), and so does what a first view
+  draws. `build/styles.test.mjs` fails on a sheet loaded with its code that has no root
+  taking it, but those with nothing of their own to show (`ARRIVES_INSIDE`: the vertical
+  slider, a picture's text, the rows).
   A way of drawing a part that is seldom wanted
   can load apart so: the vertical slider's rules ride with
   `Items/vertical/ItemsVertical.ts`, a module of nothing else, which `ItemsView` loads

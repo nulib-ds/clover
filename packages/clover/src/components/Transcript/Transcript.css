@@ -1,12 +1,12 @@
 /*
  * A transcript: cues as rows of time and text, the current one marked. The rows and the
- * list are the panel's (`Panel.css`, "Rows"). The track menu sits `s` above the
- * cues.
+ * list are the panel's (`Panel/Rows.css`). The track menu sits `s` above the cues.
  */
 .clover-transcript {
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-s);
+  animation: var(--clover-arrive);
 }
 
 /*

@@ -1,12 +1,16 @@
 /*
  * The table of contents: nested lists of Ranges, the current one marked. The rows and
- * their lists are the panel's (`Panel.css`, "Rows"); a nested list steps in by
- * `m`, behind a hairline, `s` from the edge of the list it is in.
+ * their lists are the panel's (`Panel/Rows.css`); a nested list steps in by `m`, behind
+ * a hairline, `s` from the edge of the list it is in.
  */
 .clover-contents-list .clover-contents-list {
   margin-inline-start: var(--clover-space-s);
   padding-inline-start: var(--clover-space-m);
   border-inline-start: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+.clover-contents {
+  animation: var(--clover-arrive);
 }
 
 button.clover-contents-button {
@@ -15,7 +19,7 @@ button.clover-contents-button {
 
 /*
  * An entry and the entries under it, as far apart as the entries of a list are
- * (`Panel.css`, "Rows"), so every entry is the same gap from the next, nested or not.
+ * (`Panel/Rows.css`), so every entry is the same gap from the next, nested or not.
  */
 .clover-contents-item {
   display: flex;

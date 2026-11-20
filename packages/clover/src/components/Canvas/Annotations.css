@@ -29,6 +29,7 @@
   mask-position: center;
   mask-size: 120% 120%;
   mask-clip: no-clip;
+  animation: var(--clover-arrive);
 }
 
 /*

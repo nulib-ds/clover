@@ -351,6 +351,52 @@ test("every part sheet's animations have their keyframes there or in core", () =
   assert.deepEqual([...new Set(missing)], []);
 });
 
+/*
+ * What a sheet loaded with its code styles arrives as softly as the code does (Mat,
+ * 2026-11-20: "make it universal … very subtle … to evoke content loading"): each such
+ * sheet fades up its roots with `--clover-arrive` (`styles/scale.css`), whose token and
+ * keyframes are core's, so they are in the page before any part sheet comes. Spared are
+ * those with nothing of their own to show: a vertical slider lays out Items' own list, a
+ * picture's text is there to select, never to see, and the rows are drawn inside a
+ * section that arrives itself. What a first view draws, core's, shows at once.
+ */
+const ARRIVES_INSIDE = ["items-vertical", "rows", "text"];
+test("what a sheet loaded with its code styles fades up as it arrives", () => {
+  const core = read("styles/core.css");
+  const arrives = ({ declarations }) =>
+    declarations.some(
+      ([property, value]) =>
+        property === "animation" && value.includes("var(--clover-arrive)"),
+    );
+  assert.ok(
+    rulesIn(core).some(({ declarations }) =>
+      declarations.some(([property]) => property === "--clover-arrive"),
+    ),
+    "core.css sets --clover-arrive",
+  );
+  assert.ok(
+    keyframesIn(core).some(([name]) => name === "clover-arrive"),
+    "core.css has the clover-arrive keyframes",
+  );
+  assert.deepEqual(
+    rulesIn(core)
+      .filter(arrives)
+      .map(({ selector }) => selector),
+    [],
+    "nothing a first view draws fades in",
+  );
+  for (const part of ARRIVES_INSIDE)
+    assert.ok(LAZY.includes(part), `${part} still loads with its code`);
+  assert.deepEqual(
+    LAZY.filter(
+      (part) =>
+        !ARRIVES_INSIDE.includes(part) &&
+        !rulesIn(read(`styles/${part}.css`)).some(arrives),
+    ).map((part) => `${part}.css: animation: var(--clover-arrive) on its roots`),
+    [],
+  );
+});
+
 test("every part sheet's container queries name a container there or in core", () => {
   const names = (css) =>
     new Set(
