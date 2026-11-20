@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.12.0] - 2026-11-20
+
 ### Changed
 
 - **Built for the browsers Clover's styles already need.** Clover's script is built for
