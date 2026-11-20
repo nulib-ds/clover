@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.12.1] - 2026-11-20
+
 ### Fixed
 
 - **A Scene's `RotateTransform` turns as an intrinsic Euler rotation in XYZ order.**
