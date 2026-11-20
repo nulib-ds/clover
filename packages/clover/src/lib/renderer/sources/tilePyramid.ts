@@ -46,6 +46,21 @@ export interface TilePyramid {
   /** Coarsest first. */
   levels: PyramidLevel[];
   tile(address: TileAddress): TileRequest;
+  /** The image service whose tiles these are (its `info.json` id). */
+  service?: string;
+  /**
+   * Where Clover joins the service's tiles or cuts its own: the pyramid of the service's
+   * own grid, for a server that refuses any other size (`sources/refusals.ts`) or answers
+   * its own tiles far faster (`sources/hostTiles.ts`).
+   */
+  listed?: () => TilePyramid;
+  /** On the service's own grid, where Clover could join its tiles: the joined pyramid. */
+  joined?: () => TilePyramid;
+  /**
+   * How many of the service's tiles a side Clover joins into one, 1 where it asks for
+   * them as listed or cannot cut: the same on both forms of a pyramid.
+   */
+  join: number;
 }
 
 /**
@@ -64,6 +79,7 @@ export const DERIVED_TILE_SIZE = 512;
  * CPU, no longer a frame than 256 px tiles, the upload budget taking one a frame).
  */
 export const TILE_FLOOR = 1024;
+
 /** The largest full-size image a level 0 service is asked for in one piece. */
 const MAX_SINGLE_IMAGE_PIXELS = 16_000_000;
 
@@ -86,6 +102,7 @@ export function staticPyramid(
     width,
     height,
     levels: [level],
+    join: 1,
     tile: (address) => ({
       ...address,
       url,
@@ -132,19 +149,25 @@ export function servicePyramid(
     whole: true,
   });
 
+  // Whether Clover asks for tiles of its own making (joined, or cut where none are
+  // listed) rather than the service's own grid, and how far it would join them.
+  let derived = false;
+  let join = 1;
   const spec = info.tiles[0];
   if (spec) {
     const { width: tw, height: th } = arbitrary
       ? joinedTile(info, spec, tileFloor)
       : spec;
+    derived = tw !== spec.width || th !== spec.height;
+    if (arbitrary) join = joinedTile(info, spec, TILE_FLOOR).width / spec.width;
     for (const s of spec.scaleFactors) {
       levels.push(tileLevel(s, tw, th));
     }
   } else if (arbitrary) {
     // Level 1 and 2 omit `tiles` and still serve any region: cut our own.
-    let edge = Math.max(DERIVED_TILE_SIZE, tileFloor);
-    while (edge > DERIVED_TILE_SIZE && !withinLimits(info, edge, edge))
-      edge /= 2;
+    const edge = cutEdge(info, tileFloor);
+    derived = edge > DERIVED_TILE_SIZE;
+    join = cutEdge(info, TILE_FLOOR) / DERIVED_TILE_SIZE;
     for (let s = 1; ; s *= 2) {
       const level = tileLevel(s, edge, edge);
       levels.push(level);
@@ -188,18 +211,41 @@ export function servicePyramid(
     width: W,
     height: H,
     levels: ordered,
+    service: info.id,
+    join,
+    listed: derived ? () => servicePyramid(info, 0) : undefined,
+    joined:
+      !derived && join > 1 ? () => servicePyramid(info, TILE_FLOOR) : undefined,
     tile(address) {
       const level = ordered[address.level];
       const s = level.scaleFactor;
       const isWhole = level.cols === 1 && level.rows === 1;
+      // "The size of the tile is the region size divided by the scale factor, rounded up":
+      // so for the service's own tiles, which every viewer asks for alike. A tile only
+      // Clover asks for, joined or cut, is rounded down, as a size even a fraction of a
+      // pixel past its scale factor's has a server that reads an image at its levels read
+      // the next sharper one, four times the pixels (Yale's, fresh: 549 px of a 2195 px
+      // region at scale factor 4 in 2.8 s, 548 in 0.5 s). A whole image the service's own
+      // grid asks for at this scale too keeps its size.
+      const own =
+        derived &&
+        !level.whole &&
+        !(
+          isWhole &&
+          spec &&
+          Math.ceil(W / s) <= spec.width &&
+          Math.ceil(H / s) <= spec.height
+        );
+      const size = (n: number) =>
+        own ? Math.max(1, Math.floor(n)) : Math.ceil(n);
 
       let region: RegionRect;
       let w: number;
       let h: number;
       if (isWhole) {
         region = { x: 0, y: 0, width: W, height: H };
-        w = level.width;
-        h = level.height;
+        w = own ? size(W / s) : level.width;
+        h = own ? size(H / s) : level.height;
       } else {
         const x = Math.round(address.col * level.tileWidth * s);
         const y = Math.round(address.row * level.tileHeight * s);
@@ -209,9 +255,8 @@ export function servicePyramid(
           width: Math.min(Math.round(level.tileWidth * s), W - x),
           height: Math.min(Math.round(level.tileHeight * s), H - y),
         };
-        // "The size of the tile is the region size divided by the scale factor, rounded up."
-        w = Math.ceil(region.width / s);
-        h = Math.ceil(region.height / s);
+        w = size(region.width / s);
+        h = size(region.height / s);
       }
 
       return {
@@ -239,6 +284,13 @@ function joinedTile(
   let k = Math.max(1, Math.floor(floor / Math.max(spec.width, spec.height)));
   while (k > 1 && !withinLimits(info, spec.width * k, spec.height * k)) k--;
   return { width: spec.width * k, height: spec.height * k };
+}
+
+/** The edge of the tiles Clover cuts for a service that lists none, at least `floor`. */
+function cutEdge(info: ImageServiceInfo, floor: number): number {
+  let edge = Math.max(DERIVED_TILE_SIZE, floor);
+  while (edge > DERIVED_TILE_SIZE && !withinLimits(info, edge, edge)) edge /= 2;
+  return edge;
 }
 
 function withinLimits(info: ImageServiceInfo, w: number, h: number): boolean {

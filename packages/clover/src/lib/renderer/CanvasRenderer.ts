@@ -52,6 +52,14 @@ import {
   resolveItem,
   sameSpec,
 } from "./scene/sceneItem";
+import { hostIdle, prefersGrid, timeLoad } from "./sources/hostTiles";
+import {
+  isSizeRefusal,
+  noteRefusal,
+  refusesDerivedTiles,
+  sameHost,
+} from "./sources/refusals";
+import type { TilePyramid } from "./sources/tilePyramid";
 
 export type { SceneImage } from "./scene/sceneItem";
 
@@ -322,8 +330,10 @@ export class CanvasRenderer implements GestureTarget {
       load: (url, signal) => this.loadTile(url, signal),
       onSettled: () => {
         this.contentVersion++;
+        this.applyHostChoices();
         this.invalidate();
       },
+      onFailed: (url, status) => this.refused(url, status),
       onEvict: (url) => this.backend?.release(url),
       byteBudget: this.options.byteBudget,
       maxInFlight: this.options.maxInFlight,
@@ -556,6 +566,59 @@ export class CanvasRenderer implements GestureTarget {
       (want) => want.priority < TARGET_BAND - LANDING_AHEAD,
     );
     await this.cache.prefetch(wants);
+  }
+
+  /**
+   * A tile was refused. Where it is one Clover joined or cut itself and the server says it
+   * will not make that size, every image of that host is asked for its own grid from the
+   * next frame, as the tiles still on their way would be refused too, and the host is
+   * remembered for the visit (`sources/refusals.ts`).
+   */
+  private refused(url: string, status?: number): void {
+    if (!isSizeRefusal(status)) return;
+    let swapped = false;
+    for (const item of this.items) {
+      const { listed, service } = item.pyramid;
+      if (!listed || !sameHost(service, url)) continue;
+      this.swapPyramid(item, listed());
+      swapped = true;
+    }
+    if (swapped) noteRefusal(url);
+  }
+
+  /**
+   * Each image's tiles in the form its host answers fastest (`sources/hostTiles.ts`): an
+   * image of a host found to answer its own grid far faster than joined tiles changes to
+   * the grid, and back should the grid prove no quicker, once nothing is on its way from
+   * that host, so nothing it asked for is dropped. A host that refused joined tiles keeps
+   * its grid.
+   */
+  private applyHostChoices(): void {
+    if (this.disposed) return;
+    let changed = false;
+    for (const item of this.items) {
+      const { service, listed, joined, join } = item.pyramid;
+      if (!service || (!listed && !joined) || !hostIdle(service)) continue;
+      const grid = refusesDerivedTiles(service) || prefersGrid(service, join);
+      const next = grid === true ? listed : grid === false ? joined : undefined;
+      if (!next) continue;
+      this.swapPyramid(item, next());
+      changed = true;
+    }
+    if (changed) {
+      this.contentVersion++;
+      this.invalidate();
+    }
+  }
+
+  /**
+   * Change an image's tiles to another form of its pyramid, keeping the old one beside
+   * it: what is in of it is drawn until the new tiles replace it, and nothing it covers
+   * is asked for again (`planFrame`), so the picture never steps back.
+   */
+  private swapPyramid(item: SceneItem, next: TilePyramid): void {
+    item.previous = item.pyramid;
+    item.pyramid = next;
   }
 
   private prepareContext() {
@@ -1155,15 +1218,24 @@ export class CanvasRenderer implements GestureTarget {
     }
   }
 
-  private loadTile(url: string, signal?: AbortSignal) {
-    return loadImage(url, {
-      signal,
-      request: this.options.request,
-      maxTextureSize:
-        this.backend instanceof WebGL2Backend
-          ? this.backend.maxTextureSize
-          : undefined,
-    });
+  /** Load a tile, timing its host's answer (`sources/hostTiles.ts`). */
+  private async loadTile(url: string, signal?: AbortSignal) {
+    const timed = timeLoad(url);
+    try {
+      const image = await loadImage(url, {
+        signal,
+        request: this.options.request,
+        maxTextureSize:
+          this.backend instanceof WebGL2Backend
+            ? this.backend.maxTextureSize
+            : undefined,
+      });
+      timed(image.naturalWidth * image.naturalHeight);
+      return image;
+    } catch (error) {
+      timed();
+      throw error;
+    }
   }
 
   // ─── Camera helpers ───────────────────────────────────────────────────────

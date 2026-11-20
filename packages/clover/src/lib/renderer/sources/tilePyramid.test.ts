@@ -32,6 +32,27 @@ import {
   tilesInRegion,
 } from "./tilePyramid";
 
+/** Yale's image server's info.json for a sheet of the Center for British Art's (2026-11-19). */
+const YALE = {
+  "@context": "http://iiif.io/api/image/2/context.json",
+  "@id":
+    "https://images.collections.yale.edu/iiif/2/ycba:806ec36f-8bd8-4d86-89ba-551ccc65a88f",
+  protocol: "http://iiif.io/api/image",
+  profile: ["http://iiif.io/api/image/2/level2.json"],
+  width: 6291,
+  height: 6760,
+  tiles: [{ width: 512, height: 512, scaleFactors: [1, 2, 4, 8, 16, 32, 64] }],
+  sizes: [
+    { width: 98, height: 106 },
+    { width: 197, height: 211 },
+    { width: 393, height: 423 },
+    { width: 786, height: 845 },
+    { width: 1573, height: 1690 },
+    { width: 3146, height: 3380 },
+    { width: 6291, height: 6760 },
+  ],
+};
+
 describe("servicePyramid", () => {
   it("builds the reference service's levels on its own grid, coarse to fine, with a thumbnail", () => {
     const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3), 0);
@@ -54,6 +75,33 @@ describe("servicePyramid", () => {
     const s4 = pyramid.tile({ level: 1, col: 1, row: 1 });
     expect(s4.region).toEqual({ x: 2048, y: 2048, width: 1984, height: 976 });
     expect(s4.url).toMatch(/\/2048,2048,1984,976\/496,244\//);
+  });
+
+  it("rounds the size of a tile only Clover asks for down, and the service's own up", () => {
+    const at = (pyramid: ReturnType<typeof servicePyramid>, scale: number) =>
+      pyramid.levels.findIndex((l) => l.scaleFactor === scale);
+    const joined = servicePyramid(parseInfo(YALE));
+    // At scale factor 4 its right edge, 2195 px, is 548.75 px: asked at 548, so the server
+    // reads it at its quarter-size level rather than the next sharper one.
+    expect(joined.tile({ level: at(joined, 4), col: 1, row: 0 }).url).toMatch(
+      /\/4096,0,2195,4096\/548,\//,
+    );
+    expect(joined.tile({ level: at(joined, 4), col: 0, row: 0 }).url).toMatch(
+      /\/0,0,4096,4096\/1024,\//,
+    );
+    // A whole image the grid never asks for at this scale, rounded down too (Yale lists it).
+    expect(joined.tile({ level: at(joined, 8), col: 0, row: 0 }).url).toMatch(
+      /\/full\/786,\//,
+    );
+    // One the grid asks for alike keeps its size, shared with every viewer that does.
+    expect(joined.tile({ level: at(joined, 16), col: 0, row: 0 }).url).toMatch(
+      /\/full\/394,\//,
+    );
+    // The service's own tiles stay as the Image API reckons them, rounded up.
+    const grid = servicePyramid(parseInfo(YALE), 0);
+    expect(grid.tile({ level: at(grid, 4), col: 3, row: 0 }).url).toMatch(
+      /\/6144,0,147,2048\/37,\//,
+    );
   });
 
   it("spells 2.0 tiles with w, and offers no native retry above level 0", () => {
@@ -151,6 +199,80 @@ describe("servicePyramid", () => {
       parseInfo({ ...NORTHWESTERN, profile: "level0" }),
     );
     expect(pyramid.levels[pyramid.levels.length - 1].tileWidth).toBe(256);
+  });
+
+  it("offers the service's own grid where it joins tiles, for a server that refuses them", () => {
+    const pyramid = servicePyramid(parseInfo(NORTHWESTERN));
+    expect(pyramid.service).toBe(NORTHWESTERN.id);
+    const listed = pyramid.listed!();
+    const finest = listed.levels.length - 1;
+    expect(listed.levels[finest]).toMatchObject({ tileWidth: 256 });
+    expect(listed.tile({ level: finest, col: 1, row: 0 }).url).toBe(
+      `${NORTHWESTERN.id}/256,0,256,256/256,256/0/default.jpg`,
+    );
+    // The grid is the service's own, so it has nothing further to fall back to.
+    expect(listed.listed).toBeUndefined();
+  });
+
+  it("offers a smaller cut where it cuts its own tiles, and nothing where it asks the grid", () => {
+    const untiled = servicePyramid(parseInfo(LEVEL2_UNTILED_V2)).listed!();
+    expect(untiled.levels[untiled.levels.length - 1].tileWidth).toBe(512);
+    expect(
+      servicePyramid(parseInfo({ ...NORTHWESTERN, profile: "level0" })).listed,
+    ).toBeUndefined();
+    expect(servicePyramid(parseInfo(NORTHWESTERN), 0).listed).toBeUndefined();
+    // 1024 px listed tiles are past the floor: nothing joined, nothing to offer.
+    expect(
+      servicePyramid(
+        parseInfo({
+          ...NORTHWESTERN,
+          tiles: [{ width: 1024, height: 1024, scaleFactors: [1, 2, 4, 8] }],
+        }),
+      ).listed,
+    ).toBeUndefined();
+  });
+});
+
+describe("a pyramid's two forms", () => {
+  it("knows how far it joins, and turns from joined tiles to the grid and back", () => {
+    const joined = servicePyramid(parseInfo(NORTHWESTERN));
+    expect(joined.join).toBe(4);
+    expect(joined.joined).toBeUndefined();
+    const grid = joined.listed!();
+    expect(grid.join).toBe(4);
+    expect(grid.listed).toBeUndefined();
+    expect(grid.levels[grid.levels.length - 1].tileWidth).toBe(256);
+    const again = grid.joined!();
+    expect(again.levels[again.levels.length - 1].tileWidth).toBe(1024);
+    expect(again.listed).toBeDefined();
+  });
+
+  it("has one form where it cannot join: listed tiles past the floor, or level 0", () => {
+    const large = servicePyramid(
+      parseInfo({
+        ...NORTHWESTERN,
+        tiles: [{ width: 1024, height: 1024, scaleFactors: [1, 2, 4, 8] }],
+      }),
+    );
+    expect([large.join, large.listed, large.joined]).toEqual([
+      1,
+      undefined,
+      undefined,
+    ]);
+    const level0 = servicePyramid(
+      parseInfo({ ...NORTHWESTERN, profile: "level0" }),
+    );
+    expect([level0.join, level0.listed, level0.joined]).toEqual([
+      1,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  it("counts the tiles Clover cuts, for a service that lists none", () => {
+    const cut = servicePyramid(parseInfo(LEVEL2_UNTILED_V2));
+    expect(cut.join).toBe(2);
+    expect(cut.listed!().joined).toBeDefined();
   });
 });
 

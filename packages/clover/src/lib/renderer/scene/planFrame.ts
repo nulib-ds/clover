@@ -18,6 +18,7 @@ import {
 import type { RegionRect } from "../sources/imageService";
 import {
   type TileAddress,
+  type TilePyramid,
   chooseLevel,
   tilesInRegion,
 } from "../sources/tilePyramid";
@@ -129,8 +130,18 @@ export function planFrame(input: PlanInput): FramePlan {
   };
 
   for (const item of items) {
-    const { pyramid, clip, rect } = item;
+    const { pyramid, previous, clip, rect } = item;
     const k = pixelsToWorld(item);
+    // A tile the previous pyramid's loaded tiles, at its scale or finer, already cover,
+    // after a swap: neither asked for again nor missing.
+    const covered = (address: TileAddress, present: (url: string) => boolean) =>
+      previous !== undefined &&
+      coveredBy(
+        previous,
+        pyramid.levels[address.level].scaleFactor,
+        pyramid.tile(address).region,
+        present,
+      );
 
     if (input.wantOverview) {
       for (const address of tilesInRegion(pyramid, 0, clip)) {
@@ -158,6 +169,7 @@ export function planFrame(input: PlanInput): FramePlan {
     if (there) {
       const distance = distanceFrom(there.center);
       for (const address of tilesInRegion(pyramid, 0, there.area)) {
+        if (covered(address, has)) continue;
         want(pyramid, address, distance(address) / 1e3);
       }
       if (there.target > 0) {
@@ -166,6 +178,7 @@ export function planFrame(input: PlanInput): FramePlan {
           there.target,
           there.area,
         )) {
+          if (covered(address, has)) continue;
           want(pyramid, address, TARGET_BAND + distance(address));
         }
       }
@@ -179,6 +192,7 @@ export function planFrame(input: PlanInput): FramePlan {
     if (there !== here) {
       // Passing through: the coarsest level, and a level a little short of the target.
       for (const address of coarse) {
+        if (covered(address, has)) continue;
         want(pyramid, address, distance(address) / 1e3);
       }
       const inFlight = target - IN_FLIGHT_LEVELS;
@@ -197,7 +211,7 @@ export function planFrame(input: PlanInput): FramePlan {
       const asked = new Set<string>();
       for (const address of fine) {
         const tile = pyramid.tile(address);
-        if (has(tile.url)) continue;
+        if (has(tile.url) || covered(address, has)) continue;
         // The middle tile under this one, on the same grid.
         for (const under of tilesInRegion(pyramid, middle, tile.region)) {
           const key = `${under.col},${under.row}`;
@@ -213,8 +227,9 @@ export function planFrame(input: PlanInput): FramePlan {
 
     // Paint coarse to fine. When the target level is complete, it alone is enough.
     const targetTiles = target === 0 ? coarse : fine;
+    const drawable = (url: string) => getTile(url) !== undefined;
     const complete = targetTiles.every(
-      (a) => getTile(pyramid.tile(a).url) !== undefined,
+      (a) => drawable(pyramid.tile(a).url) || covered(a, drawable),
     );
     const paintLevels = complete
       ? [target]
@@ -227,17 +242,11 @@ export function planFrame(input: PlanInput): FramePlan {
       orientOf(item),
     );
 
-    for (const level of paintLevels) {
-      const addresses =
-        level === 0
-          ? coarse
-          : level === target
-            ? fine
-            : tilesInRegion(pyramid, level, area);
-      const multiTile =
-        pyramid.levels[level].cols * pyramid.levels[level].rows > 1;
+    /** Draw what is in of `addresses`, a level of `p`. */
+    const paint = (p: TilePyramid, level: number, addresses: TileAddress[]) => {
+      const multiTile = p.levels[level].cols * p.levels[level].rows > 1;
       for (const address of addresses) {
-        const tile = pyramid.tile(address);
+        const tile = p.tile(address);
         const image = getTile(tile.url);
         if (!image) continue;
         const draw = placeTile(
@@ -249,11 +258,59 @@ export function planFrame(input: PlanInput): FramePlan {
         );
         if (draw) draws.push({ ...draw, url: tile.url });
       }
+    };
+
+    for (const level of paintLevels) {
+      // The previous pyramid's tiles, under the target level: every level of them while
+      // the target lacks tiles, else those that stand in for its own.
+      if (previous && level === target) {
+        const standIn = standInLevel(
+          previous,
+          pyramid.levels[target].scaleFactor,
+        );
+        previous.levels.forEach((_, index) => {
+          if (!complete || index === standIn)
+            paint(previous, index, tilesInRegion(previous, index, area));
+        });
+      }
+      paint(
+        pyramid,
+        level,
+        level === 0
+          ? coarse
+          : level === target
+            ? fine
+            : tilesInRegion(pyramid, level, area),
+      );
     }
   }
 
   wants.sort((a, b) => a.priority - b.priority);
   return { draws, wants: dedupeWants(wants), levels };
+}
+
+/**
+ * The level of `previous` whose tiles stand in for another pyramid's at scale factor
+ * `scale`: its coarsest at that scale or finer (a coarser one would blur the view).
+ */
+function standInLevel(previous: TilePyramid, scale: number): number {
+  return previous.levels.findIndex((l) => l.scaleFactor <= scale + 1e-6);
+}
+
+/**
+ * Whether `region` (full-size image pixels) at scale factor `scale` lies wholly under
+ * tiles of `previous` that `present` holds, at that scale or finer (`standInLevel`).
+ */
+function coveredBy(
+  previous: TilePyramid,
+  scale: number,
+  region: RegionRect,
+  present: (url: string) => boolean,
+): boolean {
+  const level = standInLevel(previous, scale);
+  if (level < 0) return false;
+  const tiles = tilesInRegion(previous, level, region);
+  return tiles.length > 0 && tiles.every((a) => present(previous.tile(a).url));
 }
 
 /** What `camera` sees of `item`, or null when the item is out of its view. */

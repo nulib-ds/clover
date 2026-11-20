@@ -11,6 +11,35 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Tiles in the form each image server answers fastest.** Clover joins a service's
+  small tiles into 1024 px requests, which saves round trips wherever every request costs
+  about the same. A server that keeps what it has rendered, though, holds its own grid for
+  anyone who has viewed an image before, while Clover's joined tiles are new to it. Now
+  Clover times each server's answers and asks for its own grid where a joined tile costs
+  more than the grid tiles it saves, from then on for that server's images during the
+  visit. What is on screen stays drawn while the tiles change form. Nothing to change.
+
+### Fixed
+
+- **Faster tiles at an image's edges from servers that render them fresh.** Clover
+  rounded every tile's size up, as the Image API does for a service's own tiles. For the
+  tiles only Clover asks for (its joined tiles at an image's right and bottom edges, and
+  some whole-image levels), a size even a fraction of a pixel too large makes a server
+  that reads an image at fixed levels, such as Cantaloupe, read the next sharper level:
+  four times the pixels. On Yale's server one such tile took 2.8 s, and 0.5 s rounded
+  down. Those tiles are now rounded down, at most a pixel smaller. A service's own tiles,
+  and a whole image its grid shares, keep their sizes. Nothing to change.
+
+- **Images from a server that serves only its own tiles.** Clover joins a service's small
+  tiles into larger requests (1024 px) wherever its `info.json` says it can cut any region
+  at any size. Some servers answer those requests 403 anyway: the Art Institute of
+  Chicago's serves its 256 px grid and listed sizes only, so Clover never showed more
+  than an enlarged whole image there. Now a tile refused with 400, 403, 413 or 414 sends
+  that host's images to their own listed tiles from the next frame, and the host is
+  remembered for the visit, so its other images start there. Nothing to change.
+
 ## [4.11.4] - 2026-11-19
 
 ### Added
