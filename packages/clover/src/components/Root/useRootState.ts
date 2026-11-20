@@ -25,6 +25,10 @@ import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect
 
 const noop = () => {};
 
+/** Whether a status says the Root has shown something: its content, or why it has none. */
+const hasShown = (status: CloverStatus) =>
+  status === "ready" || status === "error";
+
 /** What a Root is given about its content: every prop but its element's. */
 export interface RootStateOptions {
   iiifContent: IIIFContent;
@@ -51,8 +55,9 @@ export interface RootStateOptions {
  * with what it is given, and the context its parts read. `Root` adds its element and
  * the live region; `<clover-root>` (`web-components/elements/root.tsx`) is an element
  * already, and adds the live region alone. Given a Root's props whole, it hands back
- * the context (its Clover in it), the status, and the rest of the props (its element's),
- * so each name is written once, and no more names than that: every Root's page loads it.
+ * the context (its Clover in it), the status, the rest of the props (its element's) and
+ * whether it has shown anything yet, so each name is written once, and no more names
+ * than that: every Root's page loads it.
  */
 export function useRootState<Props extends RootStateOptions>({
   iiifContent,
@@ -77,6 +82,7 @@ export function useRootState<Props extends RootStateOptions>({
   context: CloverContextValue,
   status: CloverStatus,
   rest: Omit<Props, keyof RootStateOptions>,
+  shown: boolean,
 ] {
   const controlled = canvasId !== undefined;
   const manifestControlled = manifestId !== undefined;
@@ -121,6 +127,12 @@ export function useRootState<Props extends RootStateOptions>({
    * field's, and `""` as one is cleared or another Manifest opens.
    */
   const [status, setStatus] = useState<CloverStatus>(clover.store.get().status);
+  /*
+   * Whether it has shown anything yet, its first content or the failure to load it, set
+   * with the status that says so: until then (`data-pending`) nothing in a layout is
+   * where that content will put it, so a layout may hold its room unseen.
+   */
+  const [shown, setShown] = useState(() => hasShown(status));
   useIsomorphicLayoutEffect(() => {
     let last = clover.store.get().status;
     let query = clover.store.get().search.query;
@@ -133,6 +145,7 @@ export function useRootState<Props extends RootStateOptions>({
       if (next === last) return;
       last = next;
       setStatus(next);
+      if (hasShown(next)) setShown(true);
       latest.current.onStatusChange(next, error);
     });
   }, [clover]);
@@ -276,7 +289,7 @@ export function useRootState<Props extends RootStateOptions>({
       drawsToggle,
     ],
   );
-  return [context, status, rest];
+  return [context, status, rest, shown];
 }
 
 /** One value of the store, outside the context the Root itself provides. */

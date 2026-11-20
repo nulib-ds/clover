@@ -1,7 +1,11 @@
 import type { MetadataItem } from "@iiif/presentation-3";
 import React, { useEffect, useState } from "react";
 
-import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
+import {
+  pictureShape,
+  resolveThumbnail,
+  thumbnailSource,
+} from "../../core/thumbnail";
 import { markdownToPlainText } from "../../core/markdown-text";
 import { toPlainText } from "../../core/text";
 import { type LanguageMapLike, hrefLangOf, localize } from "../../core/value";
@@ -346,7 +350,32 @@ export function Thumbnail({
     // `key` stands in for `source`, a new object each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, size]);
-  if (!src) return null;
+  /*
+   * Its shape before its image is in (`pictureShape`), as the image's width and height:
+   * the room it takes from the first, so nothing beside it moves as the image comes.
+   */
+  const shape = resource ? pictureShape(resource) : undefined;
+  const width = shape && shape < 1 ? Math.round(size * shape) : size;
+  const height = shape ? Math.round(width / shape) : undefined;
+  if (!src) {
+    /*
+     * While its image is found (a service's `info.json` read first), that room, empty:
+     * sized as the image will be, by the same attributes and classes, and out of the
+     * accessibility tree. Nothing where its shape is not known.
+     */
+    return source && height ? (
+      <svg
+        className={join("clover-thumbnail", className)}
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        aria-hidden="true"
+        focusable="false"
+        data-empty=""
+        style={rest.style}
+      />
+    ) : null;
+  }
   const label = localize(resource?.label, language);
   return (
     <img
@@ -358,7 +387,8 @@ export function Thumbnail({
           ? label.lang
           : undefined,
       )}
-      width={size}
+      width={width}
+      height={height}
       loading="lazy"
       decoding="async"
       className={join("clover-thumbnail", className)}

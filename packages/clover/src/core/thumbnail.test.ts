@@ -4,6 +4,7 @@ import { p4 } from "../fixtures/presentation4";
 import { clearInfoCache } from "../lib/renderer/sources/imageService";
 import { regionSource } from "./region";
 import {
+  pictureShape,
   resolveThumbnail,
   type ThumbnailSource,
   thumbnailSource,
@@ -73,6 +74,45 @@ describe("thumbnailSource", () => {
       service: "https://example.org/static",
       fallback: "https://example.org/static/full.jpg",
     });
+  });
+});
+
+// The room a picture keeps before its image is in (2026-11-20): nothing moves as it comes.
+describe("pictureShape", () => {
+  it("is a Canvas's own shape, and a Manifest's first Canvas's", () => {
+    const canvas = book.items[0] as { width: number; height: number };
+    expect(pictureShape(canvas)).toBe(canvas.width / canvas.height);
+    expect(pictureShape(book)).toBe(canvas.width / canvas.height);
+  });
+
+  it("is the artwork's for sound, and the thumbnail's size only after the Canvas's", () => {
+    const sound = {
+      id: "https://example.org/sound",
+      type: "Timeline",
+      duration: 60,
+      accompanyingContainer: { type: "Canvas", width: 2980, height: 3020 },
+      thumbnail: [{ id: "https://example.org/t.jpg", width: 300, height: 300 }],
+    };
+    expect(pictureShape(sound)).toBe(2980 / 3020);
+    // A member with nothing but a thumbnail: its own size, the one thing that says.
+    expect(
+      pictureShape({
+        id: "https://example.org/member",
+        type: "Manifest",
+        thumbnail: sound.thumbnail,
+      }),
+    ).toBe(1);
+  });
+
+  it("says nothing where nothing has a size", () => {
+    expect(
+      pictureShape({
+        id: "https://example.org/member",
+        type: "Manifest",
+        thumbnail: [{ id: "https://example.org/t.jpg" }],
+      }),
+    ).toBeUndefined();
+    expect(pictureShape(undefined)).toBeUndefined();
   });
 });
 

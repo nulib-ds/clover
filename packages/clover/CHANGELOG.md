@@ -22,10 +22,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   components, which a page loads as they are built, no longer run in Chrome 80–84 (2020),
   where they drew without their styles. Sizes are measured as an app for these browsers
   builds (`build/browsers.mjs`).
-- **A lighter first view.** The Viewer in its Default template loads 95.8 kB gzip to
-  its first view of an image, 10.9 kB less than it did (106.7 kB); Document 102.9 kB
-  (114.0), a Canvas alone 51.3 kB (55.0), a Timeline alone 54.8 kB (57.6), and a page of
-  `<clover-viewer>` 129.2 kB (140.2), with the browsers above. Nothing is drawn later
+- **A lighter first view.** The Viewer in its Default template loads 96.3 kB gzip to
+  its first view of an image, 10.4 kB less than it did (106.7 kB); Document 103.2 kB
+  (114.0), a Canvas alone 51.3 kB (55.0), a Timeline alone 54.9 kB (57.6), and a page of
+  `<clover-viewer>` 129.8 kB (140.2), with the browsers above. Nothing is drawn later
   but the Canvas's annotations menu, and nothing differently but how what loads with its
   code comes in (both below):
   - The Panel's sections bring their own styles, as a recording's and a map's do:
@@ -95,6 +95,40 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   page's ground is not white, set `--clover-color-secondary` to it, as the docs do. To
   keep a ground behind a template, give `.clover-template-panel` or
   `.clover-template-document` a `background`.
+
+### Fixed
+
+- **Nothing in a template moves as its resource first loads.** What the resource says
+  arrives after the first paint, and moved what was drawn: a title of two lines (on a
+  phone, most titles), the Collection's line under it, About's summary and metadata, and
+  a single page giving back the room Document holds for its thumbnails. Measured in
+  Chrome over five resources and three window sizes, the layout shifts they caused are
+  gone, but for a page's own content after a Default Viewer (below):
+  - A Root carries `data-pending` until it shows its first content, or why it has none.
+    Until then the Default and Document templates keep their room unseen, all but the
+    Body's loading mark, and show at once with the content. Later loads keep the room
+    the last content took, as before.
+  - Items' `pager` keeps its room while its code loads: the Collection's line in
+    Default's header grew as its pager came.
+  - A `Thumbnail` keeps the room of its shape before its image is in: the Canvas it
+    stands for (a Manifest's first), else that Canvas's placeholder or accompanying
+    Canvas, else its `thumbnail`'s own size. While its image is found, it is an empty
+    `svg` of that shape, with its `clover-thumbnail` class, out of the accessibility
+    tree; then the image, with that `width` and `height`. About's thumbnail, beside its
+    label, no longer moved the label's lines and the summary under them as it loaded, and
+    About lays them out before its summary's "Read more" counts its lines.
+  - Items' pictures take the same shape, so a recording's card in Document's thumbnails
+    has its artwork's room from the first, where it collapsed while its image loaded.
+  - The panel's toggle on the bar is placed level with the Body before the content is
+    first drawn, not a frame after.
+
+  Nothing to change. The Viewer is as tall as its content: a title of two lines, a
+  Collection's line and the strip of thumbnails still move a page's own content after
+  it. To keep that still, give the Viewer a box and `fill` (Default). A layout of your
+  own parts can hold its room the same way, with `.clover-root[data-pending]`. It adds
+  0.5 kB gzip to the Default template's first view, 0.3 kB to Document's and 0.6 kB to
+  a page of `<clover-viewer>` (the figures above include it); their budgets are raised
+  to match (`build/size-budget.json`).
 
 ## [4.11.6] - 2026-11-19
 

@@ -118,6 +118,31 @@ export function thumbnailSource(resource: unknown): ThumbnailSource | null {
 }
 
 /**
+ * The shape a resource's picture has before its image is in, as width over height, so the
+ * room it is shown in is kept from the first: its own size (a Canvas's), else the Canvas it
+ * stands for (a Manifest's first), else that Canvas's placeholder's or accompanying
+ * Canvas's (sound shows its artwork), else its `thumbnail`'s own `width` and `height`. The
+ * `thumbnail`'s comes last, as some publishers give each one the square it fits in
+ * (Northwestern's say 300 by 300 of a picture 300 by 200). Undefined where nothing says.
+ */
+export function pictureShape(resource: unknown): number | undefined {
+  const value = resource as Json | undefined;
+  const canvas: Json | undefined =
+    value?.type === "Manifest" ? asArray(value.items)[0] : value;
+  for (const sized of [
+    canvas,
+    canvas?.placeholderContainer,
+    canvas?.accompanyingContainer,
+    asArray(value?.thumbnail)[0] as Json | undefined,
+  ]) {
+    // Both sizes, or none: anything else is not a number over 0 and under infinity.
+    const shape = sized?.width / sized?.height;
+    if (shape > 0 && shape < Infinity) return shape;
+  }
+  return undefined;
+}
+
+/**
  * A picture to stand in for a Canvas as large as it is drawn, to be sized by
  * `resolveThumbnail`: the first image it paints first, then its placeholder's or
  * accompanying Canvas's, and only then its own `thumbnail`, which is often small. Null if

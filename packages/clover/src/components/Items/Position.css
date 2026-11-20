@@ -21,3 +21,53 @@
   display: block;
   visibility: hidden;
 }
+
+/*
+ * The pager's room while its code loads (`Pager` in `Items.tsx`): its box drawn unseen,
+ * laid out as `Pager.css` lays out the pager, its widest count, then its two steps, so the
+ * line it sits in neither grows nor wraps as the pager takes its place. Up front, as the
+ * pager's sheet comes with its code.
+ */
+.clover-pager-hold[hidden] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--clover-space-s);
+  padding-block: var(--clover-space-s);
+  font-variant-numeric: tabular-nums;
+  visibility: hidden;
+}
+
+/* Its two steps, round controls, and the gap between them. */
+.clover-pager-hold > :last-child {
+  flex: none;
+  width: calc(2 * var(--clover-control) + var(--clover-space-s));
+  height: var(--clover-control);
+}
+
+/* A count that opens a menu (`CountMenu`): a button, its 12px chevron `2xs` after it. */
+.clover-pager-hold > [data-menu] {
+  min-height: var(--clover-space-l);
+  padding-inline: var(--clover-space-xs);
+}
+
+.clover-pager-hold > [data-menu]::after {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  margin-inline-start: var(--clover-space-2xs);
+}
+
+/* `small`: its steps and count as `ui/Steps` draws them, with no room over or under. */
+.clover-pager-hold[data-size="small"] {
+  gap: var(--clover-space-2xs);
+  padding-block: 0;
+  font-size: var(--clover-text-xs);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.clover-pager-hold[data-size="small"] > :last-child {
+  width: calc(2 * max(24px, var(--clover-space-l)) + var(--clover-space-2xs));
+  height: max(24px, var(--clover-space-l));
+}

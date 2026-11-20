@@ -94,6 +94,15 @@
 }
 
 /*
+ * Until the Root shows its first content (`data-pending`), it holds its room unseen, as
+ * the panes under it do (`Default.css`): a title that takes two lines on a phone then
+ * moves no hairline or control already drawn.
+ */
+.clover-root[data-pending] > .clover-template-document-toolbar {
+  visibility: hidden;
+}
+
+/*
  * The toolbar's controls at its end (`SectionControls.tsx`; Mat, 2026-11-09: "like in
  * preview on a mac, build out the top right controls", "make this look more like an
  * application menu, but don't change the over all look and feel", then "go with a light
