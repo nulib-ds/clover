@@ -47,7 +47,11 @@ export function panelFocus(pane: HTMLElement) {
   );
 }
 
-const useIsomorphicLayoutEffect =
+/**
+ * A layout effect in the browser, an effect on the server (where there is no layout): the
+ * templates' own, as they import only what `@nulib/clover` exports.
+ */
+export const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**

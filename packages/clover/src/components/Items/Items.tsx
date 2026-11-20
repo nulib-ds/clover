@@ -28,14 +28,13 @@ import {
   selectShownId,
 } from "../../core/selectors";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
-import { type LanguageMapLike, localize } from "../../core/value";
+import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useCloverSelector, useOptionalClover } from "../../react/context";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../i18n/useRootLanguage";
 import { useContainerName } from "../../i18n/useContainerName";
-import { titleTag } from "../../ui/heading";
 import { useRovingFocus } from "../../ui/useRovingFocus";
 import { useScrollTrack } from "../../ui/useScrollTrack";
 import { visuallyHidden } from "../../ui/visuallyHidden";
@@ -418,24 +417,27 @@ interface ItemsViewProps extends Omit<ItemsProps, "navigation" | "items"> {
   /** Bottom-to-top: a vertical slider runs up from its foot. */
   upward?: boolean;
   showSummary?: boolean;
-  heading?: {
-    label?: LanguageMapLike;
-    summary?: LanguageMapLike;
-    homepage?: string;
-    /** That homepage's own language, where its `language` gives one. */
-    homepageLang?: string;
-  };
+  /**
+   * The header over the list of a resource Items loads itself, drawn by `StandaloneItems`
+   * (which alone has one, so a Root's Items never carries it), given its title's id, which
+   * names the list where the header has a title, and Items' own `langOf` and `t`.
+   */
+  heading?: (
+    titleId: string,
+    langOf: (key: string) => string | undefined,
+    t: (key: string) => string,
+  ) => { titled: boolean; node: React.ReactNode };
   onActivate: (item: ItemModel, event: React.SyntheticEvent) => void;
   /**
-   * The option pointed at elsewhere (a sheet under the pointer on a map), by its index:
-   * ringed as the pointer rings one, at half strength.
+   * More for each option, after Items' own: a list beside a map's (`pointing`,
+   * `Map/overlayItems.ts`), the option pointed at there marked, and the pointer and focus
+   * here said, the roving focus's handler called on.
    */
-  pointed?: number;
-  /**
-   * An option is under the pointer or focused, and `null` as it leaves: for what lights
-   * it elsewhere (a map's outline of the sheet it is).
-   */
-  onPoint?: (item: ItemModel | null) => void;
+  optionProps?: (
+    item: ItemModel,
+    index: number,
+    roved: { onFocus: () => void },
+  ) => React.HTMLAttributes<HTMLElement>;
   /**
    * The key of the string that names the list where it has no title of its own, in
    * Clover's interface language. Default `itemsLabel`.
@@ -511,21 +513,20 @@ function DrawnItems({
   secondary = "summary",
   labels = true,
   heading,
-  headingLevel = 2,
   renderItem,
   controlButtons,
   onActivate,
-  pointed,
-  onPoint,
+  optionProps,
   nameKey = "itemsLabel",
   followFocus,
   as: Tag = "section",
   className,
   "aria-label": ariaLabel,
-  // The pager's, not a list's, and the views' alone (`ViewItems`).
+  // The pager's, not a list's, and the views' alone (`ViewItems`); the header's level.
   /* eslint-disable @typescript-eslint/no-unused-vars */
   size,
   singleItem,
+  headingLevel,
   /* eslint-enable @typescript-eslint/no-unused-vars */
   highContrast,
   ...rest
@@ -644,15 +645,12 @@ function DrawnItems({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slider, selected, track.scrollToIndex]);
 
-  // Past 6 not a heading (`ui/heading.ts`): the list is named by it either way.
-  const Title = titleTag(headingLevel) as "h2";
-  const headingLabel = heading ? localize(heading.label, language) : null;
-  const headingSummary = heading ? localize(heading.summary, language) : null;
+  const header = heading && heading(`${id}-title`, langOf, t);
   /*
    * The list is named by your `aria-label`, else by the heading over it, which carries the
    * label's language (an `aria-label` could not), else by "Items".
    */
-  const titled = ariaLabel === undefined && Boolean(headingLabel?.text);
+  const titled = ariaLabel === undefined && Boolean(header && header.titled);
   const fallbackName = useContainerName(
     t(nameKey),
     langOf(nameKey),
@@ -835,37 +833,7 @@ function DrawnItems({
             : rest.style
         }
       >
-        {heading && (headingLabel?.text || headingSummary?.text) && (
-          <header className="clover-items-header">
-            {headingLabel?.text && (
-              <Title
-                className="clover-items-title clover-title"
-                id={`${id}-title`}
-                {...languageProps(headingLabel.lang)}
-              >
-                {headingLabel.text}
-              </Title>
-            )}
-            {headingSummary?.text && (
-              <p
-                className="clover-items-description"
-                {...languageProps(headingSummary.lang)}
-              >
-                {headingSummary.text.replace(/<[^>]*>/g, "")}
-              </p>
-            )}
-            {heading.homepage && (
-              <a
-                className="clover-items-homepage"
-                href={heading.homepage}
-                hrefLang={heading.homepageLang}
-                {...languageProps(langOf("commonViewAll"))}
-              >
-                {t("commonViewAll")}
-              </a>
-            )}
-          </header>
-        )}
+        {header && header.node}
         <div
           className="clover-items-frame"
           style={{ position: "relative" }}
@@ -909,19 +877,10 @@ function DrawnItems({
                       {...languageProps(positionLang(item))}
                       className="clover-items-item"
                       data-track-index={index}
-                      data-highlighted={index === pointed || undefined}
                       style={slideStyle}
                       {...roved}
                       onClick={(event) => onActivate(item, event)}
-                      {...(onPoint && {
-                        onMouseEnter: () => onPoint(item),
-                        onMouseLeave: () => onPoint(null),
-                        onFocus: () => {
-                          roved.onFocus();
-                          onPoint(item);
-                        },
-                        onBlur: () => onPoint(null),
-                      })}
+                      {...(optionProps && optionProps(item, index, roved))}
                     >
                       {figure(item, isSelected)}
                     </div>

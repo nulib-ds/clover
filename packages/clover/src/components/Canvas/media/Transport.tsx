@@ -36,6 +36,7 @@ import { useContainerName } from "../../../i18n/useContainerName";
 import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
 import { visuallyHidden } from "../../../ui/visuallyHidden";
 import { toggleFullscreen } from "../../../lib/fullscreen";
+import { enterNativeFullscreen } from "../../../lib/videoFullscreen";
 import useFullscreenSupported from "../../../hooks/useFullscreenSupported";
 import { languageProps } from "../../../i18n/direction";
 
@@ -765,7 +766,12 @@ const Transport: React.FC<TransportProps> = ({
                 // Straight from the click: the Fullscreen API only honors a
                 // user gesture.
                 onClick={(event) =>
-                  void toggleFullscreen(event.currentTarget, video)
+                  void toggleFullscreen(
+                    event.currentTarget,
+                    video
+                      ? (from) => enterNativeFullscreen(video, from)
+                      : undefined,
+                  )
                 }
               >
                 {isFullscreen ? <ExitFullScreenIcon /> : <FullScreenIcon />}

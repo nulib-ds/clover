@@ -45,14 +45,16 @@
 .clover-inset:hover:not(:has(button:hover))
   > .clover-inset-actions
   > button:first-child {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
 }
 
 :where([data-high-contrast])
   .clover-inset:hover:not(:has(button:hover))
   > .clover-inset-actions
   > button:first-child {
-  background-color: var(--clover-accent-fill);
   outline: var(--clover-accent-ring-hover);
   outline-offset: 1px;
 }

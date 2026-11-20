@@ -1,6 +1,7 @@
 import type { AnnotationBodyEntry } from "./annotation-bodies";
 import { languageToRead } from "../i18n/languages";
-import { markdownToPlainText, readAs, toPlainText } from "./text";
+import { markdownToPlainText } from "./markdown-text";
+import { readAs, toPlainText } from "./text";
 import { localize } from "./value";
 
 /*

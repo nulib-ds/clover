@@ -11,7 +11,6 @@ function command(overrides = {}) {
     width: 100,
     height: 50,
     transform: { ...IDENTITY },
-    opacity: 1,
     ...overrides,
   };
 }

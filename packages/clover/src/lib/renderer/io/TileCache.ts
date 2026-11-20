@@ -43,12 +43,12 @@ export interface TileCacheOptions {
    * A tile failed for good, with its HTTP status where it had one: called before
    * `onSettled`, so the next frame can plan other tiles in its place.
    */
-  onFailed?: (url: string, status?: number) => void;
+  onFailed: (url: string, status?: number) => void;
   /** Decoded pixels left memory; drop anything derived from them (a texture). */
   onEvict: (url: string) => void;
   /** Decoded bytes to keep, across required and cached tiles. */
-  byteBudget?: number;
-  maxInFlight?: number;
+  byteBudget: number;
+  maxInFlight: number;
 }
 
 interface Entry {
@@ -64,8 +64,6 @@ interface Entry {
   waiters: Array<() => void>;
 }
 
-const DEFAULT_BUDGET = 192 * 1024 * 1024;
-const DEFAULT_IN_FLIGHT = 16;
 const MAX_ATTEMPTS = 2;
 
 export class TileCache {
@@ -75,13 +73,9 @@ export class TileCache {
   private bytes = 0;
   private wanted: TileWant[] = [];
   private disposed = false;
-  private readonly budget: number;
-  private readonly maxInFlight: number;
 
-  constructor(private readonly options: TileCacheOptions) {
-    this.budget = options.byteBudget ?? DEFAULT_BUDGET;
-    this.maxInFlight = options.maxInFlight ?? DEFAULT_IN_FLIGHT;
-  }
+  /** Its budget and limit, as the renderer gives them (its `DEFAULTS`). */
+  constructor(private readonly options: TileCacheOptions) {}
 
   /** The decoded tile, if ready. Marks it used this frame. */
   get(url: string): LoadedImage | undefined {
@@ -97,10 +91,6 @@ export class TileCache {
 
   failed(url: string): boolean {
     return this.entries.get(url)?.state === "failed";
-  }
-
-  get byteSize(): number {
-    return this.bytes;
   }
 
   get pending(): number {
@@ -188,17 +178,9 @@ export class TileCache {
     this.bytes = 0;
   }
 
-  /** Every ready tile, for a context restore or a consumer clearing memory. */
-  forEachReady(callback: (url: string, image: LoadedImage) => void): void {
-    for (const entry of this.entries.values()) {
-      if (entry.state === "ready" && entry.image)
-        callback(entry.url, entry.image);
-    }
-  }
-
   private pump(): void {
     for (const want of this.wanted) {
-      if (this.inFlight >= this.maxInFlight) break;
+      if (this.inFlight >= this.options.maxInFlight) break;
       if (!this.entries.has(want.url)) this.start(want);
     }
   }
@@ -253,7 +235,7 @@ export class TileCache {
         entry.state = "failed";
         entry.controller = undefined;
         entry.pinned = false;
-        this.options.onFailed?.(
+        this.options.onFailed(
           entry.url,
           (error as { status?: number } | undefined)?.status,
         );
@@ -278,12 +260,12 @@ export class TileCache {
   }
 
   private evict(required: Set<string>): void {
-    if (this.bytes <= this.budget) return;
+    if (this.bytes <= this.options.byteBudget) return;
     const candidates = [...this.entries.values()]
       .filter((e) => e.state === "ready" && !required.has(e.url))
       .sort((a, b) => a.lastUsed - b.lastUsed);
     for (const entry of candidates) {
-      if (this.bytes <= this.budget) break;
+      if (this.bytes <= this.options.byteBudget) break;
       this.entries.delete(entry.url);
       this.bytes -= entry.bytes;
       if (entry.image) releaseImage(entry.image);

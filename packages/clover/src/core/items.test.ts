@@ -1,7 +1,7 @@
 import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
 import audioJson from "../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import { p4 } from "../fixtures/presentation4";
-import { itemsOf, itemsOfManifest } from "./items";
+import { itemsOfCollection, itemsOfManifest } from "./items";
 
 describe("items", () => {
   it("makes one item per view, a spread named by its pages", () => {
@@ -22,7 +22,7 @@ describe("items", () => {
   });
 
   it("lists a Collection's members, linking to their homepage", () => {
-    const items = itemsOf({
+    const items = itemsOfCollection({
       type: "Collection",
       id: "https://example.org/c",
       items: [

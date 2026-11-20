@@ -1,12 +1,7 @@
 import type { MetadataItem } from "@iiif/presentation-3";
 import React, { forwardRef, useEffect, useState } from "react";
 
-import {
-  hasMarkup,
-  markdownToPlainText,
-  readAs,
-  toPlainText,
-} from "../core/text";
+import { hasMarkup, readAs, toPlainText } from "../core/text";
 import { type LanguageMapLike, localize } from "../core/value";
 import { languageProps } from "../i18n/direction";
 
@@ -70,6 +65,12 @@ type MarkupProps = {
   headingLevel?: number;
   /** The language to read the value in; the reader's by default. */
   language?: string;
+  /**
+   * How Markdown reads as plain text until the sanitizer arrives (`markdownToPlainText`,
+   * `core/markdown-text.ts`), from the parts that pass a `format`, the only values that
+   * can be Markdown: so a first view, whose values pass none, never loads it.
+   */
+  markdownText?: (markdown: string) => string;
 } & Omit<
   React.HTMLAttributes<HTMLElement>,
   "dangerouslySetInnerHTML" | "lang" | "dir"
@@ -98,7 +99,15 @@ const INLINE_ONLY = new Set([
 
 /** A IIIF language map, in the closest language, as sanitized HTML. Nothing when empty. */
 export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
-  { as: Tag = "span", markup, language, format, headingLevel, ...rest },
+  {
+    as: Tag = "span",
+    markup,
+    language,
+    format,
+    headingLevel,
+    markdownText,
+    ...rest
+  },
   ref,
 ) {
   const { text, lang } = localize(markup, language);
@@ -148,7 +157,7 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   ) : (
     // Until the sanitizer arrives, Markdown shows without its syntax.
     <Tag ref={ref} {...rest} {...written}>
-      {markdown ? markdownToPlainText(text) : toPlainText(text)}
+      {markdown && markdownText ? markdownText(text) : toPlainText(text)}
     </Tag>
   );
 });

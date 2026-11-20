@@ -5,26 +5,20 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { useClover } from "../../react/context";
 import { useReadingLanguages } from "../../react/readingLanguages";
 
-// The row, loaded only where there is a choice: most resources come in one language,
-// and most visitors' is the site's.
-const LanguageChoice = lazy(() =>
-  import("../../ui/LanguageChoice").then((module) => ({
-    default: module.LanguageChoice,
-  })),
-);
-
-/**
- * In a Panel's heading, what the toggle must leave room for: the section's label, and the
- * box over the heading's end that holds About's controls (`Sections`), whose width the
- * heading keeps clear.
+/*
+ * The row, loaded only where there is a choice: most resources come in one language,
+ * and most visitors' is the site's. About's fits beside the section's label
+ * (`besideHeading`), which loads with it.
  */
-const besideHeading = (place: HTMLElement) => {
-  const box = place.closest(".clover-sections-actions");
-  const label = box
-    ?.closest(".clover-sections-item")
-    ?.querySelector(".clover-sections-heading .clover-sections-label");
-  return box && label ? { box, label } : null;
-};
+const LanguageChoice = lazy(() =>
+  import("../../ui/LanguageChoice").then(
+    ({ LanguageChoice: Choice, besideHeading }) => ({
+      default: (props: React.ComponentProps<typeof Choice>) => (
+        <Choice {...props} fit={besideHeading} />
+      ),
+    }),
+  ),
+);
 
 const chooseInterface = (tag: string) =>
   void cloverI18n.chooseInterfaceLanguage(tag);
@@ -112,7 +106,6 @@ export function LanguageToggle({
         {...choice}
         nameKey="readingLanguage"
         part="clover-about"
-        fit={besideHeading}
         menu={menu}
       />
     </Suspense>

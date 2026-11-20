@@ -2,8 +2,6 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -26,16 +24,13 @@ import {
   useProvider,
 } from "../Primitives/resource";
 import { languageProps } from "../../i18n/direction";
+import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
 
 /**
  * `provider` and the `logo` on each: who provided the resource, IIIF's Agents, each with
  * its name, its logo and its homepage (Mat, 2026-10-24: "Provider and Logo components to
  * match the iiif properties").
  */
-
-/** A layout effect in the browser, an effect on the server (where there is no layout). */
-const useIsomorphicLayoutEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**
  * Told once a logo drawn for a provider has failed to load and left the page, so the

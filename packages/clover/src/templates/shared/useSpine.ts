@@ -1,7 +1,4 @@
-import { useEffect, useLayoutEffect } from "react";
-
-/* Layout effects only where there is a layout: a server render has none. */
-const useLayout = typeof window === "undefined" ? useEffect : useLayoutEffect;
+import { useIsomorphicLayoutEffect as useLayout } from "./useSlide";
 
 /**
  * How far down its bar a spine's toggle sits: at the top of `from` (the Body whose

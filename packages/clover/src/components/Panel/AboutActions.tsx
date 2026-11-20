@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useCallback, useState } from "react";
 
-import { type Rendering, useDownloads } from "../Download/downloads";
+import { useHasDownloads } from "../Download/hasDownloads";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { Tip } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
@@ -33,12 +33,11 @@ export function AboutActions({
   download?: boolean;
 }) {
   const choice = useLanguageToggle({ values: languages, interfaceLanguages });
-  const { page, all } = useDownloads();
-  const offered = download && page.length + all.length > 0;
+  const offered = useHasDownloads() && download;
   if (!choice && !offered) return null;
   return (
     <div className="clover-about-actions">
-      {offered && <DownloadButton page={page} all={all} />}
+      {offered && <DownloadButton />}
       {choice && (
         <LanguageToggle
           values={languages}
@@ -59,13 +58,7 @@ export function AboutActions({
  * closes it, Escape handing focus back to the button; open, it never covers where focus
  * has gone (WCAG 2.4.11).
  */
-function DownloadButton({
-  page,
-  all,
-}: {
-  page: Rendering[];
-  all: Rendering[];
-}) {
+function DownloadButton() {
   const { t, langOf } = useCloverTranslation();
   const [open, setOpen] = useState(false);
   const id = useUniqueId();
@@ -107,7 +100,7 @@ function DownloadButton({
             onClose={close}
             className="clover-about-download-menu"
           >
-            <DownloadGroups page={page} all={all} inPopover />
+            <DownloadGroups inPopover />
           </ControlMenu>
         </Suspense>
       )}

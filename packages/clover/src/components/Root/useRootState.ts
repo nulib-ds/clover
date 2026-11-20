@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -22,9 +21,9 @@ import { cloverI18n } from "../../i18n/config";
 import type { CloverContextValue } from "../../react/context";
 import { useRootContentState } from "../../react/useContentStateOutput";
 import { type BodyRenderer, sameRenderers } from "../Body/renderers";
+import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
 
-const useIsomorphicLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+const noop = () => {};
 
 /** What a Root is given about its content: every prop but its element's. */
 export interface RootStateOptions {
@@ -81,28 +80,34 @@ export function useRootState<Props extends RootStateOptions>({
 ] {
   const controlled = canvasId !== undefined;
   const manifestControlled = manifestId !== undefined;
-  const latest = useRef({
-    controlled,
-    manifestControlled,
-    onCanvasChange,
-    onStatusChange,
-    onManifestChange,
-    onSearchChange,
-  });
+  /*
+   * Set in each render, before anything reads it. The callbacks given, or none to call:
+   * plain calls, not `?.()`, which the build lowers to a temporary each.
+   */
+  const latest = useRef(
+    null as unknown as {
+      controlled: boolean;
+      manifestControlled: boolean;
+      onCanvasChange: NonNullable<typeof onCanvasChange>;
+      onStatusChange: NonNullable<typeof onStatusChange>;
+      onManifestChange: NonNullable<typeof onManifestChange>;
+      onSearchChange: NonNullable<typeof onSearchChange>;
+    },
+  );
   latest.current = {
     controlled,
     manifestControlled,
-    onCanvasChange,
-    onStatusChange,
-    onManifestChange,
-    onSearchChange,
+    onCanvasChange: onCanvasChange ?? noop,
+    onStatusChange: onStatusChange ?? noop,
+    onManifestChange: onManifestChange ?? noop,
+    onSearchChange: onSearchChange ?? noop,
   };
 
   const [clover] = useState<Clover>(() =>
     createClover({
       request,
-      onCanvasChange: (id) => latest.current.onCanvasChange?.(id),
-      onManifestChange: (id) => latest.current.onManifestChange?.(id),
+      onCanvasChange: (id) => latest.current.onCanvasChange(id),
+      onManifestChange: (id) => latest.current.onManifestChange(id),
       isControlled: () => latest.current.controlled,
       isManifestControlled: () => latest.current.manifestControlled,
     }),
@@ -123,12 +128,12 @@ export function useRootState<Props extends RootStateOptions>({
       const { status: next, error, search } = clover.store.get();
       if (search.query !== query) {
         query = search.query;
-        latest.current.onSearchChange?.(query);
+        latest.current.onSearchChange(query);
       }
       if (next === last) return;
       last = next;
       setStatus(next);
-      latest.current.onStatusChange?.(next, error);
+      latest.current.onStatusChange(next, error);
     });
   }, [clover]);
 

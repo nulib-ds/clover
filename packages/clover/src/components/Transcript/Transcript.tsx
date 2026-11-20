@@ -38,7 +38,7 @@ import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { CueTime } from "../../ui/Cue";
 import { FieldPill } from "../../ui/FieldPill";
 import { languageCode } from "../../i18n/languageCode";
-import { useSectionActions, useSectionShown } from "../../ui/Sections";
+import { useSectionActions, useSectionShown } from "../../ui/sectionContext";
 import type { StepsModel } from "../../ui/Steps";
 import { Tip } from "../../ui/Tip";
 import { useContainerName } from "../../i18n/useContainerName";

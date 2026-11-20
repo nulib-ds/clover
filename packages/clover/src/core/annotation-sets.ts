@@ -223,29 +223,7 @@ export function selectManifestSets(manifest: Manifest | null): AnnotationSet[] {
   return sets;
 }
 
-const manifestPages = new WeakMap<Manifest, AnnotationPageRef[]>();
 const NO_PAGES: AnnotationPageRef[] = [];
-
-/** Every annotation page the Manifest's Canvases name, in their order, fetched or not. */
-export function selectAnnotationPages(
-  manifest: Manifest | null,
-): AnnotationPageRef[] {
-  if (!manifest) return NO_PAGES;
-  let pages = manifestPages.get(manifest);
-  if (!pages) {
-    pages = (selectSequence(manifest).canvases as Json[]).flatMap((canvas) =>
-      (asArray(canvas.annotations) as Json[])
-        .filter((page) => page?.id)
-        .map((page) => ({
-          id: String(page.id),
-          canvasId: String(canvas.id),
-          fetched: Array.isArray(page.items),
-        })),
-    );
-    manifestPages.set(manifest, pages);
-  }
-  return pages;
-}
 
 const manifestCollections = new WeakMap<
   Manifest,

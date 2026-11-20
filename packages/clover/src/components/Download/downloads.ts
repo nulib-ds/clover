@@ -4,10 +4,11 @@ import { asArray } from "../../lib/asArray";
 import { useClover, useCloverSelector } from "../../react/context";
 
 /*
- * What there is to download, read apart from how the links are drawn (`Download.tsx`):
- * About decides by it whether to offer Download's button, whose links load with its
- * popover, so a page with a Panel never carries them until they are wanted (Mat,
- * 2026-10-30: the Default template's first view under 95 kB).
+ * What there is to download, read apart from how the links are drawn (`Download.tsx`),
+ * and loaded with them: About offers Download's button by `useHasDownloads`
+ * (`hasDownloads.ts`), whose links load with its popover, so a page with a Panel never
+ * carries them until they are wanted (Mat, 2026-10-30: the Default template's first view
+ * under 95 kB).
  */
 
 export interface Rendering {

@@ -5,7 +5,7 @@ import {
   selectAnnotationSets,
 } from "../../core/annotation-sets";
 import { type Clover, type CloverState, navigationOf } from "../../core/clover";
-import { tableOfContents } from "../../core/ranges";
+import { tableOfContents } from "../../core/contents";
 import {
   selectCanvas,
   selectPosition,

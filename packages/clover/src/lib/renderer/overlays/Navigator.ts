@@ -93,7 +93,6 @@ export class Navigator {
           height: draw.image.height,
           transform: draw.transform,
           crop: draw.crop,
-          opacity: 1,
           bleed: draw.bleed,
         });
       }

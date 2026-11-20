@@ -20,6 +20,7 @@ import {
 import { isSound, parseAnnotationTarget } from "../../core/annotations";
 import { bodiesOf } from "../../core/painting";
 import type { Rect, SceneImage } from "../../lib/renderer";
+import { markdownToPlainText } from "../../core/markdown-text";
 import { Markup } from "../../ui/Markup";
 import { Tip } from "../../ui/Tip";
 import { visuallyHidden } from "../../ui/visuallyHidden";
@@ -706,6 +707,7 @@ function PaintedText({
       as="div"
       markup={{ [item.body.language ?? "none"]: [item.body.value] }}
       format={item.body.format}
+      markdownText={markdownToPlainText}
       language={language}
     />,
     host,
@@ -874,6 +876,7 @@ export default function FrameAnimation({
                 as="p"
                 markup={{ [item.body.language ?? "none"]: [item.body.value] }}
                 format={item.body.format}
+                markdownText={markdownToPlainText}
                 language={language}
               />
             ))}

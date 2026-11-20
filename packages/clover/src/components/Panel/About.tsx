@@ -18,7 +18,7 @@ import {
   Summary,
   Thumbnail,
 } from "../Primitives/Primitives";
-import { useDownloads } from "../Download/downloads";
+import { useHasDownloads } from "../Download/hasDownloads";
 import { Provider } from "../Provider/Provider";
 import { titleTag, titled } from "../../ui/heading";
 import { Label } from "../Label/Label";
@@ -137,7 +137,7 @@ function AboutContent({
   ...rest
 }: AboutProps & { choice: React.ReactNode }) {
   const { t, langOf } = useCloverTranslation();
-  const downloads = useDownloads();
+  const downloads = useHasDownloads();
   const manifest = useCloverSelector(
     (state) => state.manifest as Record<string, any> | null,
     Object.is,
@@ -329,13 +329,9 @@ function AboutContent({
       )}
       {section(
         "download",
-        download && downloads.page.length + downloads.all.length > 0,
+        download && downloads,
         <Suspense fallback={null}>
-          <DownloadGroups
-            page={downloads.page}
-            all={downloads.all}
-            headingLevel={headingLevel + 1}
-          />
+          <DownloadGroups headingLevel={headingLevel + 1} />
         </Suspense>,
       )}
       {/* Its address, named "IIIF" whatever it is: a Manifest, a Canvas, an image

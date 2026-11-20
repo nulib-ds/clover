@@ -3,7 +3,7 @@ import {
   type ViewportSize,
   worldToScreen,
 } from "../camera/Camera";
-import { toCssMatrix } from "../math/affine";
+import { toCssMatrix } from "../math/cssMatrix";
 
 /**
  * A renderer's world layer, made the first time something is laid in it: over the DOM

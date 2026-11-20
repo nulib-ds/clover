@@ -58,7 +58,10 @@ button.clover-steps-step {
 button.clover-steps-step:is(:hover, :focus-visible):not(
     [aria-disabled="true"]
   ) {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
   color: var(--clover-color-control-glyph, #fff);
 }
 
@@ -67,13 +70,6 @@ button.clover-steps-step:is(:hover, :focus-visible):not(
  * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
  * its own ring.
  */
-:where([data-high-contrast])
-  button.clover-steps-step:is(:hover, :focus-visible):not(
-    [aria-disabled="true"]
-  ) {
-  background-color: var(--clover-accent-fill);
-}
-
 :where([data-high-contrast])
   button.clover-steps-step:hover:not(:focus-visible, [aria-disabled="true"]) {
   outline: var(--clover-accent-ring-hover);

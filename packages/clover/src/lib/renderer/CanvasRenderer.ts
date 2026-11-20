@@ -1020,7 +1020,7 @@ export class CanvasRenderer implements GestureTarget {
     this.gestures.dispose();
     this.resizeObserver?.disconnect();
     this.intersectionObserver?.disconnect();
-    this.dprQuery?.removeEventListener?.("change", this.onPixelRatioChange);
+    this.dprQuery?.removeEventListener("change", this.onPixelRatioChange);
     if (this.releaseTimer) clearTimeout(this.releaseTimer);
     this.navigator?.dispose();
     this.navigator = null;
@@ -1182,7 +1182,6 @@ export class CanvasRenderer implements GestureTarget {
           height: image.height,
           transform: draw.transform,
           crop: draw.crop,
-          opacity: 1,
           bleed: draw.bleed,
         });
         if (result !== "tainted" || image.kind === "bitmap") continue;
@@ -1505,11 +1504,11 @@ export class CanvasRenderer implements GestureTarget {
     ) {
       return;
     }
-    this.dprQuery?.removeEventListener?.("change", this.onPixelRatioChange);
+    this.dprQuery?.removeEventListener("change", this.onPixelRatioChange);
     this.dprQuery = window.matchMedia(
       `(resolution: ${window.devicePixelRatio || 1}dppx)`,
     );
-    this.dprQuery.addEventListener?.("change", this.onPixelRatioChange);
+    this.dprQuery.addEventListener("change", this.onPixelRatioChange);
   }
 
   private onPixelRatioChange = () => {

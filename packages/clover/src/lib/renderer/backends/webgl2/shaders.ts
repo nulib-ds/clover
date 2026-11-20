@@ -30,10 +30,9 @@ export const FRAGMENT_SHADER = `#version 300 es
 precision highp float;
 in vec2 v_uv;
 uniform sampler2D u_texture;
-uniform float u_opacity;
 out vec4 outColor;
 
 void main() {
-  outColor = texture(u_texture, v_uv, ${LOD_BIAS.toFixed(1)}) * u_opacity;
+  outColor = texture(u_texture, v_uv, ${LOD_BIAS.toFixed(1)});
 }
 `;

@@ -20,7 +20,12 @@ import Annotations, {
   wholeCanvasComments,
 } from "./Annotations";
 import type { CloverCanvasProps } from "./Canvas.types";
-import { type MediaPlacement, canvasRectToWorld, canvasScene } from "./layout";
+import {
+  type ChoiceSelections,
+  type MediaPlacement,
+  canvasRectToWorld,
+  canvasScene,
+} from "./layout";
 import { type TextUnit, readTextUnits } from "./textUnits";
 import { useSvgReader } from "./useSvgReader";
 import { isRegionText, parseAnnotationTarget } from "../../core/annotations";
@@ -58,12 +63,15 @@ export interface AnnotationModel {
   quietlyOpened: string | null;
   /** Whether the view has text to select (`TextLayer`), which the viewport's keys say. */
   hasText: boolean;
+  /** Pick a placed annotation by its id, its hotspot focused: whether one was placed. */
+  zoomTo: (id: string) => boolean;
 }
 
 export interface AnnotationStateProps {
   /** The Canvas's own props: its annotations and what the host says of them. */
   given: CloverCanvasProps;
-  annotations: CanvasAnnotation[];
+  /** The Choices' images chosen, whose annotations alone are drawn. */
+  selections: ChoiceSelections;
   scene: ReturnType<typeof canvasScene> | null;
   renderer: CanvasRenderer | null;
   /** Bumped as the scene is laid out: hotspots are placed again. */
@@ -94,7 +102,7 @@ export interface AnnotationStateProps {
  */
 export function AnnotationState({
   given,
-  annotations: allAnnotations,
+  selections,
   scene,
   renderer,
   sceneVersion,
@@ -122,6 +130,18 @@ export function AnnotationState({
     onAnnotationSelect,
     onAnnotationLink,
   } = given;
+  /*
+   * An annotation of one image of a `Choice` (Cookbook 0326: the X-ray's tag) is drawn
+   * while that image is the one chosen.
+   */
+  const allAnnotations = useMemo(
+    () =>
+      given.annotations!.filter(
+        (each) =>
+          !each.layer || (selections[each.layer.key] ?? 0) === each.layer.item,
+      ),
+    [given.annotations, selections],
+  );
   /*
    * AnnotationPages hidden from the picture: the host's (`hiddenPages`), or the Canvas's
    * own. Nothing of theirs is drawn, nor shown as a cue or in the caption; the menu still
@@ -575,6 +595,23 @@ export function AnnotationState({
     openMedia,
   ]);
 
+  // Its hotspot takes focus, as OpenSeadragon's overlay does in the Viewer.
+  const zoomTo = useCallback(
+    (id: string) => {
+      const annotation = placedAnnotations.find((a) => a.id === id);
+      if (!annotation) return false;
+      selectAnnotation(annotation);
+      Array.from(
+        renderer?.overlays?.container.querySelectorAll<HTMLElement>("[id]") ??
+          [],
+      )
+        .find((element) => element.id === id)
+        ?.focus({ preventScroll: true });
+      return true;
+    },
+    [placedAnnotations, selectAnnotation, renderer],
+  );
+
   const model = useMemo<AnnotationModel>(
     () => ({
       menu: menuAnnotations,
@@ -590,6 +627,7 @@ export function AnnotationState({
       release: releaseAnnotation,
       quietlyOpened,
       hasText,
+      zoomTo,
     }),
     [
       menuAnnotations,
@@ -605,6 +643,7 @@ export function AnnotationState({
       releaseAnnotation,
       quietlyOpened,
       hasText,
+      zoomTo,
     ],
   );
   // Before paint, so the Canvas draws with it in the same frame.

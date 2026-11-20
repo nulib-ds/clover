@@ -69,6 +69,21 @@ const later = (content: React.ReactNode) => (
   <Suspense fallback={null}>{content}</Suspense>
 );
 
+/**
+ * Each default section's title, in Clover's interface language, by its key: drawn in
+ * `PANEL_SECTIONS`' order (`usePanelSections`), as the Panel offers them.
+ */
+const SECTION_LABELS: Record<PanelSection, string> = {
+  about: "informationPanelTabsAbout",
+  targets: "informationPanelTabsTargets",
+  collection: "informationPanelTabsCollection",
+  contents: "informationPanelTabsContents",
+  search: "informationPanelTabsSearch",
+  map: "informationPanelTabsMap",
+  transcript: "transcriptLabel",
+  annotations: "informationPanelTabsAnnotations",
+};
+
 export type { PanelSection };
 
 /**
@@ -309,97 +324,39 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
         content: props.children,
         ...(props.value === "about" && { actions: aboutActions }),
       }))
-    : [
-        ...(has("about")
-          ? [
-              {
-                value: "about",
-                label: sectionLabel("about", "informationPanelTabsAbout"),
-                content: <About headingLevel={inner} download={download} />,
-                actions: aboutActions,
-              },
-            ]
-          : []),
-        ...(has("targets")
-          ? [
-              {
-                value: "targets",
-                label: sectionLabel("targets", "informationPanelTabsTargets"),
-                content: later(<Targets headingLevel={inner} />),
-              },
-            ]
-          : []),
-        ...(has("collection")
-          ? [
-              {
-                value: "collection",
-                label: sectionLabel(
-                  "collection",
-                  "informationPanelTabsCollection",
-                ),
-                content: later(<Collection headingLevel={inner} />),
-              },
-            ]
-          : []),
-        ...(has("contents")
-          ? [
-              {
-                value: "contents",
-                label: sectionLabel("contents", "informationPanelTabsContents"),
-                content: later(<Contents />),
-              },
-            ]
-          : []),
-        ...(has("search")
-          ? [
-              {
-                value: "search",
-                label: sectionLabel("search", "informationPanelTabsSearch"),
+    : offered.map((section) => ({
+        value: section,
+        label: sectionLabel(section, SECTION_LABELS[section]),
+        content:
+          section === "about" ? (
+            <About headingLevel={inner} download={download} />
+          ) : (
+            later(
+              section === "targets" ? (
+                <Targets headingLevel={inner} />
+              ) : section === "collection" ? (
+                <Collection headingLevel={inner} />
+              ) : section === "contents" ? (
+                <Contents />
+              ) : section === "search" ? (
                 // Its field small and held as the hits scroll (Mat, 2026-10-26).
-                content: later(
-                  <Search headingLevel={inner} sticky size="small" />,
-                ),
-              },
-            ]
-          : []),
-        ...(has("map")
-          ? [
-              {
-                value: "map",
-                label: sectionLabel("map", "informationPanelTabsMap"),
-                content: later(<RootMap />),
-              },
-            ]
-          : []),
-        ...(has("transcript")
-          ? [
-              {
-                value: "transcript",
-                label: sectionLabel("transcript", "transcriptLabel"),
+                <Search headingLevel={inner} sticky size="small" />
+              ) : section === "map" ? (
+                <RootMap />
+              ) : section === "transcript" ? (
                 // Its find field small and held as the cues scroll, as Search's.
-                content: later(<Transcript sticky size="small" />),
-              },
-            ]
-          : []),
-        ...(has("annotations")
-          ? [
-              {
-                value: "annotations",
-                label: sectionLabel(
-                  "annotations",
-                  "informationPanelTabsAnnotations",
-                ),
+                <Transcript sticky size="small" />
+              ) : (
                 /*
                  * Every Canvas's, by Canvas, those in view kept in sight; and first, what
                  * the resource puts on a map, where no Map section shows it.
                  */
-                content: later(
-                  <Annotations headingLevel={inner} places={!has("map")} />,
-                ),
-              },
-            ]
-          : []),
-      ];
+                <Annotations headingLevel={inner} places={!has("map")} />
+              ),
+            )
+          ),
+        ...(section === "about" && { actions: aboutActions }),
+      }));
 
   /*
    * A search started anywhere but the Search section opens it (Mat, 2026-10-26): a

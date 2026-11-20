@@ -1,8 +1,11 @@
+import { upgradePresentation3To4 } from "@iiif/parser/presentation-4/upgrader";
+
 import { keepFragments } from "./keep-fragments";
 
 /*
- * How a resource older than Presentation 4 is upgraded, loaded with the upgrader so a
- * page reading Presentation 4 never carries it, nor a part that upgrades nothing: first
+ * How a resource older than Presentation 4 is upgraded, the upgrader in its chunk, loaded
+ * as a fetch begins (`preloadUpgrader`), so a page reading Presentation 4 never carries
+ * it, nor a part that upgrades nothing: first
  * the fix for the upgrader's reading of fragmented targets (`keep-fragments.ts`); then,
  * for Presentation 2 alone, `@iiif/parser`'s reader of 2 (`convertPresentation2`, by
  * `upgrade-2.ts`), loaded only for it; then its upgrade from 3 (`upgradePresentation3To4`).
@@ -33,15 +36,12 @@ export function isPresentation2(resource: unknown): boolean {
 }
 
 /**
- * `resource` upgraded by `toFour` (`upgradePresentation3To4`), read as Presentation 3
- * first where it is 2 (`readPresentation2`).
+ * `resource` upgraded (`upgradePresentation3To4`), read as Presentation 3 first where it
+ * is 2 (`readPresentation2`).
  */
-export async function upgrade(
-  resource: unknown,
-  toFour: (resource: unknown) => unknown,
-): Promise<unknown> {
+export async function upgrade(resource: unknown): Promise<unknown> {
   const kept = keepFragments(resource);
-  if (!isPresentation2(resource)) return toFour(kept);
+  if (!isPresentation2(resource)) return upgradePresentation3To4(kept as never);
   const { readPresentation2 } = await import("./upgrade-2");
-  return toFour(readPresentation2(kept));
+  return upgradePresentation3To4(readPresentation2(kept) as never);
 }

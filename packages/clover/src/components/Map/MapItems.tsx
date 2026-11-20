@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 
-import { overlayItems } from "./overlayItems";
+import { overlayItems, pointing } from "./overlayItems";
 import type { Georeference, MapFeature } from "../../core/geo";
 import type { ItemModel } from "../../core/items";
 import type { CloverRequest } from "../../core/request";
@@ -89,7 +89,9 @@ export default function MapItems({
       className="clover-geomap-items"
       items={items}
       selected={index(selected)}
-      pointed={index(pointed)}
+      optionProps={pointing(index(pointed), (item) =>
+        onPoint(item?.id ?? null),
+      )}
       navigation="id"
       layout={layout}
       // Small as a row's picture shows; Items' own size in its other layouts.
@@ -100,7 +102,6 @@ export default function MapItems({
       secondary="navDate"
       nameKey="mapItemsLabel"
       onActivate={(item) => onChoose(item.id)}
-      onPoint={(item) => onPoint(item?.id ?? null)}
     />
   );
 }

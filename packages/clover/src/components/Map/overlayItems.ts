@@ -100,3 +100,22 @@ export function overlayItems(
     };
   });
 }
+
+/**
+ * The options of a list beside a map (`ItemsView`'s `optionProps`): the one pointed at on
+ * the map, by its index, ringed as the pointer rings one, at half strength; and each,
+ * under the pointer or focused, said to light it there (a map's outline of the sheet it
+ * is), `null` as it leaves, its roving focus kept.
+ */
+export const pointing =
+  (pointed: number, onPoint: (item: ItemModel | null) => void) =>
+  (item: ItemModel, index: number, roved: { onFocus: () => void }) => ({
+    "data-highlighted": index === pointed || undefined,
+    onMouseEnter: () => onPoint(item),
+    onMouseLeave: () => onPoint(null),
+    onFocus: () => {
+      roved.onFocus();
+      onPoint(item);
+    },
+    onBlur: () => onPoint(null),
+  });

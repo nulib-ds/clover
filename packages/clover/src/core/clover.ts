@@ -340,7 +340,17 @@ const INITIAL: CloverState = {
   targetIndex: null,
 };
 
-export function createClover(options: CloverOptions = {}): Clover {
+const noop = () => {};
+const never = () => false;
+
+export function createClover({
+  request: given,
+  // Plain calls, not `?.()`: the build lowers each optional call to a temporary.
+  onCanvasChange = noop,
+  onManifestChange = noop,
+  isControlled = never,
+  isManifestControlled = never,
+}: CloverOptions = {}): Clover {
   const store = createStore<CloverState>(INITIAL);
   const viewport = createChannel<ViewportState | null>(null);
   const media = createChannel<HTMLVideoElement | null>(null);
@@ -412,7 +422,7 @@ export function createClover(options: CloverOptions = {}): Clover {
     stateSets = [...stateSets, listed];
     store.set({ addedSets: added() });
   };
-  let request = options.request;
+  let request = given;
   let loading: AbortController | null = null;
   /** Referenced pages already asked for, so each is fetched once. */
   const requested = new Set<string>();
@@ -536,7 +546,7 @@ export function createClover(options: CloverOptions = {}): Clover {
         store.set({ addedSets: added() });
       });
     if (canvasId && canvasId !== initial.canvasId) {
-      options.onCanvasChange?.(canvasId);
+      onCanvasChange(canvasId);
     }
   };
 
@@ -553,14 +563,14 @@ export function createClover(options: CloverOptions = {}): Clover {
   /** Move to a Canvas, or ask a controlled host to. */
   const navigate = (canvasId: string | null, target: Target | null) => {
     if (!canvasId) return;
-    if (options.isControlled?.()) {
+    if (isControlled()) {
       if (target) store.set({ target });
-      options.onCanvasChange?.(canvasId);
+      onCanvasChange(canvasId);
       return;
     }
     const changed = store.get().canvasId !== canvasId;
     store.set({ canvasId, target });
-    if (changed) options.onCanvasChange?.(canvasId);
+    if (changed) onCanvasChange(canvasId);
   };
 
   const stepTo = (view: number, autoplay = false) => {
@@ -704,12 +714,12 @@ export function createClover(options: CloverOptions = {}): Clover {
    */
   const openAnnotation = (manifestId: string, id: string) => {
     pending = id;
-    if (options.isManifestControlled?.()) {
-      options.onManifestChange?.(manifestId);
+    if (isManifestControlled()) {
+      onManifestChange(manifestId);
       return;
     }
     void show({ id: manifestId, type: "Manifest" }).then(
-      (shown) => shown && options.onManifestChange?.(manifestId),
+      (shown) => shown && onManifestChange(manifestId),
     );
   };
 
@@ -787,12 +797,12 @@ export function createClover(options: CloverOptions = {}): Clover {
       if (isShown(id)) return;
       const member = memberOf(id);
       // Entering a nested Collection is not a choice of Manifest to ask the host about.
-      if (member.type !== "Collection" && options.isManifestControlled?.()) {
-        options.onManifestChange?.(id);
+      if (member.type !== "Collection" && isManifestControlled()) {
+        onManifestChange(id);
         return;
       }
       if (await show(member, canvasId)) {
-        options.onManifestChange?.(store.get().manifest!.id);
+        onManifestChange(store.get().manifest!.id);
       }
     },
     goToTarget(index) {
@@ -810,13 +820,13 @@ export function createClover(options: CloverOptions = {}): Clover {
         if (place) navigate(place.canvasId, place);
         return;
       }
-      if (options.isManifestControlled?.()) {
+      if (isManifestControlled()) {
         pendingPlace = place;
-        options.onManifestChange?.(target.manifestId);
+        onManifestChange(target.manifestId);
         return;
       }
       void show(memberOf(target.manifestId), place ?? undefined).then(
-        (shown) => shown && options.onManifestChange?.(target.manifestId),
+        (shown) => shown && onManifestChange(target.manifestId),
       );
     },
     async syncManifest(id) {

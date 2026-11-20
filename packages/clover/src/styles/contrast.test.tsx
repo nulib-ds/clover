@@ -8,9 +8,11 @@ import * as Clover from "../index";
 
 /*
  * The higher-contrast mode (`contrast.css`; Mat, 2026-10-29): where the accent fills what
- * carries a glyph or words, the part gives the mode's dark fill beside it, so an accent
- * that cannot carry white text still serves. Every stylesheet in the package is read. A
- * fill that is decoration alone, a line or a mark with nothing on it, is named here.
+ * carries a glyph or words, the part's fill reads the mode's dark fill first
+ * (`var(--clover-accent-fill, …)`), or gives it beside it, so an accent that cannot carry
+ * white text still serves. Every stylesheet in the package is read. A fill of the bare
+ * accent with neither is named, and a fill that is decoration alone, a line or a mark with
+ * nothing on it, is named here.
  */
 const SRC = resolve(__dirname, "..");
 

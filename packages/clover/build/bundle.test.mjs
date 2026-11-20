@@ -58,6 +58,8 @@ const LAZY_MODULES = [
   "/components/Canvas/ChoiceMenu.tsx",
   // The image controls' tray, only where the row cannot hold the view's controls.
   "/components/Canvas/ImageControls.tsx",
+  // The placeholder's glyphs (Play, the magnifiers), drawn by it and by the tray alone.
+  "/components/Body/placeholderGlyphs.tsx",
   // Off by default.
   "/lib/renderer/overlays/Navigator.ts",
   // Annotations as the content, an AnnotationPage or AnnotationCollection.

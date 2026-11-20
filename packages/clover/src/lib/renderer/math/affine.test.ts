@@ -5,9 +5,9 @@ import {
   rotate,
   scale,
   toClipMat3,
-  toCssMatrix,
   translate,
 } from "./affine";
+import { toCssMatrix } from "./cssMatrix";
 
 const close = (a: number, b: number) => expect(a).toBeCloseTo(b, 9);
 

@@ -1,11 +1,9 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useDragToClose } from "./useDragToClose";
 import type { useFollowFocus } from "./useFollowFocus";
 import { panelFocus, useSlide } from "./useSlide";
-
-const useIsomorphicLayoutEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
+import { useIsomorphicLayoutEffect } from "./useSlide";
 
 export interface DrawerOptions {
   /** The pane's `id`, which its toggle's `aria-controls` names. */

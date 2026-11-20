@@ -1,9 +1,5 @@
-import {
-  type Affine,
-  compose,
-  toCssMatrix,
-  translate,
-} from "../../math/affine";
+import { type Affine, compose, translate } from "../../math/affine";
+import { toCssMatrix } from "../../math/cssMatrix";
 import type { Rect } from "../../math/rect";
 
 export interface DomLayerItem {

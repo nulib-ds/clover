@@ -24,6 +24,12 @@ function sharedChunk() {
     // Most of Clover's sheets ride together (`sheetChunk`, `clover-sheets.mjs`).
     const sheets = sheetChunk(id);
     if (sheets) return sheets;
+    /*
+     * Markdown as plain text beside the rest of IIIF's text, as it was in one module: apart
+     * from it for React's first view (`core/markdown-text.ts`), which the property elements
+     * have with `clover-value`, it was a chunk of its own on their every page.
+     */
+    if (/\/src\/core\/(markdown-)?text\.ts$/.test(id)) return "text";
     if (!shared) {
       const reach = (from) => {
         const found = new Set();

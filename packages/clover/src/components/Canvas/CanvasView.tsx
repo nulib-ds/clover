@@ -46,7 +46,6 @@ import {
 } from "../../hooks/useHighContrast";
 import { ErrorBoundary } from "../../ui/ErrorBoundary";
 import { Loading } from "../../ui/Loading";
-import { focusSoon } from "../../ui/focusSoon";
 import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
@@ -112,6 +111,7 @@ const NO_MODEL: AnnotationModel = {
   release: () => false,
   quietlyOpened: null,
   hasText: false,
+  zoomTo: () => false,
 };
 // Few Canvases are animations: their clock and bar load when one is shown.
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
@@ -380,17 +380,9 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     setSelections((current) => ({ ...current, [key]: index }));
   /*
    * An annotation of one image of a `Choice` (Cookbook 0326: the X-ray's tag) is drawn
-   * while that image is the one chosen; one chosen elsewhere (the Annotations list)
-   * chooses its image, so it is drawn and framed.
+   * while that image is the one chosen (`AnnotationState`, from `selections`); one chosen
+   * elsewhere (the Annotations list) chooses its image, so it is drawn and framed.
    */
-  const layered = useMemo(
-    () =>
-      allAnnotations?.filter(
-        (each) =>
-          !each.layer || (selections[each.layer.key] ?? 0) === each.layer.item,
-      ),
-    [allAnnotations, selections],
-  );
   const pickedLayer = allAnnotations?.find(
     (each) => each.layer && each.annotation.id === props.selectedAnnotation,
   )?.layer;
@@ -514,11 +506,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   modelRef.current = model;
   const releaseAnnotation = useCallback(() => modelRef.current.release(), []);
   // The map control's box closed, and the box of a place asked for.
-  const closePlace = (restoreFocus: boolean) => {
+  // Focus goes back to its control, where it asks (`PlaceBox`'s `returnFocus`).
+  const closePlace = () => {
     setSwappedBox(null);
     setPlaceOpen(false);
-    if (restoreFocus)
-      focusSoon(() => document.getElementById(`place-${instance}`));
   };
   const closeAsked = () => {
     setSwappedBox(null);
@@ -533,7 +524,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * another is picked, and stays for it.
    */
   const bringBack = () => {
-    if (swappedBox === placeId) closePlace(false);
+    if (swappedBox === placeId) closePlace();
     else if (swappedBox === askedId) closeAsked();
   };
   // Picked beside it, each pick, the one selected already too (`refind`); never as it mounts.
@@ -1062,20 +1053,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         canvasHandle(
           renderer,
           () => drawnScene.current,
-          (id) => {
-            const annotation = modelRef.current.placed.find((a) => a.id === id);
-            if (!annotation) return false;
-            modelRef.current.select(annotation);
-            // Its hotspot takes focus, as OpenSeadragon's overlay does in the Viewer.
-            Array.from(
-              renderer.overlays?.container.querySelectorAll<HTMLElement>(
-                "[id]",
-              ) ?? [],
-            )
-              .find((element) => element.id === id)
-              ?.focus({ preventScroll: true });
-            return true;
-          },
+          (id) => modelRef.current.zoomTo(id),
         ),
       );
     });
@@ -1537,7 +1515,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         {hotspots && hasAnnotations && allAnnotations && (
           <hotspots.AnnotationState
             given={props}
-            annotations={layered ?? allAnnotations}
+            selections={selections}
             scene={scene}
             renderer={renderer}
             sceneVersion={sceneVersion}
@@ -1561,13 +1539,12 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
               open={pickOpen}
               swapped={placeSwapped && swappedBox === `place-of-${instance}`}
               onSwap={() => swapPlace(`place-of-${instance}`)}
-              onClose={(restoreFocus) => {
+              onClose={() => {
                 setSwappedBox(null);
                 setClosedPick(pickKey);
-                // Once it has gone, the Canvas back in sight (`focusSoon`).
-                if (restoreFocus)
-                  focusSoon(() => document.getElementById(pickedPlace.id));
               }}
+              // Once it has gone, the Canvas back in sight.
+              returnFocus={pickedPlace.id}
               feature={pickedPlace.feature}
               owner={canvases?.[0]}
               name={pickedPlace.name}
@@ -1583,6 +1560,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
               swapped={placeSwapped && swappedBox === placeId}
               onSwap={() => swapPlace(placeId)}
               onClose={closePlace}
+              returnFocus={`place-${instance}`}
               feature={shownPlaces.feature}
               canvases={shownPlaces.canvases}
               owner={canvases?.[0]}

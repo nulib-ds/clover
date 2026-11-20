@@ -12,7 +12,7 @@ import {
   type ContentsPart,
   currentContents,
   tableOfContents,
-} from "../../core/ranges";
+} from "../../core/contents";
 import { regionEntryId } from "../../core/annotation-sets";
 import { imageSource } from "../../core/thumbnail";
 import { localize } from "../../core/value";

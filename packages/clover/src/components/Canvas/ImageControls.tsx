@@ -4,7 +4,7 @@ import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { useContainerName } from "../../i18n/useContainerName";
 import { useOneOpen } from "../../ui/useOneOpen";
-import { CloseViewer, OpenViewer } from "../Body/glyphs";
+import { CloseViewer, OpenViewer } from "../Body/placeholderGlyphs";
 import { languageProps } from "../../i18n/direction";
 import { Tip, placeTipAgain } from "../../ui/Tip";
 

@@ -52,8 +52,10 @@ export type {
   SearchResults,
   SearchService,
 } from "../core/search-service";
-export { chaptersOf, currentContents, tableOfContents } from "../core/ranges";
-export type { Chapter, ContentsNode, ContentsPart } from "../core/ranges";
+export { chaptersOf } from "../core/ranges";
+export { currentContents, tableOfContents } from "../core/contents";
+export type { Chapter } from "../core/ranges";
+export type { ContentsNode, ContentsPart } from "../core/contents";
 export { cueAt, parseVtt } from "../core/vtt";
 export type { Cue } from "../core/vtt";
 

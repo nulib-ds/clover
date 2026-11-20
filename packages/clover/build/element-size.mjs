@@ -111,18 +111,16 @@ export const VIEWER_DIR = join(root, "dist/web-components/viewer");
 
 /**
  * What a Viewer loads as it opens a Presentation 2 or 3 resource, every one today, by its
- * keys in a chunk map: the upgrader, which a part's figure leaves out (`build/sizes.mjs`).
+ * key in a chunk map: the upgrade step, the upgrader in its chunk, which a part's figure
+ * leaves out (`build/sizes.mjs`).
  */
-export const UPGRADER = [
-  "node_modules/@iiif/parser/dist/presentation-4/upgrader.js",
-  "src/core/upgrade.ts",
-];
+export const UPGRADER = ["src/core/upgrade.ts"];
 
 /**
  * What a page with only a `<clover-viewer>` loads from `@nulib/clover/web-components/
  * viewer` to its first view: the entry and what it imports, the host that loads as the
  * viewer connects, with what it imports, the sheets among them, and the upgrader, which
- * the viewer's build takes from the elements' (`../upgrader-….mjs`). Its other lazy parts
+ * the viewer's build takes from the elements' (`../upgrade-….mjs`). Its other lazy parts
  * are left out, as a page's are.
  */
 export function viewerEntryFiles(dir = VIEWER_DIR) {

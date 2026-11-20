@@ -2,6 +2,7 @@ import type { MetadataItem } from "@iiif/presentation-3";
 import React, { useEffect, useState } from "react";
 
 import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
+import { markdownToPlainText } from "../../core/markdown-text";
 import { toPlainText } from "../../core/text";
 import { type LanguageMapLike, hrefLangOf, localize } from "../../core/value";
 import { join } from "../../lib/classnames";
@@ -123,6 +124,7 @@ export function Value({
       as={as}
       markup={value}
       format={format}
+      markdownText={markdownToPlainText}
       headingLevel={headingLevel}
       language={language}
       className={join("clover-value", className)}

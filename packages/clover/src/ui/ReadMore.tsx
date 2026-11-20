@@ -1,13 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useUniqueId } from "./useUniqueId";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { useRootLanguage } from "../i18n/useRootLanguage";
 import { languageProps } from "../i18n/direction";
-
-/** A layout effect in the browser, an effect on the server (where there is no layout). */
-const useIsomorphicLayoutEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
+import { useIsomorphicLayoutEffect } from "../hooks/useIsomorphicLayoutEffect";
 
 /**
  * "Read more" for text cut short. Its one child is clamped by its own CSS (a

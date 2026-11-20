@@ -6,7 +6,7 @@ import {
 import { hasGeoreferences, hasMapData } from "../../core/geo-detect";
 import { isImageServiceManifest } from "../../core/load";
 import { searchServiceOf } from "../../core/search-service";
-import { tableOfContents } from "../../core/ranges";
+import { hasContents } from "../../core/ranges";
 import { partOfCollection, selectVisibleCanvases } from "../../core/selectors";
 import { selectListedSets } from "../../core/annotation-sets";
 import type { CloverState } from "../../core/clover";
@@ -67,7 +67,7 @@ const HAS: Record<
   collection: (state, partOf) =>
     (state.collection?.items?.length ?? 0) > 0 ||
     Boolean(partOf && partOfCollection(state.manifest)),
-  contents: (state) => tableOfContents(state.manifest).length > 0,
+  contents: (state) => hasContents(state.manifest),
   search: (state) => Boolean(searchServiceOf(state.manifest)),
   map: (state) => hasMapData(state.manifest, state.collection),
   transcript: (state) =>

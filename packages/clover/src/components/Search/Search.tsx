@@ -15,7 +15,7 @@ import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { titleTag } from "../../ui/heading";
-import { useSectionOpened } from "../../ui/Sections";
+import { useSectionOpened } from "../../ui/sectionContext";
 import { FieldPill } from "../../ui/FieldPill";
 import type { StepsModel } from "../../ui/Steps";
 import { languageProps } from "../../i18n/direction";

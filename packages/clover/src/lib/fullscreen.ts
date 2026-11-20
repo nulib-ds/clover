@@ -15,10 +15,6 @@ type PrefixedDocument = Document & {
   webkitExitFullscreen?: () => Promise<void> | void;
 };
 
-type PrefixedVideo = HTMLVideoElement & {
-  webkitEnterFullscreen?: () => void;
-};
-
 /** The element currently full screen, if any. */
 export const getFullscreenElement = (): Element | null => {
   if (typeof document === "undefined") return null;
@@ -52,49 +48,6 @@ export const getCloverRoot = (from: Element | null): HTMLElement | null => {
 };
 
 /**
- * Hand `video` to the system player (iPhone Safari), which takes only a video on the page.
- * One not on the page (sound, which the scene never places) is placed in its Canvas for as
- * long as the player has it: first, at full size under the viewport, which paints over
- * it, so it is laid out like any video rather than hidden. It is the same element that
- * plays, so playback carries on in the page when the player closes.
- */
-const enterNativeFullscreen = (video: PrefixedVideo, from: Element) => {
-  if (typeof video.webkitEnterFullscreen !== "function") return;
-  const canvas = from.closest(".clover-canvas");
-  const placed = !video.isConnected && Boolean(canvas);
-  if (placed && canvas) {
-    const style = video.getAttribute("style");
-    // In the viewport's layer, and first in it, so beneath the viewport.
-    video.style.cssText =
-      "position:absolute;inset:0;z-index:-1;width:100%;height:100%;object-fit:contain;pointer-events:none";
-    canvas.prepend(video);
-    video.addEventListener(
-      "webkitendfullscreen",
-      () => {
-        video.remove();
-        if (style === null) video.removeAttribute("style");
-        else video.setAttribute("style", style);
-      },
-      { once: true },
-    );
-  }
-  const enter = () => {
-    try {
-      video.webkitEnterFullscreen?.();
-    } catch {
-      // Declined: not ready, or not allowed. The reader stays in the page.
-    }
-  };
-  /*
-   * A video just placed has never been drawn, and a player handed it at once shows only
-   * black: it is given a frame to be laid out first. Safari still counts the reader's
-   * press as the gesture then. One on the page already goes at once.
-   */
-  if (placed) requestAnimationFrame(enter);
-  else enter();
-};
-
-/**
  * Enter or leave full screen for the Clover root containing `from`.
  *
  * Must be called from within a user gesture — browsers reject a request that is not, and they
@@ -106,8 +59,12 @@ const enterNativeFullscreen = (video: PrefixedVideo, from: Element) => {
  */
 export const toggleFullscreen = async (
   from: Element | null,
-  /** A video that may go full screen on its own where the root cannot (iPhone Safari). */
-  video?: HTMLVideoElement | null,
+  /**
+   * What may go full screen instead where the root cannot (iPhone Safari), called within
+   * the same press: a transport hands its video to the system player
+   * (`enterNativeFullscreen`, `lib/videoFullscreen.ts`).
+   */
+  alone?: (from: Element) => void,
 ) => {
   const root = getCloverRoot(from);
   if (!root) return;
@@ -121,7 +78,7 @@ export const toggleFullscreen = async (
 
     if (!isFullscreenSupported()) {
       // iPhone: the video alone, in the system player. It leaves by its own Done button.
-      if (video && from) enterNativeFullscreen(video as PrefixedVideo, from);
+      if (alone && from) alone(from);
       return;
     }
     const element = root as PrefixedElement;

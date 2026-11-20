@@ -3,6 +3,7 @@ import React from "react";
 import type { AnnotationBodyEntry } from "../../core/annotation-bodies";
 import { shownBodies } from "../../core/shown-bodies";
 import { useBodyAlt } from "../../ui/bodyAlt";
+import { markdownToPlainText } from "../../core/markdown-text";
 import { Markup } from "../../ui/Markup";
 import { languageProps } from "../../i18n/direction";
 
@@ -45,6 +46,7 @@ export function EntryBodies({
               as="div"
               markup={{ [body.language ?? "none"]: [body.value ?? ""] }}
               format={body.format}
+              markdownText={markdownToPlainText}
               headingLevel={headingLevel}
               language={language}
               className="clover-annotations-text"

@@ -1,4 +1,5 @@
-import { markdownToPlainText, readAs, toPlainText } from "./text";
+import { markdownToPlainText } from "./markdown-text";
+import { readAs, toPlainText } from "./text";
 
 describe("markdownToPlainText", () => {
   it("takes Markdown's syntax off, so a name never reads it out", () => {
