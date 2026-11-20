@@ -8,7 +8,7 @@ import {
   scale,
   translate,
 } from "../math/affine";
-import { type Rect, transformRect, union } from "../math/rect";
+import { type Rect, containAspect, transformRect, union } from "../math/rect";
 import { type Rotation, parseRegion, parseRotation } from "./regions";
 import {
   type FetchInfoOptions,
@@ -52,8 +52,9 @@ export interface SceneImage {
    */
   rotation?: string;
   /**
-   * Where the image goes in the world, scaled to fill it — a painting annotation's
-   * target on its Canvas. Without one, images are laid side by side.
+   * Where the image goes in the world — a painting annotation's target on its Canvas —
+   * fitted inside it at its own shape and centered, never stretched to fill it. Without
+   * one, images are laid side by side.
    */
   placement?: Rect;
   /**
@@ -313,14 +314,20 @@ function shownContent(item: SceneItem): { width: number; height: number } {
 }
 
 /**
- * Side by side, each scaled to the first item's height — the strip OpenSeadragon's
- * multi-image world produced — in the first item's own coordinates.
+ * Each in its place, fitted inside it at its own shape and centered (Mat, 2026-11-19:
+ * "fit to bounds. never let it escape the bounds of declared canvas/image. but match
+ * aspect ratio to fit and not fill. center."), as a video is: its shape is its pixels'
+ * as shown, since a body or Canvas may declare a size its file does not have (Bergen's
+ * 1024 × 1024 for a 1024 × 690 photograph). The world is the places, the Canvases as
+ * declared. Without places, side by side, each scaled to the first item's height — the
+ * strip OpenSeadragon's multi-image world produced — in the first item's own coordinates.
  */
 export function layoutItems(items: SceneItem[]): Rect | null {
   if (!items.length) return null;
   if (items.every((item) => item.spec.placement)) {
-    for (const item of items) item.rect = { ...item.spec.placement! };
-    return union(items.map((item) => item.rect));
+    for (const item of items)
+      item.rect = containAspect(item.spec.placement!, item.turn ?? item.clip);
+    return union(items.map((item) => item.spec.placement!));
   }
   const height = shownContent(items[0]).height;
   let x = 0;

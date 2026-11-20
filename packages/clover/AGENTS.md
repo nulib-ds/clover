@@ -2388,11 +2388,20 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
 - Painters sit behind one `Backend` interface. WebGL2 is primary and Canvas2D is a
   full-fidelity fallback. `DomLayers` positions real `<img>`/`<video>` elements with the same
   camera transform.
+- **An image keeps its shape** (Mat, 2026-11-19: "fit to bounds. never let it escape the
+  bounds of declared canvas/image. but match aspect ratio to fit and not fill. center."):
+  `layoutItems` fits each image inside its `placement` at the shape of its pixels as shown
+  (`turn ?? clip`), centered (`containAspect`, `math/rect.ts`, which a video's fit shares),
+  so a body or Canvas that declares a size its file does not have (Bergen's 1024 × 1024 for
+  a 1024 × 690 photograph) is never stretched. The Canvas stays the source of truth and the
+  image exists within it (Mat, 2026-11-19): the world stays the places, the Canvases as
+  declared, so annotations keep their Canvas coordinates. Images without places keep their
+  declared coordinates.
 - **An image is turned by the renderer, never by its server** (Cookbook 0040, 2026-10-29):
   an `ImageApiSelector`'s `rotation` (`resolveBody`, `Canvas/layout.ts`) reaches
   `SceneImage.rotation` as written, and `prepareItem` makes it a `turn`
   (`scene/sceneItem.ts`): the clip turned about its middle, mirrored first after `!`, into
-  its bounding box, which fills `placement`. Tiles are asked unturned (rotation `0`, which
+  its bounding box, which is fitted inside `placement`. Tiles are asked unturned (rotation `0`, which
   every server gives, whatever its `info.json` offers), and the turn is one more affine in
   each draw's transform. What reads an item's pixels from the world goes through
   `orientOf`, `shownToPixels` and `itemToWorld`, never `clip` and `rect` alone, so a turned
