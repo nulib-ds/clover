@@ -163,8 +163,9 @@ export function createEngine(
 
 /**
  * A model, placed as the Scene says: its transforms in the order given, each around what
- * came before, then moved to its point. A turn is about the Scene's own axes, `x` first,
- * then `y`, then `z` (Presentation 4), which is three.js's `ZYX`.
+ * came before, then moved to its point. A turn is an intrinsic Euler rotation in XYZ
+ * order, each axis as the turns before it left it, which is three.js's `XYZ`
+ * (IIIF/api#2504; `rotation` in `lib/gltf/mat4.ts`).
  */
 function place(
   model: Object3D,
@@ -183,7 +184,7 @@ function place(
           (step.x * Math.PI) / 180,
           (step.y * Math.PI) / 180,
           (step.z * Math.PI) / 180,
-          "ZYX",
+          "XYZ",
         ),
       );
     node = group;

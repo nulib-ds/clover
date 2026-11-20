@@ -66,8 +66,10 @@ export const translation = (move: Vec3) =>
 export const scaling = (scale: Vec3) => compose([0, 0, 0], [0, 0, 0, 1], scale);
 
 /**
- * A turn about the space's own axes, in degrees: `x` first, then `y`, then `z`, as a
- * Presentation 4 `RotateTransform` turns.
+ * A Presentation 4 `RotateTransform`'s turn, in degrees: an intrinsic Euler rotation in
+ * XYZ order, `x` first, then `y` about the axes the `x` turn left, then `z` about the
+ * axes those two left (`Rx · Ry · Rz`). It is three.js's `XYZ`, as manifesto-3d and the
+ * other Presentation 4 viewers read it (IIIF/api#2504).
  */
 export function rotation([x, y, z]: Vec3): Mat4 {
   const about = (axis: 0 | 1 | 2, degrees: number) => {
@@ -82,7 +84,7 @@ export function rotation([x, y, z]: Vec3): Mat4 {
     m[j * 4 + j] = c;
     return m;
   };
-  return multiply(about(2, z), multiply(about(1, y), about(0, x)));
+  return multiply(about(0, x), multiply(about(1, y), about(2, z)));
 }
 
 /** A perspective projection, its vertical field of view in radians. */

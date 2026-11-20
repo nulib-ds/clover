@@ -11,6 +11,37 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **A Scene's `RotateTransform` turns as an intrinsic Euler rotation in XYZ order.**
+  Each turn is about the axes the turns before it left: `x`, then `y` about the model as
+  `x` turned it, then `z`. This is three.js's `XYZ`, and how manifesto-3d, MorphoSource,
+  Kompakkt, Voyager and X3D read Presentation 4, which names the order but not the axes
+  (IIIF/api#2504). Clover turned about the Scene's fixed axes before (extrinsic, three.js's
+  `ZYX`), so IIIF's own test, the tipped astronaut, stood tipped back. Both Scene engines
+  change alike. A transform that turns about one axis, as most do, places its model as
+  before. One that turns about two or three axes now places it as those viewers do. To
+  keep a placement written for the old reading, list the turns one axis at a time, in
+  the order the Scene's fixed axes took them:
+
+  ```json
+  "transform": [
+    { "type": "RotateTransform", "x": 30 },
+    { "type": "RotateTransform", "y": 45 },
+    { "type": "RotateTransform", "z": 60 }
+  ]
+  ```
+
+  where it read `{ "type": "RotateTransform", "x": 30, "y": 45, "z": 60 }`.
+
+### Changed
+
+- **Four size budgets rise by 50 B**, each crossed by a few bytes as the Scene's
+  renamed chunk changed the names the pages import: the Gallery template's first view
+  (53,751 B gzip, now 53,800), the four parts as elements (107,213 B, 107,250), a
+  `<clover-canvas>` alone (93,852 B, 93,900) and the Document template as an element
+  (149,401 B, 149,450) (`build/size-budget.json`).
+
 ## [4.12.0] - 2026-11-20
 
 ### Changed
