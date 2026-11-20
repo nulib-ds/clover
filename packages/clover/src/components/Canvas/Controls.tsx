@@ -280,9 +280,16 @@ const Controls: React.FC<CanvasControlsProps> = ({
     ? ownChoiceLabel.lang
     : langOf("canvasChoice");
   const menuId = `${choiceId}-menu`;
+  /*
+   * The annotations menu's code, with its look, as its control is first pointed at,
+   * focused or pressed (Mat, 2026-11-20: "do both"), never just as the Canvas has
+   * annotations, so a page that never opens it never loads it; a press before it has
+   * come opens it as it comes.
+   */
+  const [annotationsWanted, setAnnotationsWanted] = useState(false);
   const AnnotationMenu = useLoaded(
     loadAnnotationMenu,
-    Boolean(showAnnotations),
+    Boolean(showAnnotations) && (annotationsWanted || annotationsOpen),
   )?.default;
   const ChaptersMenu = useLoaded(loadChaptersMenu, showChapters)?.default;
   const ChoiceMenu = useLoaded(loadChoiceMenu, choices.length > 0)?.default;
@@ -313,6 +320,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
       label={annotationsLabel}
       lang={annotationsLang}
       onClick={() => setAnnotationsOpen((open) => !open)}
+      onPrepare={() => setAnnotationsWanted(true)}
       expanded={annotationsOpen}
       controls={annotationsMenuId}
     >
