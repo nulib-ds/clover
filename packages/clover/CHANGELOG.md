@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.11.5] - 2026-11-19
+
 ### Changed
 
 - **Tiles in the form each image server answers fastest.** Clover joins a service's
