@@ -84,6 +84,18 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   The size budgets come down with them (`build/size-budget.json`). Nothing to change, but
   for the strict policy above.
 
+- **The templates leave their ground to the page.** The information panel beside the
+  Body, in every template, and the Document template around its pages (its toolbar,
+  thumbnails and panel) no longer paint Clover's background (`--clover-color-secondary`)
+  behind themselves: the page's shows through, as it does around every part. The Body
+  keeps its own, as does Document's column of pages; a panel that slides over the rest
+  as a drawer, and every menu and popup, keep Clover's background, as they cover what is
+  under them. What holds in view over a scrolling panel, the headings of an accordion and
+  the find fields of Search and the Transcript, is on Clover's background too: where the
+  page's ground is not white, set `--clover-color-secondary` to it, as the docs do. To
+  keep a ground behind a template, give `.clover-template-panel` or
+  `.clover-template-document` a `background`.
+
 ## [4.11.6] - 2026-11-19
 
 ### Fixed

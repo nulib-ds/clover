@@ -114,6 +114,14 @@ schedule excuses a failure.
   sub-sections, Search's pages, Annotations' sets and Canvases, Download's groups. Clover
   styles those itself, as a control's look is its own. A new title follows the first rule;
   a new section heading the second.
+- **The ground is the page's** (Mat, 2026-11-20: "bg should be transparent (not set).
+  only the canvas/body should have one"). No part and no template region paints a
+  background behind itself: not the panel beside the Body, nor Document's toolbar,
+  thumbnails or panel. Only the Body has one (and Document's column of pages, the ground
+  its Bodies sit on). What covers other content is on Clover's background,
+  `--clover-color-secondary`, which a page sets to its own ground: a drawer over the
+  rest, a menu or popup, the map laid over Document's pages, and what holds in view over
+  a scrolling list (an accordion's headings, Search's and the Transcript's find fields).
 - **No shadow root.** Clover's web components render into their own children, light DOM,
   as its React parts render into the page: the page's CSS reaches every part, its font,
   size and custom properties with it, Clover's rules stay in `@layer clover` under the

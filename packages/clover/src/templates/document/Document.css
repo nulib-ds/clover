@@ -33,7 +33,11 @@
    */
   min-height: min-content;
   overflow: hidden;
-  background-color: var(--clover-color-secondary, #fff);
+  /*
+   * No ground of its own, nor its thumbnails' (Mat, 2026-11-20: "bg should be transparent
+   * (not set). only the canvas/body should have one"): the page's shows through, around
+   * the pages' column and its Bodies.
+   */
   color: var(--clover-color-primary, #1a1d1e);
 }
 
@@ -718,7 +722,6 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
   overflow: hidden;
   /* No room of its own: the list's is inside what scrolls (below). */
   padding: 0;
-  background-color: var(--clover-color-secondary, #fff);
 }
 
 /*
@@ -1601,7 +1604,7 @@ button.clover-template-document-live-play:focus-visible {
  * Its places out of sight ("don't show evanston/map options in this case"), but not out
  * of reach: the list is the keyboard's way to each place, and what the map's description
  * says follows it (WCAG 2.1.1, 1.3.1). With focus in it, it shows over the map's foot,
- * the inset in, on the panel's ground, scrolling past half the map's height.
+ * the inset in, on Clover's background, scrolling past half the map's height.
  */
 .clover-template-document-map .clover-geomap-items:not(:focus-within) {
   position: absolute;

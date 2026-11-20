@@ -119,7 +119,7 @@
 
 /*
  * Held in view (`sticky`; Mat, 2026-10-26: as the Panel's Search is): the find field and
- * its steps, on the panel's own color with `xs` of it above and below (drawn back by as
+ * its steps, on Clover's background with `xs` of it above and below (drawn back by as
  * much, so nothing moves at rest), at the top of the box that scrolls the cues
  * (`--clover-transcript-top` to set it lower), or in an accordion under the stuck
  * headings, up to its own (`ui/Sections.css`). A cue scrolled to or followed lands clear

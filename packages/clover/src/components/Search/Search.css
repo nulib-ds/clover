@@ -14,7 +14,7 @@
 }
 
 /*
- * Held in view (`sticky`): the field, on the panel's own color with `xs` of it above and
+ * Held in view (`sticky`): the field, on Clover's background with `xs` of it above and
  * below (drawn back by as much, so nothing moves at rest), so it reads as one with the
  * heading over it (Mat, 2026-10-26: "modern is the look"), at the top of the box that
  * scrolls the hits (`--clover-content-search-top` to set it lower, under a page's own
@@ -51,7 +51,7 @@
 
 /*
  * Hits passing under the held field fade into it rather than being cut at its foot: a
- * band of the panel's own color, `l` deep, clearing to nothing, once the hits have
+ * band of Clover's background, `l` deep, clearing to nothing, once the hits have
  * scrolled. Its opacity alone changes, driven by the scroll, no script; where
  * scroll-driven animation is not supported, the hits meet the field's foot plainly. In
  * an accordion it takes the place of the open heading's shadow (`ui/Sections.css`), so
