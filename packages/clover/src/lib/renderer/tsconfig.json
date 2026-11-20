@@ -1,0 +1,14 @@
+{
+  /*
+   * The renderer's classes assign their fields (`this.field = value` at the top of the
+   * constructor) rather than define them. Defined, a field with no initializer is
+   * declared and then assigned in its constructor again (92 B gzip more on the Default
+   * template's first view, 2026-11-20), and a bundler building for browsers older than
+   * Clover's (`build/browsers.mjs`) turns each into an `__publicField` call, its helper
+   * copied into every module. Nothing here extends a class with accessors, so assigning
+   * and defining set the same own properties; a field with no initializer is assigned in
+   * its constructor (or only read as `if (this.field)`).
+   */
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": { "useDefineForClassFields": false }
+}

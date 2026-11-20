@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+import { BROWSERS } from "./build/browsers.mjs";
 import { lazySheets } from "./build/clover-sheets.mjs";
 import { ENTRIES } from "./build/entries.mjs";
 import { inlineMapLibreWorker } from "./build/maplibre-worker.mjs";
@@ -80,6 +81,8 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    // For the browsers the stylesheet needs, so nothing they read is rewritten.
+    target: BROWSERS,
     minify: false,
     sourcemap: false,
     lib: {

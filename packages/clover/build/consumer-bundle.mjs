@@ -21,6 +21,8 @@ import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { build } from "vite";
 
+import { BROWSERS } from "./browsers.mjs";
+
 /** React, as an app bundles it: in a chunk of its own (`first-view.mjs` builds so too). */
 const REACT = /node_modules\/(react|react-dom|scheduler)\//;
 
@@ -39,6 +41,9 @@ export async function bundleAsConsumer(contents) {
       root: out,
       build: {
         write: false,
+        // For Clover's browsers (`browsers.mjs`), as an app for them builds: one for older
+        // ones would rewrite Clover's syntax for browsers that already draw none of it.
+        target: BROWSERS,
         minify: "esbuild",
         modulePreload: { polyfill: false },
         rollupOptions: {

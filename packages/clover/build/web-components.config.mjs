@@ -1,3 +1,4 @@
+import { BROWSERS } from "./browsers.mjs";
 import { transform } from "esbuild";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -93,6 +94,8 @@ export default defineConfig({
     outDir: "dist/web-components",
     emptyOutDir: true,
     sourcemap: false,
+    // As the package's: the browsers the stylesheet needs (`browsers.mjs`).
+    target: BROWSERS,
     minify: "esbuild",
     // Which chunk holds each element's code, for measuring a page of some of them
     // (`build/element-size.mjs`).
