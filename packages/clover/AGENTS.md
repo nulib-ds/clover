@@ -32,9 +32,12 @@ every rule below.
   never over a control's focus ring (`:not(:focus-visible)`). Nothing eases in it (Mat,
   2026-10-29: eased, a ring blinked in from the glyph's color): `--clover-transition` is
   `none` there, and a control with a transition of its own stops it in its mode rule. Text in the accent falls back
-  through `--clover-accent-text-fallback`. A new accent fill under a glyph or words gets
-  its mode rule beside it, in its part's stylesheet: `styles/contrast.test.tsx` fails
-  naming it otherwise, and a fill that is decoration alone goes on its `DECORATION` list.
+  through `--clover-accent-text-fallback`. A new accent fill under a glyph or words reads
+  the mode's fill first, `var(--clover-accent-fill, var(--clover-color-accent, #0065c3))`,
+  which `contrast.css` sets inside the mode alone, so the one rule serves both (its rings
+  in a mode rule beside it), or gives the mode's fill in such a rule, in its part's
+  stylesheet: `styles/contrast.test.tsx` fails naming it otherwise, and a fill that is
+  decoration alone goes on its `DECORATION` list.
 - **What a resource `provides`** (Mat, 2026-10-29: "an important inclusion in
   presentation 4.0 … valuable for accessibility reasons and annotation guidance going
   forward"). Presentation 4 puts `provides` on a `supplementing` annotation to say what
@@ -115,19 +118,53 @@ every rule below.
   into `dist/styles.css` (esbuild), which `build/styles.mjs` wraps in `@layer clover`.
   Keep the aggregate's imports plain: the docs import it from source, and Next 14 reads
   `@import … layer()` as a media query that never matches. Package JS never imports CSS.
-  Only the part sheets of what loads as it draws, a recording's, a Scene's, a map's and
-  a vertical slider's (`lazyParts`, `build/clover-sheets.mjs`), come with their code
-  instead, and `styles.css` leaves them out (the docs, from source, take the list
-  whole): the React build (`lazySheets`) has every module that draws what they style
-  (their sheets' `OWNERS`) hand its sheet to `ui/adoptSheet.ts`, which the document
-  adopts (a constructed sheet, after every other, which a strict CSP allows; a `<style>`
-  where a browser cannot adopt one). A call, never an import for its side effect, which
-  `sideEffects` would let a bundler drop. A way of drawing a part that is seldom wanted
+  Only the part sheets of what loads as it draws, a recording's, a Scene's, a map's, a
+  vertical slider's, the pager's, the Panel's sections' and a Canvas's hotspots' and
+  placeholder's (`LAZY_PARTS`, `build/clover-sheets.mjs`; the sections' since Mat,
+  2026-11-20: "Yes, move them", the rest that day: "Yes, split them"), come with their
+  code instead,
+  and `styles.css` leaves them out (the docs, from source, take the list whole): the
+  React build (`lazySheets`) has every module that draws what they style (their sheets'
+  `OWNERS`) hand its sheet to `ui/adoptSheet.ts`, which the document adopts (a
+  constructed sheet, after every other, which a strict CSP allows; a `<style>` where a
+  browser cannot adopt one, given the page's nonce, `ui/cspNonce.ts`, as the elements'
+  are). A call, never an import for its side effect, which `sideEffects` would let a
+  bundler drop. Such a sheet never shifts the layout (Mat, 2026-11-20: "make sure lazy
+  loaded css doesn't have any client/run layout shifts"): it styles only what its own
+  code draws, which no server's HTML holds (but a Map's box, as a page whose server
+  draws a Map imports its sheet), so it is in the page before that code's first paint
+  and restyles nothing already drawn; `build/styles.test.mjs` fails on a part that draws
+  what it styles, a tie it would flip, a property it reads that another part sets, and
+  a server's HTML holding what it styles. What is drawn before that code comes keeps its
+  rules up front: the Canvas held back behind a placeholder (`data-placeholder`) and the
+  overlay layer the hotspots share with a picture's text (`Canvas.css`), and the count a
+  header draws where no pager is (`Position.css`).
+  A sheet several such parts draw with is a part sheet of its own (`SHARED`; Mat,
+  2026-11-20: "Shared sheets"), adopted by each of its owners, so it comes with whichever
+  is first: the sections' rows (`Panel/Rows.css`) and the language codes (`ui/Codes.css`).
+  Never one a first view draws, or a module that draws it from its first paint: the steps
+  (`ui/Steps.css`, the Panel's tab row and the Canvas's tray step with its buttons), a
+  menu's and a cue's rules (the transport writes them, and every Timeline would carry
+  them from its first view), nor one a public part draws with what a page hands it, which
+  a server may draw (`ui/Inset.css`). A section's rule that overrides a shared one is
+  named by the section's root (`.clover-transcript .clover-transcript-cues`), so it
+  wins whichever sheet comes in first, and a template's outweighs a shared one, as such
+  a sheet comes after `templates.css`. `build/styles.test.mjs` fails on a module that
+  draws what a sheet loaded with its code styles without bringing it (adopting it,
+  importing a module that does, or drawn only by modules that do; a class built from a
+  prefix, `${part}-languages`, is its template's), and on a tie by a shorthand and its
+  longhand (`margin` and `margin-inline-start`), not only by one name. A module that
+  imports a helper from one that adopts a sheet brings that sheet: keep the helper
+  beside its only reader (`startOf` in `AnnotationMenu.tsx`, apart from the hotspots).
+  A way of drawing a part that is seldom wanted
   can load apart so: the vertical slider's rules ride with
   `Items/vertical/ItemsVertical.ts`, a module of nothing else, which `ItemsView` loads
   itself, drawing nothing until it is in (Mat, 2026-11-06), never under Suspense, whose
-  fallback hides what was drawn and whose reveal React holds back up to 300 ms; such a
-  sheet extends its part's (`EXTENDING`, `build/clover-sheets.mjs`). A template's own
+  fallback hides what was drawn and whose reveal React holds back up to 300 ms, and the
+  pager's with `PagerLayout.tsx`, which Items loads as it draws one (`Previous` and
+  `Next` are `Pager.tsx`, which never brings it); such a sheet extends its part's
+  (`EXTENDING`, `build/clover-sheets.mjs`), and a sheet both draw with is that part's.
+  A template's own
   rules stay in its sheet, as a copied template imports only `@nulib/clover` and
   `@nulib/clover/templates`. A page whose server draws one imports its part sheet too.
   Core never reads what only such a sheet sets: a recording's still draws before its
@@ -221,9 +258,10 @@ every rule below.
 - **Full screen** is offered only where `isFullscreenSupported()` says an element can have
   it. Read it with `useFullscreenSupported()`, which assumes support on the server, so
   hydration matches. Where elements cannot go full screen (iPhone), a video goes to the
-  system player: pass it to `toggleFullscreen(from, video)`. Sound's `<video>` is never on
-  the page (the scene does not place it), so `lib/fullscreen.ts` places it first in its
-  Canvas at full size, under the viewport, until `webkitendfullscreen`. The player is
+  system player: pass `toggleFullscreen(from, (at) => enterNativeFullscreen(video, at))`,
+  `lib/videoFullscreen.ts`, which loads with the transport alone. Sound's `<video>` is
+  never on the page (the scene does not place it), so `enterNativeFullscreen` places it
+  first in its Canvas at full size, under the viewport, until `webkitendfullscreen`. The player is
   handed it a frame later. Handed over at once, a video that has never been laid out shows
   as black. Safari still honors the press. Checked in the iOS 26 Simulator.
 - **Class names** are `clover-*`, and never one 3.x uses: both stylesheets load on the
@@ -741,13 +779,14 @@ every rule below.
   The mocks it opens are answered from `public/mocks` at their published addresses, as
   the end-to-end suite answers its copies, never from the deployed site (Mat, 2026-10-28:
   "lean on local mocks"); after `npm run build:mocks`, it measures what was written.
-- The sizes are measured as a Vite app builds for production (`build/consumer-bundle.mjs`:
-  Rollup, minified, React bundled in a chunk of its own and never counted), not with
-  esbuild. React is bundled, not left external, so Clover's chunks reach it as an app's
-  do: external, they read it by name and measured a few hundred bytes under what a
-  browser fetches (2026-11-01, found by `check:first-view`). The browser check leaves
-  out of a part's figure the upgrader and the upgrade step with it (`upgrader-`,
-  `upgrade-`, `keep-fragments-` chunks), which a Presentation 4 resource never loads;
+- The sizes are measured as a Vite app for Clover's browsers (`build/browsers.mjs`) builds
+  for production (`build/consumer-bundle.mjs`: Rollup, minified, React bundled in a chunk
+  of its own and never counted), not with esbuild. React is bundled, not left external,
+  so Clover's chunks reach it as an app's do: external, they read it by name and measured
+  a few hundred bytes under what a browser fetches (2026-11-01, found by
+  `check:first-view`). The browser check leaves out of a part's figure the upgrader and
+  the upgrade step with it (`upgrader-`, `upgrade-`, `keep-fragments-` chunks), which a
+  Presentation 4 resource never loads;
   a new chunk of the upgrade's own gets its name there. Through the package entry,
   esbuild's code splitting counts a module as reachable by its re-export alone, even
   once tree shaking drops it, so any lazy chunk (the Viewer's `Default`) drags the
@@ -779,7 +818,29 @@ every rule below.
   element page pays for. Chunks are named by content hash, so a change renames the chunks
   that import it: element-page differences under about 50 B are noise. A "dead" export
   may be public API: check the CHANGELOG, `parts.ts` and the elements' entry before
-  removing one.
+  removing one. A lazy part's helper that only it reads goes beside it, never in a
+  first-view module it shares (2026-11-19: `core/contents.ts` apart from `ranges.ts`'s
+  chapters, `core/markdown-text.ts` from `text.ts`, `Body/placeholderGlyphs.tsx`,
+  `lib/videoFullscreen.ts`, `math/cssMatrix.ts`, `Download/hasDownloads.ts` the first
+  view's check apart from the list), and where a first-view part only asks whether there
+  is any, it asks that alone (`hasContents`, `useHasDownloads`), held to the whole by a test.
+  Where two lazy parts share one, it rides in a chunk they share already
+  (`Map/overlayItems.ts`'s `pointing`), or the elements' build keeps it with its old
+  module (`text` in `build/web-components.config.mjs`).
+- **The browsers Clover is built for** (Mat, 2026-11-20: "Yes, raise it"; Vite's default,
+  2020's browsers, until then): Chrome and Edge 99, Firefox 97, Safari 15.4, the first with
+  cascade layers, written once in `build/browsers.mjs`, which the package's build, the
+  elements', the stylesheets' and the measuring (`consumer-bundle.mjs`, `first-view.mjs`)
+  all read. Every rule of Clover's is in `@layer clover`, so a browser before them draws
+  none of it, and the script already called what they brought (`Array.prototype.at`,
+  `structuredClone`). So `?.`, `??=` and class fields ship as written (3 kB of the Default
+  template's first view that the old target rewrote), and an app that builds for older
+  browsers rewrites them itself. The renderer's classes still assign their fields
+  (`src/lib/renderer/tsconfig.json`, `useDefineForClassFields: false`: they extend nothing
+  with accessors, so assigning sets what defining did), as a class elsewhere does in its
+  constructor (`ErrorBoundary`, `CloverContentError`): defined, a field with no initializer
+  is declared and then assigned again (92 B more), and such an app turns each field into a
+  helper call. The elements' classes, `HTMLElement`'s, keep defining theirs.
 - **Weighed for size and kept** (Mat, 2026-10-27; reopen one only with him): accordion
   headings stacked in sight, the wheel redirect too; `useSlide`'s mount and lag states,
   not a CSS slide (`@starting-style`, `transition-behavior: allow-discrete`), which
@@ -787,10 +848,8 @@ every rule below.
   sliding; Timeline on `CanvasView`, one view for recordings; `Annotations`'
   `scope="view"` with a header and hide toggle per page, never merged by label as
   `scope="all"`'s layers are; `Timeline/Connected.tsx` a chunk of its own, as it carries
-  `playerSurface`, which every Body page would carry otherwise; Vite's default build
-  target, no browser floor raised (`build/consumer-bundle.mjs` lowers syntax again on its
-  own, so the budgets move only if it does too); Norwegian's three locale files (root
-  `AGENTS.md`, i18n).
+  `playerSurface`, which every Body page would carry otherwise; Norwegian's three locale
+  files (root `AGENTS.md`, i18n).
 - The docs import `@nulib/clover`, `@nulib/clover/templates`, `@nulib/clover/map` and the
   stylesheets, which the root `tsconfig.json` maps to this package's source. Its pages are `content/docs/*` (3.x's in `content/docs/deprecated-versions/`), its demos in
   `docs/components/Clover4/`, and the homepage shows it (`docs/components/Home/`).
@@ -1449,7 +1508,8 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   file's label: in the Captions menu the label follows the code; in the Transcript the
   code alone shows, the label its `Tip` (a `<label>` around a radio can hold one), and
   the row sits beside the Transcript's heading in an accordion (`useSectionActions` in
-  `ui/Sections.tsx`: a slot after the heading, held with it, its width kept clear in the
+  `ui/sectionContext.ts`, which `Sections` provides: a slot after the heading, held with
+  it, its width kept clear in the
   heading's button), never a `<select>`, which got lost in the cues. Captions and the
   Transcript are one choice, both ways, through `clover.captions`: the Canvas's menu
   (`onCaptionChange`) sets it and the Transcript follows; the Transcript sets it and the
@@ -1575,7 +1635,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   moves it to `search` when the store's query changes to one it has not seen. Never
   focus, never a shut Panel (one that mounts after the query opens on Search), never a
   controlled `value`. A press that opens it puts focus in its field (Mat: "search should
-  focus when section is expanded"): `useSectionOpened()` (`ui/Sections.tsx`) counts the
+  focus when section is expanded"): `useSectionOpened()` (`ui/sectionContext.ts`) counts the
   reader's presses that opened a section, in an accordion only (arrowing through tabs
   never pulls focus).
 - **About's head** (Mat, 2026-10-26): the label again, as a heading at About's
@@ -3346,7 +3406,10 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   (`elements/later.ts`) and the annotations and Choice menus load on
   demand through `hooks/useLoaded.ts`, the one module cache (2026-10-27), asked for as soon as the Canvas has annotations
   or a Choice, not on the press that opens a menu, so they are there before they are
-  used. `useSvgReader` lives apart from the layer because `CanvasView` calls it on every
+  used; but for the annotations menu, which loads, with its look, as its control is
+  first pointed at, focused or pressed (`Button`'s `onPrepare`; Mat, 2026-11-20: "do
+  both", taking 5.9 kB off a first view with annotations), a press before it has come
+  opening it as it comes. `useSvgReader` lives apart from the layer because `CanvasView` calls it on every
   draw. The navigator (`overlays/Navigator.ts`) loads in `attachNavigator`, the latest
   call winning. Tests reach them with the `open()` / `loaded()` helpers in
   `Canvas/index.test.tsx`.

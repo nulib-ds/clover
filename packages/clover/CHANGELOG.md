@@ -11,6 +11,71 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Built for the browsers Clover's styles already need.** Clover's script is built for
+  Chrome and Edge 99, Firefox 97 and Safari 15.4 (March 2022), the first with cascade
+  layers, which every rule of `styles.css` is in: before them, a browser draws none of
+  Clover's styles. Optional chaining, logical assignment and class fields ship as written,
+  no longer rewritten for 2020's browsers: 2.7 kB off the Default template's first view.
+  A bundler that builds for older browsers rewrites them itself, as before. The web
+  components, which a page loads as they are built, no longer run in Chrome 80–84 (2020),
+  where they drew without their styles. Sizes are measured as an app for these browsers
+  builds (`build/browsers.mjs`).
+- **A lighter first view.** The Viewer in its Default template loads 95.7 kB gzip to
+  its first view of an image, 11.0 kB less than it did (106.7 kB); Document 102.9 kB
+  (114.0), a Canvas alone 51.3 kB (55.0), a Timeline alone 54.8 kB (57.6), and a page of
+  `<clover-viewer>` 129.2 kB (140.2), with the browsers above. Nothing is drawn
+  differently, and nothing later but the Canvas's annotations menu (below):
+  - The Panel's sections bring their own styles, as a recording's and a map's do:
+    Annotations (and the annotations menu in a Canvas), Contents, Download, Search (and
+    a Transcript's find field) and Transcript each load theirs with their code, as the
+    Panel shows them or a page draws them, and `CollectionSelect` its own. Each is in the
+    page before anything it styles is drawn, and restyles nothing drawn before it, so
+    nothing shifts. They are new part sheets (`styles/annotations.css`, `contents.css`,
+    `download.css`, `search.css` and `transcript.css`), which a page importing part
+    sheets one by one needs no import for; `styles/panel.css` keeps the Panel's own and
+    `Collection`'s list is in `styles/items.css`. What the sections draw alike loads with
+    whichever of them comes first: their rows (`styles/rows.css`) and the language codes
+    of About, a Transcript and an annotation set (`styles/codes.css`).
+  - So do a Canvas's hotspots and its placeholder's still, Items' `pager` layout with its
+    count menu, and a recording's chapters menu: `styles/hotspots.css`,
+    `styles/placeholder.css` and `styles/pager.css` are new part sheets, which a page
+    importing part sheets one by one needs no import for, and the chapters menu's rules
+    are in `styles/media.css`. What is drawn before that code comes keeps its styles where
+    they were: a Canvas held back behind its placeholder in `styles/core.css`, and
+    `Position`'s count in `styles/items.css`. A page drawing `Previous` and `Next` alone,
+    as the Document template's toolbar does, no longer loads the pager layout.
+  - The Canvas's annotations menu loads its code, with its styles, as its control is
+    first pointed at, focused or pressed, not as soon as the Canvas has annotations: 5.9
+    kB less to the first view of a resource with annotations. A press before its code
+    has come opens the menu as it comes, a moment later on a slow connection.
+  - An image an annotation gives keeps its rounded corners in a Canvas's information too,
+    where it drew without them unless the Panel's Annotations or the annotations menu had
+    loaded (`.clover-annotations-image`, now in `styles/core.css`).
+  - Where a browser cannot adopt a stylesheet (Safari 15.4–16.3, Firefox 97–100), the
+    sheets that load with their code, these and a recording's, a Scene's and a map's,
+    are written as a `<style>` given the page's nonce where its Content Security Policy
+    names one, as the web components' styles are. Under a strict policy that names none,
+    a page for those browsers imports those sheets itself.
+  - What only some resources need loads with the part that needs it: the table of
+    contents' reader with Contents (the Panel only asks whether there is one), Markdown's
+    plain-text fallback with the parts that read a `format`, the download list with
+    About's Download button, the placeholder's glyphs with the placeholder, and an
+    iPhone's video full screen with the transport.
+  - The upgrader and its upgrade step load in one request, not two.
+  - The renderer's classes assign their fields rather than define them, which the old
+    build turned into a helper call for each, copied into each module.
+  - Code written more than once is written once: the layout effect's switch, the
+    Panel's sections, the view's controls.
+  - In `styles.css` (12.3 kB, from 16.6), custom properties lose the spaces esbuild kept
+    in their values, and each higher-contrast fill reads `--clover-accent-fill` in its
+    control's own rule. A page that sets `--clover-accent-fill` itself, outside the
+    higher-contrast mode, now fills those controls with it.
+
+  The size budgets come down with them (`build/size-budget.json`). Nothing to change, but
+  for the strict policy above.
+
 ## [4.11.6] - 2026-11-19
 
 ### Fixed
