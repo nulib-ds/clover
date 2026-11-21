@@ -411,7 +411,27 @@ describe("Clover.Root and its parts", () => {
       "true",
     );
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "This could not be loaded.",
+      "Error loading resource.",
+    );
+  });
+
+  it("says why it failed where a server would not let the page read it (CORS)", async () => {
+    const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.mode === "no-cors") return new Response(null);
+      throw new TypeError("Failed to fetch");
+    });
+    render(
+      <Clover.Root
+        iiifContent="https://example.org/blocked.json"
+        request={{ fetch }}
+      >
+        <Clover.Status />
+      </Clover.Root>,
+    );
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Error loading resource.");
+    expect(alert).toHaveTextContent(
+      "There was an issue with the provider's CORS headers.",
     );
   });
 

@@ -18,7 +18,7 @@ describe("ErrorBoundary", () => {
     spy.mockRestore();
     const alert = screen.getByRole("alert");
     expect(alert).not.toHaveAttribute("lang");
-    expect(alert).toHaveTextContent("This could not be loaded.");
+    expect(alert).toHaveTextContent("Error loading resource.");
     expect(screen.getByText("No image")).toHaveAttribute("lang", "en");
   });
 

@@ -176,4 +176,31 @@ describe("Body renderers", () => {
     act(() => rerender(<Host tick={2} />));
     expect(mounts).toHaveBeenCalledTimes(1);
   });
+
+  it("says in its middle what the Root could not load, and why, with no panel beside it", async () => {
+    const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.mode === "no-cors") return new Response(null);
+      throw new TypeError("Failed to fetch");
+    });
+    render(
+      <Clover.Root
+        iiifContent="https://example.org/blocked.json"
+        request={{ fetch }}
+      >
+        <Clover.Status loading={false} error={false} />
+        <Clover.Body />
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    const alert = await screen.findByRole("alert");
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
+    expect(alert.closest(".clover-body")).not.toBeNull();
+    expect(alert).toHaveAttribute("data-center");
+    expect(alert).toHaveTextContent("Error loading resource.");
+    expect(alert.querySelector('[lang="en"]')).toHaveTextContent(
+      "There was an issue with the provider's CORS headers.",
+    );
+    // Nothing to tell of the resource: no About, so the Panel draws nothing.
+    expect(document.querySelector(".clover-panel")).toBeNull();
+  });
 });

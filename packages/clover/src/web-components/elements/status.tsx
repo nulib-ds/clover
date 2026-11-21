@@ -8,6 +8,7 @@ import { Copy, useSlot } from "./nodes";
  * `<clover-status>` (`specs/sections.ts`): `Status`, and what its slots hold in place of
  * Clover's own: `slot="loading"`, shown and announced while the root loads, and
  * `slot="error"`, the alert if it fails. Each is shown as a copy, kept in step.
+ * `error="false"` shows no alert, for a layout whose Body says it.
  */
 export function StatusElement({ hosted, props }: HostedProps) {
   const loading = useSlot(hosted.element, "loading");
@@ -16,7 +17,7 @@ export function StatusElement({ hosted, props }: HostedProps) {
     <Status
       {...(props as StatusProps)}
       loading={loading ? <Copy of={loading} /> : (props as StatusProps).loading}
-      error={error ? () => <Copy of={error} /> : undefined}
+      error={error ? () => <Copy of={error} /> : (props as StatusProps).error}
     />
   );
 }

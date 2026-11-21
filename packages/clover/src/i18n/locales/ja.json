@@ -36,7 +36,7 @@
   "sceneRotate": "回転",
   "sceneResetView": "表示をリセット",
   "statusLoading": "読み込み中…",
-  "statusError": "読み込めませんでした。",
+  "statusError": "リソースの読み込み中にエラーが発生しました。",
   "itemsLabel": "アイテム",
   "download": "ダウンロード",
   "downloadPage": "このページ",

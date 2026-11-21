@@ -9,6 +9,7 @@ import { useClover, useCloverSelector } from "../../react/context";
 import { useVisibleCanvases } from "../../react/hooks";
 import { useRootContentState } from "../../react/useContentStateOutput";
 import { Loading } from "../../ui/Loading";
+import { CanvasPending } from "./Pending";
 
 /*
  * Presentation 4's other containers, each drawn by its own part, loaded the first time a
@@ -19,6 +20,10 @@ const ConnectedTimeline = lazy(() => import("../Timeline/Connected"));
 /** Each Root's Bodies in sight, by its `body` channel, the last told as its box. */
 const boxesOf = new WeakMap<object, HTMLElement[]>();
 const ConnectedScene = lazy(() => import("../Scene/Connected"));
+/** What the Root could not load, said in the Body: loaded only where loading fails. */
+const BodyAlert = lazy(() =>
+  import("./BodyAlert").then((module) => ({ default: module.BodyAlert })),
+);
 
 export type BodyProps = Omit<
   CloverCanvasProps,
@@ -43,7 +48,9 @@ export type BodyProps = Omit<
  *
  * While the Root loads (the first Manifest, or the next one chosen) the Body is busy and
  * shows Clover's loading mark, a line along its top edge, over what it still shows; it
- * keeps its size and its background, so nothing moves.
+ * keeps its size and its background, so nothing moves. Where the Root could not load its
+ * resource, the Body says so in its middle: the template's `Status` leaves the alert to
+ * it (`error={false}`).
  */
 export function Body({
   className,
@@ -69,6 +76,9 @@ export function Body({
     canvases.find(({ type }) => type === "Scene" || type === "Timeline")
       ?.type ?? "Canvas";
   const busy = useCloverSelector((state) => state.status === "loading");
+  const failed = useCloverSelector((state) =>
+    state.status === "error" && !state.manifest ? state.error : null,
+  );
   /*
    * Its box, told to its Root (`clover.body`): what lies over its view goes in it, in the
    * box its renderer draws in (an `Inset` whose `container` is `"body"`).
@@ -100,7 +110,13 @@ export function Body({
         ...style,
       }}
     >
-      {Renderer ? (
+      {failed ? (
+        <CanvasPending>
+          <Suspense fallback={null}>
+            <BodyAlert error={failed} />
+          </Suspense>
+        </CanvasPending>
+      ) : Renderer ? (
         <Renderer canvases={canvases} bodies={bodies}>
           {children}
         </Renderer>

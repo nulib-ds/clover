@@ -47,16 +47,19 @@ const PANEL_SECTIONS: readonly PanelSection[] = [
  * Whether the resource holds anything for each section, read from a Root's state: the one
  * place that decides, for the `Panel` and for the templates around it. About is offered
  * wherever the resource says anything of itself, which is always but for an image service
- * shown as its image, which says only the rights its `info.json` gave. None of these reads the section's own
+ * shown as its image, which says only the rights its `info.json` gave, and a resource that
+ * failed to load, which says nothing. None of these reads the section's own
  * module, so a section never opened is never fetched.
  */
 const HAS: Record<
   PanelSection,
   (state: CloverState, partOf?: boolean) => boolean
 > = {
+  // Nothing where the resource failed to load: the Body says so, and no panel keeps room.
   about: (state) =>
-    !isImageServiceManifest(state.manifest) ||
-    Boolean(state.manifest?.rights || state.manifest?.requiredStatement),
+    state.status !== "error" &&
+    (!isImageServiceManifest(state.manifest) ||
+      Boolean(state.manifest?.rights || state.manifest?.requiredStatement)),
   // A content state's several targets (Cookbook 0540), listed as a Collection's members are.
   targets: (state) => (state.targets?.items.length ?? 0) > 1,
   /*

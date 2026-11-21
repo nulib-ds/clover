@@ -36,7 +36,7 @@
   "sceneRotate": "旋转",
   "sceneResetView": "重置视图",
   "statusLoading": "正在加载…",
-  "statusError": "无法加载。",
+  "statusError": "加载资源时出错。",
   "itemsLabel": "项目",
   "download": "下载",
   "downloadPage": "本页",

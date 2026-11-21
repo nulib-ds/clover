@@ -36,7 +36,7 @@
   "sceneRotate": "Rotate",
   "sceneResetView": "Reset view",
   "statusLoading": "Loading…",
-  "statusError": "This could not be loaded.",
+  "statusError": "Error loading resource.",
   "itemsLabel": "Items",
   "download": "Download",
   "downloadPage": "This page",

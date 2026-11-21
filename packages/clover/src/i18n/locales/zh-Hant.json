@@ -36,7 +36,7 @@
   "sceneRotate": "旋轉",
   "sceneResetView": "重設檢視",
   "statusLoading": "載入中…",
-  "statusError": "無法載入。",
+  "statusError": "載入資源時發生錯誤。",
   "itemsLabel": "項目",
   "download": "下載",
   "downloadPage": "本頁",

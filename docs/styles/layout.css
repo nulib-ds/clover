@@ -1299,6 +1299,12 @@ nav.nextra-toc:empty ~ article {
   margin-top: 1rem;
 }
 
+/* The version, in the code's face (Mat, 2026-11-20: "mono the version number"). */
+.site-footer-version {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
 .site-footer .site-footer-legal p {
   color: var(--gray-11);
 }
