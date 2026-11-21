@@ -58,10 +58,10 @@ const MASKS =
 
 /**
  * One of each kind of thing a page might show, in the select's order (Mat, 2026-10-26):
- * the catalog of pages first (the templates' default), the footage second, the
- * Collection of masks third, the model in 3D, etu.wiki's calligraphy in four languages
- * (Mat, 2026-11-08), the recording sixth, a manuscript, then a postcard, a photo, the
- * film after it, a map and an animation.
+ * the catalog of pages first (the templates' default), Hokusai's prints second (Mat,
+ * 2026-11-21), then the footage, the Collection of masks, the model in 3D, etu.wiki's
+ * calligraphy in four languages (Mat, 2026-11-08), the recording, a manuscript, then a
+ * postcard, a photo, the film after it, a map and an animation.
  * Every template opens each.
  */
 export const resources: PlaygroundResource[] = [
@@ -79,6 +79,21 @@ export const resources: PlaygroundResource[] = [
     resource: "paged/manifest.json",
     mock: true,
     thumbnail: `${works}/386ff30f-1975-4d9c-9905-ec76381d6992/thumbnail`,
+  },
+  // Katsushika Hokusai's Thirty-six Views of Mount Fuji, as Northwestern's Understory
+  // publishes it: a Collection of the series' 46 prints, from the Minneapolis Institute of
+  // Art, each a Manifest labeled in English and Japanese (Mat, 2026-11-21: "as the second
+  // fixture"). Its server sends CORS headers.
+  {
+    key: "prints",
+    name: "Prints",
+    title: "Thirty-six Views of Mount Fuji",
+    description: "Collection of manifests with labels in English and Japanese",
+    resource:
+      "https://iiif-understory.dc.library.northwestern.edu/published/presentation/collection/thirty-six-views-of-mount-fuji/collection.json",
+    // The Collection's own thumbnail, as it gives it.
+    thumbnail:
+      "https://images-understory.dc.library.northwestern.edu/iiif/3/image/12e964fd-532c-4c17-8f09-da8ec9d3bbe1/thumbnail/full/400,/0/default.jpg",
   },
   // The National Archives' footage of the Nuremberg judgment, as Commons publishes it
   // (a mock): Rudolf Hess and the other defendants followed through it, frame by frame
