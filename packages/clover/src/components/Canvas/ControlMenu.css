@@ -148,11 +148,3 @@
   margin: 0;
   accent-color: var(--clover-color-accent, #0065c3);
 }
-
-/* An item's picture (an animation's frames have one): `xl` high, beside its label. */
-.clover-canvas-menu-image {
-  flex: none;
-  width: auto;
-  height: var(--clover-space-xl);
-  border-radius: var(--clover-radius, 3px);
-}

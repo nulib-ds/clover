@@ -2277,9 +2277,9 @@ describe("Canvas", () => {
       const { rerender } = render(
         <Canvas canvases={book.items.slice(0, 1) as any} />,
       );
-      expect(screen.queryByRole("button", { name: "Choice" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Views" })).toBeNull();
       rerender(<Canvas canvases={xrayCanvas} />);
-      const control = screen.getByRole("button", { name: "Choice" });
+      const control = screen.getByRole("button", { name: "Views" });
       expect(control).toHaveAttribute("data-button", "choice");
       expect(control).toHaveAttribute("aria-expanded", "false");
     });
@@ -2291,7 +2291,7 @@ describe("Canvas", () => {
         .mockImplementation((type) => (type === "audio/alac" ? "" : "maybe"));
       try {
         render(<Canvas canvases={[choiceAv.items[0]] as any} />);
-        fireEvent.click(screen.getByRole("button", { name: "Choice" }));
+        fireEvent.click(screen.getByRole("button", { name: "Views" }));
         const alac = await screen.findByRole("radio", { name: "ALAC" });
         expect(alac).toBeDisabled();
         expect(alac).not.toBeChecked();
@@ -2306,8 +2306,8 @@ describe("Canvas", () => {
       render(<Canvas canvases={xrayCanvas} />);
       expect(renderer.setImages.mock.lastCall[0][0].url).toMatch(/natural/i);
 
-      fireEvent.click(screen.getByRole("button", { name: "Choice" }));
-      expect(screen.getByRole("button", { name: "Choice" })).toHaveAttribute(
+      fireEvent.click(screen.getByRole("button", { name: "Views" }));
+      expect(screen.getByRole("button", { name: "Views" })).toHaveAttribute(
         "aria-expanded",
         "true",
       );
@@ -2340,7 +2340,7 @@ describe("Canvas", () => {
       rerender(<Canvas canvases={xrayCanvas} />);
       expect(renderer.setImages.mock.lastCall[1].fit).toBe(true);
       await loaded();
-      fireEvent.click(screen.getByRole("button", { name: "Choice" }));
+      fireEvent.click(screen.getByRole("button", { name: "Views" }));
       fireEvent.click(await screen.findByRole("radio", { name: "X-Ray" }));
       const [images, { fit }] = renderer.setImages.mock.lastCall;
       expect(images[0].url).toMatch(/xray/i);
@@ -2357,7 +2357,7 @@ describe("Canvas", () => {
       };
       strip(unlabeled);
       render(<Canvas canvases={unlabeled} />);
-      fireEvent.click(screen.getByRole("button", { name: "Choice" }));
+      fireEvent.click(screen.getByRole("button", { name: "Views" }));
       const menu = screen.getByTestId("clover-canvas-choice");
       expect(within(menu).getByText("1")).toBeVisible();
       expect(within(menu).getByText("2")).toBeVisible();
@@ -2369,7 +2369,7 @@ describe("Canvas", () => {
 
     it("closes on Escape, returning focus to the control", () => {
       render(<Canvas canvases={xrayCanvas} />);
-      const control = screen.getByRole("button", { name: "Choice" });
+      const control = screen.getByRole("button", { name: "Views" });
       fireEvent.click(control);
       fireEvent.keyDown(document, { key: "Escape" });
       expect(screen.queryByTestId("clover-canvas-choice")).toBeNull();
@@ -2383,7 +2383,7 @@ describe("Canvas", () => {
           <input type="search" aria-label="Find" />
         </>,
       );
-      const control = screen.getByRole("button", { name: "Choice" });
+      const control = screen.getByRole("button", { name: "Views" });
       fireEvent.click(control);
       expect(
         screen.getByRole("radio", { name: "Natural Light" }),
@@ -2412,7 +2412,7 @@ describe("Canvas", () => {
           <Canvas canvases={xrayCanvas} />
         </dialog>,
       );
-      const control = screen.getByRole("button", { name: "Choice" });
+      const control = screen.getByRole("button", { name: "Views" });
       fireEvent.click(control);
       const radio = screen.getByRole("radio", { name: "Natural Light" });
       expect(radio).toHaveFocus();
@@ -2916,14 +2916,14 @@ describe("Canvas", () => {
         />,
       );
       await open({ images: false });
-      expect(screen.queryByRole("button", { name: "Choice" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Views" })).toBeNull();
       // The menu is to hand; a pick from it opens the Canvas (tested above).
       expect(screen.getByRole("button", { name: "Annotations" })).toBeVisible();
       expect(screen.queryByRole("button", { name: "A note" })).toBeNull();
 
       fireEvent.click(openViewer());
       await open();
-      expect(screen.getByRole("button", { name: "Choice" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Views" })).toBeVisible();
       expect(screen.getByRole("button", { name: "Annotations" })).toBeVisible();
     });
   });

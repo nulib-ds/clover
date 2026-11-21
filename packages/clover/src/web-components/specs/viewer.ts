@@ -195,7 +195,7 @@ export const viewerDocs: ElementDocs = {
     },
     "collapse-controls": {
       description:
-        "Default, Document and Gallery: when the Body's view controls (zoom, the turns, reset, full screen) collapse behind one button, the Gallery's in its lightbox: auto, only where the row cannot hold them all; always, wherever there are any, leaving the media more room. Document's view controls are its own, behind its magnifier: there, it is the Body's others (Choice, a Canvas's information).",
+        "Default, Document and Gallery: when the Body's view controls (zoom, the turns, reset, full screen) collapse behind one button, the Gallery's in its lightbox: auto, only where the row cannot hold them all; always, wherever there are any, leaving the media more room. Document's view controls are its own, behind its magnifier: there, it is the Body's others (Views, a Canvas's information).",
       default: "auto",
     },
     size: {

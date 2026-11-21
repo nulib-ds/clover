@@ -1,13 +1,14 @@
 /*
  * Rows: what a reader picks from a list in the panel (an annotation, a Range, a cue, a
- * search hit), written once. `xs` by `s` inside, an accent edge at
- * the start when it is the current one. Each part keeps only its own layout. A Contents
- * entry's toggle, beside its row, takes the rows' tint under the pointer. Loaded with the
- * code of whichever section draws them first, as no first view draws any
- * (`build/clover-sheets.mjs`, `SHARED`).
+ * search hit) or the Canvas's menus (an annotation, a Choice's item), written once. `xs`
+ * by `s` inside, an accent edge at the start when it is the current one. Each part keeps
+ * only its own layout. A Contents entry's toggle, beside its row, takes the rows' tint
+ * under the pointer. Loaded with the code of whichever section or menu draws them first,
+ * as no first view draws any (`build/clover-sheets.mjs`, `SHARED`).
  */
 :is(
   .clover-annotations-entry,
+  .clover-canvas-choice-entry,
   button.clover-contents-button,
   .clover-transcript-cue > button,
   button.clover-content-search-hit
@@ -28,6 +29,7 @@
 
 :is(
     .clover-annotations-entry,
+    .clover-canvas-choice-entry,
     button.clover-contents-button,
     .clover-transcript-cue > button,
     button.clover-content-search-hit,
@@ -38,6 +40,7 @@
 
 :is(
   .clover-annotations-entry[data-selected="true"],
+  .clover-canvas-choice-entry[data-selected="true"],
   button.clover-contents-button[aria-current="true"],
   .clover-transcript-cue[aria-current="true"] > button,
   button.clover-content-search-hit[aria-current="true"]
@@ -58,6 +61,7 @@
 @media (forced-colors: active) {
   :is(
     .clover-annotations-entry,
+    .clover-canvas-choice-entry,
     button.clover-contents-button,
     .clover-transcript-cue > button,
     button.clover-content-search-hit
@@ -67,6 +71,7 @@
 
   :is(
     .clover-annotations-entry[data-selected="true"],
+    .clover-canvas-choice-entry[data-selected="true"],
     button.clover-contents-button[aria-current="true"],
     .clover-transcript-cue[aria-current="true"] > button,
     button.clover-content-search-hit[aria-current="true"]
@@ -91,4 +96,46 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/*
+ * A Choice's items, and an animation's frames (`Canvas/ChoiceMenu.tsx`), listed as the
+ * annotations menu lists its entries: each a row (above), its picture
+ * (`ui/EntryThumbnail.css`) and its label `s` apart, the rows `2xs` apart, as a
+ * list of rows is. A long label (a file's name) breaks anywhere rather than widen the menu.
+ * Here rather than with the menus' look (`Canvas/ControlMenu.css`), which loads up front,
+ * as only the menu's code, which brings this sheet, draws them.
+ */
+.clover-canvas-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-2xs);
+}
+
+.clover-canvas-menu label.clover-canvas-choice-entry {
+  gap: var(--clover-space-s);
+}
+
+/*
+ * The entry is the radio (Mat, 2026-11-20: "we don't need to show the radio ui. the
+ * entries just behave as wai aria radios"): its native radio stays, out of sight, for the
+ * keyboard (one tab stop, the arrow keys) and assistive technology, as the annotations
+ * menu's does (`Annotations/Annotations.css`); the one chosen is marked by the rows' accent edge, its
+ * focus drawn around the entry (WCAG 2.4.7).
+ */
+label.clover-canvas-choice-entry > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.clover-canvas-choice-entry:has(> input:focus-visible) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 1px;
+}
+
+.clover-canvas-choice-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
