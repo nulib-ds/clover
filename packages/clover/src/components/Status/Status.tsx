@@ -15,8 +15,11 @@ export interface StatusProps {
    * layout with a `Body`, which shows its own loading, so nothing moves.
    */
   loading?: React.ReactNode;
-  /** Shown when loading failed. Default: a translated message and the error's own. */
-  error?: (error: Error) => React.ReactNode;
+  /**
+   * Shown when loading failed. Default: a translated message and the error's own. `false`
+   * shows nothing, for a layout with a `Body`, which says it in its middle.
+   */
+  error?: false | ((error: Error) => React.ReactNode);
 }
 
 /**
@@ -55,7 +58,7 @@ export function Status({
           </span>
         )}
       </p>
-      {status === "error" && error && (
+      {status === "error" && error && renderError !== false && (
         <div
           className={join("clover-status", className)}
           data-status={status}

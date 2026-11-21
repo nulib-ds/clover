@@ -280,7 +280,7 @@ describe("Transcript", () => {
       </Clover.Root>,
     );
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("This could not be loaded.");
+    expect(alert).toHaveTextContent("Error loading resource.");
     expect(alert).toHaveTextContent("Failed to fetch");
     expect(document.querySelector(".clover-transcript-body")).toBeNull();
   });

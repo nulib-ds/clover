@@ -5,7 +5,7 @@ import {
   preloadUpgrader,
   toPresentation4,
 } from "./presentation";
-import { type CloverRequest, fetchJson } from "./request";
+import { type CloverRequest, fetchJson, isCorsError } from "./request";
 import type { AnnotationSet } from "./annotation-sets";
 
 /**
@@ -101,7 +101,9 @@ async function fetchContent(
   try {
     return await fetchJson(request, url, signal);
   } catch (error) {
-    if (signal?.aborted || /\.json([?#]|$)/i.test(url)) throw error;
+    // A server that refused this page its CORS headers refuses it its `info.json` too.
+    if (signal?.aborted || isCorsError(error) || /\.json([?#]|$)/i.test(url))
+      throw error;
     try {
       const json = await fetchJson(
         request,

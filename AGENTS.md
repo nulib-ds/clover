@@ -1595,6 +1595,11 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 - Clover's English is in sentence case (`packages/clover/DESIGN.md` §8), which
   `locales.test.ts` checks; a string with a proper name the test does not know adds it
   to `PROPER_NAMES` there.
+- An error's own words, under Clover's "Error loading resource." (`statusError`), are
+  English alone, marked `lang="en"`, never an interface string: the browser's message,
+  and Clover's own where it can say more ("There was an issue with the provider's CORS
+  headers.", `core/request-failure.ts`; Mat, 2026-11-20: "make exception that this is
+  english only").
 - A key added to `en.json` lands in every locale, translated, in the same change:
   `packages/clover/src/i18n/locales/locales.test.ts` fails otherwise. A word a language
   spells as English does (fr "Collection", "Pause") goes on that test's

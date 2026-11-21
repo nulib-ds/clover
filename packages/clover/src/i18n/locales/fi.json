@@ -36,7 +36,7 @@
   "sceneRotate": "Kierrä",
   "sceneResetView": "Palauta näkymä",
   "statusLoading": "Ladataan…",
-  "statusError": "Tätä ei voitu ladata.",
+  "statusError": "Virhe resurssin lataamisessa.",
   "itemsLabel": "Kohteet",
   "download": "Lataa",
   "downloadPage": "Tämä sivu",

@@ -41,8 +41,10 @@ the Canvas, but for what to draw, which comes from the Root; its label, annotati
 chapters and language do too, unless you pass your own.
 
 While the Root loads, it is `aria-busy` and shows Clover's loading mark along its top
-edge; `<Clover.Status loading={false} />` announces it. The table of contents is
-[`Contents`](/docs/contents).
+edge; `<Clover.Status loading={false} />` announces it. If the Root cannot load its
+resource, the Body says so in its middle, with the reason in English: the browser's, or
+that there was an issue with the provider's CORS headers. `<Clover.Status error={false} />`
+leaves the alert to it. The table of contents is [`Contents`](/docs/contents).
 
 <ApiReference elements="clover-body">
 

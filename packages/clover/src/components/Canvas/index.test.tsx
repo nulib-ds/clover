@@ -357,7 +357,7 @@ describe("Canvas", () => {
     await waitFor(() => expect(fetch).toHaveBeenCalled());
     answer(new Response("Not found", { status: 404 }));
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("This could not be loaded.");
+    expect(alert).toHaveTextContent("Error loading resource.");
     expect(alert.querySelector(".clover-status-detail")?.textContent).not.toBe(
       "",
     );

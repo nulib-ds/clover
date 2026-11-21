@@ -320,6 +320,50 @@ describe("templates", () => {
     return { shelf, fetch };
   }
 
+  it("Default: what failed to load said in the Body alone, with no header or panel", async () => {
+    const fetch = vi.fn(async () => new Response("nope", { status: 500 }));
+    const { container } = render(
+      <Templates.Default
+        iiifContent="https://example.org/broken.json"
+        request={{ fetch }}
+      />,
+    );
+    const alert = await screen.findByRole("alert");
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
+    expect(alert.closest(".clover-template-default-body")).not.toBeNull();
+    expect(alert).toHaveTextContent("Error loading resource.");
+    expect(
+      container.querySelector(".clover-template-default-header"),
+    ).toBeNull();
+    expect(container.querySelector(".clover-template-panel")).toBeNull();
+  });
+
+  it("Default: a Collection's member that failed to load keeps the Collection's line, to move on", async () => {
+    const { shelf, fetch } = shelfOfTwo();
+    const failing = vi.fn(async (url: string) =>
+      url === "https://example.org/letter"
+        ? new Response("nope", { status: 500 })
+        : fetch(url),
+    );
+    const { container } = render(
+      <Templates.Default iiifContent={shelf} request={{ fetch: failing }} />,
+    );
+    const members = await screen.findByRole("navigation", {
+      name: "Collection",
+    });
+    fireEvent.click(within(members).getByRole("button", { name: "Next" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Error loading resource.",
+    );
+    const header = container.querySelector(".clover-template-default-header");
+    expect(header).toHaveTextContent("Shelf");
+    expect(
+      within(header as HTMLElement).getByRole("navigation", {
+        name: "Collection",
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("Default: opened on a Collection, its title over the Manifest's and its members stepped in the header", async () => {
     const { shelf, fetch } = shelfOfTwo();
     render(<Templates.Default iiifContent={shelf} request={{ fetch }} />);

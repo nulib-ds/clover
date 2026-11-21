@@ -30,7 +30,10 @@ export const status: ElementSpec = {
   tag: "clover-status",
   kind: "part",
   needsRoot: true,
-  attributes: { loading: { prop: "loading", type: ["false"] } },
+  attributes: {
+    loading: { prop: "loading", type: ["false"] },
+    error: { prop: "error", type: ["false"] },
+  },
   slots: ["loading", "error"],
 };
 export const statusDocs: ElementDocs = {
@@ -41,6 +44,10 @@ export const statusDocs: ElementDocs = {
     loading: {
       description:
         '"false" shows no loading mark and only announces it, for a layout whose Body shows its own.',
+    },
+    error: {
+      description:
+        '"false" shows no alert when it fails, for a layout whose Body says it in its middle.',
     },
   },
   slots: {

@@ -36,7 +36,7 @@
   "sceneRotate": "Roter",
   "sceneResetView": "Tilbakestill visinga",
   "statusLoading": "Lastar inn…",
-  "statusError": "Dette kunne ikkje lastast inn.",
+  "statusError": "Feil ved lasting av ressursen.",
   "itemsLabel": "Element",
   "download": "Last ned",
   "downloadPage": "Denne sida",

@@ -36,7 +36,7 @@
   "sceneRotate": "Ruota",
   "sceneResetView": "Ripristina la vista",
   "statusLoading": "Caricamento…",
-  "statusError": "Non è stato possibile caricare questo contenuto.",
+  "statusError": "Errore durante il caricamento della risorsa.",
   "itemsLabel": "Elementi",
   "download": "Scarica",
   "downloadPage": "Questa pagina",

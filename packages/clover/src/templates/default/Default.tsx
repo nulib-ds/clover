@@ -200,8 +200,7 @@ export function Default({
         >
           {lineOnly && <CollectionHeader />}
           {titled && (
-            <header className="clover-template-default-header">
-              <HeaderTitle title={title} />
+            <TitledHeader title={title}>
               {/*
                * A content state's several targets (Cookbook 0540): where the reader is
                * among them, a list of them all, and the steps between (Mat, 2026-10-29).
@@ -220,10 +219,13 @@ export function Default({
               <Clover.Provider className="clover-template-default-provider">
                 <Clover.Logo />
               </Clover.Provider>
-            </header>
+            </TitledHeader>
           )}
-          {/* The Body shows the loading; announced here, nothing moves. */}
-          <Clover.Status loading={false} />
+          {/*
+           * The Body shows the loading, announced here, so nothing moves; and a failure,
+           * in its middle.
+           */}
+          <Clover.Status loading={false} error={false} />
           <Views
             items={items}
             singleItem={singleItem}
@@ -261,6 +263,30 @@ export function Default({
 }
 
 /**
+ * The header with the title, then what follows it on its line (`children`). None where
+ * the resource failed to load and there is no Collection line to show, as nothing would
+ * fill it (the Body says what went wrong); a member that failed keeps the Collection's
+ * line, to move on to another.
+ */
+function TitledHeader({
+  title,
+  children,
+}: {
+  title: ReturnType<typeof Clover.titled>;
+  children: React.ReactNode;
+}) {
+  const failed = Clover.useStatus().status === "error";
+  const lines = useCollectionLines();
+  if (failed && !lines) return null;
+  return (
+    <header className="clover-template-default-header">
+      <HeaderTitle title={title} lines={lines} />
+      {children}
+    </header>
+  );
+}
+
+/**
  * The header's title: the Manifest's label, and under it, where the Root was opened on a
  * Collection, a line of the Collection's own, so it is plain the reader is among its
  * members (Mat, 2026-10-29: "it should be obvious the user is moving between items in the
@@ -268,8 +294,13 @@ export function Default({
  * small (where the reader is, "1 / 2", opening them all, then Previous and Next): "place
  * the collection title under the manifest title", "collection title first. then pager".
  */
-function HeaderTitle({ title }: { title: ReturnType<typeof Clover.titled> }) {
-  const lines = useCollectionLines();
+function HeaderTitle({
+  title,
+  lines,
+}: {
+  title: ReturnType<typeof Clover.titled>;
+  lines: React.ReactNode;
+}) {
   return (
     <>
       {/* Its line kept while the next member loads, so the header holds still. */}

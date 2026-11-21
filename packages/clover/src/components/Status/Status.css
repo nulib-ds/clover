@@ -15,4 +15,28 @@
 
 .clover-status-detail {
   font-size: var(--clover-text-s);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * What a Body could not load (`BodyAlert`): in the middle of the Body, both ways, its
+ * headline larger in the text's color, as a Canvas's error is (`ErrorBoundary.css`), and
+ * why, smaller and muted, under it.
+ */
+.clover-body-alert[data-center] {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--clover-space-xs);
+  text-align: center;
+}
+
+.clover-body-alert-headline {
+  color: var(--clover-color-primary, #1a1d1e);
+  font-size: var(--clover-text-l);
+  font-weight: bold;
 }

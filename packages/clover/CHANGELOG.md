@@ -11,6 +11,27 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **The Body says what the Root could not load**, in its middle, "Error loading
+  resource." larger and the reason smaller and muted under it, in place of a line at
+  the top of the template. Nothing else shows beside it: the Panel draws nothing (About
+  is no longer offered for a resource that failed), and the Default template leaves out
+  its header, unless it has a Collection's line to show, so a member that failed can be
+  left for another. `Status` takes `error={false}` (`error="false"` on
+  `<clover-status>`) to leave the alert to the Body, as `loading={false}` leaves it the
+  loading; the Default template sets it. A layout of your own with a `Root`, a `Body`
+  and a `Status` now shows the alert twice: give its `Status` `error={false}`.
+- **A resource blocked by CORS says so.** Where a server answers without the headers
+  that let the page read it, the reason given is "There was an issue with the
+  provider's CORS headers.", in English, as every error's own words are, in place of
+  the browser's "Failed to fetch". A browser hides the reason from scripts, so after a
+  request fails Clover asks once more in `no-cors` mode: an answer there means the
+  server is up and only CORS stood in the way. The error `onStatusChange` reports then
+  has `reason: "cors"`. That check loads only once a request fails; the rest of this
+  change adds about 0.4 kB gzip to a template's first view (0.2 kB to a page with a
+  `Body`), and the size budgets rise by what was measured (`build/size-budget.json`).
+
 ### Changed
 
 - **The Choice menu is "Views", and lists its items as the annotations menu lists its
@@ -30,6 +51,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   template 81,100 B, Document to first view 103,300 B, `base.css` 16,400 B,
   `spacing.css` 4,050 B, `<clover-viewer>` 129,900 B, a composed layout's page 125,150 B
   and `<clover-gallery>` 133,300 B, each 7 to 53 B past its old budget.
+- **A failed load says "Error loading resource."**, in place of "This could not be
+  loaded.", wherever Clover says one failed (the Status, a Body, a Canvas, a
+  Transcript), in every locale.
 
 ## [4.12.1] - 2026-11-20
 

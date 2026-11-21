@@ -50,11 +50,17 @@ export class CloverRequestError extends Error {
     message: string,
     readonly url: string,
     readonly status?: number,
+    /** `"cors"`: the server answered, but without the headers that let this page read it. */
+    readonly reason?: "cors",
   ) {
     super(message);
     this.name = "CloverRequestError";
   }
 }
+
+/** Whether an error is a request the server answered but would not let the page read. */
+export const isCorsError = (error: unknown) =>
+  (error as CloverRequestError | null)?.reason === "cors";
 
 /** Fetch and parse JSON with the request applied; a non-2xx status rejects. */
 export async function fetchJson(
@@ -62,10 +68,19 @@ export async function fetchJson(
   url: string,
   signal?: AbortSignal,
 ): Promise<unknown> {
-  const response = await cloverFetch(request, url, {
-    signal,
-    headers: { Accept: "application/ld+json, application/json" },
-  });
+  let response: Response;
+  try {
+    response = await cloverFetch(request, url, {
+      signal,
+      headers: { Accept: "application/ld+json, application/json" },
+    });
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    // Why, asked only once a request fails: its code loads then, never on a first view.
+    const failure = await import("./request-failure").catch(() => null);
+    if (!failure) throw error;
+    return failure.explainFailure(request, url, error, signal);
+  }
   if (!response.ok) {
     discardBody(response);
     throw new CloverRequestError(

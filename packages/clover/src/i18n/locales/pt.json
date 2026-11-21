@@ -36,7 +36,7 @@
   "sceneRotate": "Rodar",
   "sceneResetView": "Repor a vista",
   "statusLoading": "A carregar…",
-  "statusError": "Não foi possível carregar este conteúdo.",
+  "statusError": "Erro ao carregar o recurso.",
   "itemsLabel": "Itens",
   "download": "Transferir",
   "downloadPage": "Esta página",

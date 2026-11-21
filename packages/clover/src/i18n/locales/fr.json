@@ -36,7 +36,7 @@
   "sceneRotate": "Rotation",
   "sceneResetView": "Réinitialiser la vue",
   "statusLoading": "Chargement…",
-  "statusError": "Ce contenu n’a pas pu être chargé.",
+  "statusError": "Erreur lors du chargement de la ressource.",
   "itemsLabel": "Éléments",
   "download": "Télécharger",
   "downloadPage": "Cette page",

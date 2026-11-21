@@ -792,7 +792,11 @@ function SceneBody({
         />
         {/* Anything else that stops it (the browser took its graphics back), in full. */}
         {status.state === "error" && !status.load && (
-          <BodyAlert error={status.error} className="clover-scene-error" />
+          <BodyAlert
+            error={status.error}
+            className="clover-scene-error"
+            center={false}
+          />
         )}
         {loading && <Loading overlay />}
         {/* Last, as a `<figcaption>` must be first or last in its `<figure>`. */}
