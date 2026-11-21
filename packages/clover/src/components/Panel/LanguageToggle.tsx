@@ -77,8 +77,8 @@ export function useLanguageToggle({
 
 /**
  * About's language toggle, Clover's one choice of languages (`ui/LanguageChoice`): a
- * globe, then the codes of the languages to read in ("EN", "FR", "FI"), or, past five,
- * the globe and the code in use, which opens them. Nothing under two languages. Drawn,
+ * A and 文, then the codes of the languages to read in ("EN", "FR", "FI"), or, past
+ * five, the glyph and the code in use, which opens them. Nothing under two languages. Drawn,
  * it tells the Root so (`drawsToggle`), and an annotation set or a Transcript follows it
  * rather than offering its own. Its classes are `clover-about-languages` and the rest.
  */
@@ -90,7 +90,7 @@ export function LanguageToggle({
 }: {
   values?: boolean;
   interfaceLanguages?: boolean;
-  /** Folded into the globe and the code in use however few there are. */
+  /** Folded into the glyph and the code in use however few there are. */
   menu?: boolean;
   /** The part that draws it, for the message outside a Root. */
   name?: string;

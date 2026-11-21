@@ -1525,8 +1525,9 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   then those configured), then the page's, else its first (`readerLanguages`,
   `languageToRead`). The toggle is Clover's one construct for a choice of languages (Mat, 2026-11-05: "we should
   [not] be seeing multiple `en` values", "show that globe icon whenever we have a toggle
-  of multiple langs", "build the globe in. one construct"; `ui/LanguageChoice`): a globe,
-  then the codes; folded into the globe and the code in use, a menu (`ui/LanguageMenu`),
+  of multiple langs", "build the globe in. one construct"; `ui/LanguageChoice`): A and 文
+  (`ui/LanguagesGlyph`, a globe until Mat, 2026-11-21: "a and 文 without a bubble"),
+  then the codes; folded into the glyph and the code in use, a menu (`ui/LanguageMenu`),
   as soon as the codes would reach About's title ("the dropdown should happen as soon as
   lang codes intersect the section label", `fit`, measured on one line against the
   box the heading keeps clear), elsewhere past five. About's offers what the resource describes itself in
@@ -1540,7 +1541,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   lang option to that section"): an annotation set, or a Transcript's caption files,
   follows About's toggle only where it offers each of their languages (`covers`), else
   offers its own, for itself alone. A Transcript with a plain-text transcript among its
-  files keeps its own choice of files, with no globe ("the one exception is when we have
+  files keeps its own choice of files, with no glyph ("the one exception is when we have
   a TXT transcription along side actual language choices"). Folded, the button shows a
   caret, no edge ("if dropdown, make it obvious", "this hairline is unlike what we do
   elsewhere"), and its menu reads as the Canvas's annotations menu, the page's size, the

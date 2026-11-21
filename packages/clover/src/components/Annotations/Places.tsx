@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Place as PlaceGlyph } from "../Body/glyphs";
+import { PlaceGlyph } from "../../ui/glyphs/Place";
 import { overlayItems } from "../Map/overlayItems";
 import { canvasGeoreferences, georeferencesOf } from "../../core/geo";
 import type { Manifest } from "../../core/presentation";

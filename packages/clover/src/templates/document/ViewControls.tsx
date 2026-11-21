@@ -106,22 +106,24 @@ export function ViewControls({
 }
 
 /*
- * Two arrows on the diagonal, from its corners in to its middle, bold as the arrow before
- * them was (Mat, 2026-11-11: "something more bold and obvious"): each a heavy shaft,
- * rounded at its tail, into a solid head, its corners rounded as Clover's glyphs' joins
- * are, the two heads clear of each other. The Canvas's Full screen and Exit full screen
- * draw four such arrows, one to each corner (`ui/controlGlyphs.tsx`; Mat, 2026-11-13:
- * "use same arrows as expand/collapse for fullscreen", "it should be four arrows. all
- * directions"): keep their arrows alike.
+ * Two arrows on the diagonal, from its corners in to its middle (Mat, 2026-11-11:
+ * "something more bold and obvious", a thin arrow before): each a shaft, rounded at its
+ * tail, into a solid head, its corners rounded as Clover's glyphs' joins are, the two
+ * heads clear of each other. The Canvas's Full screen and Exit full screen draw four of
+ * these arrows, one to each corner (`ui/controlGlyphs.tsx`; Mat, 2026-11-13: "use same
+ * arrows as expand/collapse for fullscreen", "it should be four arrows. all
+ * directions"): keep their arrows alike. Both Regular since 2026-11-21, with smaller
+ * heads (Mat: "this feels too bold compared to others", then "Match full screen";
+ * shafts 56 and heads of 128 before), each where Exit full screen's is.
  */
 const SHAFT = {
   fill: "none",
   strokeLinecap: "round",
-  strokeWidth: 56,
+  strokeWidth: 40,
 } as const;
 const HEAD = { strokeLinejoin: "round", strokeWidth: 40 } as const;
-const BACK_SHAFTS = "M440 72L368 144M72 440L144 368";
-const BACK_HEADS = "M304 208V80L432 208ZM208 304V432L80 304Z";
+const BACK_SHAFTS = "M427 85L339 173M85 427L173 339";
+const BACK_HEADS = "M299 213V133L379 213ZM213 299V379L133 299Z";
 
 /** The pictures' height in a step's preview: a page about Items' own size. */
 const PREVIEW_SIZE = 160;

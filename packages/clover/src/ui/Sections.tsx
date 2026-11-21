@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Caret } from "./Caret";
 import { useUniqueId } from "./useUniqueId";
 
 import { titleTag } from "./heading";
@@ -411,22 +412,7 @@ export function Sections({
         onMouseDown={(event) => event.preventDefault()}
         onClick={step === "prev" ? track.scrollPrev : track.scrollNext}
       >
-        <svg
-          aria-hidden="true"
-          focusable="false"
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d={step === "next" ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Caret rotate={step === "next" ? 0 : 180} size={12} />
         <Tip label={t(key)} />
       </button>
     );

@@ -109,11 +109,24 @@
     background-color: Highlight;
     color: HighlightText;
   }
+  /*
+   * Its words keep HighlightText on the Highlight: forced, a browser draws a backplate of
+   * Canvas behind text, and the chosen code read as a blank box (2026-11-21). Its Tip
+   * stays forced.
+   */
+  :is(
+      .clover-transcript-language,
+      .clover-annotations-language,
+      .clover-about-language
+    ):has(input:checked)
+    > span:not(.clover-tip) {
+    forced-color-adjust: none;
+  }
 }
 
 /*
- * Every choice of languages (`ui/LanguageChoice`, the Transcript's caption files): a
- * globe, then the codes, or, past five, folded (`ui/LanguageMenu`), the globe and the code
+ * Every choice of languages (`ui/LanguageChoice`, the Transcript's caption files): A and
+ * 文, then the codes, or, past five, folded (`ui/LanguageMenu`), A and 文 and the code
  * in use on a button drawn as About's Download button is, but a pill wide enough for both
  * ("JA"), `l` tall (past 24px, WCAG 2.5.8): muted at rest; under the pointer, focused or
  * open, filled with the accent, its glyph and code white, and focused, the accent's ring.
@@ -128,9 +141,10 @@
 }
 
 /*
- * The globe before a row of codes, inside it, which says what they are: quieter than the
- * codes (Mat, 2026-11-05: "mute it back"), their muted text at three quarters on the
- * panel, still 3:1 beside it (WCAG 1.4.11), at the Download glyph's size.
+ * A and 文 before a row of codes (`ui/LanguagesGlyph`; a globe until 2026-11-21), inside
+ * it, which says what they are: quieter than the codes (Mat, 2026-11-05: "mute it back"),
+ * their muted text at three quarters on the panel, still 3:1 beside it (WCAG 1.4.11), at
+ * the Download glyph's size.
  */
 .clover-languages-glyph {
   display: flex;
@@ -147,6 +161,15 @@
 .clover-languages-glyph > svg {
   width: var(--clover-text-s);
   height: var(--clover-text-s);
+}
+
+/*
+ * The outline around the glyph's A that cuts 文's 丿 (`ui/LanguagesGlyph`): A's Regular
+ * stroke and 28 each side, so the gap holds at any `--clover-glyph-weight`
+ * (`styles/scale.css`). Here, with the glyph, rather than on every page.
+ */
+:where(svg[viewBox="0 0 512 512"] mask *)[stroke-width="96"] {
+  stroke-width: calc(40px * var(--clover-glyph-weight, 1.2) + 56px);
 }
 
 button.clover-languages-button {

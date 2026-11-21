@@ -1,4 +1,5 @@
 import React from "react";
+import { PanelGlyph } from "../../ui/glyphs/Panel";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -46,22 +47,8 @@ export function PanelToggle({
       side={side === "start" ? side : undefined}
       onClick={() => onOpenChange(!open)}
     >
-      {/* A page with a side panel: the panel half filled while it is open. */}
-      <>
-        <rect
-          x="64"
-          y="96"
-          width="384"
-          height="320"
-          rx="40"
-          fill="none"
-          strokeWidth="36"
-        />
-        <path d="M320 96v320" fill="none" strokeWidth="36" />
-        {open && (
-          <path d="M320 96h88a40 40 0 0 1 40 40v240a40 40 0 0 1-40 40h-88z" />
-        )}
-      </>
+      {/* A page with a side panel: the panel filled while it is open. */}
+      <PanelGlyph open={open} />
     </Button>
   );
 }

@@ -2,7 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import type { CanvasControlsConfig } from "./Canvas.types";
 import type { ListedAnnotation } from "./Annotations";
-import { Chapters, Comment, Information, Place } from "../Body/glyphs";
+import { ChaptersGlyph as Chapters } from "../../ui/glyphs/Chapters";
+import { CommentGlyph as Comment } from "../../ui/glyphs/Comment";
+import { InformationGlyph as Information } from "../../ui/glyphs/Information";
+import { PlaceGlyph as Place } from "../../ui/glyphs/Place";
 import type { TransportChapter } from "./media/Transport";
 import type { CloverRequest } from "../../core/request";
 import Button from "../../ui/Button";

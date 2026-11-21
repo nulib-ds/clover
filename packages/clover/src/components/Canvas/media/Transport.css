@@ -163,7 +163,12 @@
   stroke: none;
 }
 
-.clover-canvas-transport-button svg [stroke] {
+/*
+ * A shape drawn with a stroke is an outline, but where it gives its own fill: Play's
+ * triangle, filled and stroked for its round corners (`ui/glyphs/Play.tsx`), and full
+ * screen's arrowheads, as the Canvas's controls draw them.
+ */
+.clover-canvas-transport-button svg [stroke]:not([fill]) {
   fill: none;
 }
 

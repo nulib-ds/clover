@@ -12,7 +12,7 @@ import * as Clover from "../../index";
  * language (its control labels, section titles and announcements) is the visitor's where
  * Clover has strings for it, else the site's (the languages configured, then the page's);
  * a resource's text, the visitor's, then the interface's, then the site's, else each
- * value's first. The toggle, after a globe, offers the resource's languages and the
+ * value's first. The toggle, after A and 文, offers the resource's languages and the
  * interface languages it does not already name, each once, wherever there are two or
  * more. Choosing one the resource has reads it in that language and speaks it too where
  * Clover has strings for it; one only the site offers moves the interface alone.
@@ -104,7 +104,7 @@ const codes = (group: HTMLElement) =>
     .map((radio) => radio.closest("label")?.querySelector("span")?.textContent);
 
 describe("About's language toggle", () => {
-  it("offers an English visitor each of the resource's languages once, after a globe", async () => {
+  it("offers an English visitor each of the resource's languages once, after A and 文", async () => {
     visitor("en-US", "en");
     draw(multilingual);
     expect(await title("Reminiscence Post")).toHaveAttribute("lang", "en");
@@ -270,7 +270,7 @@ describe("About's language toggle", () => {
     expect(codes(await toggle("言語"))).toEqual(["JA", "EN"]);
   });
 
-  it("folds into the globe's menu as soon as its codes would reach About's title", async () => {
+  it("folds into the glyph's menu as soon as its codes would reach About's title", async () => {
     visitor("en");
     // The title's words end at 300px; the heading's controls start at 250px.
     const box = (left: number, right: number) =>
@@ -311,7 +311,7 @@ describe("About's language toggle", () => {
     expect(codes(await toggle())).toEqual(["EN", "FR"]);
   });
 
-  it("folds past five languages into the globe's menu alone, Escape closing it", async () => {
+  it("folds past five languages into the glyph's menu alone, Escape closing it", async () => {
     visitor("ja");
     initCloverI18n({ languages: ["en", "fr", "fi"] });
     render(
@@ -444,7 +444,7 @@ describe("Language, the toggle as a part of its own", () => {
     expect(await title("感懐帖")).toBeInTheDocument();
   });
 
-  it("menu: folded into the globe and the code in use, however few there are", async () => {
+  it("menu: folded into the glyph and the code in use, however few there are", async () => {
     visitor("en");
     render(
       <Clover.Root iiifContent={multilingual}>

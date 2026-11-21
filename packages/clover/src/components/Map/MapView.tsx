@@ -53,7 +53,8 @@ import { directionOf, languageProps } from "../../i18n/direction";
 import { Tip } from "../../ui/Tip";
 import { useContainerName } from "../../i18n/useContainerName";
 import { ZoomIn, ZoomOut } from "../../ui/controlGlyphs";
-import { Information } from "../Body/glyphs";
+import { CloseGlyph as Close } from "../../ui/glyphs/Close";
+import { InformationGlyph as Information } from "../../ui/glyphs/Information";
 import { readDate } from "../../core/dates";
 import { dateTimeOf, formatDate } from "../../core/dates-format";
 import { cloverI18n, langWithin } from "../../i18n/config";
@@ -2231,7 +2232,7 @@ const Outlines = () => (
     stroke="currentColor"
     strokeLinecap="round"
     strokeLinejoin="round"
-    strokeWidth="36"
+    strokeWidth="40"
     d="M152 96l264 48-48 272-264-48zM284 120l-48 272M128 232l264 48"
   />
 );
@@ -2246,54 +2247,60 @@ const SelectionOutline = () => (
       strokeWidth="40"
       d="M152 96l264 48-48 272-264-48z"
     />
-    <path stroke="none" d="M204 176l132 24-24 136-132-24z" />
+    <path stroke="none" d="M205 173l135 24-25 142-135-24z" />
   </>
 );
 
-/** The options' gear: a cog of eight teeth round a hub. */
+/**
+ * The options' gear: a cog of eight teeth round an open hub, solid, as a glyph that opens
+ * something is, here the options' tray (Mat, 2026-11-21: "I'm not sure if this should be
+ * outlines. maybe fill?"; its outline before). Filled and stroked at Regular, so its teeth
+ * keep their round corners and the gear its size at any weight, its hub a hole (100 on the
+ * grid, less half a stroke) that stays open at 16px.
+ */
 const Gear = () => (
   <path
-    fill="none"
+    fill="currentColor"
+    fillRule="evenodd"
     stroke="currentColor"
     strokeLinejoin="round"
-    strokeWidth="36"
-    d="M217.2 111.1L224.7 58.5L287.3 58.5L294.8 111.1L331 126.1L373.6 94.2L417.8 138.4L385.9 181L400.9 217.2L453.5 224.7L453.5 287.3L400.9 294.8L385.9 331L417.8 373.6L373.6 417.8L331 385.9L294.8 400.9L287.3 453.5L224.7 453.5L217.2 400.9L181 385.9L138.4 417.8L94.2 373.6L126.1 331L111.1 294.8L58.5 287.3L58.5 224.7L111.1 217.2L126.1 181L94.2 138.4L138.4 94.2L181 126.1ZM320 256a64 64 0 1 1-128 0a64 64 0 1 1 128 0Z"
+    strokeWidth="40"
+    d="M217.2 111.1L224.7 58.5L287.3 58.5L294.8 111.1L331 126.1L373.6 94.2L417.8 138.4L385.9 181L400.9 217.2L453.5 224.7L453.5 287.3L400.9 294.8L385.9 331L417.8 373.6L373.6 417.8L331 385.9L294.8 400.9L287.3 453.5L224.7 453.5L217.2 400.9L181 385.9L138.4 417.8L94.2 373.6L126.1 331L111.1 294.8L58.5 287.3L58.5 224.7L111.1 217.2L126.1 181L94.2 138.4L138.4 94.2L181 126.1ZM356 256a100 100 0 1 1-200 0a100 100 0 1 1 200 0Z"
   />
 );
 
 /**
- * A picture: a frame, a sun in its upper corner and hills along its foot, as the pin is the
- * map: the control that puts away and brings back the page's picture over the map.
+ * A picture: the Canvas, and peaks rising from its foot under a sun, as the pin is the map:
+ * the control that puts away and brings back the page's picture over the map. Generic on
+ * purpose (Mat, 2026-11-21: after a frame with a sun and hills, then Hokusai's Great Wave,
+ * "I just don't think the great wave works", and of famous artworks drawn on the Canvas,
+ * "none of these work. we may need to go generic.", then "peaks from the foot. round the
+ * peaks slightly."): at 16px the Canvas holds about 10 by 8 pixels, where a painting's
+ * curves blur and peaks and a sun hold.
+ *
+ * The frame is Regular (40), the Panel toggle's box, the control beside it in the map's
+ * row. The peaks rise from its foot as one shape with it, their tops and the valley
+ * between them rounded a little, and the sun stands clear of them. Whole units of the
+ * grid, in relative commands.
  */
 const Picture = () => (
   <>
     <rect
       fill="none"
       stroke="currentColor"
-      strokeWidth="36"
-      x="74"
-      y="106"
-      width="364"
-      height="300"
+      strokeWidth="40"
+      x="66"
+      y="98"
+      width="380"
+      height="316"
       rx="40"
     />
-    <circle stroke="none" cx="330" cy="196" r="34" />
     <path
       stroke="none"
-      strokeLinejoin="round"
-      d="M110 372L206 262L270 334L314 292L402 372Z"
+      d="M76 404v-32l105-112q19-20 38 0l39 42q10 10 20 0l10-10q16-16 33-2l115 94v20z"
     />
+    <circle stroke="none" cx="352" cy="192" r="28" />
   </>
-);
-
-/** The open tray's close, a cross, as Document's map's Close draws it. */
-const Close = () => (
-  <path
-    fill="none"
-    strokeLinecap="round"
-    strokeWidth="45"
-    d="M154 154L358 358M358 154L154 358"
-  />
 );
 
 /** Allmaps Viewer, which opens a georeference annotation by its address (`?url=`). */

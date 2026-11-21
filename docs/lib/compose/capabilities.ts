@@ -204,7 +204,7 @@ export const CAPABILITIES = {
     resource: "paged",
   },
   languages: {
-    says: "Resources in several languages, each value in the visitor's language, and Clover's interface language (control labels, section titles, announcements), with a globe to choose between them.",
+    says: "Resources in several languages, each value in the visitor's language, and Clover's interface language (control labels, section titles, announcements), with an A 文 glyph to choose between them.",
     words: [
       "multilingual",
       "translation",

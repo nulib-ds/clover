@@ -32,22 +32,6 @@ type Direction = keyof typeof DIRECTIONS;
 /** How long a press lasts before it turns on, as a key held repeats. */
 const HOLD_MS = 400;
 
-/**
- * A way to turn's glyph: Clover's caret, the pager's and Items' (`Pager.tsx`'s `Chevron`,
- * in the controls' 512 box), pointing the way it turns: 0° right, then clockwise (Mat,
- * 2026-10-23: "the same as our carets").
- */
-export const Caret = ({ rotate }: { rotate: number }) => (
-  <path
-    fill="none"
-    strokeWidth="64"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    d="M192 96l160 160-160 160"
-    transform={`rotate(${rotate} 256 256)`}
-  />
-);
-
 /** The globe's radius in its 512 box: the svg fills the disc, so nearly to its edge. */
 const GLOBE = 236;
 

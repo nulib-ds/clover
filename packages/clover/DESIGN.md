@@ -1,9 +1,10 @@
-# Design: space, type, selectors and words
+# Design: space, type, selectors, words and glyphs
 
-How `@nulib/clover` sizes everything it draws, how its stylesheet is written, and how its
-words are cased. This is a rule, not a guideline. `src/styles/scale.test.ts`,
-`src/styles/colors.test.ts`, `build/tiers.test.mjs` and `src/i18n/locales/locales.test.ts`
-enforce the parts a test can check; the rest is review.
+How `@nulib/clover` sizes everything it draws, how its stylesheet is written, how its
+words are cased, and how its glyphs are drawn. This is a rule, not a guideline.
+`src/styles/scale.test.ts`, `src/styles/colors.test.ts`, `build/tiers.test.mjs`,
+`src/i18n/locales/locales.test.ts` and `src/ui/glyphs/weight.test.ts` enforce the parts a
+test can check; the rest is review.
 
 The aim is natural whitespace. Space between things should say how closely they belong
 together, so a reader can see the structure before reading a word. Every value comes
@@ -557,3 +558,52 @@ reader to know a part's name.
   capitalize its nouns.
 - **A string with a new proper name** adds it to `PROPER_NAMES` in the locales test, which
   lists IIIF's resource types, keys and acronyms.
+
+## 9. Glyphs: one grid, three weights, gaps on the scale
+
+Clover's glyphs follow one system (Mat, 2026-11-21, normalizing its icons: "what helps
+with normalization across the clover system … that is most key"), so its controls read as
+one family at every size and at any `--clover-glyph-weight`. `AGENTS.md` keeps where each
+glyph lives and how each was chosen.
+
+- **One grid.** Every glyph is a shape on a 512 box (`viewBox="0 0 512 512"`). At 1rem a
+  unit is 1/512 of the page's size, so the scale's steps fall on the grid: `2xs` is 121,
+  `3xs` 75. Every point is a whole unit: a tenth costs bytes for less than a thirtieth of
+  a pixel.
+- **Three weights.** Regular, 40 on the grid at 1rem and 48 at `text-s`, for every stroked
+  glyph; Bold, 56, for chevrons (the caret); Light, 32, for page layouts alone (Mat,
+  2026-11-16: "a bit too bold/illegible"). A glyph shown at two sizes keeps one weight:
+  Close's cross is the field's Clear, at `text-s` too (Mat, 2026-11-21: "they should use
+  one"). `--clover-glyph-weight`
+  scales every stroke, 1.2 by default, so Regular is 1.5px at 1rem. The grid's numbers
+  stay the glyphs' own weights, and a new weight gets its rule in `styles/scale.css`.
+- **Stroked acts, solid opens.** A stroked glyph acts on the view (zoom, rotate, full
+  screen, Reset view); a solid one opens something (About, the map, the options' gear,
+  the Annotations card over its region). A toggle shows its state by its shape, filled
+  while on (the Panel toggle, captions) or struck through (Hide), never by color alone
+  (WCAG 1.4.1).
+- **A frame keeps its outer edge** as its stroke changes, so a filled twin stays its size
+  (the captions' card, the fit's frame, the Panel toggle).
+- **One drawing per meaning.** A glyph a part and a template both show is drawn once, in
+  `src/ui/glyphs/`, and exported as `…Glyph`. Every chevron is the caret, turned; one
+  cross closes and clears; one speaker stands for sound; one box and arrow opens a new
+  tab.
+
+**Gaps are steps of the scale** (Mat, 2026-11-21: "for all icons. normalize gaps between
+strokes. … use gr steps. to increase/decrease gaps for elements that more closely
+releated. the same way we handle layout."). The room between a glyph's parts, ink to ink
+at the grid's own weights, is a step of the golden scale at the glyph's size, smaller the
+more closely the parts belong together, as §3 chooses a layout's: `2xs` and `3xs` on the
+grid, and under them two steps no layout needs, φ⁻⁵ and φ⁻⁶, in whole units.
+
+| Relationship        | Gap         | Examples                                                                                                                                                                                                                                                                                                                                       |
+| ------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Across a glyph      | 121 (`2xs`) | Reset view's corners and its center; Full screen's heads; Fill's and Fit's arrows                                                                                                                                                                                                                                                              |
+| Separate things     | 75 (`3xs`)  | Chapters' lines; Pause's bars; Download's arrow and its line; the Map picture's sun and peaks; Full screen's shafts                                                                                                                                                                                                                            |
+| Parts of one figure | 46 (φ⁻⁵)    | The layers of Views, Collection and Choice; a transcript's lines; Auto layout's pages; a dot and its line or stem (Chapters, About); the speaker and its waves or cross; a box and its arrow (the external link, Expand); a frame and what is in it (Fill, Fit, Expand, the Map picture); Exit full screen's heads; Selection outline's sheets |
+| A cut in one shape  | 28 (φ⁻⁶)    | The A and 文 of the languages glyph; the Annotations card and its region; Hide's pupil in its eye; the captions' two Cs; a speaker's waves                                                                                                                                                                                                     |
+
+A gap may sit a unit off its step, as every point is a whole unit. Glyphs that share a
+frame hold what is in it at one height: the captions' Cs and Fill's and Fit's arrows sit
+62 from its top and foot, so the three match. A new glyph takes these steps, chosen by
+what its parts belong to, as §3's table chooses a space.

@@ -17,12 +17,13 @@ import {
   zoomed,
 } from "./orbit";
 import { type IIIFScene, sceneBackground, sceneModels } from "./models";
-import { Caret, RotatePad, showOrientation } from "./RotatePad";
+import { RotatePad, showOrientation } from "./RotatePad";
 import type { IIIFCanvas } from "../Canvas/layout";
 import Caption, { captionLabelId, hasInformation } from "../Body/Caption";
 import { BodyAlert } from "../Body/BodyAlert";
 import { BodyUnloadable } from "../../ui/BodyUnloadable";
-import { Information } from "../Body/glyphs";
+import { CaretGlyph as Caret } from "../../ui/glyphs/Caret";
+import { InformationGlyph as Information } from "../../ui/glyphs/Information";
 import { useControlsVisibility } from "../Body/useControlsVisibility";
 import { useNearViewport } from "../Body/useNearViewport";
 import type { CloverRequest } from "../../core/request";

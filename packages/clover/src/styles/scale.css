@@ -145,3 +145,54 @@
   );
   opacity: 1;
 }
+
+/*
+ * A glyph's weight (Mat, 2026-11-21: "are handling in a way where stroke could be
+ * adjust[ed] if necessary, adding weight?"). Every stroked glyph on Clover's 512 grid
+ * scales by `--clover-glyph-weight`, so a page, or what holds a Root, changes the weight
+ * by one value and every glyph keeps its weight among the others. 1.2 by default, a step
+ * up the weights' ladder (Mat, 2026-11-21: "increase the default weight of glyphs a
+ * step"): Regular, 40 on the grid, draws as 48, 1.5px at 1rem; 1 draws the glyphs at
+ * their own weights. A glyph writes its weight as its stroke's width (`ui/glyphs/`), which
+ * a rule here multiplies, one for each weight Clover draws with:
+ * `ui/glyphs/weight.test.ts` fails on a weight with none. A width one glyph alone draws
+ * has its rule in that glyph's sheet: the languages glyph's outline, `ui/Codes.css`. In px, read in the glyph's own
+ * grid, as Firefox drops a unitless one here and draws the stroke 1px wide. Here, where
+ * every element loads it.
+ */
+:where(
+  svg[viewBox="0 0 512 512"],
+  svg[viewBox="0 0 512 512"] *
+)[stroke-width="14"] {
+  stroke-width: calc(14px * var(--clover-glyph-weight, 1.2));
+}
+:where(
+  svg[viewBox="0 0 512 512"],
+  svg[viewBox="0 0 512 512"] *
+)[stroke-width="32"] {
+  stroke-width: calc(32px * var(--clover-glyph-weight, 1.2));
+}
+:where(
+  svg[viewBox="0 0 512 512"],
+  svg[viewBox="0 0 512 512"] *
+)[stroke-width="40"] {
+  stroke-width: calc(40px * var(--clover-glyph-weight, 1.2));
+}
+:where(
+  svg[viewBox="0 0 512 512"],
+  svg[viewBox="0 0 512 512"] *
+)[stroke-width="48"] {
+  stroke-width: calc(48px * var(--clover-glyph-weight, 1.2));
+}
+:where(
+  svg[viewBox="0 0 512 512"],
+  svg[viewBox="0 0 512 512"] *
+)[stroke-width="56"] {
+  stroke-width: calc(56px * var(--clover-glyph-weight, 1.2));
+}
+:where(
+  svg[viewBox="0 0 512 512"],
+  svg[viewBox="0 0 512 512"] *
+)[stroke-width="80"] {
+  stroke-width: calc(80px * var(--clover-glyph-weight, 1.2));
+}

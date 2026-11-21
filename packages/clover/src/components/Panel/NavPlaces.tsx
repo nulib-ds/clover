@@ -1,6 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 
-import { Place } from "../Body/glyphs";
+import { PlaceGlyph as Place } from "../../ui/glyphs/Place";
 import {
   type MapFeature,
   countPlaces,

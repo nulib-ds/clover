@@ -116,7 +116,7 @@ export const language: ElementSpec = {
 export const languageDocs: ElementDocs = {
   name: "CloverLanguageElement",
   description:
-    "The languages to read the resource in, as About offers them, for a layout to place where it likes: the languages its values come in, then Clover's interface languages it has none of, the one in use chosen, which sets the root's reading. A row of their codes after a globe, folded past five into the globe and the code in use, which opens them. Nothing under two languages.",
+    "The languages to read the resource in, as About offers them, for a layout to place where it likes: the languages its values come in, then Clover's interface languages it has none of, the one in use chosen, which sets the root's reading. A row of their codes after the A 文 glyph, folded past five into the glyph and the code in use, which opens them. Nothing under two languages.",
   attributes: {
     "interface-languages": {
       description:
@@ -125,7 +125,7 @@ export const languageDocs: ElementDocs = {
     },
     menu: {
       description:
-        "Folded into the globe and the code in use, which opens the rest as a menu, however few there are.",
+        "Folded into the A 文 glyph and the code in use, which opens the rest as a menu, however few there are.",
       default: "false",
     },
   },

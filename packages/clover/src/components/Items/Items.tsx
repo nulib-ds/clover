@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { Caret } from "../../ui/Caret";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { ItemFigure, type ItemSecondary } from "./Item";
@@ -770,30 +771,17 @@ function DrawnItems({
       else onActivate(item, event);
     };
     const icon = (
-      <svg
-        aria-hidden="true"
-        focusable="false"
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-      >
-        <path
-          d={
-            vertical
-              ? (step === "next") !== upward
-                ? "M3 6l5 5 5-5"
-                : "M3 10l5-5 5 5"
-              : (step === "next") !== rtl
-                ? "M6 3l5 5-5 5"
-                : "M10 3L5 8l5 5"
-          }
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <Caret
+        rotate={
+          vertical
+            ? (step === "next") !== upward
+              ? 90
+              : 270
+            : (step === "next") !== rtl
+              ? 0
+              : 180
+        }
+      />
     );
     const Custom =
       controlButtons?.[step === "prev" ? "itemsPrev" : "itemsNext"];

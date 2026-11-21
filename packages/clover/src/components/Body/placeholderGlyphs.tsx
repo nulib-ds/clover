@@ -1,17 +1,12 @@
 import React from "react";
 
 /*
- * The placeholder's glyphs, drawn as `glyphs.tsx`'s are (a 512 box, taking the button's
- * color), apart from them: only the placeholder (`Canvas/Placeholder.tsx`) and the image
- * controls' tray (`Canvas/ImageControls.tsx`) draw them, both loaded when first needed,
- * while `glyphs.tsx` loads with every Canvas's controls. Beside the others, the
- * magnifiers' long paths rode on every first view, about 0.6 kB gzip.
+ * The placeholder's magnifiers, drawn as Clover's glyphs are (`ui/glyphs/`: a 512 box,
+ * taking the button's color), apart from them: only the placeholder
+ * (`Canvas/Placeholder.tsx`) and the image controls' tray (`Canvas/ImageControls.tsx`)
+ * draw them, both loaded when first needed. Beside the controls' glyphs, their long paths
+ * rode on every first view, about 0.6 kB gzip.
  */
-
-/** A rounded triangle: plays a video or sound from its placeholder. */
-export const Play = () => (
-  <path strokeLinejoin="round" strokeWidth="40" d="M184 128V384L392 256Z" />
-);
 
 /**
  * A magnifier with a plus: opens the Canvas from its placeholder. The Viewer's

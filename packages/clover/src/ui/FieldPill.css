@@ -94,6 +94,12 @@ button.clover-field-pill-clear {
     color 120ms;
 }
 
+/* Clover's Close at `text-s`, as its other glyphs at that size (48, 1.28px). */
+button.clover-field-pill-clear svg {
+  width: var(--clover-text-s);
+  height: var(--clover-text-s);
+}
+
 button.clover-field-pill-clear:is(:hover, :focus-visible) {
   background-color: color-mix(
     in srgb,

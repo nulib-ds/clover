@@ -1,4 +1,5 @@
 import React, { Suspense, lazy, useCallback, useState } from "react";
+import { DownloadGlyph as Download } from "../../ui/glyphs/Download";
 
 import { useHasDownloads } from "../Download/hasDownloads";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -20,7 +21,7 @@ const DownloadGroups = lazy(() =>
  * What About's heading holds in a Panel, at the end of its row, shown whichever section
  * is open (`SectionSpec`'s `actions`): a Download button where there is anything to
  * download, then, furthest along, the languages to read in, the resource's and Clover's
- * interface languages as one toggle after a globe (`LanguageToggle`; Mat, 2026-10-28 and
+ * interface languages as one toggle after A and 文 (`LanguageToggle`; Mat, 2026-10-28 and
  * 2026-11-05). Nothing at all where it has neither, so the heading keeps no room for it.
  */
 export function AboutActions({
@@ -108,16 +109,7 @@ function DownloadButton() {
   );
 }
 
-/* The Download glyph's arrow and the line it comes down to, as Document's toolbar's. */
-const DOWNLOAD_ARROW = "M256 64v232M160 200l96 96 96-96";
-const DOWNLOAD_LINE = "M96 440h320";
-
-/**
- * An arrow down to a line, one weight for both, near the panel's chevrons beside it
- * (1.3px at the glyph's size, `text-s`; Mat, 2026-10-28: "less hairline"; 2026-11-11,
- * the line in place of a tray: "use the `bar` variant"). Each path is unfilled itself, so
- * a button that fills its glyphs (`ui/Button.css`) never fills the arrow's head.
- */
+/** About's Download glyph (`ui/glyphs/Download.tsx`), sized by the stylesheet. */
 function DownloadGlyph() {
   return (
     <svg
@@ -125,13 +117,8 @@ function DownloadGlyph() {
       viewBox="0 0 512 512"
       aria-hidden="true"
       focusable="false"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
-      <path d={DOWNLOAD_ARROW} fill="none" strokeWidth="48" />
-      <path d={DOWNLOAD_LINE} fill="none" strokeWidth="48" />
+      <Download />
     </svg>
   );
 }

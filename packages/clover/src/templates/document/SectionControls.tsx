@@ -326,23 +326,9 @@ function SearchControl({
             focusable="false"
             width="16"
             height="16"
-            viewBox="0 0 16 16"
+            viewBox="0 0 512 512"
           >
-            <circle
-              cx="7"
-              cy="7"
-              r="4.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-            <path
-              d="M10.5 10.5L14 14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
+            <Clover.SearchGlyph />
           </svg>
           <span style={Clover.visuallyHidden}>{label.text}</span>
           <Clover.Tip label={label.text} />
@@ -391,68 +377,39 @@ function SearchControl({
   );
 }
 
-/* Clover's glyphs (`Body/glyphs.tsx`) and a few of the template's own, on a 512 grid. */
+/* Clover's glyphs (`Clover.…Glyph`) and a few of the template's own, on their 512 grid. */
 const LINES = {
   fill: "none",
   strokeLinecap: "round",
-  strokeWidth: 36,
+  strokeWidth: 40,
 } as const;
 const GLYPHS: Record<PanelSection, React.ReactNode> = {
-  // Information.
-  about: (
-    <path
-      stroke="none"
-      d="M256 72A48 48 0 1 1 256 168A48 48 0 1 1 256 72Z M192 216H296V384H328V432H184V384H216V264H192Z"
-    />
-  ),
-  // Views: two pages, one over the other.
+  about: <Clover.InformationGlyph />,
+  // Views: two pages, the one behind the front one shifted 86 down and left, so it shows as
+  // far at its left as at its foot, 46 clear of the front one, its ends at its own corners
+  // (Mat, 2026-11-21: "the left part of the views underlayer seems closer to the top layer
+  // than the bottom line").
   targets: (
     <>
-      <rect x="144" y="64" width="304" height="304" rx="36" {...LINES} />
-      <path d="M88 152v264a32 32 0 0 0 32 32h264" {...LINES} />
+      <rect x="147" y="61" width="304" height="304" rx="36" {...LINES} />
+      <path d="M61 147v268a36 36 0 0 0 36 36h268" {...LINES} />
     </>
   ),
-  // A Collection: a stack.
+  // A Collection: a stack, its layers 46 apart.
   collection: (
     <>
-      <rect x="64" y="208" width="384" height="240" rx="36" {...LINES} />
-      <path d="M112 144h288M160 80h192" {...LINES} />
+      <rect x="64" y="242" width="384" height="200" rx="36" {...LINES} />
+      <path d="M112 156h288M160 70h192" {...LINES} />
     </>
   ),
-  // Contents: Chapters.
-  contents: (
-    <>
-      <path
-        d="M160 144h288M160 256h288M160 368h288"
-        {...LINES}
-        strokeWidth={32}
-      />
-      <circle cx="80" cy="144" r="20" stroke="none" />
-      <circle cx="80" cy="256" r="20" stroke="none" />
-      <circle cx="80" cy="368" r="20" stroke="none" />
-    </>
-  ),
+  contents: <Clover.ChaptersGlyph />,
   search: null,
-  // Place.
-  map: (
-    <path
-      fillRule="evenodd"
-      stroke="none"
-      d="M256 40C166 40 100 108 100 196C100 300 216 420 246 452A14 14 0 0 0 266 452C296 420 412 300 412 196C412 108 346 40 256 40Z M256 136A60 60 0 1 1 256 256A60 60 0 1 1 256 136Z"
-    />
-  ),
-  // A transcript: lines of text, the last shorter.
+  map: <Clover.PlaceGlyph />,
+  // A transcript: the lines of one text, 46 apart, the last shorter.
   transcript: (
-    <path d="M96 128h320M96 208h320M96 288h320M96 368h192" {...LINES} />
+    <path d="M96 127h320M96 213h320M96 299h320M96 385h192" {...LINES} />
   ),
-  // Comment.
-  annotations: (
-    <path
-      fillRule="evenodd"
-      stroke="none"
-      d="M144 72H368A96 96 0 0 1 464 168V296A96 96 0 0 1 368 392H200L104 460L144 392A96 96 0 0 1 48 296V168A96 96 0 0 1 144 72Z M168 184H344A16 16 0 0 1 344 216H168A16 16 0 0 1 168 184Z M168 264H280A16 16 0 0 1 280 296H168A16 16 0 0 1 168 264Z"
-    />
-  ),
+  annotations: <Clover.CommentGlyph />,
 };
 
 /**
@@ -531,29 +488,15 @@ function DownloadControl({
         aria-controls={`${id}-menu`}
         onClick={() => setOpen((was) => !was)}
       >
-        {/* About's Download glyph: an arrow down into a tray. */}
+        {/* About's Download glyph: an arrow down to a line. */}
         <svg
           aria-hidden="true"
           focusable="false"
           width="16"
           height="16"
           viewBox="0 0 512 512"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
         >
-          {/*
-           * About's (`AboutActions`): an arrow down to a line. Each path unfilled itself,
-           * as a Canvas button fills its glyph (`ui/Button.css`; Mat, 2026-11-11: "some css
-           * being inherited down on the tray"), which had filled the arrow's head and tray.
-           */}
-          <path
-            d="M256 64v232M160 200l96 96 96-96"
-            fill="none"
-            strokeWidth="48"
-          />
-          <path d="M96 440h320" fill="none" strokeWidth="48" />
+          <Clover.DownloadGlyph />
         </svg>
         <span style={Clover.visuallyHidden}>{t("download")}</span>
         <Clover.Tip label={t("download")} />

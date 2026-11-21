@@ -158,6 +158,21 @@ export type { InsetProps } from "./ui/Inset";
 /** A title at a heading level, and past h6, where headings end, the group it names. */
 export { titled } from "./ui/heading";
 export type { Titled } from "./ui/heading";
+/**
+ * Clover's glyphs, for controls of your own: shapes on a 512 grid for an svg of yours
+ * (`viewBox="0 0 512 512"`), in its color. One drawing each, the parts' own.
+ */
+export { CaretGlyph } from "./ui/glyphs/Caret";
+export { ChaptersGlyph } from "./ui/glyphs/Chapters";
+export { CloseGlyph } from "./ui/glyphs/Close";
+export { CommentGlyph } from "./ui/glyphs/Comment";
+export { DownloadGlyph } from "./ui/glyphs/Download";
+export { ExpandGlyph } from "./ui/glyphs/Expand";
+export { InformationGlyph } from "./ui/glyphs/Information";
+export { PanelGlyph } from "./ui/glyphs/Panel";
+export { PlaceGlyph } from "./ui/glyphs/Place";
+export { PlayGlyph } from "./ui/glyphs/Play";
+export { SearchGlyph } from "./ui/glyphs/Search";
 export type { Navigation } from "./react/hooks";
 export { useClover, useCloverSelector } from "./react/context";
 

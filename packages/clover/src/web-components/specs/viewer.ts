@@ -139,12 +139,12 @@ export const viewerDocs: ElementDocs = {
     },
     languages: {
       description:
-        "Default, Document and Gallery: where what the resource says of itself comes in several languages, the panel's About heading offers them (Document's toolbar, as a globe), and the whole Viewer reads in the one chosen. \"false\" leaves the choice out.",
+        "Default, Document and Gallery: where what the resource says of itself comes in several languages, the panel's About heading offers them (Document's toolbar, as the A 文 glyph), and the whole Viewer reads in the one chosen. \"false\" leaves the choice out.",
       default: "true",
     },
     "interface-languages": {
       description:
-        "Default, Document and Gallery: the panel's language toggle, beside its About heading (Document's globe, in its toolbar), also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of: the visitor's and the site's, where they differ. \"false\" leaves them out.",
+        "Default, Document and Gallery: the panel's language toggle, beside its About heading (Document's A 文 glyph, in its toolbar), also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of: the visitor's and the site's, where they differ. \"false\" leaves them out.",
       default: "true",
     },
     "panel-open": {

@@ -9,8 +9,28 @@ import { DOCS, SPECS } from ".";
 /** Parts whose elements are planned, each with when it will come. */
 const LATER: Record<string, string> = {};
 
-/** Parts that stay inside the others, never elements of their own: none since 2026-10-22. */
-const NEVER: Record<string, string> = {};
+/**
+ * Exports that are never elements of their own. No part since 2026-10-22; Clover's
+ * glyphs (2026-11-21) are shapes for an svg in React, where an HTML page writes its svg's
+ * markup itself, and a control of Clover's hands `controlButtons` its own `icon`.
+ */
+const GLYPH =
+  "A shape for a React svg: an HTML page writes its svg's markup, and Clover's controls hand their icon to controlButtons.";
+const NEVER: Record<string, string> = Object.fromEntries(
+  [
+    "CaretGlyph",
+    "ChaptersGlyph",
+    "CloseGlyph",
+    "CommentGlyph",
+    "DownloadGlyph",
+    "ExpandGlyph",
+    "InformationGlyph",
+    "PanelGlyph",
+    "PlaceGlyph",
+    "PlayGlyph",
+    "SearchGlyph",
+  ].map((name) => [name, GLYPH]),
+);
 
 const kebab = (name: string) =>
   name.replace(
