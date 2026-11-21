@@ -11,6 +11,26 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **The Choice menu is "Views", and lists its items as the annotations menu lists its
+  entries.** The control for a `Choice` with no label of its own, and its menu's title,
+  say "Views" (`canvasChoice`, every locale, as the Panel's Views tab says it), where
+  they said "Choice"; a Choice's own label still names them. Each item is a row: a
+  picture of its image, cut by that image's own service, then its label, the one painted
+  marked by the rows' accent edge and tint (`.clover-canvas-choice-entry`,
+  `data-selected`). The row is the radio: its native radio is out of sight, still one
+  tab stop moved by the arrow keys, and its focus ring is drawn around the row. An
+  unlabeled item shows its number beside its picture, and a long label (a file's name)
+  wraps rather than widening the menu. An animation's frames, offered in the same menu,
+  take the same rows, their pictures square (`.clover-entry-thumbnail`);
+  `.clover-canvas-menu-image` is gone. Its rows bring the sections' shared rows sheet
+  (`styles/rows.css`) where they load first. The rows' layout loads with that sheet,
+  never up front. Budgets raised to the next 50 B over what is measured: the Default
+  template 81,100 B, Document to first view 103,300 B, `base.css` 16,400 B,
+  `spacing.css` 4,050 B, `<clover-viewer>` 129,900 B, a composed layout's page 125,150 B
+  and `<clover-gallery>` 133,300 B, each 7 to 53 B past its old budget.
+
 ## [4.12.1] - 2026-11-20
 
 ### Fixed

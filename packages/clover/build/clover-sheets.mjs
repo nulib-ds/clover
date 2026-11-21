@@ -147,17 +147,22 @@ const OWNERS = {
     "components/Annotations/EntryBodies.tsx",
     "components/Body/CaptionDetails.tsx",
   ],
-  // An entry's picture, whichever draws it: an annotation's, a chapter's, or its own.
+  // An entry's picture, whichever draws it: an annotation's, a chapter's, a Choice's
+  // item's, or its own.
   "ui/EntryThumbnail": [
     "ui/EntryThumbnail.tsx",
+    "ui/EntryPicture.tsx",
     "ui/AnnotationEntry.tsx",
+    "components/Canvas/ChoiceMenu.tsx",
     "ui/AnnotationPicture.tsx",
     "ui/ChapterEntry.tsx",
   ],
-  // The sections' rows, and the Canvas's annotations menu's, which lists them as they do.
+  // The sections' rows, and the Canvas's annotations and Choice menus', which list them
+  // as they do.
   "components/Panel/Rows": [
     "components/Annotations/Annotations.tsx",
     "components/Canvas/AnnotationMenu.tsx",
+    "components/Canvas/ChoiceMenu.tsx",
     "components/Contents/Contents.tsx",
     "components/Transcript/Transcript.tsx",
     "components/Search/Search.tsx",

@@ -9,7 +9,7 @@ import { type LocalizedValue, localize } from "../../core/value";
 import type { CloverRequest } from "../../core/request";
 import { langWithin } from "../../i18n/config";
 import { languageProps } from "../../i18n/direction";
-import { EntryPicture } from "../../ui/AnnotationEntry";
+import { EntryPicture } from "../../ui/EntryPicture";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
 /**

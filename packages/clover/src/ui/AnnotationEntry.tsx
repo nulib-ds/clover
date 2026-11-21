@@ -11,6 +11,7 @@ import { localize } from "../core/value";
 import { useLoaded } from "../hooks/useLoaded";
 import { languageProps } from "../i18n/direction";
 import { CueTime } from "./Cue";
+import { EntryPicture } from "./EntryPicture";
 import { useBodyAlt } from "./bodyAlt";
 
 /*
@@ -32,8 +33,6 @@ export interface EntryOf {
 }
 
 const loadSvgShape = () => import("../core/svg-shape");
-// An entry's picture, loaded as a list first shows one (`AnnotationPicture`).
-const loadPicture = () => import("./AnnotationPicture");
 
 /**
  * Where the picture of what an entry marks comes from: its region of the Canvas, or the box
@@ -64,31 +63,6 @@ export function useRegionSource(
       return null;
     return regionSource(canvas, rect, entry.layer?.image);
   }, [entry, canvas, own, shape, point, t, svg, reader]);
-}
-
-/**
- * An entry's picture (`AnnotationPicture`): its square holds its room from the start, so
- * the words beside it never move as it arrives. Decorative, as the entry's words name it;
- * nothing for an entry with nothing to picture.
- */
-export function EntryPicture({
-  source,
-  request,
-}: {
-  source: ThumbnailSource | null | undefined;
-  request?: CloverRequest;
-}) {
-  const loaded = useLoaded(loadPicture, Boolean(source));
-  if (!source) return null;
-  return loaded ? (
-    <loaded.default
-      className="clover-annotations-thumbnail"
-      source={source}
-      request={request}
-    />
-  ) : (
-    <span className="clover-entry-thumbnail clover-annotations-thumbnail" />
-  );
 }
 
 /**

@@ -352,12 +352,16 @@ describe("FrameControls", () => {
     expect(screen.getByRole("radio", { name: "4" })).toBeChecked();
     await waitFor(() =>
       expect(
-        document.querySelectorAll(".clover-canvas-menu-image"),
+        document.querySelectorAll(
+          ".clover-canvas-choice-entry .clover-entry-thumbnail",
+        ),
       ).toHaveLength(16),
     );
     // Each frame's own image, which the scene loads to play it: it names no service.
     expect(
-      document.querySelector(".clover-canvas-menu-image")?.getAttribute("src"),
+      document
+        .querySelector(".clover-canvas-choice-entry .clover-entry-thumbnail")
+        ?.getAttribute("src"),
     ).toMatch(
       /\/pct:1\.2882,1\.2152,23\.6669,23\.3242\/full\/0\/default\.jpg$/,
     );
