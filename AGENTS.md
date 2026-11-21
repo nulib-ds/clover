@@ -829,8 +829,9 @@ deadline.
     (its name, muted), the list's chevron, and Open at its end, a round accent button with
     Items' caret (the site's round buttons agree; Mat, 2026-10-25), named "Open", for the address or content state of the reader's own, with ours listed under it,
     the list as wide as the whole select (its label, the field and Open; Mat, 2026-10-22) (`resources`
-    in `playground-config.ts`, in this order (Mat, 2026-10-26): a catalog, the footage, a
-    Collection (the masks), a model in 3D, etu.wiki's calligraphy in four
+    in `playground-config.ts`, in this order (Mat, 2026-10-26): a catalog, Hokusai's
+    Thirty-six Views of Mount Fuji, a Collection on Understory (Mat, 2026-11-21), the
+    footage, a Collection (the masks), a model in 3D, etu.wiki's calligraphy in four
     languages (Mat, 2026-11-08), a recording, a manuscript in Arabic (Maktaba's), a
     postcard, a photo, a film, a map…), each by its thumbnail, its own label, and a few words of IIIF,
     never of the material (`description`; Mat, 2026-11-08): its type, then the features it
