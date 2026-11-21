@@ -55,6 +55,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   loaded.", wherever Clover says one failed (the Status, a Body, a Canvas, a
   Transcript), in every locale.
 
+### Documentation
+
+- The footer names the version of Clover the docs are for, read from the package
+  ("version 4.12.1", in the code's face), in place of "version 4.x".
+
 ## [4.12.1] - 2026-11-20
 
 ### Fixed

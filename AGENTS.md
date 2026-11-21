@@ -955,8 +955,9 @@ deadline.
     then what Clover is in the homepage hero's words, a sentence a line (the headline's
     in bold, a step up, `1.618rem`, balanced where it takes two lines, Mat, 2026-10-22; the sentence at `--text-lede`, muted as the hero's is), then one paragraph in
     Mat's words, whose project Clover is (Academic Innovation at Northwestern University
-    Libraries; Mat, 2026-10-22), since when (2021) and at which version ("version 4.x"), and how widely it is used and built on, a
-    variety of implementations and the institutions that contributed, never a person
+    Libraries; Mat, 2026-10-22), since when (2021) and at which version (the package's
+    own, read from its `package.json`, "version 4.12.1"; Mat, 2026-11-20; "version 4.x"
+    before), and how widely it is used and built on, a variety of implementations and the institutions that contributed, never a person
     (Mat, 2026-10-21: people are credited elsewhere; its maturity shown, never claimed),
     its "more" linking to the repository's contributors; the two across 61.8% of the
     footer's width (all of it on a phone). No history, and no titles. Under it, `3xl`

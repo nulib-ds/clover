@@ -3,10 +3,15 @@ import React from "react";
 import Logo from "docs/components/Logo";
 import { ThemeSwitch } from "docs/components/ThemeSwitch";
 import { homeHeadline, homeTagline } from "docs/lib/site";
+import cloverPackage from "../../packages/clover/package.json";
 
-/* When Clover's development began, and the version these docs are for (Mat, 2026-10-21). */
+/*
+ * When Clover's development began (Mat, 2026-10-21), and the version these docs are for,
+ * the package's own, so it is never out of date (Mat, 2026-11-20: "say version {version
+ * number}"; "version 4.x" until then).
+ */
 const SINCE = 2021;
-const VERSION = "version 4.x";
+const VERSION = cloverPackage.version;
 
 /**
  * The site's footer, inside Nextra's (`app/layout.tsx`): what Clover is, in the homepage
@@ -33,10 +38,11 @@ export function SiteFooter() {
           <a href="https://www.library.northwestern.edu/">
             Northwestern University Libraries
           </a>
-          . Developed since {SINCE}, now at {VERSION}, it is used in a variety
-          of implementations, with contributions from folks at Princeton
-          University, Texas A&amp;M University, UNC Chapel Hill, University of
-          Pennsylvania, Cogapp, and{" "}
+          . Developed since {SINCE}, now at version{" "}
+          <span className="site-footer-version">{VERSION}</span>, it is used in
+          a variety of implementations, with contributions from folks at
+          Princeton University, Texas A&amp;M University, UNC Chapel Hill,
+          University of Pennsylvania, Cogapp, and{" "}
           <a href="https://github.com/nulib-ds/clover/graphs/contributors">
             more
           </a>
