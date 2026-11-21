@@ -45,8 +45,8 @@ export function PageLayoutGlyph({ layout }: { layout: PageLayout }) {
       )}
       {layout === "auto" && (
         <>
-          <rect x="96" y="144" width="224" height="304" rx="32" />
-          <path d="M192 144v-48a32 32 0 0 1 32-32h160a32 32 0 0 1 32 32v240a32 32 0 0 1-32 32h-64" />
+          <rect x="105" y="143" width="224" height="304" rx="32" />
+          <path d="M183 143v-46a32 32 0 0 1 32-32h160a32 32 0 0 1 32 32v240a32 32 0 0 1-32 32h-46" />
         </>
       )}
     </svg>

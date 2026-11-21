@@ -30,6 +30,16 @@ function sharedChunk() {
      * have with `clover-value`, it was a chunk of its own on their every page.
      */
     if (/\/src\/core\/(markdown-)?text\.ts$/.test(id)) return "text";
+    /*
+     * Clover's glyphs, a module each (`src/ui/glyphs/`) and the caret's svg
+     * (`ui/Caret.tsx`), in one small chunk: alone, each was a chunk of its own, about
+     * 0.2 kB gzip of boilerplate apiece, five or six on a page with a few parts. Not the
+     * speaker or the external link, which only parts that load later show (a recording,
+     * Annotations' links): in the chunk, every first view carried them,
+     * `<clover-canvas>` alone some 0.2 kB.
+     */
+    if (/\/src\/ui\/(glyphs\/(?!Speaker|External)[^/]+|Caret)\.tsx$/.test(id))
+      return "glyphs";
     if (!shared) {
       const reach = (from) => {
         const found = new Set();

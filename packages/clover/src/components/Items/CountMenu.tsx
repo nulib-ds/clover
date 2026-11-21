@@ -1,4 +1,5 @@
 import React, { Suspense, lazy, useCallback, useRef, useState } from "react";
+import { Caret } from "../../ui/Caret";
 
 import { useUniqueId } from "../../ui/useUniqueId";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -76,22 +77,7 @@ export function CountMenu({
             {total} / {total}
           </span>
         </span>
-        <svg
-          aria-hidden="true"
-          focusable="false"
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-        >
-          <path
-            d="M3 4.5l3 3 3-3"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Caret rotate={90} size={12} />
       </button>
       {open && (
         <Suspense fallback={null}>

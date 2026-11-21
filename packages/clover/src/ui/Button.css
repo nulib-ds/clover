@@ -219,9 +219,18 @@ button.clover-canvas-button[data-button="rotate-left"]:is(
   rotate: -45deg;
 }
 
-button.clover-canvas-button[data-button="reset"]:is(:hover, :focus-visible)
+/*
+ * Reset view's viewfinder draws in, a pixel a side at 1rem, as the view comes back to
+ * where it opened (Mat, 2026-11-21: the viewfinder; a 15° turn before, made for the undo
+ * arrow it was). Not where it has nowhere to go: said here, as the rule after this one
+ * undoes a turn alone, and a glyph mirrored by `scale` keeps its mirror.
+ */
+button.clover-canvas-button[data-button="reset"]:not([aria-disabled="true"]):is(
+    :hover,
+    :focus-visible
+  )
   svg {
-  rotate: -15deg;
+  scale: 0.875;
 }
 
 /* A control that does nothing does not nudge its glyph. */

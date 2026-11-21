@@ -250,6 +250,8 @@ a.clover-annotations-link svg {
  * a disc in the controls' fill, the glyph theirs, at the end of the picture's foot, a
  * little past it (Mat, 2026-11-13: "overlay map icon in corner of thumbnail"; kept,
  * 2026-11-16: "do leave the map … map icon"). Decorative: its entry says it is on the map.
+ * The pin fills itself in `currentColor`, as every shared glyph does (`ui/glyphs/`), so
+ * its color is set here, never its `fill`, which the pin's own would outweigh.
  */
 .clover-annotations-place-picture {
   position: relative;
@@ -267,13 +269,13 @@ a.clover-annotations-link svg {
   padding: var(--clover-space-3xs);
   border-radius: 50%;
   background-color: var(--clover-color-control, #1a1d1e);
-  fill: var(--clover-color-control-glyph, #fff);
+  color: var(--clover-color-control-glyph, #fff);
 }
 
 @media (forced-colors: active) {
   .clover-annotations-place-glyph {
     border: 1px solid CanvasText;
     background-color: Canvas;
-    fill: CanvasText;
+    color: CanvasText;
   }
 }

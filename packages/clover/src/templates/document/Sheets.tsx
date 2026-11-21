@@ -1028,18 +1028,8 @@ export function Sheets({
              */}
             {mediaOf(sheet.canvases) !== null && (
               <span className="clover-template-document-play" data-play>
-                <svg
-                  aria-hidden="true"
-                  focusable="false"
-                  viewBox="0 0 512 512"
-                  fill="currentColor"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinejoin="round"
-                    strokeWidth="40"
-                    d="M184 128V384L392 256Z"
-                  />
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 512 512">
+                  <Clover.PlayGlyph />
                 </svg>
               </span>
             )}
@@ -1072,18 +1062,8 @@ export function Sheets({
                 openHere();
               }}
             >
-              <svg
-                aria-hidden="true"
-                focusable="false"
-                viewBox="0 0 512 512"
-                fill="currentColor"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinejoin="round"
-                  strokeWidth="40"
-                  d="M184 128V384L392 256Z"
-                />
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 512 512">
+                <Clover.PlayGlyph />
               </svg>
               <span style={Clover.visuallyHidden}>{t("playerPlay")}</span>
             </button>

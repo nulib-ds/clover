@@ -31,6 +31,28 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   has `reason: "cors"`. That check loads only once a request fails; the rest of this
   change adds about 0.4 kB gzip to a template's first view (0.2 kB to a page with a
   `Body`), and the size budgets rise by what was measured (`build/size-budget.json`).
+- **`--clover-glyph-weight` makes Clover's glyphs heavier or lighter.** Every stroked
+  glyph's weight is multiplied by it, 1.2 by default, a step heavier than the glyphs' own
+  weights: a Regular glyph, 40 on its grid, draws 1.5px at 16px. Set it on the page, or
+  on what holds a `Root`, to 1 for the glyphs' own weights or to more for heavier, every
+  glyph keeping its weight among the others; Chapters' dots, round ends of its lines now,
+  follow it too. Solid glyphs (About's, the place pin, the
+  magnifier) are as they were. Its rules are in `styles/scale.css`, which every element loads.
+- **Clover's glyphs, for controls of your own.** `CaretGlyph`, `ChaptersGlyph`,
+  `CloseGlyph`, `CommentGlyph`, `DownloadGlyph`, `ExpandGlyph`, `InformationGlyph`,
+  `PanelGlyph`, `PlaceGlyph`, `PlayGlyph` and `SearchGlyph` are exported, each a shape on
+  a 512 grid for an svg of yours (`viewBox="0 0 512 512"`) in its color: the drawing the
+  parts and templates show, so a control of yours matches Clover's. React only. Each is
+  a module of its own, so a page loads only those it shows; as elements they share one
+  small chunk (`glyphs`). The parts that drew their own copies now share them. To first view, the Default template loads 29 B more,
+  Document 0.3 kB less and the Gallery 0.25 kB more, and a Canvas, Timeline or Scene
+  alone 0.1 to 0.2 kB less; as elements, `<clover-canvas>` loads 0.4 kB more, its
+  glyphs coming in one small chunk, and `<clover-viewer>` in Document 0.7 kB less. The
+  glyph weight's rules add 0.1 kB to `styles.css`. Budgets raised to the next 50 B over
+  what is measured: the Gallery 33,250 B and 54,150 B to first view, a map to first view
+  48,800 B, `styles.css` 12,600 B, `base.css` 16,450 B, `<clover-viewer>` 130,400 B and
+  its own entry 108,100 B, a page of labels 37,900 B, a composed layout's page 107,900 B,
+  a layout's page 125,550 B, `<clover-canvas>` 94,400 B and `<clover-gallery>` 133,750 B.
 
 ### Changed
 
@@ -54,6 +76,84 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **A failed load says "Error loading resource."**, in place of "This could not be
   loaded.", wherever Clover says one failed (the Status, a Body, a Canvas, a
   Transcript), in every locale.
+- **One caret for every chevron.** Items' and the pager's arrows, the Panel's and
+  Contents' disclosure chevrons, the pager's count menu, a frame animation's steps and
+  menu, the image controls' tray arrows, the Panel's tab arrows, Content Search's steps,
+  the lightbox's Back and a Scene's rotate pad show Clover's caret: one shape on a 512
+  grid, its stroke 56, drawn by default 2.1px at 16px and 1.58px at 12px, where it was
+  2px and 1.5px. Their sizes and classes are the same. Nothing to change.
+- **Close is the same everywhere.** Its cross is 40 on its 512 grid, drawn by default
+  1.5px at 16px, 1.41px before. The lightbox's close and a search field's Clear, which had
+  crosses of their own on a 16 grid, show it too, at the same weight, Clear's now
+  `--clover-text-s` square (12px before). Nothing to change.
+- **Reset view is a viewfinder.** The Canvas's Reset, and a Scene's in the corner of its
+  rotate pad, shows four corner brackets round a solid center, the framing the view
+  opened with, where it showed an undo arrow. Under the pointer or focused it draws in a
+  little, where the arrow turned 15°. Its name, its key and its place are the same.
+- **One speaker for sound.** The transport's Volume and Muted, Items' tile for sound
+  with nothing to picture, and a recording with no artwork show one speaker, its waves
+  (muted, its cross) 40 on its grid, drawn by default 1.5px at 16px. A recording with no
+  artwork shows it
+  in place of the music note, its class `.clover-canvas-player-speaker`: a stylesheet
+  that sized `.clover-canvas-player-note` sizes the speaker by its new class.
+- **One Play, and a Pause to match.** The transports' Play, a video's and an
+  animation's, is the placeholder's rounded triangle, and Pause two rounded bars as tall
+  as it. In the transport a shape drawn with a stroke keeps a fill of its own, so full
+  screen's arrowheads there are solid, as over a Canvas.
+- **One Regular weight.** Clover's stroked glyphs are 40 on their 512 grid, where they
+  were 32, 36, 45 or 64, and draw by default 1.5px at 16px: zoom, rotate, Choice,
+  captions, fill and fit, the Panel toggle, Chapters and Contents, Document's sections and
+  the Map's outlines, which drew 1 to 1.41px, and Search, which drew 2px. Hide, at its
+  small size, is 48, and the Annotations list's external link 40, as at every size. A frame keeps its outer edge on the grid. Nothing to change.
+- **Glyphs space their parts on the golden scale.** The room between a glyph's parts is
+  a space of Clover's golden scale, smaller the more closely they belong together, as
+  its layout's spaces are: a cut in one shape (the languages glyph's A and 文, the
+  Annotations card and its region, Hide's pupil, the captions' two Cs), the parts of one
+  figure (stacked layers, a dot and its line, the speaker and its sound, a frame or a box
+  and what is in it or leaves it), separate things (Chapters' lines, Pause's bars,
+  Download's arrow and line, the Map picture's sun and peaks) and across a glyph (Reset
+  view's corners, Full screen's heads, Fill's and Fit's arrows). Twenty-five glyphs move
+  by a few units of their grid; the Collection's box is a little shorter and Expand's box
+  a little larger. Their names, sizes and places are the same. Nothing to change.
+- **The Map's options are a solid gear.** The control that opens a map's options tray
+  shows a solid gear with its hub open, as Clover's controls that open something are
+  solid; it showed the gear's outline. Its size, name and place are the same.
+- **Full screen's arrows are lighter.** The four arrows of Full screen and Exit full
+  screen, over a Canvas, a Scene and in a recording's transport, are Regular, 40 on
+  their grid, drawn by default 1.5px at 16px, 1.75px before, with their solid heads a
+  little smaller, so
+  they sit at the weight of the controls beside them. Document's way back to its pages
+  takes the same two arrows. Nothing to change.
+- **Exit full screen's button shows the four arrows in.** The labeled way out of full
+  screen shows the Full screen control's glyph, at 1rem, where it showed a left arrow.
+  Its words and its place are the same.
+- **The Map's picture control matches its neighbors.** The control that puts the page's
+  picture away over a map and brings it back shows the frame the size of the Panel
+  toggle's beside it, at the same weight, with peaks rising from its foot under a sun,
+  their tops a little rounded; it showed a frame of its own with a sun and hills. Its
+  name and its place are the same.
+- **A choice of languages shows A and 文.** About's language toggle, `Language`, an
+  annotation set's and a Transcript's choices, and the folded menu (Document's toolbar
+  too) open with a Latin A and 文 (wén, writing), where they showed a globe. 文's
+  lower-left stroke runs on from the A's bar, behind its leg, and an outline around the
+  A cuts it, the same gap at any `--clover-glyph-weight`. The outline is an SVG mask, so
+  each glyph has an id of its own. Its classes and its place are the same. Nothing to
+  change. It loads with the choice of languages, not with a first view.
+- **Annotations show a marked region.** The annotations control over a Canvas and the
+  Document template's Annotations button show an area of the picture outlined, its
+  top-left corner kept and a solid card across the rest of its top holding two lines of
+  text, where they showed a speech bubble.
+  `CommentGlyph`, for controls of your own, draws it too: a stroked path and a filled
+  one, each with its own fill and stroke, so it takes its svg's color as before. Nothing
+  to change.
+
+### Fixed
+
+- **The chosen language reads in a contrast theme.** With forced colors (Windows'
+  contrast themes), the chosen code of a choice of languages, About's, an annotation
+  set's or a Transcript's, showed as a blank box: its letters, in the highlight's text
+  color, sat on the backplate a browser draws behind text there. They now show on the
+  highlight.
 
 ### Documentation
 

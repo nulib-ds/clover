@@ -1,4 +1,5 @@
 import React from "react";
+import { Caret } from "./Caret";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { join } from "../lib/classnames";
@@ -96,22 +97,7 @@ function Step({
         if (available) steps.step(isNext ? 1 : -1);
       }}
     >
-      <svg
-        aria-hidden="true"
-        focusable="false"
-        width="12"
-        height="12"
-        viewBox="0 0 16 16"
-      >
-        <path
-          d={isNext ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <Caret rotate={isNext ? 0 : 180} size={12} />
       <span style={visuallyHidden}>{t(key)}</span>
       <Tip label={t(key)} />
     </button>

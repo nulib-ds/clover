@@ -1,11 +1,13 @@
 import React from "react";
 
+import { CaretGlyph as Caret } from "./glyphs/Caret";
 import { join } from "../lib/classnames";
 
 /**
  * The chevron an information panel opens and closes things by, one for all of them: a
- * section's heading in an accordion, and an entry's in Contents. Down to open, up to
- * close (`open`), in the text's color, `--clover-chevron` square (`ui/Chevron.css`).
+ * section's heading in an accordion, and an entry's in Contents. Clover's caret pointing
+ * down to open, turned up to close (`open`), in the text's color, `--clover-chevron`
+ * square (`ui/Chevron.css`).
  */
 export function Chevron({
   open = false,
@@ -20,18 +22,11 @@ export function Chevron({
       focusable="false"
       width="12"
       height="12"
-      viewBox="0 0 12 12"
+      viewBox="0 0 512 512"
       className={join("clover-chevron", className)}
       data-open={open || undefined}
     >
-      <path
-        d="M3 4.5l3 3 3-3"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <Caret rotate={90} />
     </svg>
   );
 }

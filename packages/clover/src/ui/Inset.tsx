@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
+import { ExpandGlyph as Expand } from "./glyphs/Expand";
 import { join } from "../lib/classnames";
 import { useOptionalClover } from "../react/context";
 import { Tip } from "./Tip";
@@ -173,33 +174,18 @@ export function InsetExpand({
       aria-controls={controls}
       onClick={onClick}
     >
-      {/*
-       * A frame open at its upper right, a box inside it at the lower left, and an arrow
-       * from the opening down to the box (Mat, 2026-11-14: "do the opposite icon. one point
-       * to bottom left.").
-       */}
+      {/* Clover's Expand glyph (`ui/glyphs/Expand.tsx`). */}
       <svg
         aria-hidden="true"
         focusable="false"
         width="16"
         height="16"
         viewBox="0 0 512 512"
-        fill="currentColor"
-        stroke="currentColor"
       >
-        <path {...LINE} d="M232 72H72V440H440V280" />
-        <rect stroke="none" x="144" y="244" width="124" height="124" rx="16" />
-        <path {...LINE} d="M429.77 82.2L312 200M424 200H312V88" />
+        <Expand />
       </svg>
       <span style={visuallyHidden}>{label}</span>
       <Tip label={label} lang={lang} />
     </button>
   );
 }
-
-const LINE = {
-  fill: "none",
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  strokeWidth: 40,
-} as const;

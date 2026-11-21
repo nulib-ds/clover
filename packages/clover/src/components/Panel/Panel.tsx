@@ -11,7 +11,7 @@ import { About } from "./About";
 import { AboutActions } from "./AboutActions";
 import { InPanelContext } from "./ReadingLanguages";
 import { Tip } from "../../ui/Tip";
-import { Close } from "../Body/glyphs";
+import { CloseGlyph as Close } from "../../ui/glyphs/Close";
 import { SEARCH_SET_ID } from "../../core/search-service";
 import { type PanelSection, usePanelSections } from "./sections";
 import { langWithin } from "../../i18n/config";

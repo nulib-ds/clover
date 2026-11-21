@@ -14,7 +14,7 @@ import { useContainerName } from "../i18n/useContainerName";
 import { useUniqueId } from "./useUniqueId";
 import { visuallyHidden } from "./visuallyHidden";
 import { languageProps } from "../i18n/direction";
-import { GlobeGlyph } from "./GlobeGlyph";
+import { LanguagesGlyph } from "./LanguagesGlyph";
 
 // The folded form, loaded only where there are more than five.
 const LanguageMenu = lazy(() => import("./LanguageMenu"));
@@ -103,9 +103,10 @@ function useFolded(
 
 /**
  * Clover's one choice of languages (Mat, 2026-11-05: "build the globe in. one
- * construct"): a globe, then a row of the languages' codes ("AR", "EN"), drawn as the
+ * construct"): A and 文 (`LanguagesGlyph`, a globe until 2026-11-21), then a row of the
+ * languages' codes ("AR", "EN"), drawn as the
  * Transcript's are (`ui/Codes.css`), one chosen: About's, and an annotation set's where
- * About draws none. Past five, folded into the globe and the code in use, which opens
+ * About draws none. Past five, folded into the glyph and the code in use, which opens
  * them (`LanguageMenu`), as a row so long crushed the heading beside it. Native radios, one stop in the
  * tab order, the arrow keys moving between them; the row named by `nameKey` ("Language"),
  * each radio by its code and then its language's own name in that language (WCAG 2.5.3,
@@ -134,7 +135,7 @@ export function LanguageChoice({
    * past five languages.
    */
   fit?: (place: HTMLElement) => LanguageRowFit | null | undefined;
-  /** Folded into the globe and the code in use however few there are (`Language`'s `menu`). */
+  /** Folded into the glyph and the code in use however few there are (`Language`'s `menu`). */
   menu?: boolean;
 }) {
   const { t, langOf } = useCloverTranslation();
@@ -164,7 +165,7 @@ export function LanguageChoice({
       <fieldset {...name.props} className={`${part}-languages`} ref={place}>
         {/* What the codes are: their row's name says it to assistive technology. */}
         <span className="clover-languages-glyph" aria-hidden="true">
-          <GlobeGlyph />
+          <LanguagesGlyph />
         </span>
         {languages.map((tag) => {
           const own = autonym(tag);

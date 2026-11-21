@@ -180,7 +180,7 @@
  * Nextra's icon gives way to it, a mask, so it takes the button's color.
  */
 .nextra-sidebar > .nextra-sidebar-footer > button {
-  --panel-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect x='64' y='96' width='384' height='320' rx='40' fill='none' stroke='%23000' stroke-width='36'/%3E%3Cpath d='M192 96v320' fill='none' stroke='%23000' stroke-width='36'/%3E%3Cpath d='M192 96h-88a40 40 0 0 0-40 40v240a40 40 0 0 0 40 40h88z'/%3E%3C/svg%3E");
+  --panel-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect x='66' y='98' width='380' height='316' rx='40' fill='none' stroke='%23000' stroke-width='48'/%3E%3Cpath d='M192 98v316' fill='none' stroke='%23000' stroke-width='48'/%3E%3Cpath d='M192 98h-86a40 40 0 0 0-40 40v236a40 40 0 0 0 40 40h86z'/%3E%3C/svg%3E");
   display: flex;
   align-items: center;
   justify-content: center;
@@ -193,7 +193,7 @@
 }
 
 .nextra-sidebar > .nextra-sidebar-footer > button[aria-expanded="false"] {
-  --panel-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect x='64' y='96' width='384' height='320' rx='40' fill='none' stroke='%23000' stroke-width='36'/%3E%3Cpath d='M192 96v320' fill='none' stroke='%23000' stroke-width='36'/%3E%3C/svg%3E");
+  --panel-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect x='66' y='98' width='380' height='316' rx='40' fill='none' stroke='%23000' stroke-width='48'/%3E%3Cpath d='M192 98v316' fill='none' stroke='%23000' stroke-width='48'/%3E%3C/svg%3E");
 }
 
 .nextra-sidebar > .nextra-sidebar-footer > button:is(:hover, :focus-visible) {

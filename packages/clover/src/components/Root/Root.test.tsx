@@ -256,7 +256,7 @@ describe("Clover.Root and its parts", () => {
     expect(next).toHaveAttribute("data-direction", "right-to-left");
     expect(next.querySelector("path")).toHaveAttribute(
       "transform",
-      "rotate(180 8 8)",
+      "rotate(180 256 256)",
     );
     // Next sits on the left, where the book continues.
     expect(screen.getByRole("navigation").firstElementChild).toBe(next);

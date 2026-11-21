@@ -10,6 +10,7 @@ import { type LanguageMapLike, localize } from "../../../core/value";
 import type { IIIFCanvas } from "../layout";
 import { useThumbnail } from "../../../ui/EntryThumbnail";
 import { languageProps } from "../../../i18n/direction";
+import { SpeakerGlyph } from "../../../ui/glyphs/Speaker";
 
 /*
  * A lone recording of sound, played as a music app plays one (Mat, 2026-10-24: Apple
@@ -64,24 +65,19 @@ function artworkOf(
   };
 }
 
-/** A note, for a recording with no artwork, as a music app shows one. */
-const Note = () => (
+/**
+ * Clover's one speaker, for a recording with no artwork, as Items shows one for sound
+ * with nothing to picture (Mat, 2026-11-21: a music note before, "we should do away with
+ * this altogether. go for a speaker icon").
+ */
+const Speaker = () => (
   <svg
     aria-hidden="true"
-    className="clover-canvas-player-note"
+    className="clover-canvas-player-speaker"
     focusable="false"
-    viewBox="0 0 24 24"
+    viewBox="0 0 512 512"
   >
-    <path
-      d="M9 18V5l11-2v13"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-    />
-    <circle cx="6" cy="18" r="3" />
-    <circle cx="17" cy="16" r="3" />
+    <SpeakerGlyph />
   </svg>
 );
 
@@ -152,7 +148,7 @@ export function PlayerFace({
             src={src}
           />
         ) : (
-          <Note />
+          <Speaker />
         )}
       </div>
       <div className="clover-canvas-player-head">

@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useRef } from "react";
+import { Caret } from "../../ui/Caret";
 
 import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -263,22 +264,7 @@ export function ImageControls({
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => page(forward)}
       >
-        <svg
-          aria-hidden="true"
-          focusable="false"
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d={forward ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Caret rotate={forward ? 0 : 180} size={12} />
         <Tip label={t(key)} />
       </button>
     );

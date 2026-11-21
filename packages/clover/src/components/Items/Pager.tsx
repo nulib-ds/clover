@@ -1,4 +1,5 @@
 import React, { forwardRef } from "react";
+import { Caret } from "../../ui/Caret";
 
 import type { ViewingDirection } from "../../core/sequence";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -48,28 +49,9 @@ const NEXT_ROTATION: Record<ViewingDirection, number> = {
   "bottom-to-top": 270,
 };
 
-/** A chevron with its own size, so it never fills its button without the stylesheet. */
+/** Clover's caret (`ui/Caret.tsx`), for "next" or "previous" in each direction. */
 function Chevron({ rotate, size = 16 }: { rotate: number; size?: number }) {
-  return (
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      width={size}
-      height={size}
-      viewBox="0 0 16 16"
-      className="clover-pager-icon"
-    >
-      <path
-        d="M6 3l5 5-5 5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        transform={`rotate(${rotate} 8 8)`}
-      />
-    </svg>
-  );
+  return <Caret rotate={rotate} size={size} className="clover-pager-icon" />;
 }
 
 export const StepButton = forwardRef<

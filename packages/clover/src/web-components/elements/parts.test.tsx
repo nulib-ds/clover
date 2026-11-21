@@ -277,7 +277,7 @@ describe("The parts that read a root's state, as elements", () => {
     );
   });
 
-  it("offers the languages to read in, folded into the globe with menu", async () => {
+  it("offers the languages to read in, folded into the A 文 glyph with menu", async () => {
     const languages = {
       "@context": "http://iiif.io/api/presentation/3/context.json",
       id: "https://example.org/manifest/element-languages",

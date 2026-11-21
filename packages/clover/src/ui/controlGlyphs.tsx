@@ -4,7 +4,9 @@ import React from "react";
  * The glyphs for the controls over a Canvas: zoom, full screen, rotate, reset, Choice.
  *
  * Bare `path` elements: `Button` wraps them in its own svg, and a `controlButtons`
- * replacement gets them wrapped in `ControlIcon`.
+ * replacement gets them wrapped in `ControlIcon`. Their strokes are Regular (40, 1.25px at
+ * 1rem), but full screen's arrows, Bold (56), as arrows and chevrons are (Mat,
+ * 2026-11-21: one Regular weight; 36 and 45 before).
  */
 
 export const ZoomIn = () => {
@@ -12,7 +14,7 @@ export const ZoomIn = () => {
     <path
       strokeLinecap="round"
       strokeMiterlimit="10"
-      strokeWidth="45"
+      strokeWidth="40"
       d="M256 112v288M400 256H112"
     />
   );
@@ -23,7 +25,7 @@ export const ZoomOut = () => {
     <path
       strokeLinecap="round"
       strokeMiterlimit="10"
-      strokeWidth="45"
+      strokeWidth="40"
       d="M400 256H112"
     />
   );
@@ -32,15 +34,18 @@ export const ZoomOut = () => {
 /*
  * Full screen's glyphs: four arrows on the diagonals, one to each corner (Mat,
  * 2026-11-13: "use same arrows as expand/collapse for fullscreen", then "it should be
- * four arrows. all directions"), drawn as Document's way back to its pages draws its two:
- * each a heavy shaft, rounded at its tail, and a solid head, its corners rounded as the
- * other glyphs' joins are. Their fill and stroke their own, for the transport's svg too.
+ * four arrows. all directions"), shaped as Document's way back to its pages shapes its
+ * two: each a shaft, rounded at its tail, and a solid head, its corners rounded as the
+ * other glyphs' joins are. Regular, with heads a little smaller (Mat, 2026-11-21: "this
+ * feels too bold compared to others"; shafts 56 and heads of 112 before), so the four sit
+ * at the weight of the controls beside them. Their fill and stroke their own, for the
+ * transport's svg too.
  */
 const SHAFTS = {
   fill: "none",
   stroke: "currentColor",
   strokeLinecap: "round",
-  strokeWidth: 56,
+  strokeWidth: 40,
 } as const;
 const HEADS = {
   fill: "currentColor",
@@ -63,7 +68,7 @@ const Four = ({ shaft, head }: { shaft: string; head: string }) => (
 
 /** Four arrows pointing out, from the middle to the corners. */
 export const ZoomFullScreen = () => (
-  <Four shaft="M304 208L368 144" head="M432 80V192L320 80Z" />
+  <Four shaft="M314 198L376 136" head="M416 96V176L336 96Z" />
 );
 
 /**
@@ -73,12 +78,29 @@ export const ZoomFullScreen = () => (
  * where it will take you rather than where you already are.
  */
 export const ZoomExitFullScreen = () => (
-  <Four shaft="M440 72L360 152" head="M296 216V104L408 216Z" />
+  <Four shaft="M427 85L339 173" head="M299 213V133L379 213Z" />
 );
 
+/**
+ * Reset view: a viewfinder, four corner brackets round a solid center, the framing the
+ * view opened with (Mat, 2026-11-21: 'think "reset view" -- it about bring the user back
+ * to the original point', then, of a target and this, "I like the viewfinder"). An undo
+ * arrow before, which said "undo the last thing" and, beside Rotate's arrow, read as
+ * another turn. Its brackets Regular (40), their corners a frame's (40); a Scene's rotate
+ * pad wears it in its last corner, the way home.
+ */
 export const Reset = () => {
   return (
-    <path d="M448 440a16 16 0 01-12.61-6.15c-22.86-29.27-44.07-51.86-73.32-67C335 352.88 301 345.59 256 344.23V424a16 16 0 01-27 11.57l-176-168a16 16 0 010-23.14l176-168A16 16 0 01256 88v80.36c74.14 3.41 129.38 30.91 164.35 81.87C449.32 292.44 464 350.9 464 424a16 16 0 01-16 16z" />
+    <>
+      <path
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="40"
+        d="M80 176v-56a40 40 0 0 1 40-40h56M336 80h56a40 40 0 0 1 40 40v56M432 336v56a40 40 0 0 1-40 40h-56M176 432h-56a40 40 0 0 1-40-40v-56"
+      />
+      <circle stroke="none" cx="256" cy="256" r="52" />
+    </>
   );
 };
 
@@ -89,7 +111,7 @@ export const Rotate = () => {
         fill="none"
         strokeLinecap="round"
         strokeMiterlimit="10"
-        strokeWidth="45"
+        strokeWidth="40"
         d="M400 148l-21.12-24.57A191.43 191.43 0 00240 64C134 64 48 150 48 256s86 192 192 192a192.09 192.09 0 00181.07-128"
       />
       <path d="M464 97.42V208a16 16 0 01-16 16H337.42c-14.26 0-21.4-17.23-11.32-27.31L436.69 86.1C446.77 76 464 83.16 464 97.42z" />
@@ -113,8 +135,8 @@ export const Choice = () => {
       fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth="36"
-      d="M256 72L448 168L256 264L64 168ZM64 256L256 352L448 256M64 344L256 440L448 344"
+      strokeWidth="40"
+      d="M256 64L448 160L256 256L64 160ZM64 256L256 352L448 256M64 352L256 448L448 352"
     />
   );
 };

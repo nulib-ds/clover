@@ -6,7 +6,7 @@ import { languageProps } from "../i18n/direction";
 import { languageCode } from "../i18n/languageCode";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { Chevron } from "./Chevron";
-import { GlobeGlyph } from "./GlobeGlyph";
+import { LanguagesGlyph } from "./LanguagesGlyph";
 import { Tip } from "./Tip";
 import { useUniqueId } from "./useUniqueId";
 
@@ -18,7 +18,7 @@ interface Choice {
 
 /**
  * A choice of languages, folded (`LanguageChoice`): a button as About's Download button
- * is drawn, a globe, the code of the language in use ("JA") and a caret that turns as it
+ * is drawn, A and 文 (`LanguagesGlyph`), the code of the language in use ("JA") and a caret that turns as it
  * opens (no edge: Mat, 2026-11-05, "this hairline is unlike what we do elsewhere"), named
  * by that code and the row's name ("Language"; WCAG 2.5.3), that discloses a menu drawn as the Canvas's are
  * (`ControlMenu`): native radios in a fieldset under its legend, each language by its own
@@ -72,7 +72,7 @@ export default function LanguageMenu({
         aria-controls={open ? `${button}-menu` : undefined}
         onClick={() => setOpen((was) => !was)}
       >
-        <GlobeGlyph />
+        <LanguagesGlyph />
         <span className="clover-languages-code" aria-hidden="true">
           {languageCode(chosen)}
         </span>

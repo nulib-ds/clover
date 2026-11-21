@@ -78,9 +78,11 @@ export default function SectionContent({
                 label="mapExpand"
                 onClick={onExpandMap}
               >
-                <path {...LINE} d={FRAME} />
-                <rect stroke="none" {...BOX} />
-                <path {...LINE} d="M429.77 82.2L312 200M424 200H312V88" />
+                {/*
+                 * The aside is at the page's end, so the map grows toward the lower
+                 * left, as Expand points (mirrored right to left, `Document.css`).
+                 */}
+                <Clover.ExpandGlyph />
               </MapButton>
             </div>
           )}
@@ -191,15 +193,8 @@ export function ExpandedMap({
   );
 }
 
-// Close's cross, as the Canvas's controls draw it.
-const CLOSE = (
-  <path
-    fill="none"
-    strokeLinecap="round"
-    strokeWidth="45"
-    d="M154 154L358 358M358 154L154 358"
-  />
-);
+// Clover's Close, as the Canvas's controls draw it.
+const CLOSE = <Clover.CloseGlyph />;
 
 /** Close on the page's picture over the map: puts the picture away, as Image does. */
 function PageClose() {
@@ -249,22 +244,6 @@ function MapButton({
     </button>
   );
 }
-
-/*
- * Clover's Expand map and Collapse map (`Body/glyphs.tsx`): a frame open at its upper
- * right, a box inside it at the lower left, and an arrow in the opening, in toward the
- * box to expand, out of it to collapse. The aside is at the page's end, so the map grows
- * toward the lower left and goes back to the top right, as the glyphs point (mirrored
- * right to left, `Document.css`).
- */
-const LINE = {
-  fill: "none",
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  strokeWidth: 40,
-} as const;
-const FRAME = "M232 72H72V440H440V280";
-const BOX = { x: 144, y: 244, width: 124, height: 124, rx: 16 } as const;
 
 /**
  * Each page in sight that describes itself, after the resource's About: its label, at

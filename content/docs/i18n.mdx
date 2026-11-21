@@ -45,7 +45,7 @@ Each is complete: it has every string English has, which a test checks.
 Check the languages a site would offer, as `initCloverI18n({ languages })` sets them. With
 none checked, Clover speaks your language, from your browser, or English where it has none
 of yours. Each resource here comes in several languages, which About's toggle offers,
-after a globe; check others, and it offers those too. Open one of your own by its address
+after the A 文 glyph; check others, and it offers those too. Open one of your own by its address
 or a content state. The code under the Viewer is what draws it as
 checked. This page is in English, so each of the interface's words in another language
 carries that language's `lang`.
@@ -89,13 +89,14 @@ German ones, though the interface is English.
 
 ### One toggle
 
-Every choice of languages in Clover is one construct: a globe, then the languages' codes.
+Every choice of languages in Clover is one construct: the A 文 glyph, then the languages'
+codes.
 About's offers the languages the resource describes itself in, then the interface
 languages it has none of, each once: `zh-CN` stands for Simplified Chinese. Choosing a
 language the resource has shows it in that language, and speaks it too where Clover has
 strings for it, so choosing `ES` turns the interface Spanish. Choosing a language only
 your site offers changes the interface alone. As soon as its codes would reach About's
-title, the toggle folds into the globe, the code in use and a caret, which opens them;
+title, the toggle folds into the glyph, the code in use and a caret, which opens them;
 elsewhere it folds past five. A language chosen for a resource goes with it when another
 opens, the interface back to the visitor's.
 
@@ -104,7 +105,7 @@ About's toggle does not offer, Maktaba's manuscript's Arabic and English, say, o
 own, the same toggle, in its header, and its choice is the set's alone. A Transcript
 does the same with its caption files. A Transcript with a plain-text transcript among its
 files ("TXT") always offers its own choice, of files rather than languages, without the
-globe.
+glyph.
 
 <span data-code-flavor="both">`interfaceLanguages={false}`</span> on the Viewer,
 `Panel` or `About` leaves the interface languages out of it, and
@@ -113,7 +114,7 @@ globe.
 ### Placing the toggle
 
 `Language` is the same toggle as a component of its own, for a layout to place where it
-likes, inside a `Root`. With `menu`, it is the globe and the code in use however few
+likes, inside a `Root`. With `menu`, it is the glyph and the code in use however few
 languages there are. Give `About` <span data-code-flavor="both">`languages={false}`</span>
 so the page offers one.
 

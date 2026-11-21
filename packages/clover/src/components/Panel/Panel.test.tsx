@@ -1020,7 +1020,7 @@ describe("The languages to read a resource in", () => {
       row.closest(".clover-sections-actions")?.parentElement,
     ).toHaveAttribute("data-value", "about");
     expect(screen.getAllByRole("group", { name: "Language" })).toHaveLength(1);
-    // The languages furthest along the row, after their globe, the Download button
+    // The languages furthest along the row, after their A 文 glyph, the Download button
     // before them.
     const actions = row.closest(".clover-about-actions")!;
     expect(actions.lastElementChild).toContainElement(row);

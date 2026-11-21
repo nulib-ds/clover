@@ -284,6 +284,114 @@ every rule below.
   (`clover-template-default*`), not `clover-viewer*`. Before adding a class, grep `src/` for it. Copied 3.x classes were renamed (`clover-canvas-controls`,
   `clover-canvas-button`, `clover-canvas-exit-full-screen`, `clover-canvas-error`), so 3.x
   and 4.x styles never collide on one page.
+- **Glyphs are drawn once** (Mat, 2026-11-21: normalizing Clover's icons, "what helps
+  with normalization across the clover system … that is most key"): a glyph a part and a
+  template both show is a module of its own in `ui/glyphs/`, a bare shape on a 512 grid
+  that carries its own fill and stroke, and `parts` exports it as `…Glyph`
+  (`Clover.CloseGlyph`), so a template imports it rather than drawing its own, and a page
+  may use it in a control of its own (Customizing's Icons). Every chevron is its `Caret`,
+  turned by `rotate` (`ui/Caret.tsx` gives it an svg and a size). Close is Regular, 40 at
+  1rem and 48 at `text-s`; the caret Bold, 56. A new glyph goes there with its export, a
+  `NEVER` reason in `specs/specs.test.ts` (an HTML page writes its svg itself) and its
+  name on Customizing's Icons. One module each, as a bundler places a module in a chunk
+  whole: grouped, the Gallery's lightbox took every glyph to its first view for its Close
+  (about 0.9 kB gzip), and Items' element every glyph for its caret.
+- **One Regular weight** (Mat, 2026-11-21, normalizing the icons; `DESIGN.md` §9 holds
+  the glyph rules): every stroked glyph is
+  Regular, 40 on its 512 grid at 1rem and 48 at `text-s` (Download, Hide; the languages
+  glyph keeps 40, below, and one glyph shown at two sizes keeps one weight: the field's
+  Clear is Close's own cross at 40, Mat, 2026-11-21: "why are these not the same. they
+  should use one."; and the Annotations list's external link is 40 at `text-s` too,
+  "these should just be one."); Bold, 56, for chevrons (the caret); the arrows of full
+  screen and of Document's way back to its pages Regular, their solid heads a little
+  smaller (2026-11-21); Light, 32, for page layouts alone (2026-11-16). Every stroked
+  glyph scales by `--clover-glyph-weight` (Mat, 2026-11-21: "Add the setting"), one rule
+  a weight in `styles/scale.css`, which every element loads, held by
+  `ui/glyphs/weight.test.ts`: a new weight gets its rule there, or, drawn by one glyph
+  alone, in that glyph's sheet (the languages glyph's outline, `ui/Codes.css`). It is 1.2 by default, a
+  step up the ladder ("increase the default weight of glyphs a step"), so Regular draws
+  as 48, 1.5px at 1rem; the grid's numbers stay the glyphs' own weights, and a weight
+  named here is one on the grid. A
+  frame keeps its outer edge as its stroke changes (Captions' card, the fit's frame, the
+  Panel toggle), so a filled twin stays its size. Glyphs that parts share and no template
+  shows are in `ui/glyphs/` too, unexported: the speaker (the transport's Volume, a
+  recording with no artwork, in place of the music note it showed:
+  `.clover-canvas-player-speaker`) and the external link (Annotations' links). The web components' build keeps the two out of its `glyphs` chunk,
+  which every first view loads. Items draws its own speaker, the same drawing, held to
+  the shared one by `ui/glyphs/Speaker.test.tsx`: imported, it cost every first view with
+  Items 42 B gzip, the two seldom sharing a page. One Play (`PlayGlyph`), filled and
+  stroked for its round corners, in the transports too, whose rule leaves unfilled only a
+  stroked shape with no fill of its own (`Transport.css`); Pause is two rounded bars as
+  tall as it shows (`mediaIcons.tsx`).
+- **Gaps on the golden scale** (Mat, 2026-11-21: "for all icons. normalize gaps between
+  strokes. … use gr steps … the same way we handle layout."): `DESIGN.md` §9 gives the
+  steps, 121, 75, 46 and 28 on the grid, the relationship each is for and the glyphs
+  that take it, with the rest of the glyph rules. Expand's box is 132 square, so it is 46
+  from the arrow as from the frame. Open viewer's plus sits 44 inside its lens, left as
+  drawn.
+- **Reset view is a viewfinder** (Mat, 2026-11-21: 'think "reset view" -- it about bring
+  the user back to the original point', then "for the center in view, I like the
+  viewfinder"; an undo arrow before, which read as undoing the last thing and, beside
+  Rotate's arrow, as another turn): four corner brackets at Regular (40, their corners a
+  frame's) round a solid center (`Reset`, `ui/controlGlyphs.tsx`), the Canvas's and, in
+  its rotate pad's corner, the Scene's. Under the pointer or focused it draws in
+  (`scale: 0.875`, a pixel a side at 1rem; `Button.css`), where the arrow turned 15°,
+  and not while it has nowhere to go.
+- **The Map's options gear is solid** (`Gear`, `Map/MapView.tsx`; Mat, 2026-11-21: "I'm
+  not sure if this should be outlines. maybe fill?"): it opens a tray, so it is solid, as
+  glyphs that open something are. Filled and stroked at Regular with round joins, as
+  `PlayGlyph` is, so its teeth keep their round corners and the gear its size at any
+  weight; its hub, 100 on the grid, a hole (`evenodd`) that stays open at 16px (64 closed
+  to a blob there).
+- **The Map's Picture is generic** (`Picture`, `Map/MapView.tsx`; Mat, 2026-11-21: "none
+  of these work. we may need to go generic.", then "peaks from the foot. round the peaks
+  slightly."): the Canvas (the Panel toggle's box beside it in the map's row, Regular,
+  `rx` 40), and in it peaks rising from its foot as one shape with it, their tops and the
+  valley between them rounded a little, under a solid sun clear of them. At 16px the
+  Canvas holds about 10 by 8 pixels, where peaks and a sun hold and a painting's curves
+  blur. The frame is the Canvas on screen, never an object ("the rectangle represents the
+  canvas on screen, not a skuemorphic thing"). Tried that day and set aside: a more GLAM
+  picture (folio, gallery frame, askew sheet), then Hokusai's Great Wave on the print's
+  golden grid, built and taken out ("I just don't think the great wave works"), then
+  frames that are things (a museum frame, a picture hung on its wire, an easel) and
+  famous artworks on the Canvas (Magritte's pipe and Son of Man, the Mona Lisa, The
+  Scream, Mondrian, Warhol's banana and soup can, Koons' Balloon Dog, Dalí's clock),
+  which read at 16px as a person, a blob, a battery or a layout grid, or, the pipe, as
+  a pipe and not a picture.
+- **Annotations are a marked region** (`CommentGlyph`, `ui/glyphs/Comment.tsx`, exported;
+  the Canvas's annotations control and Document's Annotations button; Mat, 2026-11-21,
+  where a speech bubble was: "I like the marked region idea, but perhaps making it larger
+  and having the annotation be in top right with two lines. no need for the jut of the
+  speech bubble. the lines should indicate text.", then "make region card in upper right
+  even larger. should almost extend to left line.", and of the two ways drawn, "I like
+  card to the corner best. make annotation text block in upper right just a tad
+  taller."): a region at Regular (40, corners `rx` 40), its top-left corner kept, and
+  across the rest of its top a solid card (`rx` 40), 336 by 212, nearly golden, from 28
+  past the corner's end to the region's right edge, which stops 28 short of it, a cut in
+  one shape on the golden scale (above). The
+  card's two lines are holes, wound against it (no `fillRule`) and centered in it, so
+  they show the button's own fill at rest and under the pointer. Two paths, each setting its
+  own fill and stroke, as the controls' svg fills and strokes in the text color
+  (`ui/Button.css`); written with relative commands, its corners arcs and so no line
+  join, it costs a first view about what the speech bubble did; drawn first in absolute
+  commands, it cost the Default template's first view some 50 B more.
+  The speech bubble is gone from Clover's glyphs. Set aside the same day: the card
+  reaching the region's left line, the line rising beside it and the corner gone.
+- **Languages are A and 文** (`ui/LanguagesGlyph.tsx`, before every choice of
+  languages: `LanguageChoice`, `LanguageMenu`, a Transcript's files; Mat, 2026-11-21,
+  where a globe was: "a and 文 without a bubble might be best direction. be sure we are
+  making their hyper legible"). A plain A, its bar at two thirds of its height, and 文
+  (simplified and traditional alike), its strokes fit to the middle lines of PingFang SC
+  and Hiragino Sans GB: 丶, 一, 丿 and ㇏, the 丿 within half a unit of the grid and the ㇏
+  within a fifth. 文's box is A's height (248), its feet on A's bar line, so it sits 74
+  higher ("A down 文 up a bit"). Its 丿 turns level at A's bar where A's right leg crosses
+  it ("draw the lower left line of the wen as if it is come from the cross line of the
+  A"; "just bring the A and wen closer together"), and an outline of the A cuts it
+  ("imagine there is an imaginary outline of the A"): a mask, A's own path stroked 96,
+  A's 40 and a gap of 28 each side, a cut in one shape on the golden scale (above), the
+  gap kept at any `--clover-glyph-weight` by its rule in `ui/Codes.css`. A mask needs an id, so each glyph takes one (`useUniqueId`):
+  every form `useId` makes resolves in `url(#…)` in Chromium, Firefox and WebKit. At 40,
+  where text-size glyphs take 48: heavier, the letters' counters close.
 
 ## Sections
 
@@ -1011,8 +1119,8 @@ every rule below.
   (`core/annotation-name.ts`), `descriptionLanguages` (`core/language-choice.ts`), `useReadingLanguages` (`react/readingLanguages.ts`),
   `useInterfaceLanguages`, `useLanguageToggle` and `LanguageToggle` (About's
   language toggle, `components/Panel/LanguageToggle.tsx`), drawn by Clover's one
-  construct for a choice of languages, `ui/LanguageChoice.tsx` (the globe,
-  `ui/GlobeGlyph.tsx`, and the fold, `ui/LanguageMenu.tsx`, its own chunk),
+  construct for a choice of languages, `ui/LanguageChoice.tsx` (A and 文,
+  `ui/LanguagesGlyph.tsx`, and the fold, `ui/LanguageMenu.tsx`, its own chunk),
   `languagesOf` (`components/Annotations/languages.ts`). Each chooses through
   `languageToRead`, never a language map made up to borrow `localize`'s choice.
 - **Direction.** Text in a right-to-left language or script gets `dir="rtl"` beside its
@@ -1562,7 +1670,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   and ground (`Player.tsx`), which load with the transport and its chapters. An image of
   its own shows at once; a service's once its `info.json` is read. A picture of the words
   beside it goes at once for another's, so none shows under words it is not of; the
-  Player holds its last (`hold`), so its note never flashes as the artwork turns from the
+  Player holds its last (`hold`), so its speaker never flashes as the artwork turns from the
   placeholder Canvas to the accompanying one. Four keep their own, measured 2026-10-29:
   Items and the `Thumbnail` part (they load where no entry's picture does, and as
   elements a shared hook became a chunk of its own: 180 B more on a page with Items,
@@ -1997,7 +2105,11 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     enter and in to exit (`ZoomFullScreen`, `ZoomExitFullScreen` in
     `ui/controlGlyphs.tsx`: "use same arrows as expand/collapse for fullscreen", then "it
     should be four arrows. all directions"); the template draws its own, using only the
-    parts: keep their arrows alike.
+    parts: keep their arrows alike. Both are Regular, their solid heads smaller (Mat,
+    2026-11-21: "this feels too bold compared to others", then, of the way back, "Match
+    full screen"; bold from 2026-11-11, "something more bold and obvious"). Exit full
+    screen's labeled button shows the four arrows in (`ui/ExitFullscreen.tsx`), as the
+    control does.
   - An asked place follows the view (Mat, 2026-11-13: "toggling canvases in expanded map
     mode doesn't toggle map"): `useRootMap`, as the view changes, asks for the new
     Canvas's place, else its first georeferenced image, where what was asked was a
@@ -2437,7 +2549,7 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   last button in the pad's empty corner, `s` left of the down arrow, and the rotate pad,
   `RotatePad.tsx`, a group named `sceneRotate`, three controls across, each way to turn in
   the cell on its side, `s` apart as the cluster's are, its glyph Clover's caret (`Caret`,
-  the pager's chevron) pointing its way, around a disc that is a handle to drag
+  every chevron's, `ui/glyphs/Caret.tsx`) pointing its way, around a disc that is a handle to drag
   (`.clover-scene-rotate-disc`; Mat, 2026-10-23: "something you can hold onto and drag …
   the button is the disk"): a drag on it turns the models as one on the Scene does,
   measured against the Scene's height (`span`), and a pinch zooms; a pointer's
@@ -3155,8 +3267,9 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     whatever JSON it was given. Do not add an attribute type for a shape `data` can carry.
   - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or
     a reason why not yet (`LATER`, empty since 2026-10-22, but for `Inset` on 2026-11-14,
-    whose `<clover-inset>` came the next day) or not at all (`NEVER`, empty
-    since 2026-10-22: `Tip` is `<clover-tip>`, `ReadMore` `<clover-read-more>`). A new
+    whose `<clover-inset>` came the next day) or not at all (`NEVER`: no part
+    since 2026-10-22, `Tip` being `<clover-tip>` and `ReadMore` `<clover-read-more>`; the
+    `…Glyph` exports since 2026-11-21, shapes for a React svg). A new
     part fails it until it has either, and an element's slots, like its attributes, fail
     it without docs.
   - **The containers** (`specs/containers.ts`). `<clover-panel>` (`elements/

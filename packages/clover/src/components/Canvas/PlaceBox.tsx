@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 
-import { Close } from "../Body/glyphs";
+import { CloseGlyph as Close } from "../../ui/glyphs/Close";
 import { GivenMap, MapView, useMapPutAway, useRootMap } from "../Map/MapView";
 import { Thumbnail } from "../Primitives/Primitives";
 import { canvasGeoreferences } from "../../core/geo";

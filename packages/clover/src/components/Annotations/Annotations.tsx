@@ -18,7 +18,7 @@ import { ListEnd } from "../../ui/ListEnd";
 import { annotationName } from "../../core/annotation-name";
 import { hasGeoreferences } from "../../core/geo-detect";
 import { readLink, readTagSource } from "../../core/link";
-import { ExternalGlyph } from "../../ui/ExternalGlyph";
+import { ExternalGlyph } from "../../ui/glyphs/External";
 import { showLink } from "../../core/show-link";
 import type { Manifest } from "../../core/presentation";
 import { selectSequence, selectVisibleCanvases } from "../../core/selectors";
@@ -780,7 +780,14 @@ function FollowLink({ annotation }: { annotation: Record<string, any> }) {
         {...languageProps(lang)}
       >
         {text}
-        <ExternalGlyph />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <ExternalGlyph />
+        </svg>
       </a>
     );
   return (

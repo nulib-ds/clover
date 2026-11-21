@@ -733,12 +733,7 @@ function DocumentLayout({
           viewBox="0 0 512 512"
           fill="currentColor"
         >
-          {/* Clover's map pin (`Body/glyphs.tsx`'s `Place`). */}
-          <path
-            fillRule="evenodd"
-            stroke="none"
-            d="M256 40C166 40 100 108 100 196C100 300 216 420 246 452A14 14 0 0 0 266 452C296 420 412 300 412 196C412 108 346 40 256 40Z M256 136A60 60 0 1 1 256 256A60 60 0 1 1 256 136Z"
-          />
+          <Clover.PlaceGlyph />
         </svg>
         <Clover.Tip label={t("mapLabel")} lang={langOf("mapLabel")} />
       </button>
@@ -786,22 +781,10 @@ function DocumentLayout({
         width="16"
         height="16"
         viewBox="0 0 512 512"
-        fill="currentColor"
-        stroke="currentColor"
       >
-        <rect
-          x="64"
-          y="96"
-          width="384"
-          height="320"
-          rx="40"
-          fill="none"
-          strokeWidth="36"
-        />
-        <path d="M192 96v320" fill="none" strokeWidth="36" />
-        {sidebar.open && (
-          <path d="M192 96h-88a40 40 0 0 0-40 40v240a40 40 0 0 0 40 40h88z" />
-        )}
+        <g transform="matrix(-1 0 0 1 512 0)">
+          <Clover.PanelGlyph open={sidebar.open} />
+        </g>
       </svg>
       <span style={Clover.visuallyHidden}>{t("templateSidebarToggle")}</span>
       <Clover.Tip label={t("templateSidebarToggle")} />
@@ -1060,14 +1043,8 @@ function DocumentLayout({
               width="16"
               height="16"
               viewBox="0 0 512 512"
-              fill="none"
-              stroke="currentColor"
             >
-              <path
-                strokeLinecap="round"
-                strokeWidth="45"
-                d="M154 154L358 358M358 154L154 358"
-              />
+              <Clover.CloseGlyph />
             </svg>
             <span style={Clover.visuallyHidden}>
               {t("informationPanelClose")}

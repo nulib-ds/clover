@@ -10,9 +10,9 @@ export interface LanguageProps {
    */
   interfaceLanguages?: boolean;
   /**
-   * Folded into the globe and the code in use, which opens the rest as a menu, however
-   * few there are. Default `false`: a row of their codes after the globe, folded past
-   * five.
+   * Folded into the A 文 glyph and the code in use, which opens the rest as a menu,
+   * however few there are. Default `false`: a row of their codes after the glyph, folded
+   * past five.
    */
   menu?: boolean;
 }
@@ -23,8 +23,8 @@ export interface LanguageProps {
  * where it likes, About then given `languages={false}`. The languages the resource's
  * values come in, then Clover's interface languages it has none of, each once, the one
  * in use chosen; a choice sets the whole Root's reading, and Clover's interface language
- * with it where Clover has strings for it. A row of their codes after a globe, or, with
- * `menu`, the globe and the code in use, which opens them. Nothing under two languages.
+ * with it where Clover has strings for it. A row of their codes after A and 文, or, with
+ * `menu`, the glyph and the code in use, which opens them. Nothing under two languages.
  * Inside a `Root`. Its classes are About's (`clover-about-languages` and the rest).
  */
 export function Language({

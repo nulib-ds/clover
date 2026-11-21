@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { Caret } from "../../ui/Caret";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { createPortal } from "react-dom";
@@ -516,22 +517,7 @@ export function FrameControls({
                   {frames.length} / {frames.length}
                 </span>
               </span>
-              <svg
-                aria-hidden="true"
-                focusable="false"
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-              >
-                <path
-                  d="M3 7.5l3-3 3 3"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <Caret rotate={270} size={12} />
             </button>
             {open && (
               <ChoiceMenu
@@ -555,44 +541,14 @@ export function FrameControls({
             disabled={here === 0}
             onClick={() => step(-1)}
           >
-            <svg
-              aria-hidden="true"
-              focusable="false"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M10 3L5 8l5 5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <Caret rotate={180} />
           </TransportButton>
           <TransportButton
             words="commonNext"
             disabled={here === starts.length - 1}
             onClick={() => step(1)}
           >
-            <svg
-              aria-hidden="true"
-              focusable="false"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M6 3l5 5-5 5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <Caret />
           </TransportButton>
         </div>
       </div>

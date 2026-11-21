@@ -44,12 +44,13 @@ export function HideToggle({
         focusable="false"
         fill="none"
         stroke="currentColor"
-        strokeWidth={40}
+        // Regular at its small size, as Clover's glyphs at `text-s` are.
+        strokeWidth={48}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
         <path d="M32 256s80-144 224-144 224 144 224 144-80 144-224 144S32 256 32 256z" />
-        <circle cx={256} cy={256} r={72} />
+        <circle cx={256} cy={256} r={68} />
         {hidden && <path d="M80 80l352 352" />}
       </svg>
       <span id={id} hidden {...languageProps(langOf(key))}>
