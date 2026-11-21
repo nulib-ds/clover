@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.12.2] - 2026-11-21
+
 ### Added
 
 - **The Body says what the Root could not load**, in its middle, "Error loading
