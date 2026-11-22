@@ -5,8 +5,9 @@ import React from "react";
  *
  * Bare `path` elements: `Button` wraps them in its own svg, and a `controlButtons`
  * replacement gets them wrapped in `ControlIcon`. Their strokes are Regular (40, 1.25px at
- * 1rem), but full screen's arrows, Bold (56), as arrows and chevrons are (Mat,
- * 2026-11-21: one Regular weight; 36 and 45 before).
+ * 1rem; Mat, 2026-11-21: one Regular weight; 36 and 45 before). Full screen's arrows are
+ * glyphs of their own (`glyphs/FullScreen.tsx`, `glyphs/ExitFullScreen.tsx`), as
+ * Document's Back to pages shares them.
  */
 
 export const ZoomIn = () => {
@@ -30,56 +31,6 @@ export const ZoomOut = () => {
     />
   );
 };
-
-/*
- * Full screen's glyphs: four arrows on the diagonals, one to each corner (Mat,
- * 2026-11-13: "use same arrows as expand/collapse for fullscreen", then "it should be
- * four arrows. all directions"), shaped as Document's way back to its pages shapes its
- * two: each a shaft, rounded at its tail, and a solid head, its corners rounded as the
- * other glyphs' joins are. Regular, with heads a little smaller (Mat, 2026-11-21: "this
- * feels too bold compared to others"; shafts 56 and heads of 112 before), so the four sit
- * at the weight of the controls beside them. Their fill and stroke their own, for the
- * transport's svg too.
- */
-const SHAFTS = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeLinecap: "round",
-  strokeWidth: 40,
-} as const;
-const HEADS = {
-  fill: "currentColor",
-  stroke: "currentColor",
-  strokeLinejoin: "round",
-  strokeWidth: 40,
-} as const;
-
-/** An arrow drawn to the top right corner, turned about the middle to each of the four. */
-const Four = ({ shaft, head }: { shaft: string; head: string }) => (
-  <>
-    {[0, 90, 180, 270].map((turn) => (
-      <g key={turn} transform={`rotate(${turn} 256 256)`}>
-        <path {...SHAFTS} d={shaft} />
-        <path {...HEADS} d={head} />
-      </g>
-    ))}
-  </>
-);
-
-/** Four arrows pointing out, from the middle to the corners. */
-export const ZoomFullScreen = () => (
-  <Four shaft="M314 198L376 136" head="M416 96V176L336 96Z" />
-);
-
-/**
- * The four arrows pointing in, from the corners to the middle.
- *
- * Shown in place of the expand glyph while full screen is active, so the control reads as
- * where it will take you rather than where you already are.
- */
-export const ZoomExitFullScreen = () => (
-  <Four shaft="M427 85L339 173" head="M299 213V133L379 213Z" />
-);
 
 /**
  * Reset view: a viewfinder, four corner brackets round a solid center, the framing the

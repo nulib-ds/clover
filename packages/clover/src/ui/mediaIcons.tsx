@@ -1,6 +1,7 @@
 import React from "react";
 
-import { ZoomExitFullScreen, ZoomFullScreen } from "./controlGlyphs";
+import { ExitFullScreenGlyph } from "./glyphs/ExitFullScreen";
+import { FullScreenGlyph } from "./glyphs/FullScreen";
 import { PlayGlyph } from "./glyphs/Play";
 import { SpeakerBody, SpeakerGlyph } from "./glyphs/Speaker";
 
@@ -13,7 +14,8 @@ import { SpeakerBody, SpeakerGlyph } from "./glyphs/Speaker";
  * placeholder's too (`glyphs/Play.tsx`), and a Pause to match it, two rounded bars as tall
  * as it shows. Volume is Clover's one speaker, which Items
  * and a recording with no artwork show too. Full screen is the controls' own glyphs
- * (`controlGlyphs.tsx`), so the one control looks the same wherever it sits (WCAG 3.2.4).
+ * (`glyphs/FullScreen.tsx`, `glyphs/ExitFullScreen.tsx`), so the one control looks the
+ * same wherever it sits (WCAG 3.2.4).
  * Every stroke is Regular (40).
  */
 
@@ -153,12 +155,12 @@ export const FitIcon = () => (
 
 export const FullScreenIcon = () => (
   <svg {...svgProps}>
-    <ZoomFullScreen />
+    <FullScreenGlyph />
   </svg>
 );
 
 export const ExitFullScreenIcon = () => (
   <svg {...svgProps}>
-    <ZoomExitFullScreen />
+    <ExitFullScreenGlyph />
   </svg>
 );

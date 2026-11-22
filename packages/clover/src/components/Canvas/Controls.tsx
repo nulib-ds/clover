@@ -14,15 +14,9 @@ import ControlCluster, {
   type ControlSpec,
   renderControl,
 } from "../../ui/ControlCluster";
-import {
-  Choice,
-  Reset,
-  Rotate,
-  ZoomExitFullScreen,
-  ZoomFullScreen,
-  ZoomIn,
-  ZoomOut,
-} from "../../ui/controlGlyphs";
+import { Choice, Reset, Rotate, ZoomIn, ZoomOut } from "../../ui/controlGlyphs";
+import { ExitFullScreenGlyph } from "../../ui/glyphs/ExitFullScreen";
+import { FullScreenGlyph } from "../../ui/glyphs/FullScreen";
 import type { ControlButtons } from "../../ui/controlButtons";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { localize } from "../../core/value";
@@ -397,7 +391,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
         id: `fullPage-${instance}`,
         label: isFullscreen ? t("imageExitFullScreen") : t("imageFullScreen"),
         lang: langOf(isFullscreen ? "imageExitFullScreen" : "imageFullScreen"),
-        glyph: isFullscreen ? <ZoomExitFullScreen /> : <ZoomFullScreen />,
+        glyph: isFullscreen ? <ExitFullScreenGlyph /> : <FullScreenGlyph />,
         // Straight from the click: the Fullscreen API only honors a user gesture.
         onClick: (event) => void toggleFullscreen(event.currentTarget),
       });

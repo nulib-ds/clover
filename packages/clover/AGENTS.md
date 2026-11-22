@@ -326,7 +326,7 @@ every rule below.
 - **Gaps on the golden scale** (Mat, 2026-11-21: "for all icons. normalize gaps between
   strokes. … use gr steps … the same way we handle layout."): `DESIGN.md` §9 gives the
   steps, 121, 75, 46 and 28 on the grid, the relationship each is for and the glyphs
-  that take it, with the rest of the glyph rules. Expand's box is 132 square, so it is 46
+  that take it, with the rest of the glyph rules. Expand's box is 109 square, so it is 46
   from the arrow as from the frame. Open viewer's plus sits 44 inside its lens, left as
   drawn.
 - **Reset view is a viewfinder** (Mat, 2026-11-21: 'think "reset view" -- it about bring
@@ -2101,15 +2101,21 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `mapped`).
     The full viewer's way back is two arrows pointing at each other on the diagonal
     ("let's do a youtube still expand collapse two arrows pointing at or away from
-    eachother diagonallly"), and Full screen four such arrows, one to each corner, out to
-    enter and in to exit (`ZoomFullScreen`, `ZoomExitFullScreen` in
-    `ui/controlGlyphs.tsx`: "use same arrows as expand/collapse for fullscreen", then "it
-    should be four arrows. all directions"); the template draws its own, using only the
-    parts: keep their arrows alike. Both are Regular, their solid heads smaller (Mat,
-    2026-11-21: "this feels too bold compared to others", then, of the way back, "Match
-    full screen"; bold from 2026-11-11, "something more bold and obvious"). Exit full
-    screen's labeled button shows the four arrows in (`ui/ExitFullscreen.tsx`), as the
-    control does.
+    eachother diagonallly"), and Full screen the same two arrows: out to enter
+    (`FullScreenGlyph`) and in to exit (`ExitFullScreenGlyph`), each a module in
+    `ui/glyphs/` and exported, so the way back is Exit full screen's own glyph
+    (`Clover.ExitFullScreenGlyph`; Mat, 2026-11-22: "make back to pages and exit full
+    screen the same. use back to pages.", then of Full screen, "I like B · Back to pages,
+    turned out"; four arrows, one to each corner, from 2026-11-13: "it should be four
+    arrows. all directions"). Regular, their solid heads 80 (Mat, 2026-11-21: "this feels
+    too bold compared to others"; bold from 2026-11-11), the heads pointing in and the
+    tails pointing out 76 apart across the middle (82 until 2026-11-22, off the golden
+    scale). Exit full screen's labeled button (`ui/ExitFullscreen.tsx`) and the
+    transport show the same two. Expand (`ExpandGlyph`, an Inset's and Document's Expand
+    map) points in with Exit full screen's top-right arrow, in Reset view's frame, the
+    viewfinder's square and corners (Mat, 2026-11-22: "yes option 2", then "this is good
+    design normalization"; an open head and a square-cornered frame before), held to the
+    arrow by `ui/glyphs/Expand.test.tsx`.
   - An asked place follows the view (Mat, 2026-11-13: "toggling canvases in expanded map
     mode doesn't toggle map"): `useRootMap`, as the view changes, asks for the new
     Canvas's place, else its first georeferenced image, where what was asked was a
