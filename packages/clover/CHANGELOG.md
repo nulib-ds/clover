@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.12.3] - 2026-11-22
+
 ### Added
 
 - **Full screen's glyphs, for controls of your own.** `FullScreenGlyph` and
