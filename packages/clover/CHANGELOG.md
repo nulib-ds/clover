@@ -11,6 +11,20 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Full screen's glyphs, for controls of your own.** `FullScreenGlyph` and
+  `ExitFullScreenGlyph` are exported with Clover's other glyphs, each a shape on a 512
+  grid for an svg of yours in its color. React only.
+
+### Changed
+
+- **Full screen and its way out are two arrows.** Full screen shows two arrows on the
+  diagonal, out to the corners, where it showed four, and Exit full screen the same two
+  pointing in: the controls over a Canvas and a Scene, a recording's transport and the
+  labeled way out of full screen. Document's way back to its pages shows Exit full
+  screen's glyph. Their names, keys and places are the same. Nothing to change.
+
 ## [4.12.2] - 2026-11-21
 
 ### Added

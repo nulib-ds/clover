@@ -84,9 +84,8 @@ export function ViewControls({
           fill="currentColor"
           stroke="currentColor"
         >
-          {/* Two arrows pointing at each other: the pages, out of the full viewer. */}
-          <path {...SHAFT} d={BACK_SHAFTS} />
-          <path {...HEAD} d={BACK_HEADS} />
+          {/* Two arrows pointing in: the pages, out of the full viewer, as full screen's way out. */}
+          <Clover.ExitFullScreenGlyph />
         </svg>
         <span style={Clover.visuallyHidden}>{label}</span>
         <Clover.Tip label={label} lang={langOf(key)} />
@@ -106,24 +105,12 @@ export function ViewControls({
 }
 
 /*
- * Two arrows on the diagonal, from its corners in to its middle (Mat, 2026-11-11:
- * "something more bold and obvious", a thin arrow before): each a shaft, rounded at its
- * tail, into a solid head, its corners rounded as Clover's glyphs' joins are, the two
- * heads clear of each other. The Canvas's Full screen and Exit full screen draw four of
- * these arrows, one to each corner (`ui/controlGlyphs.tsx`; Mat, 2026-11-13: "use same
- * arrows as expand/collapse for fullscreen", "it should be four arrows. all
- * directions"): keep their arrows alike. Both Regular since 2026-11-21, with smaller
- * heads (Mat: "this feels too bold compared to others", then "Match full screen";
- * shafts 56 and heads of 128 before), each where Exit full screen's is.
+ * Back to pages is Exit full screen's glyph, two arrows on the diagonal in from its
+ * corners (`Clover.ExitFullScreenGlyph`; Mat, 2026-11-22: "make back to pages and exit
+ * full screen the same. use back to pages."). Its own two arrows came first (Mat,
+ * 2026-11-11: "something more bold and obvious", a thin arrow before), Regular since
+ * 2026-11-21 (Mat: "this feels too bold compared to others", then "Match full screen").
  */
-const SHAFT = {
-  fill: "none",
-  strokeLinecap: "round",
-  strokeWidth: 40,
-} as const;
-const HEAD = { strokeLinejoin: "round", strokeWidth: 40 } as const;
-const BACK_SHAFTS = "M427 85L339 173M85 427L173 339";
-const BACK_HEADS = "M299 213V133L379 213ZM213 299V379L133 299Z";
 
 /** The pictures' height in a step's preview: a page about Items' own size. */
 const PREVIEW_SIZE = 160;

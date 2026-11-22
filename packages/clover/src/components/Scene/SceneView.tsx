@@ -57,13 +57,9 @@ import ControlCluster, {
   renderControl,
 } from "../../ui/ControlCluster";
 import type { ControlButtons } from "../../ui/controlButtons";
-import {
-  Reset,
-  ZoomExitFullScreen,
-  ZoomFullScreen,
-  ZoomIn,
-  ZoomOut,
-} from "../../ui/controlGlyphs";
+import { Reset, ZoomIn, ZoomOut } from "../../ui/controlGlyphs";
+import { ExitFullScreenGlyph } from "../../ui/glyphs/ExitFullScreen";
+import { FullScreenGlyph } from "../../ui/glyphs/FullScreen";
 import { ErrorBoundary } from "../../ui/ErrorBoundary";
 import ExitFullscreen from "../../ui/ExitFullscreen";
 import { Loading } from "../../ui/Loading";
@@ -608,7 +604,7 @@ function SceneBody({
               lang: root.langOf(
                 fullscreen ? "imageExitFullScreen" : "imageFullScreen",
               ),
-              glyph: fullscreen ? <ZoomExitFullScreen /> : <ZoomFullScreen />,
+              glyph: fullscreen ? <ExitFullScreenGlyph /> : <FullScreenGlyph />,
               // Straight from the click: the Fullscreen API only honors a user gesture.
               onClick: (event: React.MouseEvent<HTMLButtonElement>) =>
                 void toggleFullscreen(event.currentTarget),

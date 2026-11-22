@@ -2101,15 +2101,17 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `mapped`).
     The full viewer's way back is two arrows pointing at each other on the diagonal
     ("let's do a youtube still expand collapse two arrows pointing at or away from
-    eachother diagonallly"), and Full screen four such arrows, one to each corner, out to
-    enter and in to exit (`ZoomFullScreen`, `ZoomExitFullScreen` in
-    `ui/controlGlyphs.tsx`: "use same arrows as expand/collapse for fullscreen", then "it
-    should be four arrows. all directions"); the template draws its own, using only the
-    parts: keep their arrows alike. Both are Regular, their solid heads smaller (Mat,
-    2026-11-21: "this feels too bold compared to others", then, of the way back, "Match
-    full screen"; bold from 2026-11-11, "something more bold and obvious"). Exit full
-    screen's labeled button shows the four arrows in (`ui/ExitFullscreen.tsx`), as the
-    control does.
+    eachother diagonallly"), and Full screen the same two arrows: out to enter
+    (`FullScreenGlyph`) and in to exit (`ExitFullScreenGlyph`), each a module in
+    `ui/glyphs/` and exported, so the way back is Exit full screen's own glyph
+    (`Clover.ExitFullScreenGlyph`; Mat, 2026-11-22: "make back to pages and exit full
+    screen the same. use back to pages.", then of Full screen, "I like B · Back to pages,
+    turned out"; four arrows, one to each corner, from 2026-11-13: "it should be four
+    arrows. all directions"). Regular, their solid heads 80 (Mat, 2026-11-21: "this feels
+    too bold compared to others"; bold from 2026-11-11), the heads pointing in and the
+    tails pointing out 76 apart across the middle (82 until 2026-11-22, off the golden
+    scale). Exit full screen's labeled button (`ui/ExitFullscreen.tsx`) and the
+    transport show the same two.
   - An asked place follows the view (Mat, 2026-11-13: "toggling canvases in expanded map
     mode doesn't toggle map"): `useRootMap`, as the view changes, asks for the new
     Canvas's place, else its first georeferenced image, where what was asked was a

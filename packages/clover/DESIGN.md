@@ -587,7 +587,8 @@ glyph lives and how each was chosen.
 - **One drawing per meaning.** A glyph a part and a template both show is drawn once, in
   `src/ui/glyphs/`, and exported as `…Glyph`. Every chevron is the caret, turned; one
   cross closes and clears; one speaker stands for sound; one box and arrow opens a new
-  tab.
+  tab; one pair of arrows goes into full screen and, turned, comes back out, as Document's
+  Back to pages does.
 
 **Gaps are steps of the scale** (Mat, 2026-11-21: "for all icons. normalize gaps between
 strokes. … use gr steps. to increase/decrease gaps for elements that more closely
@@ -596,12 +597,12 @@ at the grid's own weights, is a step of the golden scale at the glyph's size, sm
 more closely the parts belong together, as §3 chooses a layout's: `2xs` and `3xs` on the
 grid, and under them two steps no layout needs, φ⁻⁵ and φ⁻⁶, in whole units.
 
-| Relationship        | Gap         | Examples                                                                                                                                                                                                                                                                                                                                       |
-| ------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Across a glyph      | 121 (`2xs`) | Reset view's corners and its center; Full screen's heads; Fill's and Fit's arrows                                                                                                                                                                                                                                                              |
-| Separate things     | 75 (`3xs`)  | Chapters' lines; Pause's bars; Download's arrow and its line; the Map picture's sun and peaks; Full screen's shafts                                                                                                                                                                                                                            |
-| Parts of one figure | 46 (φ⁻⁵)    | The layers of Views, Collection and Choice; a transcript's lines; Auto layout's pages; a dot and its line or stem (Chapters, About); the speaker and its waves or cross; a box and its arrow (the external link, Expand); a frame and what is in it (Fill, Fit, Expand, the Map picture); Exit full screen's heads; Selection outline's sheets |
-| A cut in one shape  | 28 (φ⁻⁶)    | The A and 文 of the languages glyph; the Annotations card and its region; Hide's pupil in its eye; the captions' two Cs; a speaker's waves                                                                                                                                                                                                     |
+| Relationship        | Gap         | Examples                                                                                                                                                                                                                                                                                                             |
+| ------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Across a glyph      | 121 (`2xs`) | Reset view's corners and its center; Fill's and Fit's arrows                                                                                                                                                                                                                                                         |
+| Separate things     | 75 (`3xs`)  | Chapters' lines; Pause's bars; Download's arrow and its line; the Map picture's sun and peaks; Full screen's two arrows tail to tail, and Exit full screen's head to head, across the middle                                                                                                                         |
+| Parts of one figure | 46 (φ⁻⁵)    | The layers of Views, Collection and Choice; a transcript's lines; Auto layout's pages; a dot and its line or stem (Chapters, About); the speaker and its waves or cross; a box and its arrow (the external link, Expand); a frame and what is in it (Fill, Fit, Expand, the Map picture); Selection outline's sheets |
+| A cut in one shape  | 28 (φ⁻⁶)    | The A and 文 of the languages glyph; the Annotations card and its region; Hide's pupil in its eye; the captions' two Cs; a speaker's waves                                                                                                                                                                           |
 
 A gap may sit a unit off its step, as every point is a whole unit. Glyphs that share a
 frame hold what is in it at one height: the captions' Cs and Fill's and Fit's arrows sit

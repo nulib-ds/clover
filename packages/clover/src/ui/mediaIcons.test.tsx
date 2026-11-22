@@ -1,7 +1,8 @@
 import { render } from "@testing-library/react";
 import React from "react";
 
-import { ZoomExitFullScreen, ZoomFullScreen } from "./controlGlyphs";
+import { ExitFullScreenGlyph } from "./glyphs/ExitFullScreen";
+import { FullScreenGlyph } from "./glyphs/FullScreen";
 import { ExitFullScreenIcon, FullScreenIcon } from "./mediaIcons";
 
 /** The glyph's path, as drawn. */
@@ -17,14 +18,14 @@ describe("the transport's full-screen glyphs", () => {
     expect(drawn(<FullScreenIcon />)).toBe(
       drawn(
         <svg>
-          <ZoomFullScreen />
+          <FullScreenGlyph />
         </svg>,
       ),
     );
     expect(drawn(<ExitFullScreenIcon />)).toBe(
       drawn(
         <svg>
-          <ZoomExitFullScreen />
+          <ExitFullScreenGlyph />
         </svg>,
       ),
     );

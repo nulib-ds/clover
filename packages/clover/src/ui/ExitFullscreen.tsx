@@ -1,5 +1,5 @@
 import React from "react";
-import { ZoomExitFullScreen } from "./controlGlyphs";
+import { ExitFullScreenGlyph } from "./glyphs/ExitFullScreen";
 import { toggleFullscreen } from "../lib/fullscreen";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { languageProps } from "../i18n/direction";
@@ -7,8 +7,8 @@ import { languageProps } from "../i18n/direction";
 /**
  * The way out of full screen. `hidden` unless its root is full screen, so it stays out of
  * the way without the stylesheet too; the stylesheet only dresses it. Its glyph is the
- * Full screen control's, the four arrows in, so the one action looks the same wherever it
- * sits (WCAG 3.2.4; a left arrow before, which read as Back).
+ * Full screen control's way out, two arrows in, so the one action looks the same wherever
+ * it sits (WCAG 3.2.4; a left arrow before, which read as Back).
  */
 const ExitFullscreen: React.FC<{ hidden?: boolean }> = ({ hidden }) => {
   const { t, langOf } = useCloverTranslation();
@@ -30,7 +30,7 @@ const ExitFullscreen: React.FC<{ hidden?: boolean }> = ({ hidden }) => {
         aria-hidden="true"
         focusable="false"
       >
-        <ZoomExitFullScreen />
+        <ExitFullScreenGlyph />
       </svg>
       {label}
     </button>
