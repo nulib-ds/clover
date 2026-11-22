@@ -24,6 +24,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   pointing in: the controls over a Canvas and a Scene, a recording's transport and the
   labeled way out of full screen. Document's way back to its pages shows Exit full
   screen's glyph. Their names, keys and places are the same. Nothing to change.
+- **Expand points in as Exit full screen does.** Its arrow is Exit full screen's, a solid
+  head where it had an open one, and its frame the viewfinder's that Reset zoom and Reset
+  view show, the same square with rounded corners, its box smaller to keep its room from
+  the arrow: an Inset's Expand map and Collapse map, Document's Expand map, and
+  `ExpandGlyph`. Nothing to change.
 
 ## [4.12.2] - 2026-11-21
 

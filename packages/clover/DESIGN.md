@@ -588,7 +588,8 @@ glyph lives and how each was chosen.
   `src/ui/glyphs/`, and exported as `…Glyph`. Every chevron is the caret, turned; one
   cross closes and clears; one speaker stands for sound; one box and arrow opens a new
   tab; one pair of arrows goes into full screen and, turned, comes back out, as Document's
-  Back to pages does.
+  Back to pages does. Glyphs of one family share their parts: Expand points in with Exit
+  full screen's arrow, in Reset view's frame, the viewfinder's square and corners.
 
 **Gaps are steps of the scale** (Mat, 2026-11-21: "for all icons. normalize gaps between
 strokes. … use gr steps. to increase/decrease gaps for elements that more closely

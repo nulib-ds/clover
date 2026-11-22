@@ -326,7 +326,7 @@ every rule below.
 - **Gaps on the golden scale** (Mat, 2026-11-21: "for all icons. normalize gaps between
   strokes. … use gr steps … the same way we handle layout."): `DESIGN.md` §9 gives the
   steps, 121, 75, 46 and 28 on the grid, the relationship each is for and the glyphs
-  that take it, with the rest of the glyph rules. Expand's box is 132 square, so it is 46
+  that take it, with the rest of the glyph rules. Expand's box is 109 square, so it is 46
   from the arrow as from the frame. Open viewer's plus sits 44 inside its lens, left as
   drawn.
 - **Reset view is a viewfinder** (Mat, 2026-11-21: 'think "reset view" -- it about bring
@@ -2111,7 +2111,11 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     too bold compared to others"; bold from 2026-11-11), the heads pointing in and the
     tails pointing out 76 apart across the middle (82 until 2026-11-22, off the golden
     scale). Exit full screen's labeled button (`ui/ExitFullscreen.tsx`) and the
-    transport show the same two.
+    transport show the same two. Expand (`ExpandGlyph`, an Inset's and Document's Expand
+    map) points in with Exit full screen's top-right arrow, in Reset view's frame, the
+    viewfinder's square and corners (Mat, 2026-11-22: "yes option 2", then "this is good
+    design normalization"; an open head and a square-cornered frame before), held to the
+    arrow by `ui/glyphs/Expand.test.tsx`.
   - An asked place follows the view (Mat, 2026-11-13: "toggling canvases in expanded map
     mode doesn't toggle map"): `useRootMap`, as the view changes, asks for the new
     Canvas's place, else its first georeferenced image, where what was asked was a
