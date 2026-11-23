@@ -2,12 +2,12 @@ import {
   DOUBLE_TAP_SLOP,
   TAP_MS,
   TAP_SLOP,
+  holdTwoFingers,
   isDirect,
   isHovering,
   isInteractive,
-  pageWheeling,
   scrollsWithin,
-  watchWheels,
+  wheelZooms,
 } from "../../pointer";
 import { getFullscreenElement } from "../../fullscreen";
 import type { Point } from "../math/affine";
@@ -31,11 +31,16 @@ export interface GestureTarget {
    * picked annotation). If it did, the tap does nothing more: no zoom, no `tap`.
    */
   dismiss(): boolean;
-  /** A gesture `cooperative` left to the page: a plain wheel, or one finger's drag. */
+  /** A gesture `cooperative` left to the page: one finger's drag. */
   hint(kind: GestureHintKind): void;
 }
 
-export type GestureHintKind = "wheel" | "touch";
+/**
+ * What a hint says how to do: a finger's alone, on a touch screen. A plain wheel left to
+ * the page says nothing (Mat, 2026-11-23: "scroll to zoom overlay should only show on
+ * mobile").
+ */
+export type GestureHintKind = "touch";
 
 export interface GestureOptions {
   /**
@@ -53,11 +58,11 @@ export interface GestureOptions {
    */
   scrollToZoom: boolean;
   /**
-   * The page keeps its own gestures, as an embedded Google map does: a plain wheel and
-   * one finger's drag scroll the page and say how to move the view (`hint`): Ctrl or ⌘
-   * with the wheel, two fingers on a touch screen. In full screen, with no page to
-   * scroll, the wheel and a finger's drag are the view's. `scrollToZoom` still lets a
-   * plain wheel zoom. Off by default.
+   * The page keeps its own gestures, as an embedded Google map does, and as the Map and
+   * the Scene do: one finger's drag scrolls the page, and a hint says to use two (`hint`).
+   * A mouse's drag still pans, and a plain wheel scrolls the page, as it does without.
+   * In full screen, with no page to scroll, the wheel and a finger's drag are the view's.
+   * `scrollToZoom` still lets a plain wheel zoom. On by default; off, a finger's drag pans.
    */
   cooperative: boolean;
   /**
@@ -82,7 +87,7 @@ export const DEFAULT_GESTURES: GestureOptions = {
   dblClickToZoom: true,
   pinchToZoom: true,
   scrollToZoom: false,
-  cooperative: false,
+  cooperative: true,
   navigable: true,
   flickEnabled: true,
   flickMinSpeed: 200,
@@ -114,7 +119,8 @@ const onText = (event: Event) =>
  *
  * Pointer events cover mouse, pen and touch alike. The Body's viewport sets
  * `touch-action: none` so the browser hands pinch and drag over rather than scrolling or
- * zooming the page.
+ * zooming the page; cooperative, as it is by default, `pan-x pan-y`, so a finger's drag
+ * scrolls the page and two fingers are the view's (`holdTwoFingers`).
  */
 export class GestureController {
   private pointers = new Map<number, Point>();
@@ -128,6 +134,17 @@ export class GestureController {
   private penHovers = false;
   /** Two pointers have been down in this gesture: its last finger is a pinch's, not a scroll. */
   private pinched = false;
+  /**
+   * Two fingers came down, and have not moved since (nor the one left after the first
+   * lifts): lifted soon, they are a tap, which zooms out, as a double tap zooms in.
+   */
+  private twoTap: {
+    t: number;
+    mid: Point;
+    distance: number;
+    left?: Point;
+  } | null = null;
+  private releaseTwoFingers: () => void;
 
   constructor(
     private readonly element: HTMLElement,
@@ -141,8 +158,7 @@ export class GestureController {
     element.addEventListener("dblclick", this.onDoubleClick);
     element.addEventListener("wheel", this.onWheel, { passive: false });
     element.addEventListener("keydown", this.onKeyDown);
-    element.addEventListener("touchmove", this.onTouchMove, { passive: false });
-    watchWheels();
+    this.releaseTwoFingers = holdTwoFingers(element, () => this.cooperating());
     this.markCooperative();
   }
 
@@ -182,7 +198,7 @@ export class GestureController {
     el.removeEventListener("dblclick", this.onDoubleClick);
     el.removeEventListener("wheel", this.onWheel);
     el.removeEventListener("keydown", this.onKeyDown);
-    el.removeEventListener("touchmove", this.onTouchMove);
+    this.releaseTwoFingers();
     el.removeAttribute("data-cooperative");
   }
 
@@ -209,11 +225,22 @@ export class GestureController {
     if (this.pointers.size === 1) {
       this.down = { x: p.x, y: p.y, t: event.timeStamp, moved: false };
       this.samples = [{ x: p.x, y: p.y, t: event.timeStamp }];
+      this.twoTap = null;
       this.target.setInteracting(true);
     } else if (this.pointers.size === 2) {
       this.pinch = this.pinchState();
+      // Two fingers, both soon after the first: a tap of two, if they lift as soon.
+      this.twoTap =
+        !this.pinched &&
+        isDirect(event.pointerType, this.penHovers) &&
+        this.down &&
+        event.timeStamp - this.down.t < TAP_MS
+          ? { t: event.timeStamp, ...this.pinch }
+          : null;
       this.pinched = true;
       if (this.down) this.down.moved = true;
+    } else {
+      this.twoTap = null;
     }
   };
 
@@ -227,6 +254,9 @@ export class GestureController {
     if (this.pointers.size === 1) {
       const dx = p.x - previous.x;
       const dy = p.y - previous.y;
+      const left = this.twoTap?.left;
+      if (left && Math.hypot(p.x - left.x, p.y - left.y) > TAP_SLOP)
+        this.twoTap = null;
       if (
         this.down &&
         Math.hypot(p.x - this.down.x, p.y - this.down.y) > TAP_SLOP
@@ -249,6 +279,13 @@ export class GestureController {
       this.options.navigable
     ) {
       const next = this.pinchState();
+      const tap = this.twoTap;
+      if (
+        tap &&
+        (Math.abs(next.distance - tap.distance) > TAP_SLOP ||
+          Math.hypot(next.mid.x - tap.mid.x, next.mid.y - tap.mid.y) > TAP_SLOP)
+      )
+        this.twoTap = null;
       if (this.options.pinchToZoom && this.pinch.distance > 0) {
         this.target.zoomBy(
           next.distance / this.pinch.distance,
@@ -276,17 +313,37 @@ export class GestureController {
       this.pinch = null;
       const [remaining] = this.pointers.values();
       this.samples = [{ ...remaining, t: event.timeStamp }];
+      if (this.twoTap) this.twoTap.left = remaining;
       return;
     }
     if (this.pointers.size > 0) return;
 
     const down = this.down;
     const pinched = this.pinched;
+    const twoTap = this.twoTap;
     this.down = null;
     this.pinch = null;
     this.pinched = false;
+    this.twoTap = null;
     this.target.setInteracting(false);
     if (!down) return;
+
+    /*
+     * Two fingers' tap zooms out, about the middle of them, as on a map: a double tap's
+     * way back, where its zoom in does (WCAG 2.5.1 keeps a single pointer's: the controls,
+     * and a double tap, which goes home from as far in as the view goes).
+     */
+    if (
+      twoTap &&
+      event.type === "pointerup" &&
+      event.timeStamp - twoTap.t < TAP_MS &&
+      this.options.navigable &&
+      (this.options.clickToZoom || this.options.dblClickToZoom)
+    ) {
+      this.lastTap = null;
+      this.target.zoomBy(1 / CLICK_ZOOM, twoTap.mid, true);
+      return;
+    }
 
     const p = this.local(event);
     const isTap =
@@ -386,37 +443,21 @@ export class GestureController {
     const pinch =
       event.ctrlKey && event.deltaMode === 0 && Math.abs(delta) < PINCH_MOST;
     const held = event.ctrlKey || event.metaKey;
-    // Cooperative in full screen, with no page to scroll, a plain wheel zooms.
-    const free =
-      this.options.scrollToZoom ||
-      (this.options.cooperative && this.fullscreen());
-    if (!held && !free) {
-      // Not for a page scroll that carries the view under a resting pointer, nor sideways.
-      if (
-        this.cooperating() &&
-        Math.abs(event.deltaY) >= Math.abs(event.deltaX) &&
-        !pageWheeling(event, this.element) &&
-        !scrollsWithin(event.target, this.element, delta)
-      )
-        this.target.hint("wheel");
+    // As over the Map and the Scene (`wheelZooms`); else the page's.
+    if (
+      !wheelZooms(event, {
+        scrollZoom: this.options.scrollToZoom,
+        cooperative: this.options.cooperative,
+        fullscreen: this.fullscreen(),
+      })
+    )
       return;
-    }
     // A box in the Body that scrolls that way (a hotspot's long Tip) scrolls, not zooms.
     if (!held && scrollsWithin(event.target, this.element, event.deltaY))
       return;
     event.preventDefault();
     const rate = pinch ? PINCH_WHEEL_ZOOM_RATE : WHEEL_ZOOM_RATE;
     this.target.zoomBy(Math.exp(-delta * rate), this.local(event), !pinch);
-  };
-
-  /*
-   * Where a finger's drag is the page's (`touch-action: pan-x pan-y`), two fingers still
-   * pinch and pan the view, not the page.
-   */
-  private onTouchMove = (event: TouchEvent) => {
-    if (!this.cooperating() || event.targetTouches.length < 2) return;
-    if (isInteractive(event.target, this.element)) return;
-    if (event.cancelable) event.preventDefault();
   };
 
   private onKeyDown = (event: KeyboardEvent) => {

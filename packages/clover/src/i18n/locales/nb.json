@@ -19,7 +19,6 @@
   "bodyUnloadableVideo": "Denne videoen kunne ikke lastes inn.",
   "bodyUnloadableAudio": "Denne lyden kunne ikke lastes inn.",
   "bodyUnloadableModel": "Denne modellen kunne ikke lastes inn.",
-  "gestureHintWheel": "Bruk {{key}} + rulling for å zoome",
   "gestureHintTouch": "Bruk to fingre for å flytte visningen",
   "canvasRoleDescription": "zoombart bilde",
   "canvasKeysImage": "Bruk piltastene for å flytte bildet, med Shift for lengre steg, pluss og minus for å zoome, 0 for å tilbakestille visningen, og R eller Shift+R for å rotere.",

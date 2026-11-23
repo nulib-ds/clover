@@ -414,13 +414,13 @@ export const mapDocs: ElementDocs = {
     },
     "scroll-zoom": {
       description:
-        "Zooms with a plain mouse wheel or trackpad, and takes one finger's drag, with no hint. Off by default, so scrolling the page never gets caught in the map.",
+        "Zooms with a plain wheel too, not only one with Ctrl or ⌘ held (as a trackpad's pinch comes). Off by default, so scrolling the page never gets caught in the map.",
       default: "false",
     },
     cooperative: {
       description:
-        "Leaves a plain wheel and one finger's drag to the page, and says over the map how to move it: Ctrl or ⌘ with the wheel, or two fingers. In full screen the map takes both.",
-      default: "false",
+        "Leaves one finger's drag to the page, as an embedded Google map does, and says over the map to use two. A mouse's drag still pans, a plain wheel scrolls the page (Ctrl or ⌘ with it zooms), and in full screen the map takes both. \"false\" gives one finger's drag to the map.",
+      default: "true",
     },
     zoom: {
       description:

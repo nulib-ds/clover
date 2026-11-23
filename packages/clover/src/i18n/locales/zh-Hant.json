@@ -19,7 +19,6 @@
   "bodyUnloadableVideo": "無法載入此影片。",
   "bodyUnloadableAudio": "無法載入此音訊。",
   "bodyUnloadableModel": "無法載入此模型。",
-  "gestureHintWheel": "按住 {{key}} 並捲動以縮放",
   "gestureHintTouch": "用兩根手指移動檢視",
   "canvasRoleDescription": "可縮放影像",
   "canvasKeysImage": "使用方向鍵平移（按住 Shift 可大幅移動），按加號和減號縮放，按 0 重設檢視，按 R 或 Shift+R 旋轉。",

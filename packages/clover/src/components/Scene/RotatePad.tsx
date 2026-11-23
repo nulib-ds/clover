@@ -182,7 +182,7 @@ export function RotatePad({
         turn: (dTheta, dPhi) => turning.current(dTheta, dPhi),
         zoom: (factor) => zooming.current(factor),
       },
-      span,
+      { span },
     );
   }, [span, turns]);
 

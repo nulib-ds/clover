@@ -144,6 +144,9 @@ class FakeMap {
   getCanvas() {
     return this.canvas;
   }
+  getContainer() {
+    return this.options.container;
+  }
   getZoom() {
     return 1;
   }
@@ -433,7 +436,8 @@ describe("Map", () => {
     expect(map.getLayer("road-primary")).toBeUndefined();
   });
 
-  it("leaves the wheel and a finger's drag to the page, saying how to move the map", async () => {
+  // As an embedded Google map, the Canvas and the Scene do (Mat, 2026-11-23).
+  it("leaves the wheel and a finger's drag to the page, saying to use two fingers", async () => {
     const place = {
       type: "Feature",
       properties: {},
@@ -442,14 +446,36 @@ describe("Map", () => {
     const { rerender } = render(<CloverMap navPlace={place} />);
     await waitFor(() => expect(maps).toHaveLength(1));
     const [map] = maps;
-    // Off by default.
-    await waitFor(() => expect(map.scrollZoom.on).toBe(false));
-    expect(map.cooperativeGestures.on).toBe(false);
-
-    rerender(<CloverMap navPlace={place} cooperative />);
-    // Its wheel on, for Ctrl or ⌘; the plain wheel and one finger the page's.
+    // On by default: one finger the page's, two the map's; the wheel MapLibre's to zoom.
     await waitFor(() => expect(map.cooperativeGestures.on).toBe(true));
     expect(map.scrollZoom.on).toBe(true);
+
+    /*
+     * A plain wheel never reaches MapLibre, and says nothing (Mat, 2026-11-23: "scroll to
+     * zoom overlay should only show on mobile"); with Ctrl or ⌘ it does.
+     */
+    const reached = vi.fn();
+    map.canvas.addEventListener("wheel", reached);
+    const wheel = (init: WheelEventInit) => {
+      const event = new WheelEvent("wheel", {
+        bubbles: true,
+        cancelable: true,
+        ...init,
+      });
+      act(() => void map.canvas.dispatchEvent(event));
+      return event;
+    };
+    expect(wheel({ deltaY: 100 }).defaultPrevented).toBe(false);
+    expect(reached).not.toHaveBeenCalled();
+    expect(document.querySelector(".clover-gesture-hint")?.textContent).toBe(
+      "",
+    );
+    wheel({ deltaY: 100, ctrlKey: true });
+    expect(reached).toHaveBeenCalledTimes(1);
+    wheel({ deltaY: 100, metaKey: true });
+    expect(reached).toHaveBeenCalledTimes(2);
+
+    // One finger's drag MapLibre left to the page says to use two.
     act(() =>
       map.fire("cooperativegestureprevented", { gestureType: "touch_pan" }),
     );
@@ -457,9 +483,19 @@ describe("Map", () => {
       await screen.findByText("Use two fingers to move the view"),
     ).toBeInTheDocument();
 
-    rerender(<CloverMap navPlace={place} cooperative scrollZoom />);
-    await waitFor(() => expect(map.scrollZoom.on).toBe(true));
-    expect(map.cooperativeGestures.on).toBe(false);
+    // scrollZoom: a plain wheel zooms too; a finger's drag is still the page's.
+    rerender(<CloverMap navPlace={place} scrollZoom />);
+    await waitFor(() => {
+      wheel({ deltaY: 100 });
+      expect(reached).toHaveBeenCalledTimes(3);
+    });
+    expect(map.cooperativeGestures.on).toBe(true);
+
+    // Off, a finger's drag pans, and a plain wheel still goes to the page.
+    rerender(<CloverMap navPlace={place} cooperative={false} />);
+    await waitFor(() => expect(map.cooperativeGestures.on).toBe(false));
+    wheel({ deltaY: 100 });
+    expect(reached).toHaveBeenCalledTimes(3);
   });
 
   // Mat, 2026-11-08: "it's okay to rerender but can we smooth it out?"

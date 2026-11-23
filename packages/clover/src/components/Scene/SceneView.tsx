@@ -11,6 +11,7 @@ import { attachOrbitGestures } from "./gestures";
 import {
   type Bounds,
   type Orbit,
+  atNearest,
   homeOrbit,
   sameOrbit,
   turned,
@@ -70,6 +71,7 @@ import { visuallyHidden } from "../../ui/visuallyHidden";
 import { engineFor } from "./engines";
 import { languageProps } from "../../i18n/direction";
 import { useContentStateOutput } from "../../react/useContentStateOutput";
+import { GestureHint, useGestureHint } from "../../ui/GestureHint";
 
 /** Which of the Scene's controls to show. All are on by default. */
 export interface SceneControlsConfig {
@@ -115,6 +117,18 @@ export interface SceneProps {
     request?: CloverRequest;
     /** Milliseconds the controls stay after a mouse stops or a finger lifts, as `Canvas`'s. */
     hideDelay?: number;
+    /** How a pointer moves it, as a Canvas's `options.gestures`, which `Body` hands it. */
+    gestures?: {
+      /**
+       * The page keeps its own gestures, as an embedded Google map does: one finger's drag
+       * scrolls the page, and a hint says to use two. A mouse's drag still turns the models.
+       * In full screen, the wheel and a finger's drag are the view's. Default true; false, a
+       * finger's drag turns.
+       */
+      cooperative?: boolean;
+      /** A plain wheel zooms too, not only one with Ctrl or ⌘ held. Default false. */
+      scrollToZoom?: boolean;
+    };
   };
   /**
    * The Manifest the Scene is from: when it changes, the last one's models go at once. A
@@ -466,11 +480,36 @@ function SceneBody({
     return () => observer.disconnect();
   }, [homeFor]);
 
+  /*
+   * A double tap or double click: a step nearer, or home from as near as it comes, so one
+   * pointer can always go back out, whichever controls the host shows (WCAG 2.5.1); two
+   * fingers' tap, or Shift, a step back.
+   */
+  const step = useCallback(
+    (out: boolean) => {
+      if (out) zoom(1 / ZOOM);
+      else if (
+        orbit.current &&
+        home.current &&
+        atNearest(orbit.current, home.current)
+      )
+        reset();
+      else zoom(ZOOM);
+    },
+    [zoom, reset],
+  );
+  const [hint, showHint] = useGestureHint();
+  const cooperative = options?.gestures?.cooperative ?? true;
+  const scrollToZoom = options?.gestures?.scrollToZoom ?? false;
   useEffect(() => {
     const host = hostRef.current;
     if (!host || status.state !== "ready") return;
-    return attachOrbitGestures(host, { turn, zoom });
-  }, [status.state, turn, zoom]);
+    return attachOrbitGestures(
+      host,
+      { turn, zoom, step, hint: showHint },
+      { cooperative, scrollToZoom },
+    );
+  }, [status.state, turn, zoom, step, showHint, cooperative, scrollToZoom]);
 
   const onViewportKey = (event: React.KeyboardEvent) => {
     if (event.target !== event.currentTarget) return;
@@ -796,6 +835,7 @@ function SceneBody({
           />
         )}
         {loading && <Loading overlay />}
+        <GestureHint kind={hint} />
         {/* Last, as a `<figcaption>` must be first or last in its `<figure>`. */}
         {captioned.length > 0 && (
           <Caption

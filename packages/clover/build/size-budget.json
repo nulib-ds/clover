@@ -1,7 +1,7 @@
 {
   "canvasInitialGzip": 44550,
   "timelineInitialGzip": 28900,
-  "sceneInitialGzip": 19450,
+  "sceneInitialGzip": 20100,
   "sceneOnDemandGzip": 160000,
   "sceneCloverOnDemandGzip": 8300,
   "viewerShellGzip": 1150,
@@ -13,7 +13,7 @@
   "galleryTemplateFirstViewGzip": 54150,
   "canvasFirstViewGzip": 51600,
   "timelineFirstViewGzip": 55100,
-  "sceneFirstViewGzip": 29850,
+  "sceneFirstViewGzip": 30550,
   "mapFirstViewGzip": 48800,
   "stylesGzip": 12600,
   "templatesStylesGzip": 5600,

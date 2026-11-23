@@ -153,9 +153,9 @@ export const sceneDocs: ElementDocs = {
       description: "A Presentation 4 Scene to draw.",
     },
     options: {
-      type: "{ request?: Record<string, unknown>; hideDelay?: number } | null",
+      type: "{ request?: Record<string, unknown>; hideDelay?: number; gestures?: { cooperative?: boolean; scrollToZoom?: boolean } } | null",
       description:
-        "request: credentials and headers for the Scene and its models; hideDelay: how long the controls stay after a mouse stops or a finger lifts, in milliseconds (3000).",
+        "request: credentials and headers for the Scene and its models; hideDelay: how long the controls stay after a mouse stops or a finger lifts, in milliseconds (3000); gestures: as clover-canvas's options.gestures, cooperative (true: one finger's drag scrolls the page, saying to use two) and scrollToZoom (false: a plain wheel zooms too).",
     },
     controls: {
       type: "boolean | { zoom?: boolean; fullPage?: boolean; rotation?: boolean; reset?: boolean; information?: boolean } | null",

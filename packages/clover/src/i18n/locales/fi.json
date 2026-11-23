@@ -19,7 +19,6 @@
   "bodyUnloadableVideo": "Tätä videota ei voitu ladata.",
   "bodyUnloadableAudio": "Tätä ääntä ei voitu ladata.",
   "bodyUnloadableModel": "Tätä mallia ei voitu ladata.",
-  "gestureHintWheel": "Zoomaa painamalla {{key}} ja vierittämällä",
   "gestureHintTouch": "Siirrä näkymää kahdella sormella",
   "canvasRoleDescription": "zoomattava kuva",
   "canvasKeysImage": "Siirrä kuvaa nuolinäppäimillä, pidemmin Vaihto-näppäimen kanssa, lähennä ja loitonna plus- ja miinusnäppäimillä, palauta näkymä näppäimellä 0 ja kierrä näppäimellä R tai Vaihto+R.",
