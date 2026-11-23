@@ -11,6 +11,19 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Security
+
+- **The web components bundle Preact 10.27.3.** Every 4.x release until now bundled
+  Preact 10.27.2, which could take an object from JSON, shaped as a crafted element, for
+  an element where text was expected, an opening for HTML injection
+  ([GHSA-36hm-qxxp-pg3m](https://github.com/advisories/GHSA-36hm-qxxp-pg3m)). Pages that
+  use the web components should update. The React components were never open to it, as
+  React checks its elements itself. Nothing else to change.
+- **Content Search's text around a result is read as text alone.** A service's `before`
+  and `after` (Content Search 1), or a `TextQuoteSelector`'s `prefix` and `suffix`
+  (Content Search 2), that is anything but text is left out rather than shown, as the
+  match beside it already was. Nothing to change.
+
 ## [4.12.3] - 2026-11-22
 
 ### Added

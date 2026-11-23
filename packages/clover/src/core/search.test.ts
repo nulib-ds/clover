@@ -122,4 +122,44 @@ describe("search", () => {
       [`${CANVAS(2)}#xywh=100,100,40,20`, `${CANVAS(2)}#xywh=150,100,40,20`],
     );
   });
+
+  it("keeps only text around a result, never an object a service sends in its place", async () => {
+    // An element's shape where text belongs, as JSON gives it (GHSA-36hm-qxxp-pg3m).
+    const forged = JSON.parse(
+      '{"type":"img","props":{"dangerouslySetInnerHTML":{"__html":"<img src=x onerror=alert(1)>"}},"constructor":null}',
+    );
+    const v1 = JSON.parse(JSON.stringify(v1Page));
+    Object.assign(v1[`${SEARCH_V1}?q=bird`].hits[0], {
+      before: forged,
+      after: forged,
+    });
+    const [hit] = (
+      await search({ id: SEARCH_V1, version: 1 }, "bird", {
+        request: { fetch: mockFetch(v1) },
+      })
+    ).hits;
+    expect([hit.before, hit.match, hit.after]).toEqual([
+      undefined,
+      "blue bird",
+      undefined,
+    ]);
+
+    const v2 = JSON.parse(JSON.stringify(v2Pages));
+    for (const page of Object.values(v2) as any[])
+      for (const group of page.annotations ?? [])
+        for (const annotation of group.items)
+          for (const target of annotation.target)
+            for (const selector of target.selector)
+              Object.assign(selector, { prefix: forged, suffix: forged });
+    const hits = (
+      await search({ id: SEARCH_V2, version: 2 }, "bird", {
+        request: { fetch: mockFetch(v2) },
+      })
+    ).hits;
+    expect(hits.map((each) => [each.before, each.match, each.after])).toEqual([
+      [undefined, "birds", undefined],
+      [undefined, "bird", undefined],
+      [undefined, "Birdsong", undefined],
+    ]);
+  });
 });

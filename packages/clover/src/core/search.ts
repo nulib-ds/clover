@@ -107,6 +107,15 @@ function nextPage(page: Json): string | null {
   return typeof id === "string" ? id : null;
 }
 
+/**
+ * A result's text around its match, as its service wrote it, only where it is text: a
+ * response the page does not control is never handed on to be rendered as anything else
+ * (GHSA-36hm-qxxp-pg3m: Preact before 10.27.3, which the web components bundle, could
+ * take an object shaped as a crafted element for one).
+ */
+const textAround = (value: unknown) =>
+  typeof value === "string" ? value : undefined;
+
 /** Read pages of results, of either version, into hits and a set. */
 export function readResults(pages: Json[], query: string): SearchResults {
   const entries: AnnotationEntry[] = [];
@@ -182,9 +191,9 @@ function readHitsV1(page: Json, byId: Map<string, AnnotationEntry>) {
       id: entryIds.join(" "),
       canvasId: byId.get(entryIds[0])!.canvasId,
       entryIds,
-      before: hit.before,
+      before: textAround(hit.before),
       match: String(hit.match ?? byId.get(entryIds[0])!.bodies[0]?.value ?? ""),
-      after: hit.after,
+      after: textAround(hit.after),
     });
   }
   return hits;
@@ -210,9 +219,9 @@ function readHitsV2(page: Json, byId: Map<string, AnnotationEntry>) {
           id: `${annotation.id ?? source}#${source}`,
           canvasId: entry.canvasId,
           entryIds: [entry.id],
-          before: quote?.prefix,
+          before: textAround(quote?.prefix),
           match: String(quote?.exact ?? entry.bodies[0]?.value ?? ""),
-          after: quote?.suffix,
+          after: textAround(quote?.suffix),
         });
       }
     }
