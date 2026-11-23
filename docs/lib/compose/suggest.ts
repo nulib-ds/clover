@@ -1,4 +1,4 @@
-import type { Capability } from "docs/lib/compose/capabilities";
+import { CAPABILITIES, type Capability } from "docs/lib/compose/capabilities";
 import {
   BODY_DRAWS,
   type PartInfo,
@@ -50,9 +50,10 @@ export interface PropSummary {
 export interface PartSummary {
   name: string;
   /** Its element, for a page of web components. */
-  element: string;
+  element?: string;
   says: string;
-  props: PropSummary[];
+  /** Its props: for a part the layout places, or one asked for by its name. */
+  props?: PropSummary[];
   /** What only code gives it. */
   codeOnly?: string[];
   docs: string;
@@ -78,7 +79,7 @@ export type Suggested =
   | {
       ok: true;
       /** With no needs: everything Clover handles, and the parts that do. */
-      capabilities: { name: string; says: string; parts: string[] }[];
+      capabilities: { name: string; says?: string; parts: string[] }[];
     }
   | { ok: false; says: string };
 
@@ -160,6 +161,7 @@ function typeOf(info: PropInfo) {
     .join(" | ");
 }
 
+/** A part as an answer gives it: what it is, each prop with what it does, and its docs. */
 export function summary(part: PartInfo): PartSummary {
   return {
     name: part.name,
@@ -322,9 +324,10 @@ export function suggest(
   if (!read && (given === undefined || (Array.isArray(given) && !given.length)))
     return {
       ok: true,
+      // A IIIF property's capability is its part's, said once there: by its name alone.
       capabilities: Object.entries(all).map(([name, capability]) => ({
         name,
-        says: capability.says,
+        ...(name in CAPABILITIES && { says: capability.says }),
         parts: [...capability.parts],
       })),
     };
@@ -464,9 +467,26 @@ export function suggest(
     }),
     handled,
     ...(unknown.length && { unknown }),
-    parts: [...new Set([...placed, ...listed])].map((name) =>
-      summary(findPart(name)!),
-    ),
+    /*
+     * Each part the layout places, or a need named, whole: an agent sets its props from
+     * this one answer. What else handles a need is named, with what it is and its docs,
+     * its props there or a call away (2026-11-22).
+     */
+    parts: [
+      ...[
+        ...new Set([...placed, ...handled.flatMap((each) => each.part ?? [])]),
+      ].map((name) => summary(findPart(name)!)),
+      ...[...listed]
+        .filter(
+          (name) =>
+            !placed.includes(name) &&
+            !handled.some((each) => each.part === name),
+        )
+        .map((name) => {
+          const { says, docs } = summary(findPart(name)!);
+          return { name, says, docs };
+        }),
+    ],
     ...(nodes.length && {
       layout: { ...(read && { resource: read.address }), parts: nodes },
     }),

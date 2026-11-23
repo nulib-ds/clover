@@ -115,6 +115,10 @@ const didYouMean = (name: string, names: readonly string[]) => {
   return near ? ` Did you mean \`${near}\`?` : "";
 };
 
+/** A name's possessive: "The Root's", "Items'". */
+const possessive = (name: string) =>
+  name.endsWith("s") ? `${name}'` : `${name}'s`;
+
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -257,11 +261,11 @@ function checkProps(props: unknown, check: PropsCheck): Props {
         level: "error",
         at: where,
         says: other
-          ? `\`${given}\` is ${other}'s: ${whose} does not read it.`
+          ? `\`${given}\` is ${possessive(other)}: ${whose} does not read it.`
           : `${whose} has no prop \`${given}\`.${didYouMean(
               given,
               infos.map((each) => each.prop),
-            )} Its props: ${infos.map((each) => each.prop).join(", ") || "none"}.`,
+            )} Its props: ${[...infos.map((each) => each.prop), ...OWN_PROPS].join(", ")}.`,
       });
       continue;
     }
@@ -276,7 +280,7 @@ function checkProps(props: unknown, check: PropsCheck): Props {
       issues.push({
         level: "error",
         at: where,
-        says: `${whose}'s \`${info.prop}\` ${read.error}`,
+        says: `${possessive(whose)} \`${info.prop}\` ${read.error}`,
       });
       continue;
     }
@@ -343,7 +347,7 @@ function checkNode(
     }
     const props = checkProps(node.props, {
       at: `${at}.props`,
-      whose: `An \`${element}\``,
+      whose: `${/^[aeiou]/.test(element) ? "An" : "A"} \`${element}\``,
       infos: [],
       issues,
     });
@@ -548,7 +552,7 @@ export function layoutSchema() {
   const props = {
     type: "object",
     description:
-      "Props, by React's names (headingLevel), as plain values: text, numbers, true or false, or JSON. id, className and style (CSS as React writes it) on any.",
+      "Props by React's names (headingLevel), as plain values or JSON; id, className and style (CSS as React writes it) on any.",
   };
   return {
     type: "object",

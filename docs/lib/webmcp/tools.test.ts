@@ -3,7 +3,12 @@ import { describe, expect, it } from "vitest";
 import { catalog } from "docs/lib/compose/catalog";
 import { closePreview, registerHost, snapshot } from "./preview-store";
 import { run } from "./run";
-import { TOOL_NAMES, agentTools } from "./tools";
+import {
+  DESCRIPTION_MOST,
+  PARAMETER_MOST,
+  TOOL_NAMES,
+  agentTools,
+} from "./tools";
 
 describe("agentTools", () => {
   const tools = agentTools();
@@ -23,6 +28,32 @@ describe("agentTools", () => {
         tool.inputSchema,
       );
       expect(typeof tool.annotations.readOnlyHint).toBe("boolean");
+    }
+  });
+
+  it("keeps each description within what agents take, as Chrome advises", () => {
+    const parameters = (schema: unknown, at: string): [string, string][] => {
+      if (!schema || typeof schema !== "object") return [];
+      const { description } = schema as { description?: unknown };
+      return [
+        ...(typeof description === "string"
+          ? [[at, description] as [string, string]]
+          : []),
+        ...Object.entries(schema).flatMap(([key, value]) =>
+          parameters(value, `${at}.${key}`),
+        ),
+      ];
+    };
+    for (const tool of tools) {
+      expect(
+        tool.description.length,
+        `${tool.name}'s description: say it in ${DESCRIPTION_MOST} characters`,
+      ).toBeLessThanOrEqual(DESCRIPTION_MOST);
+      for (const [at, description] of parameters(tool.inputSchema, tool.name))
+        expect(
+          description.length,
+          `${at}: say it in ${PARAMETER_MOST} characters`,
+        ).toBeLessThanOrEqual(PARAMETER_MOST);
     }
   });
 
