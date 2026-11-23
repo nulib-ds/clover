@@ -148,6 +148,18 @@ resource "aws_cloudfront_function" "rewrite" {
   code    = file("${path.module}/rewrite.js")
 }
 
+# What search engines need to know of the copies agents read: a page's Markdown names its
+# HTML page as canonical, and `llms.txt` and `llms-full.txt` are noindex. The site's
+# address goes before the code, so the function reads the host defined here. See
+# `response-headers.js`.
+resource "aws_cloudfront_function" "response_headers" {
+  name    = "${replace(local.fqdn, ".", "-")}-response-headers"
+  runtime = "cloudfront-js-2.0"
+  comment = "Canonical and noindex headers for agent copies on ${local.fqdn}"
+  publish = true
+  code    = "var SITE = \"https://${local.fqdn}\";\n${file("${path.module}/response-headers.js")}"
+}
+
 data "aws_cloudfront_cache_policy" "optimized" {
   name = "Managed-CachingOptimized"
 }
@@ -186,6 +198,12 @@ resource "aws_cloudfront_distribution" "site" {
     function_association {
       event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.rewrite.arn
+    }
+
+    # Beside the headers policy, which it leaves as it is (CORS and security headers).
+    function_association {
+      event_type   = "viewer-response"
+      function_arn = aws_cloudfront_function.response_headers.arn
     }
   }
 

@@ -116,13 +116,25 @@ describe("suggest", () => {
     const items = suggested(["thumbnails"]).parts.find(
       (part) => part.name === "Items",
     );
-    expect(items?.props.find((prop) => prop.prop === "layout")).toEqual({
+    expect(items?.props?.find((prop) => prop.prop === "layout")).toEqual({
       prop: "layout",
       type: '"slider" | "list" | "grid" | "masonry" | "pager"',
       default: "slider",
       says: expect.any(String),
     });
     expect(items?.codeOnly).toContain("renderItem");
+  });
+
+  it("names what else handles a need, with its docs, beside the parts it places", () => {
+    // Canvas handles a book too, but the layout places Body: Canvas is named, with its docs.
+    const canvas = suggested(["book"]).parts.find(
+      (part) => part.name === "Canvas",
+    );
+    expect(canvas).toEqual({
+      name: "Canvas",
+      says: expect.any(String),
+      docs: expect.stringMatching(/\/docs\/canvas$/),
+    });
   });
 
   it("says what a need it does not know might be", () => {

@@ -27,6 +27,8 @@ import {
   siteTitle,
   siteUrl,
 } from "docs/lib/site";
+import { composeRules } from "docs/lib/compose/rules";
+import { compose } from "docs/lib/compose/write";
 import { CLOVER, agentTools } from "docs/lib/webmcp/tools";
 import cloverPackage from "../../packages/clover/package.json";
 
@@ -226,8 +228,12 @@ export async function homeData() {
   return homeStructuredData({
     features,
     react: cloverPackage.peerDependencies.react,
+    version: cloverVersion,
   });
 }
+
+/** Clover's version, its package's own: `4.12.3`. */
+export const cloverVersion = cloverPackage.version;
 
 /** The languages Clover ships, by tag, from its locales (`src/i18n/locales/`). */
 export const shippedLanguages = () =>
@@ -262,10 +268,69 @@ export const glance = () => {
   ];
 };
 
+/*
+ * The layout `llms.txt` shows composed, over Get started's resource, Northwestern's record
+ * of a street in Corozal (`StartExample.tsx`): a header of its title and summary, the Body
+ * and Items, and an aside of its metadata, as Composing's first example lays them out.
+ */
+const COMPOSED = {
+  resource:
+    "https://api.dc.library.northwestern.edu/api/v2/works/3510cac2-1439-49f0-b30a-09ae19a0643d?as=iiif",
+  parts: [
+    {
+      element: "header",
+      children: [{ part: "Label", props: { as: "h2" } }, { part: "Summary" }],
+    },
+    { part: "Body" },
+    { part: "Items" },
+    {
+      element: "aside",
+      children: [{ part: "Metadata" }, { part: "RequiredStatement" }],
+    },
+  ],
+};
+
 /**
- * `llms.txt` (llmstxt.org): what Clover is, at a glance, then the docs as their menu
- * lists them, each linked to its Markdown, and 3.x and the whole docs in one file under
- * "Optional", which an agent short of room may skip.
+ * How to compose, for agents (2026-11-22): the rules (`compose/rules.ts`), then a layout's
+ * code in both flavors, written as `clover_compose_layout` writes it, and the tools that
+ * write one. A layout that no longer holds fails the build, saying why.
+ */
+export function composeGuide() {
+  const code = (flavor: "react" | "html") => {
+    const written = compose(COMPOSED, flavor);
+    if (!written.ok)
+      throw new Error(
+        `llms.txt's layout no longer holds: ${written.issues.map((issue) => `${issue.at}: ${issue.says}`).join(" ")}`,
+      );
+    return written.code;
+  };
+  return [
+    "## Compose a layout",
+    "",
+    "Use the Viewer where one of its templates fits. For a layout of your own, place Clover's parts, its components and primitives, in a `Root`, among your own markup:",
+    "",
+    ...composeRules().map((rule) => `- ${rule}`),
+    "",
+    "React:",
+    "",
+    "```jsx",
+    code("react"),
+    "```",
+    "",
+    "Web components:",
+    "",
+    "```html",
+    code("html"),
+    "```",
+    "",
+    `Each part's page lists its props, in both flavors. Composing, ${markdownUrl("/docs/composing")}, gives the \`Root\`'s props, and the Glossary, ${markdownUrl("/docs/composing/glossary")}, names every part. In the user's browser, the tools below check a layout and write its code.`,
+  ];
+}
+
+/**
+ * `llms.txt` (llmstxt.org): what Clover is, at a glance, how to compose a layout, then
+ * the docs as their menu lists them, each linked to its Markdown, and 3.x and the whole
+ * docs in one file under "Optional", which an agent short of room may skip.
  */
 export async function llmsTxt() {
   const { sections, earlier } = await docsIndex();
@@ -286,6 +351,8 @@ export async function llmsTxt() {
     "## At a glance",
     "",
     ...glance().map((fact) => `- ${fact}`),
+    "",
+    ...composeGuide(),
     "",
     "## Tools for agents",
     "",

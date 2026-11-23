@@ -1,10 +1,10 @@
 import type { Page } from "@playwright/test";
 
 /**
- * A stand-in for the browser's WebMCP, as the W3C draft has it (October 20, 2026):
- * `document.modelContext.registerTool(tool, { signal })`, keeping each tool until its
- * signal aborts, and refusing a name already taken. Set before the page's own scripts,
- * as a browser's would be.
+ * A stand-in for the browser's WebMCP, as the W3C draft has it (November 19, 2026):
+ * `document.modelContext.registerTool(tool, { signal })`, a promise, keeping each tool
+ * until its signal aborts, and refusing a name already taken. Set before the page's own
+ * scripts, as a browser's would be.
  */
 export async function standIn(page: Page) {
   await page.addInitScript(() => {

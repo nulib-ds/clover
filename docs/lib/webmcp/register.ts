@@ -2,10 +2,12 @@ import type { ToolDefinition, ToolName } from "docs/lib/webmcp/tools";
 
 /**
  * Registering the docs' agent tools with WebMCP (AGENTS.md, "Agent tools (WebMCP)"), as
- * the W3C Web Machine Learning Community Group's draft has it (October 20, 2026):
- * `document.modelContext`, whose `registerTool(tool, { signal })` takes a tool until the
- * signal aborts. Earlier drafts, and the polyfills written to them, put it on `navigator`
- * and gave back a handle to unregister: both are met. Where neither is, nothing happens.
+ * the W3C Web Machine Learning Community Group's draft has it (November 19, 2026, checked
+ * 2026-11-22): `document.modelContext`, whose `registerTool(tool, { signal })` keeps a
+ * tool until the signal aborts, and returns a promise that rejects for a name taken, or
+ * a signal that aborts first. Earlier drafts, and the polyfills written to them, put it on
+ * `navigator` and gave back a handle to unregister: both are met. Where neither is,
+ * nothing happens.
  */
 
 export interface ModelContextLike {

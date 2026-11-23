@@ -39,8 +39,13 @@ export function RelatedLink({
     <li className={styles.card}>
       <Link href={href} className={styles.link}>
         <span className={styles.title}>{title}</span>{" "}
-        {/* A space keeps the two apart in the link's name, "Viewer Its templates…". */}
-        <span className={styles.note}>{note}</span>
+        {/*
+         * A space keeps the two apart in the link's name, "Viewer Its templates…"; the
+         * Markdown puts the note after the link (`build-agent-docs.mjs`).
+         */}
+        <span className={styles.note} data-link-note="">
+          {note}
+        </span>
         <span className={styles.arrow} aria-hidden="true">
           →
         </span>

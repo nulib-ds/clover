@@ -71,9 +71,9 @@ describe("checkLayout", () => {
       ],
     }).map((issue) => issue.says);
     expect(found).toEqual([
-      "Items's `layout` is one of slider, list, grid, masonry, pager.",
-      "Items's `thumbnailSize` is a number, 1 or more.",
-      "Items's `header` is true or false.",
+      "Items' `layout` is one of slider, list, grid, masonry, pager.",
+      "Items' `thumbnailSize` is a number, 1 or more.",
+      "Items' `header` is true or false.",
     ]);
   });
 

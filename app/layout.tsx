@@ -34,7 +34,10 @@ import SiteEffects from "docs/components/SiteEffects";
 import Subheader from "docs/components/Subheader";
 import { pageMetadata, siteTitle, siteUrl } from "docs/lib/site";
 import { tagManagerId } from "docs/lib/tag-manager";
-import { WEBMCP_ORIGIN_TRIAL } from "docs/lib/webmcp/origin-trial";
+import {
+  WEBMCP_EDGE_ORIGIN_TRIAL,
+  WEBMCP_ORIGIN_TRIAL,
+} from "docs/lib/webmcp/origin-trial";
 import { agentTools } from "docs/lib/webmcp/tools";
 
 export const metadata: Metadata = {
@@ -88,13 +91,15 @@ export default async function RootLayout({
           <style>{`.docs-code[data-clipped] pre code.nextra-code > span { display: block !important; } .docs-code > .docs-code-more { display: none; } .docs-code.docs-code.docs-code[data-clips] pre { padding-bottom: var(--clover-space-s, 0.618rem); }`}</style>
         </noscript>
         {/*
-         * Chrome's origin trial for WebMCP, once its token is registered: readers' Chrome
-         * then offers the page `document.modelContext`, for the agent tools (AGENTS.md,
-         * "Agent tools (WebMCP)").
+         * Chrome's and Edge's origin trials for WebMCP, once their tokens are registered:
+         * readers' browsers then offer the page `document.modelContext`, for the agent
+         * tools (AGENTS.md, "Agent tools (WebMCP)"). A browser ignores a token not its own.
          */}
-        {WEBMCP_ORIGIN_TRIAL && (
-          <meta httpEquiv="origin-trial" content={WEBMCP_ORIGIN_TRIAL} />
-        )}
+        {[WEBMCP_ORIGIN_TRIAL, WEBMCP_EDGE_ORIGIN_TRIAL]
+          .filter(Boolean)
+          .map((token) => (
+            <meta key={token} httpEquiv="origin-trial" content={token} />
+          ))}
       </Head>
       <body>
         {process.env.NODE_ENV === "production" && containerId && (
