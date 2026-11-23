@@ -81,28 +81,42 @@ deadline.
     by hand. The job assumes a role by OIDC (`aws-actions/configure-aws-credentials`,
     `vars.AWS_ROLE_ARN`) and syncs `out/` to `vars.DOCS_BUCKET`, hashed assets first and
     kept a year, the rest revalidated, then invalidates
-    `vars.CLOUDFRONT_DISTRIBUTION_ID` where one is set. The build reads
+    `vars.CLOUDFRONT_DISTRIBUTION_ID` where one is set; between the two, it marks the
+    text agents read (`*.md`, `*.txt`) as UTF-8, which the upload's type alone does not
+    say (2026-11-22: without a charset, a client may read "—" as "â€”"). The build reads
     `DOCS_BASE_PATH` (`next.config.mjs`, empty: CloudFront serves the site at its host's
     root) and `NEXT_PUBLIC_SITE_URL` (canonical links, `docs/lib/site.ts`, from
     `vars.DOCS_SITE_URL`). Without them, a build is for
     `clover.iiif.library.northwestern.edu` at its root. The infrastructure itself is
-    `terraform/`. CORS is open to any origin, for the mocks and fixtures, through the
+    `terraform/`, applied by Mat. Its CloudFront runs two functions, each tested in
+    `docs/lib/`: `rewrite.js`, as a request comes in, puts a page's address back to its
+    file, and `response-headers.js`, as the answer goes out, tells search engines how to
+    treat the copies agents read (below). CORS is open to any origin, for the mocks and fixtures, through the
     managed `Managed-CORS-with-preflight-and-SecurityHeadersPolicy` (2026-11-16; the
     policy without preflight sent browsers no CORS header, `terraform/CORS.md`): check it
     with a browser's headers (`Priority: u=1, i`), never `Origin` alone.
   - The site is a static export, so there are no server redirects. URLs that moved
     (3.x pages from `/docs/…` and `/docs/3.x/…`, 4.x pages from `/docs/4.x/…`, the demo, the Panel's page)
-    are sent on by the 404 page (`app/not-found.tsx`, exported as `404.html`, which CloudFront
-    serves for any missing path), from the table in `docs/components/Moved.tsx`, query
-    and hash kept. Move a page
-    again, and add its old URL there. A 3.x page whose name 4.x now uses (`viewer`,
-    `map`) shows the 4.x page, which links to its 3.x version.
+    are in one table, `docs/lib/moved.mjs`, query and hash kept. Each old address a built
+    page answers for has a page of its own, written after the build
+    (`scripts/build-moved-pages.mjs`; 2026-11-22): an instant redirect (a script, then a
+    meta refresh, which search engines take as permanent) with the new page's canonical
+    address, so the old address's links count for the new one, where a 404 lost them (the
+    iiif.io recipes' `/docs/viewer/demo?iiif-content=…` most of all). Any other is sent
+    on by the 404 page (`app/not-found.tsx`, exported as `404.html`, which CloudFront
+    serves for any missing path), as is a path whose last segment has a dot (`/docs/3.x`),
+    which CloudFront serves as a file. Move a page again, and add its old URL there. A
+    3.x page whose name 4.x now uses (`viewer`, `map`) shows the 4.x page, which links to
+    its 3.x version.
   - How to compose a layout (`Root`, the parts, the property parts, the information
     panel's `Tab`s, `Split`, hooks, renderers) lives on one page,
     `content/docs/composing.mdx` ("Composing layouts", "Composing" in the menu). Composing is a
     folder (Mat, 2026-11-04: "break this out into two more pages and have the composing
     page be more of a playground like Viewer is for templates"): its index, Composing,
-    the live example and the `Root`'s props, then Next; under it Glossary
+    the live example, What goes where (what goes inside what, and what works alone, a
+    sentence each; 2026-11-22, so a person and an agent can tell how a layout nests
+    before they try one: `llms.txt` says the same, from `docs/lib/compose/rules.ts`), and
+    the `Root`'s props, then Next; under it Glossary
     (`/docs/composing/glossary`: Core components, every part in the Components menu with
     the Primitives a group of its rows, drawn from the menu and each page's description
     by `CoreComponents.tsx`, UI components (Mat, 2026-11-04: "call this UI components
@@ -1259,8 +1273,11 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     already holds (`docs/lib/agents.ts`: the docs' menu, each page's front matter, and
     `figures.ts`), and, the site being a static export, each is a file:
     `llms.txt` (`app/llms.txt/route.ts`; what Clover is, at a glance with its figures,
-    then the docs as their menu lists them, each linked to its Markdown, 3.x under
-    "Optional"), `sitemap.xml` (`app/sitemap.ts`, every page but the unlisted and
+    then how to compose a layout (`composeGuide`, 2026-11-22: the rules of
+    `docs/lib/compose/rules.ts`, read from the catalog where it says them, and a layout's
+    code in both flavors, written by `clover_compose_layout`'s own writer, the build
+    failing, saying why, if the layout no longer holds), then the docs as their menu lists
+    them, each linked to its Markdown, 3.x under "Optional"), `sitemap.xml` (`app/sitemap.ts`, every page but the unlisted and
     `/test/`, with its file's last commit's time, from Git, `docs/lib/last-changed.ts`, as
     the pages' `dateModified` is: Nextra's own `timestamp` was not always the file's, and
     the deploy fetches the whole history for it) and `robots.txt` (`app/robots.ts`; a crawler reads
@@ -1269,11 +1286,24 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     Markdown beside its HTML (`/docs/items.md`, converted from the built page, its
     examples' code and tables included, each fence with its language, from its block's
     `data-lang`, and each link's words without the space Nextra's arrow left, front
-    matter giving its title, description, address and version) and `llms-full.txt` (Clover 4's pages, in `llms.txt`'s order),
-    and fails the build if `llms.txt` links to a page it could not write. Each page's
+    matter giving its title, description, address, version and the docs' index,
+    `llms.txt`) and `llms-full.txt` (Clover 4's pages, in `llms.txt`'s order),
+    and fails the build if `llms.txt` links to a page it could not write. So an agent can
+    browse them as it began, in Markdown (2026-11-22: "docs that are easy for agents to
+    browse and utilize … a huge priority"), a link to a docs page goes to its Markdown
+    (`llms.txt` for the homepage), its anchor kept, but a link with a query (a demo); a
+    link card (`Related.tsx`) is its title linked, then its note; a table is unpadded,
+    its columns' padding having been a third of `llms-full.txt`; and an editor's language
+    over its code (`data-code-lang`) is left to the fence. Search engines are told how to
+    treat these copies as CloudFront answers (`terraform/response-headers.js`,
+    2026-11-22): a page's Markdown names its HTML page as canonical, in a `Link` header,
+    so what links to it counts for the page; `llms.txt` and `llms-full.txt`, which no page
+    mirrors, are `noindex`. Neither keeps an agent out. Each page's
     head links its Markdown (`alternate`, `text/markdown`; the homepage's is `llms.txt`).
     The homepage's structured data is Clover itself (`homeData`: the site, its publisher,
-    and the software, its features its parts' descriptions), and its HTML lists the
+    and the software, its features its parts' descriptions, its version the package's and
+    its npm page `sameAs` and `installUrl`), each page's an article with the share card's
+    picture and the publisher as author too, and its HTML lists the
     parts (`PartsIndex.tsx`, drawn on the server into the parts' placeholder, out of
     sight and out of search) until the live parts take its place, for a reader without
     the page's scripts. Agent-facing words say what Clover does as released
@@ -1788,9 +1818,17 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   a new input or a new answer; a new tool needs Mat's agreement.
 - Every agent on the page reads every tool's schema, so each stays small: part, template
   and capability names, never every prop (props come back from `clover_suggest_layout`, or
-  in `clover_compose_layout`'s errors). Answers are bounded: lists name things, detail
-  comes when asked for. A tool answers in plain data, which WebMCP serializes as JSON, a
-  failure too (`ok: false`, and what is wrong), never a thrown error (`run.ts`).
+  in `clover_compose_layout`'s errors). Each description says what its tool is for, when
+  to call it and the order the three go in (suggest, compose, preview), and a layout's
+  shape and how it nests (2026-11-22), within what Chrome advises an agent take (its
+  "Secure tools" guide: 500 characters a description, 150 a parameter's; past them,
+  agents' guardrails may cut them), held by `tools.test.ts` (`DESCRIPTION_MOST`,
+  `PARAMETER_MOST`). Answers are clear before they are small (2026-11-22: "clarity and
+  efficiency", over size): a suggestion gives each part it places whole, every prop with
+  what it does, so one call is enough to set them, and names what else handles a need
+  with its docs; it never says a thing twice (a IIIF property's capability is its part's).
+  A tool answers in plain data, which WebMCP serializes as JSON, a failure too (`ok:
+false`, and what is wrong, how to fix it), never a thrown error (`run.ts`).
 - What a tool says comes from what Clover already states: the element specs, the docs'
   menus, `sizes.json` and the docs' own code writer (`live-code.ts`), so its code, in
   either flavor, is what a reader copies from the docs, and its sizes are the build's
@@ -1827,20 +1865,27 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   layout that throws as it is drawn says so rather than taking the page with it. Its
   titles, the Viewer's too, take the level one below the heading its frame sits under
   (`levelUnder`), as the docs' demos take theirs (1.3.1), and the answer says which.
-- WebMCP is as the W3C Web Machine Learning Community Group's draft of 2026-10-20 has it,
-  checked again on 2026-10-26 (`register.ts`, and the e2e suite's stand-in,
-  `e2e/specs/stand-in.ts`; check both against a later draft): `document.modelContext`, on
-  `navigator` in earlier drafts, so both are looked for, whose
-  `registerTool(tool, { signal })` keeps a tool until the signal aborts and refuses a name
-  already taken (the page then leaves that tool out, quietly). A name is 1 to 128 of ASCII
-  letters, digits, `_`, `-` and `.`, unique in a document (`tools.test.ts`). It needs a
-  secure context, and its `tools` Permissions Policy is `'self'` by default. Chrome offers
-  it in an origin trial (149 to 156; Edge 147 behind a flag): its token,
-  `WEBMCP_ORIGIN_TRIAL` (`docs/lib/webmcp/origin-trial.ts`), is empty until Mat registers
-  one (https://developer.chrome.com/origintrials) for the origin the site is served from
-  (`https://clover.iiif.library.northwestern.edu`), and every page then gives it as
-  `<meta http-equiv="origin-trial">` (`app/layout.tsx`). A token works only on its origin, so a
-  move to another host needs one of its own.
+- WebMCP is as the W3C Web Machine Learning Community Group's draft of 2026-11-19 has it,
+  checked on 2026-11-22 (`register.ts`, and the e2e suite's stand-in,
+  `e2e/specs/stand-in.ts`; check both against a later draft): `document.modelContext`
+  (`navigator`'s left the draft on 2026-05-27; both are looked for, for the polyfills
+  written to it), whose `registerTool(tool, { signal })` returns a promise, keeps a tool
+  until the signal aborts and rejects a name already taken (the page then leaves that tool
+  out, quietly). A name is 1 to 128 of ASCII letters, digits, `_`, `-` and `.`, unique in
+  a document (`tools.test.ts`). It needs a secure context, and its `tools` Permissions
+  Policy is `'self'` by default. Its hints are `readOnlyHint` and `untrustedContentHint`
+  (`consequentialHint` and `debugging` besides, which no tool here needs); a tool's
+  `outputSchema` is optional, and none is given, as every answer, a failure too, would have
+  to hold to it, and every agent would read it. The declarative API (a form's `toolname`)
+  left the draft on 2026-10-08. Chrome offers WebMCP in an origin trial (149 to 162, as
+  extended on 2026-09-28), and Edge in its own (to 2027-03-30): their tokens,
+  `WEBMCP_ORIGIN_TRIAL` and `WEBMCP_EDGE_ORIGIN_TRIAL`
+  (`docs/lib/webmcp/origin-trial.ts`), are empty until Mat registers them
+  (https://developer.chrome.com/origintrials, and Microsoft's own portal) for the origin
+  the site is served from (`https://clover.iiif.library.northwestern.edu`), and every page
+  then gives each as `<meta http-equiv="origin-trial">` (`app/layout.tsx`). A token works
+  only on its origin and until it expires, so a move to another host, or a trial
+  extended, needs one of its own.
 - Built to grow (Mat, 2026-10-26). When Clover grows, the tests named fail until each step
   is done:
   - A new part: its element spec, as every part has, puts it in the catalog. Then a page in
