@@ -103,6 +103,29 @@ jobs:
         env:
           DOCS_BUCKET: ${{ vars.DOCS_BUCKET }}
 
+      # The text agents read (`llms.txt`, `llms-full.txt`, each page's Markdown) and the
+      # mocks' transcripts, said to be UTF-8: the upload names their type alone, and a
+      # client given `text/plain` or `text/markdown` without a charset may read them as
+      # Latin-1, so "—" comes out "â€”".
+      - name: Mark text files as UTF-8
+        run: |
+          aws s3 cp out "s3://${DOCS_BUCKET}" \
+            --recursive \
+            --no-progress \
+            --exclude "*" \
+            --include "*.md" \
+            --content-type "text/markdown; charset=utf-8" \
+            --cache-control "public, max-age=0, must-revalidate"
+          aws s3 cp out "s3://${DOCS_BUCKET}" \
+            --recursive \
+            --no-progress \
+            --exclude "*" \
+            --include "*.txt" \
+            --content-type "text/plain; charset=utf-8" \
+            --cache-control "public, max-age=0, must-revalidate"
+        env:
+          DOCS_BUCKET: ${{ vars.DOCS_BUCKET }}
+
       - name: Invalidate CloudFront
         if: env.DISTRIBUTION_ID != ''
         run: |
