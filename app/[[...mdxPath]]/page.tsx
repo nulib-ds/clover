@@ -3,7 +3,7 @@ import { generateStaticParamsFor, importPage } from "nextra/pages";
 import React from "react";
 
 import { EarlierVersion } from "docs/components/EarlierVersion";
-import { homeData, trailOf } from "docs/lib/agents";
+import { cloverVersion, homeData, trailOf } from "docs/lib/agents";
 import { lastChanged } from "docs/lib/last-changed";
 import {
   earlierDescription,
@@ -96,6 +96,7 @@ export default async function Page(props: Props) {
           route,
           modified: modifiedOf(metadata),
           trail: await trailOf(route),
+          version: cloverVersion,
         });
   return (
     <Wrapper

@@ -360,7 +360,8 @@ export function PartsEditor<K extends string>({
       >
         <div className={styles.frame}>
           <div className={styles.head}>
-            <span>{language.toUpperCase()}</span>
+            {/* Left out of the Markdown, whose fence names it (`build-agent-docs.mjs`). */}
+            <span data-code-lang="">{language.toUpperCase()}</span>
             {picked && (
               <div
                 role="group"

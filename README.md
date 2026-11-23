@@ -114,6 +114,10 @@ export default function Item() {
 </clover-root>
 ```
 
+[Composing layouts](https://clover.iiif.library.northwestern.edu/docs/composing) says what
+goes where. For AI agents, the docs are Markdown too, starting from
+[`llms.txt`](https://clover.iiif.library.northwestern.edu/llms.txt).
+
 ## Contributing
 
 Please follow the [contributing guidelines](./.github/CONTRIBUTING.md), and branch from

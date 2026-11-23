@@ -91,6 +91,9 @@ const publisher = {
   url: "https://www.library.northwestern.edu/",
 };
 
+/* Clover 4's page on npm, where it is installed from. */
+const npmPage = "https://www.npmjs.com/package/@nulib/clover";
+
 /*
  * The site's name as search results show it over a page's title: its publisher's (Mat,
  * 2026-11-01), "Clover IIIF" the name Google may take instead (`alternateName`). Google
@@ -242,6 +245,7 @@ export function structuredData({
   route,
   modified,
   trail = [],
+  version,
 }: {
   title: string;
   description: string;
@@ -250,6 +254,8 @@ export function structuredData({
   modified?: string;
   /** The folders the docs' menu holds the page in, outermost first (`trailOf`). */
   trail?: Crumb[];
+  /** Clover's version, as its package gives it: `4.12.3`. */
+  version?: string;
 }) {
   const earlier = isEarlierVersion(route);
   const address = (to: string) => `${siteUrl}${to === "/" ? "" : to}`;
@@ -278,6 +284,9 @@ export function structuredData({
           creativeWorkStatus: "Deprecated",
           abstract: earlierAdvice,
         }),
+        // What search engines ask of an article: its picture and who wrote it.
+        image: shareImage.url,
+        author: { "@id": publisher["@id"] },
         isPartOf: {
           "@type": "WebSite",
           name: siteName,
@@ -296,8 +305,9 @@ export function structuredData({
           : {
               "@type": "SoftwareSourceCode",
               name: "@nulib/clover",
-              version: "4",
+              version: version ?? "4",
               codeRepository: "https://github.com/nulib-ds/clover",
+              sameAs: npmPage,
             },
       },
       {
@@ -321,10 +331,13 @@ export function structuredData({
 export function homeStructuredData({
   features,
   react,
+  version,
 }: {
   features: string[];
   /** The React it runs with, as its package asks for it (`peerDependencies`). */
   react: string;
+  /** Clover's version, as its package gives it: `4.12.3`. */
+  version: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -349,8 +362,9 @@ export function homeStructuredData({
         alternateName: "@nulib/clover",
         description: aboutClover,
         url: siteUrl,
-        version: "4",
+        version,
         codeRepository: "https://github.com/nulib-ds/clover",
+        sameAs: [npmPage, "https://github.com/nulib-ds/clover"],
         programmingLanguage: "TypeScript",
         runtimePlatform: ["React", "Web Components"],
         license: "https://github.com/nulib-ds/clover/blob/main/LICENSE",
@@ -370,6 +384,8 @@ export function homeStructuredData({
           "@type": "SoftwareApplication",
           name: siteTitle,
           applicationCategory: "DeveloperApplication",
+          softwareVersion: version,
+          installUrl: npmPage,
           operatingSystem: "Any, in a web browser",
           softwareRequirements: `React ${react}, or none for the web components`,
           featureList: features,

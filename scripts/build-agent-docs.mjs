@@ -40,7 +40,8 @@ const find = (tree, test) => {
 /*
  * What a page shows for a reader, not the page's frame: the controls (buttons, the tabs'
  * list, whose panels each keep a heading of their tab's name, every panel kept though only
- * one shows), heading anchors, icons, scripts and what is hidden.
+ * one shows), heading anchors, icons, scripts and what is hidden, and an editor's
+ * language over its code (`data-code-lang`), which the code's fence names.
  */
 const isFrame = (node) =>
   ["script", "style", "svg", "button", "noscript", "template"].includes(
@@ -50,6 +51,7 @@ const isFrame = (node) =>
   (node.properties?.hidden !== undefined &&
     node.properties?.role !== "tabpanel") ||
   node.properties?.ariaHidden === "true" ||
+  node.properties?.dataCodeLang !== undefined ||
   classes(node).includes("subheading-anchor");
 
 /* Each of an example's flavors, named over its code: "React", "Web components". */
@@ -182,6 +184,19 @@ function clean(node) {
     (child) =>
       child.type !== "comment" && (child.type !== "element" || !isFrame(child)),
   );
+  /*
+   * A link card (`Related.tsx`): its title the link's words, and its note after the link,
+   * "[Glossary](…): Every component…", never run into the title.
+   */
+  node.children = node.children.flatMap((child) => {
+    if (child.type !== "element" || child.tagName !== "a") return [child];
+    const note = child.children.find(
+      (each) => each.properties?.dataLinkNote !== undefined,
+    );
+    if (!note) return [child];
+    child.children = child.children.filter((each) => each !== note);
+    return [child, { type: "text", value: ": " }, ...note.children];
+  });
   // A link's words end where its words do: not on the space before Nextra's arrow for
   // another site, which is gone with its icon.
   if (node.tagName === "a")
@@ -202,6 +217,21 @@ function clean(node) {
   node.children.forEach(clean);
 }
 
+/*
+ * A link to a page of the docs goes to its Markdown, so an agent reads on from page to
+ * page as it began, in Markdown, a section's anchor kept (2026-11-22); the homepage's is
+ * `llms.txt`, the docs' index. Never a link with a query, which opens a resource in a
+ * demo, nor one to anything but a page.
+ */
+const published = new Set(urls.map((url) => url.replace(/\/+$/, "")));
+function asMarkdown(href) {
+  const [address, hash] = href.split("#");
+  const page = address.replace(/\/+$/, "");
+  if (address.includes("?") || !published.has(page)) return href;
+  if (page === siteUrl) return `${siteUrl}/llms.txt`;
+  return `${page}.md${hash ? `#${hash}` : ""}`;
+}
+
 /* Addresses as an agent can follow them: absolute, on the site, under its path. */
 const underBase = (value) =>
   Boolean(basePath) &&
@@ -218,6 +248,8 @@ function absolute(main, pageUrl) {
         node.properties[key] =
           `${origin}${underBase(value) ? "" : basePath}${value}`;
     }
+    if (node.tagName === "a" && typeof node.properties?.href === "string")
+      node.properties.href = asMarkdown(node.properties.href);
   }
 }
 
@@ -230,7 +262,11 @@ const unescape = (text) =>
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 
-/** A page as Markdown: its front matter (title, description, address, version), then its content. */
+/**
+ * A page as Markdown: its front matter (title, description, its address, the version it
+ * documents, and the docs' index, for an agent that came straight to it), then its
+ * content.
+ */
 function markdownOf(html, url) {
   const tree = fromHtml(html);
   // A page has one `main`, Nextra's; a 3.x page's has no `data-pagefind-body`, being out
@@ -241,7 +277,11 @@ function markdownOf(html, url) {
   absolute(main, url);
   const body = toMarkdown(toMdast(main), {
     bullet: "-",
-    extensions: [gfmToMarkdown()],
+    /*
+     * Tables unpadded: padding each column to its widest cell was a third of
+     * `llms-full.txt`, spaces an agent reads for nothing (2026-11-22).
+     */
+    extensions: [gfmToMarkdown({ tablePipeAlign: false })],
     fences: true,
     rule: "-",
   }).trim();
@@ -261,6 +301,7 @@ function markdownOf(html, url) {
     description && `description: ${JSON.stringify(description)}`,
     `url: ${url}`,
     `version: ${earlier ? '"3.x, deprecated, superseded by Clover 4"' : '"4"'}`,
+    `index: ${siteUrl}/llms.txt`,
     "---",
   ].filter(Boolean);
   return { front: front.join("\n"), body, title };
@@ -285,8 +326,10 @@ for (const url of urls) {
 }
 
 /*
- * `llms-full.txt`: `llms.txt`'s head (what Clover is), then each of Clover 4's pages it
- * lists, before its "Optional" section, in its order, each with its address under its title.
+ * `llms-full.txt`: `llms.txt`'s head, what Clover is, and each section of it that is no
+ * list of pages (At a glance, Compose a layout, the tools), so an agent that reads this
+ * file alone knows them too (2026-11-22); then each of Clover 4's pages it lists, before
+ * its "Optional" section, in its order, each with its address under its title.
  */
 const llms = read("llms.txt");
 const [main] = llms.split(/^## Optional$/m);
@@ -298,7 +341,11 @@ if (missing.length)
   throw new Error(
     `build-agent-docs: llms.txt links to pages with no Markdown: ${missing.join(", ")}`,
   );
-const head = llms.split(/^## /m)[0].trim();
+const head = llms
+  .split(/^(?=## )/m)
+  .filter((section) => !/^- \[/m.test(section))
+  .join("")
+  .trim();
 const pages = [...main.matchAll(/\]\((https?:\/\/[^)\s]+\.md)\)/g)].map((m) =>
   written.get(m[1]),
 );

@@ -26,6 +26,20 @@ the code, or change a value, and the example follows.
 
 <ComposeExample />
 
+## What goes where
+
+- `Root` loads the IIIF resource you give it as `iiifContent` and holds the current view.
+  Every other component goes inside it, as deep in your markup as you like.
+- `Body` shows the current Canvas, Timeline or Scene. It is 60vh tall unless you set
+  `--clover-body-height` or give it a `style`.
+- `Items` moves between the views, and `Panel` gathers the resource's sections, such as
+  About, Contents, Search and Annotations.
+- `Tab` goes inside a `Panel`, and `SplitPane` and `SplitHandle` go inside a `Split`.
+- Each [primitive](/docs/primitives) shows one IIIF property of the Manifest, or of the
+  current Canvas with `of` set to <span data-code-flavor="both">`canvas`</span>.
+- `Canvas`, `Timeline`, `Scene`, `Map` and `Items` also work on their own, outside a
+  `Root`, each given its own `iiifContent`.
+
 ## `Root`
 
 | Prop                      | Type                              | Description                                                                                                                |

@@ -2,7 +2,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { folderKeys } from "./agents";
+import { composeGuide, folderKeys } from "./agents";
 
 const DOCS = resolve(__dirname, "../../content/docs");
 
@@ -24,5 +24,17 @@ describe("the docs' folders", () => {
         listed,
         `content/docs/${folder}/ has a menu: add it to FOLDERS in docs/lib/agents.ts`,
       ).toContain(folder);
+  });
+});
+
+describe("llms.txt's guide to composing", () => {
+  // `composeGuide` throws, saying why, when its layout no longer holds.
+  it("writes its layout in both flavors, as the compose tool would", () => {
+    const guide = composeGuide().join("\n");
+    expect(guide).toMatch(/^## Compose a layout$/m);
+    expect(guide).toContain("<Clover.Root iiifContent=");
+    expect(guide).toContain('<clover-root\n  iiif-content="');
+    // What goes inside what, read from the catalog.
+    expect(guide).toContain("`Tab` goes inside `Panel`");
   });
 });

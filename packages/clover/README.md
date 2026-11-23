@@ -120,6 +120,8 @@ If you serve Clover's files yourself, copy the whole `dist/web-components` folde
 - [Styling](https://clover.iiif.library.northwestern.edu/docs/styling): colors, sizes and classes.
 - [Glossary](https://clover.iiif.library.northwestern.edu/docs/composing/glossary): every
   component and helper, and the package's structure.
+- [`llms.txt`](https://clover.iiif.library.northwestern.edu/llms.txt): the docs for AI
+  agents, as Markdown, starting with how to compose a layout.
 
 Clover 3.x, `@samvera/clover-iiif`, is deprecated and no longer maintained. Its docs are
 kept on the same site, under
