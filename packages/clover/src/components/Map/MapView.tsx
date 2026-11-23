@@ -43,7 +43,7 @@ import { type CloverRequest, sendsCredentials } from "../../core/request";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import useWithinFullscreen from "../../hooks/useWithinFullscreen";
 import { GestureHint, useGestureHint } from "../../ui/GestureHint";
-import { pageWheeling, watchWheels } from "../../lib/pointer";
+import { wheelZooms } from "../../lib/pointer";
 import { join } from "../../lib/classnames";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../i18n/useRootLanguage";
@@ -108,12 +108,18 @@ export interface MapProps
    * default Clover brings it, from a `blob:` URL.
    */
   workerUrl?: string;
-  /** Zoom with the wheel or trackpad. Default false, so an embedded map never traps page scroll. */
+  /**
+   * A plain wheel zooms too, not only one with Ctrl or ⌘ held (a trackpad's pinch comes
+   * so), as the Canvas's `options.gestures.scrollToZoom`. Default false, so an embedded map
+   * never traps page scroll.
+   */
   scrollZoom?: boolean;
   /**
-   * The page keeps its own gestures: a plain wheel and one finger's drag scroll the page
-   * and say how to move the map (Ctrl or ⌘ with the wheel, two fingers). Default false;
-   * off in full screen, and wherever `scrollZoom` is on.
+   * The page keeps its own gestures, as an embedded Google map does, and as the Canvas's
+   * `options.gestures.cooperative`: one finger's drag scrolls the page, and a hint says
+   * to use two. A mouse's drag still pans, and a plain wheel scrolls the page, as it does
+   * without. In full screen, the wheel and a finger's drag are the map's. Default true;
+   * false, a finger's drag pans.
    */
   cooperative?: boolean;
   /**
@@ -392,7 +398,7 @@ export function MapView({
   styleUrl,
   workerUrl,
   scrollZoom = false,
-  cooperative = false,
+  cooperative = true,
   zoom,
   onSelect,
   request,
@@ -1632,36 +1638,53 @@ export function MapView({
       else handler.disable();
     };
     turn(map.dragPan, navigable);
-    // Cooperative, a wheel zooms with Ctrl or ⌘ held, and in full screen without.
-    turn(map.scrollZoom, navigable && (scrollZoom || cooperative));
+    // The wheel, MapLibre's to zoom with once Clover's rule lets it by (below).
+    turn(map.scrollZoom, navigable);
+    /*
+     * Cooperative, one finger's drag is the page's, and two fingers move the map: MapLibre's
+     * own cooperative gestures, but for the wheel, whose rule is the Canvas's and the
+     * Scene's (`wheelUse`), which MapLibre's own would block without Ctrl or ⌘.
+     */
+    if (map.cooperativeGestures)
+      map.cooperativeGestures.isBypassed = () => true;
     turn(
       map.cooperativeGestures,
-      navigable && cooperative && !scrollZoom && !withinFullscreen,
+      navigable && cooperative && !withinFullscreen,
     );
     turn(map.boxZoom, navigable);
     turn(map.doubleClickZoom, navigable);
     turn(map.keyboard, navigable);
     turn(map.touchZoomRotate, navigable);
     map.getCanvas().tabIndex = navigable ? 0 : -1;
+  }, [map, navigable, cooperative, withinFullscreen]);
+
+  /*
+   * A wheel over the map does what it does over a Canvas and a Scene (`wheelZooms`): with
+   * Ctrl or ⌘ held it zooms, plain it scrolls the page. One left to the page never
+   * reaches MapLibre, so it never zooms.
+   */
+  useEffect(() => {
+    const container: HTMLElement | undefined = map?.getContainer?.();
+    if (!container || !navigable) return;
+    const wheel = (event: WheelEvent) => {
+      const fullscreen = withinFullscreen;
+      if (!wheelZooms(event, { scrollZoom, cooperative, fullscreen }))
+        event.stopPropagation();
+    };
+    container.addEventListener("wheel", wheel, { capture: true });
+    return () =>
+      container.removeEventListener("wheel", wheel, { capture: true });
   }, [map, navigable, scrollZoom, cooperative, withinFullscreen]);
 
-  // MapLibre's own words for a gesture it left to the page are hidden (`Map.css`).
+  // MapLibre's own words for a finger's drag it left to the page are hidden (`Map.css`).
   useEffect(() => {
     if (!map || typeof map.on !== "function") return;
-    watchWheels();
-    const blocked = (event: {
-      gestureType?: string;
-      originalEvent?: Event;
-    }) => {
-      if (event.gestureType === "touch_pan") return showHint("touch");
-      const wheel = event.originalEvent;
-      if (!(wheel instanceof WheelEvent) || !box) return;
-      if (Math.abs(wheel.deltaY) < Math.abs(wheel.deltaX)) return;
-      if (!pageWheeling(wheel, box)) showHint("wheel");
+    const blocked = (event: { gestureType?: string }) => {
+      if (event.gestureType === "touch_pan") showHint("touch");
     };
     map.on("cooperativegestureprevented", blocked);
     return () => map.off?.("cooperativegestureprevented", blocked);
-  }, [map, box, showHint]);
+  }, [map, showHint]);
 
   // Whether it is ready, to what holds it as it changes, and not as it goes (`onReady`).
   const told = useRef(onReady);

@@ -25,23 +25,22 @@ export function useGestureHint(): [
   return [kind, show];
 }
 
-const isMac = () =>
-  typeof navigator !== "undefined" &&
-  /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-
 /**
- * How to move a view whose page keeps the wheel and a finger's drag (`cooperative`), over
- * the Body as the gesture is left to the page. Its live region is always there, so the
- * words are announced as they come (WCAG 4.1.3).
+ * How to move a view whose page keeps a finger's drag (`cooperative`): two fingers, over
+ * the Body as the gesture is left to the page, on a touch screen alone (Mat, 2026-11-23:
+ * "scroll to zoom overlay should only show on mobile"). Its live region is always there,
+ * so the words are announced as they come (WCAG 4.1.3).
  */
 export function GestureHint({ kind }: { kind: GestureHintKind | null }) {
   const { t, langOf } = useCloverTranslation();
-  const key = kind === "touch" ? "gestureHintTouch" : "gestureHintWheel";
   return (
     <div className="clover-gesture-hint" role="status">
       {kind && (
-        <p className="clover-gesture-hint-text" {...languageProps(langOf(key))}>
-          {t(key, { key: isMac() ? "⌘" : "Ctrl" })}
+        <p
+          className="clover-gesture-hint-text"
+          {...languageProps(langOf("gestureHintTouch"))}
+        >
+          {t("gestureHintTouch")}
         </p>
       )}
     </div>

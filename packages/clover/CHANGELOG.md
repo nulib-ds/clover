@@ -11,6 +11,25 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **The Canvas, the Map and the Scene take the same gestures, an embedded Google map's.**
+  On a touch screen, one finger's drag scrolls the page past them, and two fingers move
+  the view (pan it, or turn the Scene's models) and pinch to zoom; a hint says so ("Use
+  two fingers to move the view"). A plain wheel scrolls the page with no hint, now even
+  where `cooperative` is on, and Ctrl or ⌘ with the wheel, or a trackpad's pinch, zooms
+  each of them, the Map and the Scene with ⌘ too. A mouse's drag still moves the view,
+  a double tap or double click zooms in, two fingers' tap zooms out, and in full screen
+  one finger and a plain wheel are the view's. Cooperative gestures are now on by
+  default: the Canvas's and the Scene's `options.gestures.cooperative`, and the Map's
+  `cooperative` (`cooperative="false"` on `clover-map`), give one finger's drag back to
+  the view, with no hint. The Map's `scrollZoom` now governs only the wheel: one finger's
+  drag stays the page's while it is on. The Scene takes `options.gestures`
+  (`cooperative`, `scrollToZoom`), which `Body` hands it from the Canvas's options.
+  The Scene's budgets rise to the next 50 B over what is measured, for its double tap,
+  two fingers' turn and tap, and the hint: its initial JS 20,100 B gzip, and to first
+  view 30,550 B (`build/size-budget.json`).
+
 ### Security
 
 - **The web components bundle Preact 10.27.3.** Every 4.x release until now bundled

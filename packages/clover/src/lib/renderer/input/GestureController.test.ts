@@ -54,7 +54,12 @@ describe("GestureController", () => {
   ])(
     "a %s drag with flickEnabled %s is eased: %s",
     (pointerType, flickEnabled, eased) => {
-      const { element, target } = setup({ ...DEFAULT_GESTURES, flickEnabled });
+      // Not cooperative, so a finger's drag pans.
+      const { element, target } = setup({
+        ...DEFAULT_GESTURES,
+        flickEnabled,
+        cooperative: false,
+      });
       const at = (type: string, x: number, timeStamp: number) => {
         const event = Object.assign(
           new MouseEvent(type, { clientX: x, clientY: 50, button: 0 }),
@@ -126,6 +131,12 @@ describe("GestureController", () => {
       });
     });
 
+    // As an embedded Google map, the Map and the Scene are (Mat, 2026-11-23).
+    it("is on by default", () => {
+      const { element } = setup();
+      expect(element.hasAttribute("data-cooperative")).toBe(true);
+    });
+
     it("marks the Body so a finger's drag is the page's, and unmarks it when off", () => {
       const { element, controller } = cooperative();
       expect(element.hasAttribute("data-cooperative")).toBe(true);
@@ -133,27 +144,12 @@ describe("GestureController", () => {
       expect(element.hasAttribute("data-cooperative")).toBe(false);
     });
 
-    it("leaves a plain wheel to the page and says how to zoom", () => {
+    // Mat, 2026-11-23: "scroll to zoom overlay should only show on mobile".
+    it("leaves a plain wheel to the page, with no hint", () => {
       const { element, target } = cooperative();
       const event = wheel(element, { deltaY: 100 });
       expect(event.defaultPrevented).toBe(false);
       expect(target.zoomBy).not.toHaveBeenCalled();
-      expect(hinted(target)).toEqual(["wheel"]);
-    });
-
-    it("says nothing as the page's scroll carries the view under a resting pointer", () => {
-      const { element, target } = cooperative();
-      wheel(document.body, { deltaY: 100 });
-      wheel(element, { deltaY: 100 }, 16);
-      expect(hinted(target)).toEqual([]);
-      // A scroll that starts over the view still says it.
-      wheel(element, { deltaY: 100 });
-      expect(hinted(target)).toEqual(["wheel"]);
-    });
-
-    it("says nothing for a sideways wheel", () => {
-      const { element, target } = cooperative();
-      wheel(element, { deltaX: 100 });
       expect(hinted(target)).toEqual([]);
     });
 
@@ -250,6 +246,32 @@ describe("GestureController", () => {
       touch(element, "pointermove", 150, 2);
       expect(target.zoomBy).toHaveBeenCalled();
       expect(hinted(target)).toEqual([]);
+    });
+
+    it.each([[true], [false]])(
+      "zooms out on two fingers' tap, about their middle (cooperative %s)",
+      (on) => {
+        const { element, target } = setup({
+          ...DEFAULT_GESTURES,
+          cooperative: on,
+        });
+        touch(element, "pointerdown", 50, 1);
+        touch(element, "pointerdown", 100, 2);
+        touch(element, "pointerup", 100, 2);
+        touch(element, "pointerup", 50, 1);
+        expect(target.zoomBy).toHaveBeenCalledWith(0.5, { x: 75, y: 50 }, true);
+      },
+    );
+
+    it("takes two fingers that move apart as a pinch, not a tap", () => {
+      const { element, target } = cooperative();
+      touch(element, "pointerdown", 50, 1);
+      touch(element, "pointerdown", 100, 2);
+      touch(element, "pointermove", 150, 2);
+      touch(element, "pointerup", 150, 2);
+      touch(element, "pointerup", 50, 1);
+      const calls = (target.zoomBy as ReturnType<typeof vi.fn>).mock.calls;
+      expect(calls.some(([factor]) => factor === 0.5)).toBe(false);
     });
   });
 
@@ -392,7 +414,11 @@ describe("GestureController", () => {
   ])(
     "a %s drag on the picture's text pans: %s, as a mouse selects it",
     (pointerType, pans) => {
-      const { element, target } = setup();
+      // Not cooperative, so a finger's drag pans.
+      const { element, target } = setup({
+        ...DEFAULT_GESTURES,
+        cooperative: false,
+      });
       const layer = document.createElement("div");
       layer.dataset.cloverCanvasText = "";
       const run = document.createElement("span");

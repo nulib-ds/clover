@@ -191,9 +191,10 @@
 }
 
 /*
- * Cooperative (`gestures.cooperative`): a finger's drag scrolls the page, and
- * two fingers move the view (`GestureController`). In full screen there is no page to
- * scroll, so every drag is the view's.
+ * Cooperative (`gestures.cooperative`, on by default), a Canvas's or a Scene's view: a
+ * finger's drag scrolls the page, and two fingers move the view (`GestureController`,
+ * `Scene/gestures.ts`). A mouse's drag is not a touch action, so it still moves it. In
+ * full screen there is no page to scroll, so every drag is the view's.
  */
 .clover-canvas-viewport[data-cooperative] {
   touch-action: pan-x pan-y;

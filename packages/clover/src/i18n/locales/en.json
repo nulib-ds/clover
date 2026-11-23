@@ -19,7 +19,6 @@
   "bodyUnloadableVideo": "This video could not be loaded.",
   "bodyUnloadableAudio": "This audio could not be loaded.",
   "bodyUnloadableModel": "This model could not be loaded.",
-  "gestureHintWheel": "Use {{key}} + scroll to zoom",
   "gestureHintTouch": "Use two fingers to move the view",
   "canvasRoleDescription": "zoomable image",
   "canvasKeysImage": "Use the arrow keys to pan, with Shift for larger steps, plus and minus to zoom, 0 to reset the view, and R or Shift+R to rotate.",

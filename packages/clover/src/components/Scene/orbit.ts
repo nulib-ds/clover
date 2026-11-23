@@ -75,6 +75,11 @@ export function zoomed(orbit: Orbit, factor: number, home: Orbit): Orbit {
   };
 }
 
+/** As near as the camera comes: a step nearer goes home instead (WCAG 2.5.1). */
+export function atNearest(orbit: Orbit, home: Orbit): boolean {
+  return orbit.distance <= home.distance * NEAREST * 1.001;
+}
+
 /** The camera's position for an orbit around `center`. */
 export function cameraPosition(
   orbit: Orbit,
