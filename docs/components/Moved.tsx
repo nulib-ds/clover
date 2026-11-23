@@ -1,61 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { movedTo } from "docs/lib/moved.mjs";
 import { useRouter } from "docs/lib/router";
 import React, { useEffect, useState } from "react";
 
 /**
- * Where a page went when Clover 4 became the docs' focus: 3.x moved under /docs/3.x, then
- * /docs/deprecated-versions, and 4.x up from /docs/4.x. A 3.x page whose name 4.x now uses
- * (/docs/viewer, /docs/map, /docs/composing) shows the 4.x page instead, which links back
- * to its 3.x version.
- */
-const MOVES: [RegExp, string][] = [
-  // The earlier versions, at a name that holds the next one too (Mat, 2026-10-30).
-  [/^\/docs\/3\.x(\/.*)?$/, "/docs/deprecated-versions$1"],
-  [/^\/docs\/4\.x(\/.*)?$/, "/docs$1"],
-  [
-    /^\/docs\/(image|scroll|slider|homepage|label|metadata|partOf|rendering|requiredStatement|seeAlso|summary|thumbnail|i18n)(\/.*)?$/,
-    "/docs/deprecated-versions/$1$2",
-  ],
-  /*
-   * Clover 4's demo is the homepage now: its playground opens what `?iiif-content=` names,
-   * as the demo page did, and iiif.io's recipe pages link to
-   * `/docs/viewer/demo?iiif-content=<manifest>`. The query and the hash go along.
-   */
-  [/^\/docs\/viewer\/demo$/, "/"],
-  // The templates' page, folded into the Viewer's (Mat, 2026-10-21).
-  [/^\/docs\/viewer\/templates$/, "/docs/viewer#templates"],
-  // The 3.x Viewer's own pages: content state, search and prefetched content.
-  [/^\/docs\/viewer\/(.+)$/, "/docs/deprecated-versions/viewer/$1"],
-  // The component's page, from when the Panel was the InformationPanel.
-  [/^\/docs\/information-panel$/, "/docs/panel"],
-  // Pages folded into others: the templates under the Viewer, the element into Get started.
-  [/^\/docs\/templates$/, "/docs/viewer#templates"],
-  [/^\/docs\/web-component$/, "/docs/composing/glossary#structure-of-project"],
-  // The Technical overview, folded into the Glossary's end (Mat, 2026-11-05).
-  [/^\/docs\/technical$/, "/docs/composing/glossary#structure-of-project"],
-  // The part that draws the view, when it was Content (Mat, 2026-10-22: now Body).
-  [/^\/docs\/content$/, "/docs/body"],
-  /*
-   * The Cookbook's recipes, listed on a page of their own until the homepage listed them
-   * (its Viewing field and its Natural story; Mat, 2026-10-25).
-   */
-  [/^\/docs\/cookbook$/, "/"],
-];
-
-/** The page moved to from `path`, or nothing. */
-export function movedTo(path: string): string | null {
-  const clean = path.replace(/\/+$/, "") || "/";
-  for (const [pattern, target] of MOVES) {
-    if (pattern.test(clean)) return clean.replace(pattern, target);
-  }
-  return null;
-}
-
-/**
  * The 404 page. The docs are a static export, so there are no server redirects;
- * CloudFront serves this page for any missing path instead, and it sends a moved one on.
+ * CloudFront serves this page for any missing path instead, and it sends a moved one on
+ * (`docs/lib/moved.mjs`). The moved paths a built page answers for have pages of their
+ * own, which redirect first (`scripts/build-moved-pages.mjs`).
  */
 export function Moved() {
   const router = useRouter();
