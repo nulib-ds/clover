@@ -27,7 +27,7 @@
     "dev": "next dev",
     "e2e": "npm run e2e -w @nulib/clover && npm run e2e:docs",
     "e2e:docs": "playwright test --config=e2e/playwright.config.ts",
-    "lint": "prettier . --check && eslint app pages packages/clover/src docs/lib docs/components/SiteEffects.tsx docs/components/ScrollTable.tsx mdx-components.tsx next.config.mjs eslint.config.mjs",
+    "lint": "prettier . --check && eslint --max-warnings 0 app pages packages/clover/src docs/lib docs/components/SiteEffects.tsx docs/components/ScrollTable.tsx mdx-components.tsx next.config.mjs eslint.config.mjs",
     "prettier": "prettier . --check",
     "prettier:fix": "prettier --write .",
     "start": "next start",
