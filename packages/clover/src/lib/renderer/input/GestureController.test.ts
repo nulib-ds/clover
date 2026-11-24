@@ -194,6 +194,24 @@ describe("GestureController", () => {
       expect(hinted(target)).toEqual([]);
     });
 
+    // The Document template's full viewer (Mat, 2026-11-23: "as the user opts in to it").
+    it("pans on one finger's drag where its view takes every drag", () => {
+      const { element, target } = cooperative();
+      const style = window.getComputedStyle;
+      const spy = vi
+        .spyOn(window, "getComputedStyle")
+        .mockImplementation((node, pseudo) =>
+          node === element
+            ? ({ touchAction: "none" } as CSSStyleDeclaration)
+            : style(node, pseudo),
+        );
+      touch(element, "pointerdown", 50);
+      touch(element, "pointermove", 80);
+      spy.mockRestore();
+      expect(target.panBy).toHaveBeenCalled();
+      expect(hinted(target)).toEqual([]);
+    });
+
     it("leaves one finger's drag to the page and says to use two", () => {
       const { element, target } = cooperative();
       touch(element, "pointerdown", 50);

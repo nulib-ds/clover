@@ -97,6 +97,16 @@ export function wheelZooms(
 }
 
 /**
+ * Whether the page may take a finger's drag on a cooperative view, as its `touch-action`
+ * says: not where the view takes every drag (`none`), as in full screen (`Canvas.css`)
+ * or the Document template's full viewer, which a press or a zoom opened and Escape
+ * closes (Mat, 2026-11-23: "1 finger is fine in the document expanded full viewer as the
+ * user opts in to it").
+ */
+export const pageMayPan = (element: Element): boolean =>
+  getComputedStyle(element).touchAction !== "none";
+
+/**
  * Where one finger's drag is the page's (`touch-action: pan-x pan-y`, `[data-cooperative]`
  * in `Canvas.css`), two fingers are the view's: their moves are kept from the page, so it
  * neither scrolls nor zooms under them. Returns the way to stop.

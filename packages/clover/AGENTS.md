@@ -2404,7 +2404,12 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   (`useNearViewport`), the information caption (`Caption`, `CaptionDetails`), the
   pending box (`Pending`), the alert for what will not load (`BodyAlert`, a module of
   its own, or Rollup puts it on every Canvas page) and the glyphs. Pointer helpers are
-  `lib/pointer.ts`, shared with the 2D renderer's gestures. Timeline's and Scene's
+  `lib/pointer.ts`, shared with the 2D renderer's gestures. A cooperative view leaves a
+  finger's drag to the page only where its `touch-action` lets the page pan
+  (`pageMayPan`): never in full screen, nor where a template's opened view takes every
+  drag, as the Document's full viewer does (Mat, 2026-11-23: "1 finger is fine in the
+  document expanded full viewer as the user opts in to it"), its `touch-action: none`
+  in its own stylesheet. Timeline's and Scene's
   figures are each a `clover-canvas` too (`clover-canvas clover-timeline`,
   `clover-canvas clover-scene`), so `Canvas.css`'s rules for the Body (the controls and
   their reveal, scrim, focus ring, full screen, `getCloverRoot`) are theirs; a neutral

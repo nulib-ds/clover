@@ -7,6 +7,7 @@ import {
   isDirect,
   isHovering,
   isInteractive,
+  pageMayPan,
   wheelZooms,
 } from "../../lib/pointer";
 import type { GestureHintKind } from "../../lib/renderer/input/GestureController";
@@ -93,9 +94,11 @@ export function attachOrbitGestures(
   let penHovers = false;
 
   const fullscreen = () => Boolean(getFullscreenElement()?.contains(element));
+  /** Cooperative, where the page may take a finger's drag (`pageMayPan`). */
+  const cooperating = () => cooperative && !fullscreen() && pageMayPan(element);
   /** A drag the page takes: a finger's, or a pen's that does not hover. */
   const leftToPage = (pointerType: string) =>
-    cooperative && isDirect(pointerType, penHovers) && !fullscreen();
+    isDirect(pointerType, penHovers) && cooperating();
 
   const two = () => [...pointers.values()];
   const apart = () => {
@@ -254,10 +257,7 @@ export function attachOrbitGestures(
 
   // One finger's drag the page's (`Canvas.css`), two kept from it.
   element.toggleAttribute("data-cooperative", cooperative);
-  const releaseTwoFingers = holdTwoFingers(
-    element,
-    () => cooperative && !fullscreen(),
-  );
+  const releaseTwoFingers = holdTwoFingers(element, cooperating);
   element.addEventListener("pointerdown", down);
   element.addEventListener("pointermove", move);
   element.addEventListener("pointerup", up);
