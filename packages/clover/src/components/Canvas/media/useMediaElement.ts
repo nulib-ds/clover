@@ -64,6 +64,7 @@ export function useMediaElement(
   const posterKey = media.poster
     ? (media.poster.src ?? media.poster.service ?? "")
     : "";
+  const requestSettings = requestKey(request);
   const withCredentials = sendsCredentials(request);
   // Read through a ref, so a new object with the same settings does not remake the element.
   const requestRef = useRef(request);
@@ -190,7 +191,7 @@ export function useMediaElement(
     posterKey,
     captionsKey,
     segmentsKey,
-    requestKey(request),
+    requestSettings,
   ]);
 
   return element;

@@ -73,7 +73,6 @@ const ChapterPicture = memo(
   }) {
     const src = useThumbnail(source, CHAPTER_THUMBNAIL_SIZE, request);
     return src ? (
-      // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
       <img
         className={PICTURE}
         src={src}

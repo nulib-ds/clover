@@ -692,7 +692,7 @@ function DocumentLayout({
   const [column, setColumn] = useState<HTMLElement | null>(null);
   // Each render, as the pane is read from a ref; the check keeps it from setting it again.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (mapShown && aside.main.current !== column)
       setColumn(aside.main.current);
   });

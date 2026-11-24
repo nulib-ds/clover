@@ -604,7 +604,7 @@ describe("Canvas", () => {
       name: /^Find on the map: /,
     });
     expect(find).toHaveAttribute("aria-pressed", "false");
-    find.focus();
+    act(() => find.focus());
     fireEvent.click(find);
     await loaded();
     const figure = screen.getByTestId("clover-canvas");
@@ -788,7 +788,7 @@ describe("Canvas", () => {
       await showSheet();
       await openMenu();
       const radio = campus();
-      radio.focus();
+      act(() => radio.focus());
       renderer.fitAnnotation.mockClear();
       press(radio);
       await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
@@ -833,7 +833,7 @@ describe("Canvas", () => {
       const lake = within(menu()).getByRole("radio", {
         name: /Lake Michigan/,
       });
-      lake.focus();
+      act(() => lake.focus());
       press(lake);
       // The menu closes first, focus on its control (WCAG 2.4.3).
       expect(screen.queryByTestId("clover-canvas-annotation-menu")).toBeNull();
@@ -895,7 +895,7 @@ describe("Canvas", () => {
       const show = screen.getByRole("button", {
         name: "Find on the image: Northwestern University",
       });
-      show.focus();
+      act(() => show.focus());
       fireEvent.click(show);
       await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
       await waitFor(() => expect(asked()).toBeUndefined());
@@ -1304,9 +1304,11 @@ describe("Canvas", () => {
     });
 
     it("labels them in Clover's language, as Image does", async () => {
-      await initCloverI18n().chooseInterfaceLanguage("fr");
+      // Inside `act`: what the tests before it load on demand may arrive meanwhile.
+      await act(() => initCloverI18n().chooseInterfaceLanguage("fr"));
       try {
         render(<Canvas src="a.jpg" />);
+        await loaded();
         expect(
           screen.getByRole("button", { name: "Zoom avant" }),
         ).toBeInTheDocument();

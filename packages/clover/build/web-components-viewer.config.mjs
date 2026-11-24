@@ -31,6 +31,19 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [],
+      /*
+       * Built whole, the Viewer holds in its own chunk what the element and React builds
+       * load apart (`core/thumbnail`, `core/content-state`, `i18n/config`), so Vite notes
+       * that their dynamic imports split nothing here. That is this build's design.
+       */
+      onwarn(warning, warn) {
+        if (
+          warning.plugin === "vite:reporter" &&
+          warning.message.includes("dynamic import will not move module")
+        )
+          return;
+        warn(warning);
+      },
       output: {
         chunkFileNames: "[name]-[hash].mjs",
         // Clover's stylesheet in a chunk of its own, which compresses as CSS does.

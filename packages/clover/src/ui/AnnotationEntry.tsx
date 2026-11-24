@@ -120,7 +120,6 @@ export function EntryWords({
         if (body.image) {
           const alt = altOf(body);
           return (
-            // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
             <img
               key={index}
               src={body.image}

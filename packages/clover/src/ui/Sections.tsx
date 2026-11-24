@@ -128,7 +128,7 @@ export function Sections({
     if (hidden <= 0) return;
     const scroller = scrollerOf(panel);
     if (scroller) scroller.scrollTop -= hidden;
-  }, [open, tabs, items, id]);
+  }, [open, tabs, items, id, at]);
 
   /*
    * Focus in the open box lands clear of the stuck headings (WCAG 2.4.11). The panel's

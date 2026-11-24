@@ -156,7 +156,7 @@ describe("Clover.Root and its parts", () => {
     );
     await screen.findByRole("heading", { name: "Simple Manifest - Book" });
     const letter = screen.getByRole("option", { name: /A letter/ });
-    letter.focus();
+    act(() => letter.focus());
     fireEvent.click(letter);
     expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
     // The members stay, the one chosen current and focused while it loads.

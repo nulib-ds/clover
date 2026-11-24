@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -333,7 +334,7 @@ describe("Items of members", () => {
     );
     const listbox = await screen.findByRole("listbox", { name: "Shelf" });
     const option = within(listbox).getByRole("option", { name: "A drawer" });
-    option.focus();
+    act(() => option.focus());
     fireEvent.keyDown(option, { key: "Enter" });
     await screen.findByRole("heading", { name: "A note" });
     // The drawer's members replace the shelf's, the option in focus with them; focus
@@ -357,7 +358,7 @@ describe("Items of members", () => {
     );
     const options = await screen.findAllByRole("option");
     await screen.findByRole("heading", { name: "Simple Manifest - Book" });
-    options[1].focus();
+    act(() => options[1].focus());
     fireEvent.keyDown(options[1], { key: "Enter" });
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ id: LETTER }),

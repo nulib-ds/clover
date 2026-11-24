@@ -46,6 +46,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   37,950 B, a composed page 108,250 B and a layout 126,000 B, each 50 to 450 B over its
   old budget.
 
+### Fixed
+
+- **Rendered on the server with React 18, the Canvas and the Document template no longer
+  warn that `useLayoutEffect` does nothing there.** They measure as every other part
+  does: as an effect on the server, and before paint in the browser.
+
 ### Security
 
 - **The web components bundle Preact 10.27.3.** Every 4.x release until now bundled

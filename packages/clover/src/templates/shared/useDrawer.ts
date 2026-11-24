@@ -150,6 +150,8 @@ export function useDrawer({
     // Beside the page again: over it, it starts closed next time.
     if (measured === true) setOpenOver(false);
     was.current = measured;
+    // Only as `measured` changes; `toggle` and `follow` are read as it does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [measured]);
 
   const slide = useSlide(slides && over && open);

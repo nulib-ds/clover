@@ -37,9 +37,9 @@ if (typeof window !== "undefined") {
     value: true,
   });
 
-  // Mock HTML video element
+  // Mock HTML video element: jsdom plays nothing, and says so for `play`.
   HTMLMediaElement.prototype.load = () => {};
-  //HTMLMediaElement.prototype.play = () => { /* do nothing */ };
+  HTMLMediaElement.prototype.play = () => Promise.resolve();
   HTMLMediaElement.prototype.pause = () => {};
   //HTMLMediaElement.prototype.addTextTrack = () => { /* do nothing */ };
 

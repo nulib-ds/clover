@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { SeekMarks, groupMarks } from "./SeekMarks";
@@ -37,7 +37,7 @@ describe("SeekMarks", () => {
     );
     const points = screen.getAllByRole("button");
     expect(points.map((point) => point.tabIndex)).toEqual([0, -1, -1]);
-    points[0].focus();
+    act(() => points[0].focus());
     fireEvent.keyDown(points[0], { key: "ArrowRight" });
     expect(points[1]).toHaveFocus();
     expect(onActivate).toHaveBeenLastCalledWith("b");
@@ -78,7 +78,7 @@ describe("SeekMarks", () => {
     render(<SeekMarks marks={marks} duration={856} onSelect={vi.fn()} />);
     const [point] = screen.getAllByRole("button");
     const group = point.parentElement!;
-    point.focus();
+    act(() => point.focus());
     // Taken: nothing around it closes too (a floating Panel, a dialog).
     expect(fireEvent.keyDown(point, { key: "Escape" })).toBe(false);
     expect(group).toHaveAttribute("data-tip-hidden");

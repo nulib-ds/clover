@@ -83,7 +83,6 @@ export function EntryThumbnail({
   const src = useThumbnail(source, PICTURE_SIZE, request);
   if (!src) return null;
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
     <img
       className={join("clover-entry-thumbnail", className)}
       data-large=""

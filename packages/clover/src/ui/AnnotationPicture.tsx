@@ -96,7 +96,6 @@ export default function AnnotationPicture({
   const { src, cut } = picture;
   if (!cut)
     return (
-      // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
       <img
         className={classes}
         src={src}
@@ -124,7 +123,6 @@ export default function AnnotationPicture({
       data-cut=""
       style={{ position: "relative", overflow: "hidden" }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js. */}
       <img
         src={src}
         alt=""
