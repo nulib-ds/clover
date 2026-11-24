@@ -2274,6 +2274,13 @@ describe("Canvas", () => {
   });
   describe("Choice", () => {
     const xrayCanvas = choice.items as any[];
+    /** Each item's picture in, or none to show, once its image is read (`AnnotationPicture`). */
+    const pictured = () =>
+      waitFor(() =>
+        expect(
+          document.querySelectorAll("span.clover-entry-thumbnail:empty"),
+        ).toHaveLength(0),
+      );
 
     it("offers a choice control only when the Canvas has a Choice", () => {
       const { rerender } = render(
@@ -2304,7 +2311,7 @@ describe("Canvas", () => {
       }
     });
 
-    it("lists the items, first selected, and paints the one picked", () => {
+    it("lists the items, first selected, and paints the one picked", async () => {
       render(<Canvas canvases={xrayCanvas} />);
       expect(renderer.setImages.mock.lastCall[0][0].url).toMatch(/natural/i);
 
@@ -2323,6 +2330,7 @@ describe("Canvas", () => {
       // Same Canvas: the reader's view is kept, and the last picture up until the next is in.
       expect(fit).toBe(false);
       expect(renderer.clear).not.toHaveBeenCalled();
+      await pictured();
     });
 
     /*
@@ -2349,7 +2357,7 @@ describe("Canvas", () => {
       expect(fit).toBe(true);
     });
 
-    it("shows an unlabeled item's number beside its radio button", () => {
+    it("shows an unlabeled item's number beside its radio button", async () => {
       const unlabeled = JSON.parse(JSON.stringify(xrayCanvas));
       const strip = (node: any): void => {
         if (!node || typeof node !== "object") return;
@@ -2367,6 +2375,7 @@ describe("Canvas", () => {
       expect(screen.getByRole("radio", { name: "2" })).not.toHaveAttribute(
         "aria-label",
       );
+      await pictured();
     });
 
     it("closes on Escape, returning focus to the control", () => {
