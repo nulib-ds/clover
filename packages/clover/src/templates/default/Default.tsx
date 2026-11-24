@@ -184,6 +184,8 @@ export function Default({
       data-fill={fill || undefined}
       {...(titled ? title.group : null)}
       {...root}
+      // The Body's gestures for every view inside, its maps' too (`Root`'s `gestures`).
+      gestures={canvasOptions?.gestures ?? root.gestures}
     >
       <Clover.Split
         ref={panes}

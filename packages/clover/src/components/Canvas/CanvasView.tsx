@@ -1535,6 +1535,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         {pickedPlace && (
           <Suspense fallback={null}>
             <PlaceBox
+              cooperative={options?.gestures?.cooperative}
               id={`place-of-${instance}`}
               open={pickOpen}
               swapped={placeSwapped && swappedBox === `place-of-${instance}`}
@@ -1555,6 +1556,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         {shownPlaces && placeShown && (
           <Suspense fallback={null}>
             <PlaceBox
+              cooperative={options?.gestures?.cooperative}
               id={placeId}
               open={placeOpen}
               swapped={placeSwapped && swappedBox === placeId}

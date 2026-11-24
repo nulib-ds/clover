@@ -38,7 +38,18 @@ export function ConnectedMap({
   Forwarded & { scope: "view" | "all"; landmark?: boolean }) {
   const root = useRootMap(scope, whose, onSelect);
   const asked = useAskedPlace();
-  return <MapView {...rest} {...root} focus={asked} List={MapList} />;
+  // The Root's gestures, where the map leaves them unset (`Root`'s `gestures`).
+  const gestures = useOptionalClover()?.gestures;
+  return (
+    <MapView
+      {...rest}
+      cooperative={rest.cooperative ?? gestures?.cooperative}
+      scrollZoom={rest.scrollZoom ?? gestures?.scrollToZoom}
+      {...root}
+      focus={asked}
+      List={MapList}
+    />
+  );
 }
 
 /**

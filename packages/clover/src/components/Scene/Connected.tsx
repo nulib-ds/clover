@@ -36,11 +36,16 @@ export default function ConnectedScene({
   useEffect(() => {
     if (target && scene && target.canvasId === scene.id) clover.consumeTarget();
   }, [target, scene, clover]);
-  // The Root's request settings, unless the Scene is given its own.
+  // The Root's request settings and gestures, unless the Scene is given its own.
   const request = options?.request ?? clover.request;
+  const rootGestures = context.gestures;
   const connected = useMemo(
-    () => ({ ...options, request }),
-    [options, request],
+    () => ({
+      ...options,
+      request,
+      gestures: { ...rootGestures, ...options?.gestures },
+    }),
+    [options, request, rootGestures],
   );
   if (!scene) return null;
   return (

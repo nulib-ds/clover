@@ -683,6 +683,26 @@ describe("Map", () => {
     await waitFor(() => expect(picture.hidden).toBe(false));
   });
 
+  // Mat, 2026-11-23: "document how to disable this in templates/body/canvas/map/scene".
+  it("takes its Root's gestures where it sets none of its own", async () => {
+    const { rerender } = render(
+      <Clover.Root iiifContent={canvasesJson} gestures={{ cooperative: false }}>
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    await waitFor(() => expect(map.scrollZoom.on).toBe(true));
+    expect(map.cooperativeGestures.on).toBe(false);
+    // Its own wins.
+    rerender(
+      <Clover.Root iiifContent={canvasesJson} gestures={{ cooperative: false }}>
+        <CloverMap cooperative />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(map.cooperativeGestures.on).toBe(true));
+  });
+
   // Mat, 2026-11-08: "as if hover turns off/on/off/on over and over".
   it("keeps the place it names while it is under the pointer, across layers and places that overlap", async () => {
     render(

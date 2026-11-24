@@ -21,6 +21,7 @@ import { cloverI18n } from "../../i18n/config";
 import type { CloverContextValue } from "../../react/context";
 import { useRootContentState } from "../../react/useContentStateOutput";
 import { type BodyRenderer, sameRenderers } from "../Body/renderers";
+import type { GestureOptions } from "../../lib/renderer/input/GestureController";
 import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
 
 const noop = () => {};
@@ -44,6 +45,7 @@ export interface RootStateOptions {
   request?: CloverRequest;
   language?: string;
   renderers?: BodyRenderer[];
+  gestures?: Partial<GestureOptions>;
   annotations?: AnnotationsInput;
   annotationPages?: "view" | "all";
   defaultAnnotationsShown?: boolean;
@@ -73,6 +75,7 @@ export function useRootState<Props extends RootStateOptions>({
   request,
   language,
   renderers,
+  gestures,
   annotations,
   annotationPages = "view",
   defaultAnnotationsShown = true,
@@ -214,6 +217,11 @@ export function useRootState<Props extends RootStateOptions>({
   const kept = useRef(renderers);
   if (!sameRenderers(kept.current, renderers)) kept.current = renderers;
   const stableRenderers = kept.current;
+  // So too the gestures: an inline object, kept while it says the same.
+  const keptGestures = useRef(gestures);
+  if (JSON.stringify(keptGestures.current) !== JSON.stringify(gestures))
+    keptGestures.current = gestures;
+  const stableGestures = keptGestures.current;
   /*
    * The language chosen to read IIIF text in (About's languages), until the page gives
    * the Root another `language`, which wins again (React's state adjusted as it renders,
@@ -276,6 +284,7 @@ export function useRootState<Props extends RootStateOptions>({
       clover,
       language: reading,
       renderers: stableRenderers,
+      gestures: stableGestures,
       chooseLanguage,
       toggleDrawn,
       drawsToggle,
@@ -284,6 +293,7 @@ export function useRootState<Props extends RootStateOptions>({
       clover,
       reading,
       stableRenderers,
+      stableGestures,
       chooseLanguage,
       toggleDrawn,
       drawsToggle,

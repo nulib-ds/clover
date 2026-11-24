@@ -161,6 +161,27 @@ const renderers = [{ format: ["model/gltf-binary"], component: ModelViewer }];
 </script>
 ```
 
+### Cooperative gestures
+
+On a touch screen, one finger's drag scrolls the page past the Body, and two fingers move
+the view, whichever it shows. Set `cooperative` to `false` in its `options` for one finger
+to move the view, a Canvas or a Scene alike
+([turn cooperative gestures off](/docs/canvas#turn-cooperative-gestures-off)).
+
+```jsx
+<Clover.Body options={{ gestures: { cooperative: false } }} />
+```
+
+```html twin
+<clover-body></clover-body>
+
+<script type="module">
+  document.querySelector("clover-body").options = {
+    gestures: { cooperative: false },
+  };
+</script>
+```
+
 ## Previous versions
 
 [Clover 3.x › Viewer](/docs/deprecated-versions/viewer)

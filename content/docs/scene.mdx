@@ -99,6 +99,31 @@ The Viewer draws a Manifest's Scenes with it, as it draws its Canvases with Canv
 
 </ViewerExample>
 
+### Cooperative gestures
+
+On a touch screen, one finger's drag scrolls the page past the Scene, and two fingers
+turn the models and pinch to zoom. Set `cooperative` to `false` in its `options.gestures`
+for one finger to turn them. Inside a `Root`, it takes the Root's `gestures` where it
+sets none, and in a `Body`, the Body's `options`
+([turn cooperative gestures off](/docs/canvas#turn-cooperative-gestures-off)).
+
+```jsx
+<Clover.Scene
+  iiifContent={url}
+  options={{ gestures: { cooperative: false } }}
+/>
+```
+
+```html twin
+<clover-scene iiif-content="https://…/manifest.json"></clover-scene>
+
+<script type="module">
+  document.querySelector("clover-scene").options = {
+    gestures: { cooperative: false },
+  };
+</script>
+```
+
 ### Customizing engine
 
 Clover draws a Scene with its own engine, `clover`, by default, for its size. Each engine
