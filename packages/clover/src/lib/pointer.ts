@@ -98,10 +98,10 @@ export function wheelZooms(
 
 /**
  * Whether the page may take a finger's drag on a cooperative view, as its `touch-action`
- * says: not where the view takes every drag (`none`), as in full screen (`Canvas.css`)
- * or the Document template's full viewer, which a press or a zoom opened and Escape
- * closes (Mat, 2026-11-23: "1 finger is fine in the document expanded full viewer as the
- * user opts in to it").
+ * says: not where the view takes every drag (`none`), as in full screen (`Canvas.css`),
+ * the Document template's full viewer, which a press or a zoom opened and Escape closes
+ * (Mat, 2026-11-23: "1 finger is fine in the document expanded full viewer as the user
+ * opts in to it"), or the Gallery template's lightbox (`Lightbox.css`; 2026-11-24).
  */
 export const pageMayPan = (element: Element): boolean =>
   getComputedStyle(element).touchAction !== "none";

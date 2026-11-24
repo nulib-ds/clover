@@ -194,7 +194,8 @@ describe("GestureController", () => {
       expect(hinted(target)).toEqual([]);
     });
 
-    // The Document template's full viewer (Mat, 2026-11-23: "as the user opts in to it").
+    // The Document template's full viewer and the Gallery's lightbox (Mat, 2026-11-23:
+    // "as the user opts in to it").
     it("pans on one finger's drag where its view takes every drag", () => {
       const { element, target } = cooperative();
       const style = window.getComputedStyle;

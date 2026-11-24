@@ -96,6 +96,17 @@
 }
 
 /*
+ * The view takes a finger's drag, as in full screen and the Document template's full
+ * viewer: the lightbox was opened on purpose, and Escape, Close or Back puts it away
+ * (Mat, 2026-11-24: "Yes, Gallery too"). Cooperative as the Canvas is, it reads this
+ * (`pageMayPan`), so no hint says to use two. On a window too short for the panel, a
+ * finger scrolls it from its title, strip or caption.
+ */
+.clover-template-lightbox .clover-canvas-viewport[data-cooperative] {
+  touch-action: none;
+}
+
+/*
  * The thumbnails under the Body, a short strip (Mat, 2026-11-01: "items should be small
  * in height"): Items' documented sizes, its pictures half their height and each label on
  * one line, so the Body keeps the room.

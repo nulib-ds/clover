@@ -31,9 +31,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `gestures={{ cooperative: false }}` turns them all off; a template's
   `canvasOptions.gestures` goes to its Root, so its maps take them, and the Canvas's map
   box takes its Canvas's. In the Document template's full viewer, opened by a press or a
-  zoom, one finger moves the view, as in full screen, with no hint; for it, budgets
-  raised to the next 50 B over what is measured: the Scene's initial JS to 20,200 B
-  gzip, and the Default template to 81,500 B and to first view 96,950 B.
+  zoom, and in the Gallery template's lightbox, one finger moves the view, as in full
+  screen, with no hint; for it, budgets raised to the next 50 B over what is measured:
+  the Scene's initial JS to 20,200 B gzip, the Default template to 81,500 B and to first
+  view 96,950 B, and `<clover-viewer>` in Gallery to 134,200 B.
   The hint is a pill in the middle of the view, where no part puts a control, a pinching
   hand beside its words at the page's own text size, and a small card, the hand over
   two short lines, in a view too narrow for one; it laid a dark wash over the whole Body

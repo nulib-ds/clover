@@ -183,3 +183,26 @@ test("a tap on the navigator over a hotspot is the navigator's, and leaves the h
   );
   await expect(hotspot).toHaveAttribute("aria-current", "true");
 });
+
+/*
+ * The Gallery's Lightbox was opened on purpose, and Escape, Close or Back puts it away, so
+ * a finger's drag is its view's, as in full screen (Mat, 2026-11-24: "Yes, Gallery too").
+ * The same Canvas on a page is cooperative: there a finger scrolls the page.
+ */
+test("in the Gallery's Lightbox a finger's drag is the view's; on a page, the page's", async ({
+  page,
+}) => {
+  await serveIIIF(page);
+  await page.goto(`/?scene=composed&content=${BOOK}`);
+  const onPage = page.locator(".clover-canvas-viewport");
+  await expect(onPage).toHaveAttribute("data-cooperative", "");
+  await expect(onPage).toHaveCSS("touch-action", "pan-x pan-y");
+
+  await page.goto(`/?scene=gallery&content=${BOOK}`);
+  await page.getByRole("option").first().tap();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  const inLightbox = dialog.locator(".clover-canvas-viewport");
+  await expect(inLightbox).toHaveAttribute("data-cooperative", "");
+  await expect(inLightbox).toHaveCSS("touch-action", "none");
+});

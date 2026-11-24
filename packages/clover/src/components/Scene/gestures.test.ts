@@ -152,7 +152,8 @@ describe("the Scene's gestures", () => {
     expect(input.zoom).toHaveBeenCalledTimes(2);
   });
 
-  // The Document template's full viewer (Mat, 2026-11-23: "as the user opts in to it").
+  // The Document template's full viewer and the Gallery's lightbox (Mat, 2026-11-23:
+  // "as the user opts in to it").
   it("turns on one finger's drag where its view takes every drag", () => {
     const { element, input } = setup();
     const style = window.getComputedStyle;

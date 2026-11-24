@@ -2407,9 +2407,10 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   `lib/pointer.ts`, shared with the 2D renderer's gestures. A cooperative view leaves a
   finger's drag to the page only where its `touch-action` lets the page pan
   (`pageMayPan`): never in full screen, nor where a template's opened view takes every
-  drag, as the Document's full viewer does (Mat, 2026-11-23: "1 finger is fine in the
-  document expanded full viewer as the user opts in to it"), its `touch-action: none`
-  in its own stylesheet. Timeline's and Scene's
+  drag, as the Document's full viewer and the Gallery's lightbox do (Mat, 2026-11-23: "1
+  finger is fine in the document expanded full viewer as the user opts in to it"; and
+  2026-11-24, "Yes, Gallery too"), each its `touch-action: none` in its own stylesheet
+  (`Document.css`, `Lightbox.css`). Timeline's and Scene's
   figures are each a `clover-canvas` too (`clover-canvas clover-timeline`,
   `clover-canvas clover-scene`), so `Canvas.css`'s rules for the Body (the controls and
   their reveal, scrim, focus ring, full screen, `getCloverRoot`) are theirs; a neutral
