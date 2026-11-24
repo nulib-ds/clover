@@ -204,6 +204,8 @@ describe("Transcript", () => {
       .items;
     fireEvent.click(screen.getByRole("radio", { name: /^EN / }));
     expect(clover.captions.get()).toBe(en.id);
+    // Its cues, read from the English file.
+    await screen.findAllByRole("button", { name: /Good manners|at lunch/ });
   });
 
   // Mat, 2026-10-28: "there should be one language toggle. always let root win".

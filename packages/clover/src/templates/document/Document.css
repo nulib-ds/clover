@@ -1837,6 +1837,17 @@ button.clover-template-document-live-play:focus-visible {
   touch-action: pan-x pan-y;
 }
 
+/*
+ * The full viewer takes a finger's drag too, as full screen does: it was opened on
+ * purpose, and Escape or its toggle closes it (Mat, 2026-11-23: "1 finger is fine in the
+ * document expanded full viewer as the user opts in to it"). Cooperative as the Canvas
+ * is, it reads this (`pageMayPan`), so no hint says to use two.
+ */
+.clover-template-document-column:is([data-zoomed], [data-expanded])
+  .clover-canvas-viewport[data-cooperative] {
+  touch-action: none;
+}
+
 /* ---------- information panel ---------- */
 
 /*

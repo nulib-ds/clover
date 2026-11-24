@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
 import { initCloverI18n } from "../i18n";
@@ -6,7 +6,11 @@ import Button from "./Button";
 import { scrollTip } from "../components/Canvas/Annotations";
 import { SHORTCUTS, Tip, forwardShortcut } from "./Tip";
 
-afterEach(() => initCloverI18n({ lng: "en" }));
+// Unmounted first, so English coming back changes no Tip outside `act`.
+afterEach(() => {
+  cleanup();
+  return initCloverI18n({ lng: "en" });
+});
 
 describe("Tip", () => {
   it("says what the control's accessible name says, and its key", () => {

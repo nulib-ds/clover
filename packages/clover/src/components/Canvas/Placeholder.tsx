@@ -84,7 +84,6 @@ function Still({
 }) {
   const src = useStill(still.source, request);
   return src ? (
-    // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
     <img
       alt={still.alt}
       {...languageProps(still.alt ? still.lang : undefined)}

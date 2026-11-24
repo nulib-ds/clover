@@ -1,4 +1,5 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -667,7 +668,7 @@ describe("A long answer", () => {
     expect(drawn()).toBe(40);
 
     // The end nears the view: the next chunk.
-    observers.at(-1)?.([{ isIntersecting: true }]);
+    act(() => observers.at(-1)?.([{ isIntersecting: true }]));
     await waitFor(() => expect(drawn()).toBe(80));
 
     // Focus on one of the last few drawn: more, so Tab never runs out first.

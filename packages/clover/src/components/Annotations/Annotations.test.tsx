@@ -183,7 +183,7 @@ describe("Annotations", () => {
     const find = screen.getByRole("button", { name: /Find on the image/ });
     fireEvent.click(find);
     expect(renderer.fitAnnotation).toHaveBeenCalledTimes(1);
-    find.focus();
+    act(() => find.focus());
     fireEvent.click(find);
     expect(renderer.fitAnnotation).toHaveBeenCalledTimes(2);
     expect(find).toHaveAttribute("aria-pressed", "true");

@@ -153,7 +153,6 @@ const ChoiceMenu: React.FC<ChoiceMenuProps> = ({
                       onChange={() => onSelect(group.key, index)}
                     />
                     {picture?.src ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
                       <img
                         alt=""
                         className="clover-entry-thumbnail"

@@ -6,6 +6,7 @@ import {
   isDirect,
   isHovering,
   isInteractive,
+  pageMayPan,
   scrollsWithin,
   wheelZooms,
 } from "../../pointer";
@@ -186,7 +187,7 @@ export class GestureController {
 
   private cooperating(): boolean {
     if (!this.options.cooperative || !this.options.navigable) return false;
-    return !this.fullscreen();
+    return !this.fullscreen() && pageMayPan(this.element);
   }
 
   dispose(): void {

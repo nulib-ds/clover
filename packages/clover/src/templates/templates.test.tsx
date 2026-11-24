@@ -1294,7 +1294,7 @@ describe("templates", () => {
   it("Gallery: the lightbox is modal within the Gallery, and Escape gives focus back to the cell", async () => {
     const { container } = render(<Templates.Gallery iiifContent={bookJson} />);
     const options = await screen.findAllByRole("option");
-    options[1].focus();
+    act(() => options[1].focus());
     fireEvent.click(options[1]);
     const dialog = screen.getByRole("dialog", {
       name: "Simple Manifest - Book",
@@ -1452,7 +1452,7 @@ describe("templates", () => {
   it("Gallery: the lightbox's title is the Manifest's, Back a step out to the grid", async () => {
     render(<Templates.Gallery iiifContent={bookJson} />);
     const cells = await screen.findAllByRole("option");
-    cells[1].focus();
+    act(() => cells[1].focus());
     fireEvent.click(cells[1]);
     const dialog = screen.getByRole("dialog", {
       name: "Simple Manifest - Book",
@@ -2119,7 +2119,7 @@ describe("templates", () => {
       });
       const sidebar = await openThumbnails();
       const option = within(sidebar).getAllByRole("option")[1];
-      option.focus();
+      act(() => option.focus());
       fireEvent.click(option);
       expect(sidebar).toHaveAttribute("hidden");
       await waitFor(() => expect(items()).toHaveFocus());

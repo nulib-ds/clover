@@ -122,10 +122,7 @@ export function PlayerFace({
         data-art={ground ? "" : undefined}
         aria-hidden="true"
       >
-        {ground && (
-          // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
-          <img alt="" decoding="async" src={ground} />
-        )}
+        {ground && <img alt="" decoding="async" src={ground} />}
       </div>
       <div
         className="clover-canvas-player-art"
@@ -137,7 +134,6 @@ export function PlayerFace({
         }
       >
         {src ? (
-          // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
           <img
             // Anew for another picture, so the one coming in fades in over the ground.
             key={src}

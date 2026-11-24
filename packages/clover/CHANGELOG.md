@@ -30,7 +30,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `options.gestures` for every Canvas, Scene and Map inside that sets none, so
   `gestures={{ cooperative: false }}` turns them all off; a template's
   `canvasOptions.gestures` goes to its Root, so its maps take them, and the Canvas's map
-  box takes its Canvas's.
+  box takes its Canvas's. In the Document template's full viewer, opened by a press or a
+  zoom, and in the Gallery template's lightbox, one finger moves the view, as in full
+  screen, with no hint; for it, budgets raised to the next 50 B over what is measured:
+  the Scene's initial JS to 20,200 B gzip, the Default template to 81,500 B and to first
+  view 96,950 B, and `<clover-viewer>` in Gallery to 134,200 B.
   The hint is a pill in the middle of the view, where no part puts a control, a pinching
   hand beside its words at the page's own text size, and a small card, the hand over
   two short lines, in a view too narrow for one; it laid a dark wash over the whole Body
@@ -45,6 +49,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   elements a `<clover-viewer>` 130,800 B, a Canvas 94,750 B, a Gallery 134,150 B, labels
   37,950 B, a composed page 108,250 B and a layout 126,000 B, each 50 to 450 B over its
   old budget.
+
+### Fixed
+
+- **Rendered on the server with React 18, the Canvas and the Document template no longer
+  warn that `useLayoutEffect` does nothing there.** They measure as every other part
+  does: as an effect on the server, and before paint in the browser.
 
 ### Security
 

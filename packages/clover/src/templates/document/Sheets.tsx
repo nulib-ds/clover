@@ -565,7 +565,8 @@ export function Sheets({
     followed.current = null;
     resting.current = false;
     bring(position, fresh);
-    // `bring` and `zoom` read only refs.
+    // `bring`, `reveal` and `zoom` read only refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [position, sheetKeys]);
 
   /* The reader's scroll: where it is going, and where it comes to rest. */
@@ -779,7 +780,9 @@ export function Sheets({
     if (latest.current.position !== openedOn.current || !seen)
       bring(latest.current.position, true);
     else reveal();
-    // `place`, `zoom`, `bring` and `reveal` read only refs.
+    // `place`, `placeOf`, `zoom`, `bring` and `reveal` read only refs, and `handle` is
+    // the live Canvas's as the viewer opens or closes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expanded]);
 
   /*
@@ -1146,7 +1149,6 @@ function Still({ canvas }: { canvas: Canvas }) {
   const ratio = ratioOf(canvas);
   const style = ratio ? { aspectRatio: String(ratio) } : undefined;
   return src ? (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       alt=""
       decoding="async"

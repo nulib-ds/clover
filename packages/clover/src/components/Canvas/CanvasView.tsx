@@ -3,7 +3,6 @@ import React, {
   lazy,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -40,6 +39,7 @@ import useFullscreen from "../../hooks/useFullscreen";
 import useWithinFullscreen from "../../hooks/useWithinFullscreen";
 import useFullscreenExit from "../../hooks/useFullscreenExit";
 import { useLoaded } from "../../hooks/useLoaded";
+import { useIsomorphicLayoutEffect } from "../../hooks/useIsomorphicLayoutEffect";
 import {
   highContrastProps,
   useHighContrast,
@@ -489,7 +489,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    */
   const asked = controlsConfig && controlsConfig.map ? props.askedPlace : null;
   const askedId = `place-asked-${instance}`;
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (asked) setSwappedBox(askedId);
     // Each ask, as it comes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1092,8 +1092,16 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       setSurface(null);
     };
     // A new instanceId is a new viewer; nothing else remounts the surface
-    // (`makeSurface` is a module's, and `releaseAnnotation` and `markDrawn` are stable).
-  }, [instanceId, makeSurface, releaseAnnotation, markDrawn, showHint]);
+    // (`makeSurface` is a module's, and `releaseAnnotation`, `markDrawn`, `showHint` and
+    // `contentStateChanged` are stable).
+  }, [
+    instanceId,
+    makeSurface,
+    releaseAnnotation,
+    markDrawn,
+    showHint,
+    contentStateChanged,
+  ]);
 
   useEffect(() => {
     if (!renderer || !navigatorElement) return;
@@ -1129,7 +1137,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * and stays a swap (`setImages`), the last picture up until the next is in.
    */
   const flushed = useRef(false);
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (shownCanvases.current === null || shownCanvases.current === canvasKey)
       return;
     surfaceRef.current?.clear();
@@ -1170,7 +1178,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const shownManifest = useRef(manifestId);
   /* Cleared for another Manifest: nothing of the last one shows, its placeholder included. */
   const [cleared, setCleared] = useState(false);
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (manifestId === shownManifest.current) return;
     shownManifest.current = manifestId;
     surfaceRef.current?.clear();

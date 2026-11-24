@@ -216,7 +216,7 @@ describe("Items in a Root", () => {
     renderInRoot({ onSelect });
     const options = await screen.findAllByRole("option");
     // Focus moved without an arrow, so nothing is selected until Enter.
-    options[2].focus();
+    act(() => options[2].focus());
     fireEvent.keyDown(options[2], { key: "Enter" });
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ id: canvasIds[3] }),
@@ -228,7 +228,7 @@ describe("Items in a Root", () => {
     expect(options[2]).toHaveAttribute("aria-selected", "true");
     // Space too, and Clover still keeps it from scrolling the page.
     onSelect.mockImplementation(() => {});
-    options[1].focus();
+    act(() => options[1].focus());
     const space = new KeyboardEvent("keydown", {
       key: " ",
       bubbles: true,

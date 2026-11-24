@@ -211,7 +211,6 @@ function PreviewPage({ canvas, load }: { canvas: Container; load: boolean }) {
   const style =
     width && height ? { aspectRatio: `${width} / ${height}` } : undefined;
   return src ? (
-    // eslint-disable-next-line @next/next/no-img-element
     <img alt="" decoding="async" src={src} style={style} />
   ) : (
     <span className="clover-template-document-step-blank" style={style} />

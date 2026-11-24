@@ -152,6 +152,25 @@ describe("the Scene's gestures", () => {
     expect(input.zoom).toHaveBeenCalledTimes(2);
   });
 
+  // The Document template's full viewer and the Gallery's lightbox (Mat, 2026-11-23:
+  // "as the user opts in to it").
+  it("turns on one finger's drag where its view takes every drag", () => {
+    const { element, input } = setup();
+    const style = window.getComputedStyle;
+    const spy = vi
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation((node, pseudo) =>
+        node === element
+          ? ({ touchAction: "none" } as CSSStyleDeclaration)
+          : style(node, pseudo),
+      );
+    pointer(element, "pointerdown", 50);
+    pointer(element, "pointermove", 80);
+    spy.mockRestore();
+    expect(input.turn).toHaveBeenCalled();
+    expect(hinted(input)).toEqual([]);
+  });
+
   it("gives the wheel and a finger's drag to the view in full screen", () => {
     const { element, input } = setup();
     Object.defineProperty(document, "fullscreenElement", {

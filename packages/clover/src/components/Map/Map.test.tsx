@@ -254,6 +254,13 @@ afterEach(() => {
 const placeData = (map: FakeMap) =>
   map.sources["geomap-navplace"].setData.mock.calls.at(-1)?.[0];
 
+/** Every row's picture in, cut once its image's info.json is read. */
+const pictured = (list: HTMLElement) =>
+  waitFor(() => {
+    for (const picture of list.querySelectorAll(".clover-items-picture"))
+      expect(picture.querySelector("img")).not.toBeNull();
+  });
+
 describe("Map", () => {
   it("starts with its credits collapsed, and cases its lines in white", async () => {
     const { container } = render(
@@ -859,7 +866,7 @@ describe("Map", () => {
     expect(places[0]).toHaveAttribute("aria-selected", "true");
     expect(places[1]).toHaveAttribute("aria-selected", "false");
 
-    places[1].focus();
+    act(() => places[1].focus());
     fireEvent.click(places[1]);
     // Named on the map as in the list: its name, and its date under it.
     const named = popups.at(-1)!.node!;
@@ -1224,9 +1231,9 @@ describe("Map", () => {
       name: "Current Location of Painting",
     });
     await waitFor(() => expect(maps[0]?.fitBounds).toHaveBeenCalled());
-    const options = within(
-      screen.getByRole("listbox", { name: "On the map" }),
-    ).getAllByRole("option");
+    const list = screen.getByRole("listbox", { name: "On the map" });
+    await pictured(list);
+    const options = within(list).getAllByRole("option");
     for (const option of options)
       expect(option).toHaveAttribute("aria-selected", "false");
     // Once one is chosen, it alone: its popup names it, and nothing goes to a view.
@@ -1323,6 +1330,7 @@ describe("Map", () => {
       { name: "Township map" },
       { timeout: 4000 },
     );
+    await pictured(button);
     expect(within(button).getByText("Township map")).toHaveAttribute(
       "lang",
       "en",
@@ -1427,6 +1435,7 @@ describe("Map", () => {
       { name: "Township map" },
       { timeout: 4000 },
     );
+    await pictured(row);
     const [map] = maps;
     const [[west, south], [east, north]] = boundsOf(
       [],

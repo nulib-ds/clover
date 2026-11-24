@@ -44,8 +44,21 @@ export default tseslint.config(
     },
   },
   {
+    // Where Next's config sets up the hooks plugin.
+    files: ["**/*.{js,jsx,mjs,ts,tsx,mts,cts}"],
+    rules: {
+      // A layout effect in the browser, an effect on the server, checked as either is.
+      "react-hooks/exhaustive-deps": [
+        "warn",
+        { additionalHooks: "^(useIsomorphicLayoutEffect|useLayout)$" },
+      ],
+    },
+  },
+  {
     files: ["packages/clover/src/**"],
     rules: {
+      // The package renders outside Next.js, where `next/image` is not there to use.
+      "@next/next/no-img-element": "off",
       "no-restricted-imports": [
         "error",
         {

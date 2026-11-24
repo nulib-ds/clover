@@ -306,6 +306,8 @@ function inOrder<T>(groups: Array<[string, T]>, order: Map<string, number>) {
     : groups;
 }
 
+const NO_MANIFESTS: Manifest[] = [];
+
 /**
  * The Canvases of other Manifests the listing's annotations are on (`partOf`), as
  * annotations given as the content name them: each Manifest fetched once, when the listing
@@ -320,7 +322,8 @@ function useElsewhere(
   of: Map<string, { canvas: Record<string, any>; label: LocalizedValue[] }>;
 } {
   const { clover, language } = useClover("Annotations");
-  const wanted = useMemo(() => {
+  // The Manifests' ids as one key: the same ones again are no new fetch, and no new render.
+  const wantedKey = useMemo(() => {
     const ids = new Set<string>();
     for (const sheet of sheets) {
       // A georeferenced image is always on one of the open Manifest's Canvases.
@@ -328,10 +331,18 @@ function useElsewhere(
       const manifest = manifestOfAnnotation(sheet.entries[0].annotation);
       if (manifest) ids.add(manifest);
     }
-    return [...ids];
+    return [...ids].join("\n");
   }, [sheets, here]);
-  const [manifests, setManifests] = useState<Manifest[]>([]);
+  const wanted = useMemo(
+    () => (wantedKey ? wantedKey.split("\n") : []),
+    [wantedKey],
+  );
+  const [manifests, setManifests] = useState<Manifest[]>(NO_MANIFESTS);
   useEffect(() => {
+    if (!wanted.length) {
+      setManifests(NO_MANIFESTS);
+      return;
+    }
     let live = true;
     Promise.all(wanted.map((id) => fetchManifest(clover, id))).then(
       (found) =>

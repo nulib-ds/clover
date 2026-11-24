@@ -118,7 +118,9 @@ describe("Timeline", () => {
         isPrimary: { value: true },
         timeStamp: { value: timeStamp },
       });
-      view.dispatchEvent(event);
+      act(() => {
+        view.dispatchEvent(event);
+      });
     };
     click("pointerdown", 0);
     click("pointerup", 80);
@@ -265,7 +267,9 @@ describe("Timeline", () => {
       onMediaElement.mock.calls.at(-1)?.[0] as HTMLMediaElement | null;
     await waitFor(() => expect(latest()).toBeTruthy());
     const element = latest()!;
-    element.dispatchEvent(new Event("loadedmetadata"));
+    act(() => {
+      element.dispatchEvent(new Event("loadedmetadata"));
+    });
     return element;
   };
 

@@ -1393,13 +1393,34 @@ e2e:docs`.
   both write to `.next/`, and the build leaves the dev server failing with "Cannot find
   module './NNNN.js'". Stop the dev server first, or after a build clear `.next/` and
   restart it.
-- `npm run test`: run unit tests (Vitest/JSDOM).
+- `npm run test`: run unit tests (Vitest/JSDOM), watching. `npm run test:ci` runs them
+  once, as CI does.
 - `npm run coverage`: run tests with coverage reports (text/json/html).
 - `npm run lint`: Prettier check + ESLint 9 (`eslint.config.mjs`, a flat config; Next 16
   has no `next lint`). It lints the package's source, `app/`, `pages/` and `docs/lib/`,
   as `next lint` did. The React Compiler rules of eslint-plugin-react-hooks 7 are off
   (99 hits in code that passed before); turn them on deliberately.
 - `npm run typecheck`: TypeScript project checks.
+
+## Keep the checks clean
+
+The checks run clean: no errors and no warnings (Mat, 2026-11-23: "make a rule to keep
+this clean going forward and resolve as they occur").
+
+- The checks are `npm run lint`, `npm run typecheck`, `npm run test:ci`, `npm run build`,
+  `npm run test:build` and `npm run build:docs` (in a copy of the tree while
+  `npm run dev` runs). Clean means ESLint reports nothing (`npm run lint` fails on a
+  warning, `--max-warnings 0`), and the tests print nothing to stderr: no `act(...)`
+  warning, no React warning, no jsdom error, no stray `console` output. A build prints no
+  warning of its own (a budget, a chunk, Next's or Vite's).
+- A warning a change brings is fixed in that change. One already there is fixed when it
+  is found, as part of the work at hand, never left for later. Where the fix is outside
+  what was asked (the package's source, when only the docs were to change), say so and
+  fix it with Mat's go-ahead.
+- Fix the cause, never hide it. A test that warns about `act(...)` waits for what it
+  sets off (`findBy…`, `waitFor`, `act`); an unused `eslint-disable` comes out. Turn a
+  rule off, or filter a message, only where it doesn't fit the code, with the reason
+  beside it.
 
 ## Coding Style & Naming Conventions
 
@@ -1456,7 +1477,8 @@ e2e:docs`.
   of what it is, then sections (`##`) of bullets, each item one line, conversational, no
   fluff, and no "Generated with Claude Code" or other agent line at the bottom. Commits
   carry no `Co-Authored-By` trailer for an agent either.
-- Required: `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` must pass.
+- Required: `npm run lint`, `npm run typecheck`, `npm run test:ci`, `npm run build` and
+  `npm run test:build` must pass, clean ("Keep the checks clean").
 - Update docs (`docs/` or `content/`) when changing public APIs or behavior.
 
 ## Agents: scope of work

@@ -6,7 +6,6 @@ import type { Default } from "../../templates/default/Default";
  * A layout the Viewer draws: one from `@nulib/clover/templates`, or a component of your
  * own that takes the `Clover.Root` props.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ViewerTemplate = React.ComponentType<any>;
 
 /**
