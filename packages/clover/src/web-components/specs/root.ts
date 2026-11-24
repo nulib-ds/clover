@@ -16,7 +16,13 @@ export const root: ElementSpec = {
     "annotations-shown": { prop: "defaultAnnotationsShown", type: "boolean" },
     lang: { prop: "lang", type: "string" },
   },
-  properties: ["iiifContent", "annotations", "request", "renderers"],
+  properties: [
+    "iiifContent",
+    "annotations",
+    "request",
+    "renderers",
+    "gestures",
+  ],
   events: {
     "clover-ready": { prop: "onReady", detail: ["clover"], keeps: "clover" },
     "clover-canvas-change": { prop: "onCanvasChange", detail: ["canvasId"] },
@@ -91,6 +97,11 @@ export const rootDocs: ElementDocs = {
       readonly: true,
       description:
         "Its Clover, for a part of your own, once it has loaded (clover-ready): what React's hooks read, as methods of the same name (navigation(), visibleCanvases()…), the table of contents (contents()), its state and subscribe, its actions and channels, and its language. Null before.",
+    },
+    gestures: {
+      type: "{ cooperative?: boolean; scrollToZoom?: boolean } | null",
+      description:
+        "How a pointer moves the views inside, for every clover-canvas, clover-scene and clover-map in it that leaves it unset, as clover-canvas's options.gestures: { cooperative: false } gives one finger's drag back to all of them.",
     },
     renderers: {
       type: "CloverRenderer[] | null",

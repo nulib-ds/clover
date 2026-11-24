@@ -1,8 +1,11 @@
 /*
- * How to move the view, over the whole Body while a gesture is left to the page
- * (`GestureHint`): white on a black wash, 5.7:1 or more over any picture. It takes no
- * pointer. Empty, it stays laid out but clear, so its live region is in the
- * accessibility tree before it speaks.
+ * How to move the view, while one finger's drag is left to the page (`GestureHint`): a
+ * pill in the middle of the view, the one place no part puts a control, so it is clear of
+ * them all, the Canvas's, the Map's, the Scene's and Document's (Mat, 2026-11-23: "do not
+ * have it completely overlay", then, of where, "Centered"). The controls' colors, white on
+ * their dark fill, at the page's own text size (`inherit`, which `1em` is; "make it 1em
+ * text"). It takes no pointer. Empty, its live region stays laid out and clear, so it is
+ * in the accessibility tree before it speaks (WCAG 4.1.3).
  */
 .clover-gesture-hint {
   position: absolute;
@@ -11,40 +14,78 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--clover-inset);
-  background-color: #0009;
-  color: #fff;
+  padding: var(--clover-canvas-controls-inset, var(--clover-inset));
   pointer-events: none;
-  animation: clover-gesture-hint-in 160ms ease-out;
-}
-
-.clover-gesture-hint:empty {
-  background-color: transparent;
-  animation: none;
+  container-type: inline-size;
 }
 
 .clover-gesture-hint-text {
+  display: flex;
+  align-items: center;
+  gap: var(--clover-space-xs);
   margin: 0;
-  font-size: var(--clover-text-l);
+  padding: var(--clover-space-xs) var(--clover-space-m) var(--clover-space-xs)
+    var(--clover-space-s);
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: var(--clover-color-control, #1a1d1e);
+  color: var(--clover-color-control-glyph, #fff);
+  font-size: inherit;
+  line-height: 1.25;
   text-align: center;
   text-wrap: balance;
+  /*
+   * It rises a little as it fades in, as the controls come back, and sinks as it fades
+   * out, more slowly, kept until it has (`GestureHint`): opacity and a transform alone.
+   */
+  animation: clover-gesture-hint-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.clover-gesture-hint-text[data-leaving] {
+  animation: clover-gesture-hint-out 400ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.clover-gesture-hint-text svg {
+  width: 1.25em;
+  height: 1.25em;
+  flex-shrink: 0;
+}
+
+/*
+ * A view too narrow for it on one line: a small card, the hand over two short lines,
+ * all about the middle, so it stays compact rather than a band across the view.
+ */
+@container (width < 22em) {
+  .clover-gesture-hint-text {
+    flex-direction: column;
+    max-width: 12em;
+    padding: var(--clover-space-s) var(--clover-space-m);
+    border-radius: var(--clover-space-m);
+  }
 }
 
 @keyframes clover-gesture-hint-in {
   from {
     opacity: 0;
+    translate: 0 var(--clover-space-xs);
+  }
+}
+
+@keyframes clover-gesture-hint-out {
+  to {
+    opacity: 0;
+    translate: 0 var(--clover-space-xs);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .clover-gesture-hint {
+  .clover-gesture-hint-text,
+  .clover-gesture-hint-text[data-leaving] {
     animation: none;
   }
 }
 
 @media (forced-colors: active) {
   .clover-gesture-hint-text {
-    padding: var(--clover-space-xs) var(--clover-space-s);
     background-color: Canvas;
     color: CanvasText;
     border: 1px solid CanvasText;

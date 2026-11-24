@@ -335,13 +335,18 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
     hasBehavior(active, "auto-advance") ||
     hasBehavior(manifest, "auto-advance");
   const loop = hasBehavior(active, "repeat") || hasBehavior(manifest, "repeat");
+  // The Root's gestures, where the Canvas leaves them unset.
+  const rootGestures = context.gestures;
   const connectedOptions = useMemo(
     () => ({
       ...options,
       request,
       animation: options?.animation ?? { autoplay, loop },
+      ...((rootGestures || options?.gestures) && {
+        gestures: { ...rootGestures, ...options?.gestures },
+      }),
     }),
-    [options, request, autoplay, loop],
+    [options, request, autoplay, loop, rootGestures],
   );
 
   // Nothing to draw, but for the next Manifest on its way: a view already up stays, empty.

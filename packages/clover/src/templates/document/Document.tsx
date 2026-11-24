@@ -182,6 +182,8 @@ export function Document({
         .join(" ")}
       {...title.group}
       {...root}
+      // The Body's gestures for every view inside, its maps' too (`Root`'s `gestures`).
+      gestures={canvasOptions?.gestures ?? root.gestures}
       defaultAnnotationsShown={defaultAnnotationsShown ?? false}
     >
       <DocumentLayout

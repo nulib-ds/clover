@@ -9,6 +9,7 @@ import {
   useHighContrast,
 } from "../../hooks/useHighContrast";
 import type { CloverRequest } from "../../core/request";
+import type { GestureOptions } from "../../lib/renderer/input/GestureController";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { join } from "../../lib/classnames";
 import { CloverContext } from "../../react/context";
@@ -67,6 +68,12 @@ export interface RootProps
    * drawn by every `Body` inside in place of `Canvas` (3.x's `customDisplays`).
    */
   renderers?: BodyRenderer[];
+  /**
+   * How a pointer moves the views inside, for every Canvas, Scene and Map that leaves it
+   * unset: the Canvas's `options.gestures`, which a template takes as its `canvasOptions`.
+   * `{ cooperative: false }` gives one finger's drag back to all of them; a part's own wins.
+   */
+  gestures?: Partial<GestureOptions>;
   /**
    * Annotations to show beside the Manifest's own: an AnnotationPage or
    * AnnotationCollection (or a list of them), as URLs or objects.

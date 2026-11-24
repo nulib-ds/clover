@@ -236,6 +236,17 @@ This example is one georeference Annotation: Northwestern University's campus, f
 
 </Example>
 
+### Cooperative gestures
+
+On a touch screen, one finger's drag scrolls the page past the map, and two fingers pan
+and pinch it, as on an embedded Google map. Set `cooperative` to `false` for one finger
+to pan it. Inside a `Root`, a map takes the Root's `gestures` where it sets none
+([turn cooperative gestures off](/docs/canvas#turn-cooperative-gestures-off)).
+
+```jsx
+<Clover.Map iiifContent={url} cooperative={false} />
+```
+
 ### Customize layout
 
 Map lists its places and images under itself with Items, in any of Items' layouts. To put

@@ -2,6 +2,7 @@ import { createContext, useContext, useRef, useSyncExternalStore } from "react";
 
 import type { BodyRenderer } from "../components/Body/renderers";
 import type { Clover, CloverState } from "../core/clover";
+import type { GestureOptions } from "../lib/renderer/input/GestureController";
 
 /**
  * The Clover a `Root` owns, and the language it reads IIIF text in. The context value is
@@ -25,6 +26,11 @@ export interface CloverContextValue {
   drawsToggle?: () => () => void;
   /** Renderers of the host's own, for `Body` to draw some views with. */
   renderers?: BodyRenderer[];
+  /**
+   * The Root's `gestures`: what a Canvas's, a Scene's and a Map's own leave unset, for
+   * every one inside (`cooperative`, `scrollToZoom`, and the Canvas's others).
+   */
+  gestures?: Partial<GestureOptions>;
 }
 
 export const CloverContext = createContext<CloverContextValue | null>(null);

@@ -319,6 +319,35 @@ describe("Body, for a Scene", () => {
     await waitFor(() => expect(engine.draw).toHaveBeenCalled());
   });
 
+  // Mat, 2026-11-23: "document how to disable this in templates/body/canvas/map/scene".
+  it("takes its Root's gestures, and the Body's options, for one finger's drag", async () => {
+    const { rerender } = render(
+      <Clover.Root
+        iiifContent={modelJson as never}
+        gestures={{ cooperative: false }}
+      >
+        <Clover.Body />
+      </Clover.Root>,
+    );
+    const view = await screen.findByTestId("clover-scene-viewport");
+    await waitFor(() => expect(engine.draw).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(view.hasAttribute("data-cooperative")).toBe(false),
+    );
+    // The Body's own options win, as the Canvas's do.
+    rerender(
+      <Clover.Root
+        iiifContent={modelJson as never}
+        gestures={{ cooperative: false }}
+      >
+        <Clover.Body options={{ gestures: { cooperative: true } }} />
+      </Clover.Root>,
+    );
+    await waitFor(() =>
+      expect(view.hasAttribute("data-cooperative")).toBe(true),
+    );
+  });
+
   it("lets a renderer of the host's draw it instead, by its format", async () => {
     function Mine() {
       return <div data-testid="mine" />;

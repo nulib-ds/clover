@@ -26,9 +26,25 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the view, with no hint. The Map's `scrollZoom` now governs only the wheel: one finger's
   drag stays the page's while it is on. The Scene takes `options.gestures`
   (`cooperative`, `scrollToZoom`), which `Body` hands it from the Canvas's options.
-  The Scene's budgets rise to the next 50 B over what is measured, for its double tap,
-  two fingers' turn and tap, and the hint: its initial JS 20,100 B gzip, and to first
-  view 30,550 B (`build/size-budget.json`).
+  A `Root` takes `gestures` (`<clover-root>`'s property too), the Canvas's
+  `options.gestures` for every Canvas, Scene and Map inside that sets none, so
+  `gestures={{ cooperative: false }}` turns them all off; a template's
+  `canvasOptions.gestures` goes to its Root, so its maps take them, and the Canvas's map
+  box takes its Canvas's.
+  The hint is a pill in the middle of the view, where no part puts a control, a pinching
+  hand beside its words at the page's own text size, and a small card, the hand over
+  two short lines, in a view too narrow for one; it laid a dark wash over the whole Body
+  before. It fades in and out. Its hand is Material Design Icons' `gesture-pinch`
+  (Pictogrammers, Apache License 2.0), its arrows left out; its words and hand load
+  apart, early on a touch screen and otherwise the first time it speaks. Budgets raised
+  to the next 50 B over what is measured (`build/size-budget.json`): the Scene's initial
+  JS to 20,150 B gzip and to first view 30,600 B, for its double tap and its two
+  fingers' turn and tap; and, for the hint and the Root's `gestures`, `styles.css`
+  12,700 B, `base.css` 16,500 B, the Default template to first view 96,900 B, the
+  Gallery 33,300 B and to first view 54,300 B, the Viewer's own entry 108,300 B, and as
+  elements a `<clover-viewer>` 130,800 B, a Canvas 94,750 B, a Gallery 134,150 B, labels
+  37,950 B, a composed page 108,250 B and a layout 126,000 B, each 50 to 450 B over its
+  old budget.
 
 ### Security
 

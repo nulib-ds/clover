@@ -645,6 +645,59 @@ plain wheel zooms.
 | `gestures.cooperative`    | `boolean` | `true`  | Leaves the page its own gestures, as an embedded Google map does: one finger's drag scrolls the page, and a hint over the Canvas says to use two. A mouse's drag still pans. In full screen, one finger pans and a plain wheel zooms. `false`: one finger's drag pans. |
 | `gestures.navigable`      | `boolean` | `true`  | Off, a drag, a pinch, the wheel, a click and the keys leave the view where it is. The Canvas's controls and its [handle](#canvas-handles-and-callbacks) still move it.                                                                                                 |
 
+#### Turn cooperative gestures off
+
+Set `cooperative` to `false` where the view should take one finger's drag, as on a page
+given wholly to the viewer. Each part takes it in its own options. A `Root`, a Viewer or a
+template's `canvasOptions` gives it to every Canvas, Scene and Map inside, and a part's
+own setting wins. Off, a finger's drag over the view moves it, so it no longer scrolls
+the page.
+
+```jsx
+// A Viewer, in any template: its Body, and the maps it shows.
+<Viewer iiifContent={url} canvasOptions={{ gestures: { cooperative: false } }} />
+
+// A layout of your own: every Canvas, Scene and Map in the Root.
+<Clover.Root iiifContent={url} gestures={{ cooperative: false }}>
+  <Clover.Body />
+  <Clover.Map />
+</Clover.Root>
+
+// One part at a time.
+<Clover.Body options={{ gestures: { cooperative: false } }} />
+<Clover.Canvas iiifContent={url} options={{ gestures: { cooperative: false } }} />
+<Clover.Scene iiifContent={url} options={{ gestures: { cooperative: false } }} />
+<Clover.Map iiifContent={url} cooperative={false} />
+```
+
+```html twin
+<!-- A Viewer, in any template: its Body, and the maps it shows. -->
+<clover-viewer
+  id="viewer"
+  iiif-content="https://…/manifest.json"
+></clover-viewer>
+
+<!-- A layout of your own: every Canvas, Scene and Map in the Root. -->
+<clover-root id="layout" iiif-content="https://…/manifest.json">
+  <clover-body></clover-body>
+  <clover-map></clover-map>
+</clover-root>
+
+<!-- One part at a time: the Map by its attribute, the rest by their options. -->
+<clover-map
+  iiif-content="https://…/manifest.json"
+  cooperative="false"
+></clover-map>
+
+<script type="module">
+  const gestures = { cooperative: false };
+  document.querySelector("#viewer").canvasOptions = { gestures };
+  document.querySelector("#layout").gestures = gestures;
+  // A clover-body, clover-canvas or clover-scene of its own: its options.
+  // element.options = { gestures };
+</script>
+```
+
 ### Selecting text
 
 Where a Canvas has `supplementing` annotations on regions of its image, as OCR does,

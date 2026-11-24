@@ -175,6 +175,8 @@ export function Gallery({
       onFocus={preloadLightbox}
       {...title.group}
       {...root}
+      // The Body's gestures for every view inside, its maps' too (`Root`'s `gestures`).
+      gestures={canvasOptions?.gestures ?? root.gestures}
     >
       <GalleryGrid
         title={title}

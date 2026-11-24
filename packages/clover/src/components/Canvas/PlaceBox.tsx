@@ -51,6 +51,7 @@ export default function PlaceBox({
   asked,
   onReady,
   returnFocus,
+  cooperative,
 }: {
   id: string;
   open: boolean;
@@ -63,6 +64,8 @@ export default function PlaceBox({
   returnFocus?: string;
   /** Whether its map and the Canvas have traded places: the map fills the Body. */
   swapped?: boolean;
+  /** As the Canvas's `gestures.cooperative`: the map, expanded, takes the same. */
+  cooperative?: boolean;
   /** Trade them, or trade them back. */
   onSwap: () => void;
   /** Its place: a GeoJSON `Feature`, `FeatureCollection` or geometry. */
@@ -210,7 +213,12 @@ export default function PlaceBox({
     >
       {/* The map first, so it stays the one map as it and the Canvas trade places. */}
       {asked ? (
-        <RootPlaceMap focus={asked} reframe={swapped} onReady={onReady}>
+        <RootPlaceMap
+          focus={asked}
+          reframe={swapped}
+          cooperative={cooperative}
+          onReady={onReady}
+        >
           {page}
         </RootPlaceMap>
       ) : (
@@ -221,6 +229,7 @@ export default function PlaceBox({
           owner={owner}
           reframe={swapped}
           navigable={swapped}
+          cooperative={cooperative}
           forwardedRef={null}
           landmark={false}
           items={false}
@@ -290,11 +299,13 @@ function PageClose({ id }: { id: string }) {
 function RootPlaceMap({
   focus,
   reframe,
+  cooperative,
   onReady,
   children,
 }: {
   focus: { key: string; n: number };
   reframe: boolean;
+  cooperative?: boolean;
   onReady?: (ready: boolean) => void;
   /** Over the map, in its box: expanded, the page's picture. */
   children?: React.ReactNode;
@@ -306,6 +317,7 @@ function RootPlaceMap({
       focus={focus}
       reframe={reframe}
       navigable={reframe}
+      cooperative={cooperative}
       onReady={onReady}
       forwardedRef={null}
       landmark={false}
