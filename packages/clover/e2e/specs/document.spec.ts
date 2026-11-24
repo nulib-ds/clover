@@ -69,8 +69,8 @@ const read = (page: Page) =>
       ".clover-template-document-live",
     )!;
     const box = element.querySelector(".clover-template-document-sheets")!;
-    // The space between the sheets and over the first, which a sheet at the top keeps.
-    const gap = parseFloat(getComputedStyle(box).rowGap) || 0;
+    // The space over the first sheet, which a sheet brought to the top keeps (`Sheets`).
+    const gap = parseFloat(getComputedStyle(box).paddingTop) || 0;
     return {
       scrollTop: element.scrollTop,
       clientHeight: element.clientHeight,
