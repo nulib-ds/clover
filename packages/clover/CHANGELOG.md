@@ -13,6 +13,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **A click on a Canvas's text zooms, as a click anywhere on the picture does.** Over
+  its text (`supplementing` annotations on regions, as OCR is), a mouse's or a hovering
+  pen's press only selected, so zoomed into a column of text a pointer could neither
+  move about it nor, with `controls={false}`, zoom back out (WCAG 2.5.1;
+  `ACCESSIBILITY.md` N42). Now a press that does not move is a click: it zooms in where
+  `clickToZoom` is on, out with Shift, and the first click over a selection only lets it
+  go. A drag from a word still selects, and Control or Command with A still selects all
+  of it. A double or triple click no longer takes a word or a line: it zooms as on the
+  picture. Budgets raised to the next 50 B over what is measured: the Canvas's initial
+  JS 44,600 B gzip, the Default template 82,100 B, the Document template 84,750 B, the
+  Default template to first view 97,550 B, the Document template to first view
+  104,350 B, the Canvas to first view 51,750 B, a `<clover-viewer>` 131,700 B, a
+  composed page of elements 108,950 B, a layout of elements 126,650 B, a
+  `<clover-canvas>` alone 95,000 B, a `<clover-viewer>` in Document 150,800 B, a
+  `<clover-viewer>` in Gallery 135,100 B and the Viewer's own entry 108,950 B.
+
 - **The Canvas, the Map and the Scene take the same gestures, an embedded Google map's.**
   On a touch screen, one finger's drag scrolls the page past them, and two fingers move
   the view (pan it, or turn the Scene's models) and pinch to zoom; a hint says so ("Use
