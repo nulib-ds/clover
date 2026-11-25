@@ -55,6 +55,51 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Rendered on the server with React 18, the Canvas and the Document template no longer
   warn that `useLayoutEffect` does nothing there.** They measure as every other part
   does: as an effect on the server, and before paint in the browser.
+- **Accessibility audit of November 25, 2026** (WCAG 2.2 AA; `ACCESSIBILITY.md`):
+  - **Focus stays where it can be seen.** The annotations menu over a map filling the
+    Body closes as focus moves into the map, as it does for the viewport, so Collapse map
+    and Close are never under it (2.4.11). A hotspot reached by Tab is panned clear of the
+    Canvas's place box, drawn as an Inset since November 16, as it is of the controls (2.4.11). While a
+    map loads, its canvas and zoom buttons, drawn out of sight, are out of the tab order
+    too (2.4.7). After a long selection of a Canvas's text, its hidden popover is no
+    longer a tab stop (2.4.7).
+  - **Focus is never dropped.** Zoom in and Zoom out on a map stay enabled at the
+    greatest and least zoom, `aria-disabled` saying so, as the Canvas's are, where
+    MapLibre disabled them and focus fell to the page (2.4.3). In Document, Escape out of
+    the full viewer from a recording's player hands focus to the page's Play, as Back to
+    pages does; Next or Previous in the full viewer keeps focus as a step between a
+    picture and a recording moves its controls; and the toolbar's search keeps focus as
+    the toolbar crosses the width that opens it. Default keeps its header, and the pager
+    in it, where a content state's target fails to load. A standalone `Items` given
+    another `iiifContent` hands focus among the last items to the next ones, which the
+    flush of November 6 had dropped (2.4.3).
+  - **Focus shows.** In the higher-contrast mode a focused map control is ringed, its fill
+    being the one at rest, and in forced colors the map's credits button is too (2.4.7).
+    With `base.css` alone, the viewport (and a recording's player over it) and an
+    Annotations entry are ringed in the page's own colors, `CanvasText` and `Canvas`, where
+    nothing else drew their focus (2.4.7).
+  - **Languages.** The selected text's popover shows and announces each run in its own
+    language (3.1.2). Document's step among the pages says each page's label in its own
+    language and its place in Clover's, and its toolbar's group of sections is named in
+    Clover's interface language without marking the sections' own names with it, so a
+    `panelLabels` name takes the page's language (3.1.2).
+  - **Gestures.** Two fingers on a Canvas's text, each on a line of its own, pinch and
+    pan the view, where the page scrolled under them (2.5.1); and the map a place asked
+    for fills the Body with the Canvas's `cooperative`, as the Canvas's other maps do.
+  - **Names and structure.** Past `headingLevel` 6, Document's pages are still named by
+    its title (1.3.1, 4.1.2). An entry in the annotations menu that opens the map says so,
+    "Find on the map", before it is chosen (3.2.2).
+  - **One Escape, one thing.** With the map filling the Body, the Canvas's keys no longer
+    reach the Canvas put away under it (a `+` zoomed both). A page layout chosen in the
+    full viewer keeps it open (3.2.2), and its menu opens over the thumbnails on a phone,
+    whole, where it ran off the screen (1.4.10). The page layout's Escape checks
+    `defaultPrevented`, as DESIGN.md asks of every one.
+  - **Budgets** raised to the next 50 B over what is measured (`build/size-budget.json`),
+    for these fixes: `base.css` to 16,650 B gzip; to first view, the Document template
+    103,900 B, the Gallery 54,350 B, a Scene 30,650 B and a Map 48,950 B; and as elements
+    a `<clover-viewer>` 130,900 B, in Document 149,950 B and in Gallery 134,300 B, a
+    Canvas 94,800 B, a composed page 108,300 B, a layout 126,050 B and the Viewer's own
+    entry 108,350 B, each 50 to 250 B over its old budget.
 
 ### Security
 
