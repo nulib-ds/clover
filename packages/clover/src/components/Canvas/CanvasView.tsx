@@ -1255,8 +1255,12 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             event.preventDefault();
             return;
           }
-          // The Canvas's keys work from its own controls too, as their popovers say.
-          forwardShortcut(event, hostRef.current);
+          /*
+           * The Canvas's keys work from its own controls too, as their popovers say; not
+           * while a map fills the Body, the view then, whose keys are its own (its + and -
+           * would zoom the Canvas put away under it too).
+           */
+          if (!placeSwapped) forwardShortcut(event, hostRef.current);
         }}
         /*
          * Geometry inline: the Body fills its box with or without the stylesheet. Its
@@ -1582,6 +1586,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         {asked && (
           <Suspense fallback={null}>
             <PlaceBox
+              cooperative={options?.gestures?.cooperative}
               id={askedId}
               open
               swapped={placeSwapped && swappedBox === askedId}
