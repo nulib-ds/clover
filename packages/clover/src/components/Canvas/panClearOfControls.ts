@@ -8,13 +8,18 @@ import type { CanvasRenderer } from "../../lib/renderer";
 
 /**
  * The Canvas's own controls over the Body, which a hotspot reached by Tab is kept clear
- * of: the cluster's each, never its box, which runs the Body's width as its row may.
+ * of: the cluster's each, never its box, which runs the Body's width as its row may. An
+ * Inset under them too (`ui/Inset`: the Canvas's place box, a template's map in the Body),
+ * but not expanded, when it fills the Body and the Canvas is put away (`clover-inset` is
+ * its small box's alone).
  */
 const CONTROLS = [
   ".clover-canvas-controls > *",
   ".clover-canvas-navigator",
   ".clover-canvas-transport",
   '.clover-canvas-caption[data-open="true"]',
+  ".clover-canvas > .clover-inset",
+  ".clover-inset-host > .clover-inset",
   ".clover-canvas-menu",
   ".clover-canvas-placeholder-toggle",
   ".clover-canvas-exit-full-screen",

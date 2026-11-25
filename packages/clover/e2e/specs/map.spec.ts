@@ -604,3 +604,128 @@ test("in forced colors, only the current place's ring shows", async ({
   await expect(pictures(bronze)).toHaveCSS("outline-style", "solid");
   await expect(pictures(bronze)).toHaveCSS("outline-width", "3px");
 });
+
+// Audit of 2026-11-25: MapLibre disabled Zoom out at its least zoom, dropping focus.
+test("Zoom out at the least zoom keeps focus, and says it is at an end", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await open(page, `/?scene=map&content=${PLACES}`);
+  const out = page.getByRole("button", { name: "Zoom out" });
+  await out.focus();
+  for (let press = 0; press < 40; press++) {
+    if ((await out.getAttribute("aria-disabled")) === "true") break;
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(50);
+  }
+  await expect(out).toHaveAttribute("aria-disabled", "true");
+  // Never `disabled`, which would drop focus to the page (WCAG 2.4.3).
+  expect(
+    await out.evaluate((button) => (button as HTMLButtonElement).disabled),
+  ).toBe(false);
+  await expect(out).toBeFocused();
+  // A press there does nothing, and keeps focus.
+  await page.keyboard.press("Enter");
+  await expect(out).toBeFocused();
+  // Zoom in, from there, takes it off the end.
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Enter");
+  await expect(out).toHaveAttribute("aria-disabled", "false");
+});
+
+// Audit of 2026-11-25: in the higher-contrast mode the fill at rest is the fill focused.
+test("in the higher-contrast mode, a focused map control has a ring", async ({
+  page,
+}) => {
+  await page.emulateMedia({ contrast: "more" });
+  await open(page, `/?scene=map&content=${PLACES}`);
+  const zoom = page.getByRole("button", { name: "Zoom in" });
+  await zoom.focus();
+  await expect(zoom).toBeFocused();
+  expect(
+    await zoom.evaluate((element) => getComputedStyle(element).boxShadow),
+  ).not.toBe("none");
+});
+
+test("in forced colors, the credits' button shows focus", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== "chromium", "forced colors emulate in Chromium");
+  await page.emulateMedia({ forcedColors: "active" });
+  await serveIIIF(page);
+  // A basemap with credits, so its ⓘ shows: the one-color basemap has none.
+  await page.route("https://fixtures.test/map-style.json", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({
+        ...STYLE,
+        sources: {
+          credited: {
+            type: "geojson",
+            data: { type: "FeatureCollection", features: [] },
+            attribution: "Test basemap",
+          },
+        },
+        // Credited only where a layer draws from it.
+        layers: [
+          ...STYLE.layers,
+          { id: "credited", type: "circle", source: "credited" },
+        ],
+      }),
+    }),
+  );
+  await page.goto(`/?scene=map&content=${PLACES}`);
+  await ready(page);
+  const credits = page.locator(".maplibregl-ctrl-attrib-button");
+  // By the keyboard, from Zoom out before it.
+  await page.getByRole("button", { name: "Zoom out" }).focus();
+  await page.keyboard.press("Tab");
+  await expect(credits).toBeFocused();
+  expect(
+    await credits.evaluate((element) => getComputedStyle(element).outlineStyle),
+  ).toBe("solid");
+});
+
+// Audit of 2026-11-25: the annotations menu stayed open over the map filling the Body,
+// over its Collapse map and Close, as Tab went on into the map (WCAG 2.4.11).
+test("the annotations menu over a map filling the Body closes as focus goes into the map", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "the panel lies over the Body on a phone");
+  await serveIIIF(page);
+  await page.route("https://tiles.openfreemap.org/**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify(STYLE),
+    }),
+  );
+  await page.goto(
+    "/?content=https://clover.iiif.library.northwestern.edu/mocks/sanborn/manifest.json",
+  );
+  const figure = page.getByTestId("clover-canvas");
+  const place = figure.locator(
+    '.clover-canvas-controls button[data-button="place"]',
+  );
+  await place.focus();
+  await page.keyboard.press("Enter");
+  await ready(page);
+  await figure.getByRole("button", { name: "Expand map" }).click();
+  await expect(figure).toHaveAttribute("data-place", "swapped");
+  const annotations = figure.locator(
+    '.clover-canvas-controls button[data-button="annotations"]',
+  );
+  await annotations.focus();
+  await page.keyboard.press("Enter");
+  const menu = figure.locator(".clover-canvas-annotation-menu");
+  await expect(menu).toHaveCount(1);
+  await figure
+    .locator(".clover-canvas-place[data-swapped] .maplibregl-canvas")
+    .focus();
+  await expect(menu).toHaveCount(0);
+});

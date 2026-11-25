@@ -109,12 +109,24 @@ export function SectionControls({
         <div className="clover-template-document-bar" hidden={!bar}>
           {language && <Offered onOffered={setLanguages}>{language}</Offered>}
           {sections.length > 0 && (
+            /*
+             * Named in Clover's interface language, never marked with it: the group holds
+             * the sections' own names, a page's `panelLabels` among them (DESIGN.md §0,
+             * WCAG 3.1.2). In another language than the page's, by a hidden name.
+             */
             <div
               className="clover-template-document-group"
               role="group"
-              aria-label={groupLabel.text}
-              lang={groupLabel.lang}
+              aria-label={groupLabel.lang ? undefined : groupLabel.text}
+              aria-labelledby={
+                groupLabel.lang ? `${aside}-group-name` : undefined
+              }
             >
+              {groupLabel.lang && (
+                <span hidden id={`${aside}-group-name`} lang={groupLabel.lang}>
+                  {groupLabel.text}
+                </span>
+              )}
               {sections.map((section) => {
                 const label = labelOf(section);
                 const mark = marks(section);
@@ -271,6 +283,21 @@ function SearchControl({
 
   // Unfolded by a press, focus goes into the field, once its code has come.
   const focusField = useRef(false);
+  /*
+   * The toolbar crossing the width that opens it (`open`), a window resized or zoomed,
+   * with focus on what that swaps (WCAG 2.4.3): narrowed with focus in the field, it
+   * stays unfolded; widened with focus on the magnifier, which goes, focus goes into the
+   * field. Read as the render begins, while focus is still where it was.
+   */
+  const wasOpen = useRef(open);
+  if (wasOpen.current !== open) {
+    wasOpen.current = open;
+    const active =
+      typeof document === "undefined" ? null : document.activeElement;
+    if (open && active?.id === id) focusField.current = true;
+    else if (!open && active && box.current?.contains(active) && !unfolded)
+      setUnfolded(true);
+  }
   useEffect(() => {
     if (!shown || !focusField.current) return;
     let frames = 120;

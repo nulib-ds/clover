@@ -268,7 +268,8 @@ export function Default({
  * The header with the title, then what follows it on its line (`children`). None where
  * the resource failed to load and there is no Collection line to show, as nothing would
  * fill it (the Body says what went wrong); a member that failed keeps the Collection's
- * line, to move on to another.
+ * line, to move on to another, and a content state's target that failed keeps the pager
+ * among its targets, focus on its step with it (WCAG 2.4.3).
  */
 function TitledHeader({
   title,
@@ -279,7 +280,10 @@ function TitledHeader({
 }) {
   const failed = Clover.useStatus().status === "error";
   const lines = useCollectionLines();
-  if (failed && !lines) return null;
+  const targets = Clover.useCloverSelector(
+    (state) => (state.targets?.items.length ?? 0) > 1,
+  );
+  if (failed && !lines && !targets) return null;
   return (
     <header className="clover-template-default-header">
       <HeaderTitle title={title} lines={lines} />

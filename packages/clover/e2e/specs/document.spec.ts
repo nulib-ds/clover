@@ -823,3 +823,158 @@ test("among the pages, Up and Down step from page to page, Home and End to the f
   await expect(column(page)).toHaveAttribute("data-expanded");
   await expect(viewport(page)).toBeFocused();
 });
+
+// Audit of 2026-11-25: Escape from one of the full viewer's own controls dropped focus.
+test("Escape from a full viewer's own control closes it, focus on the page's Canvas", async ({
+  page,
+}) => {
+  await open(page);
+  await viewport(page).focus();
+  await page.keyboard.press("+");
+  await full(page);
+  const zoom = page
+    .locator(".clover-template-document-live")
+    .getByRole("button", { name: "Zoom in" });
+  await zoom.focus();
+  // The first Escape puts away its Tip, if focus showed one; the next closes the viewer.
+  await page.keyboard.press("Escape");
+  if ((await column(page).getAttribute("data-expanded")) !== null)
+    await page.keyboard.press("Escape");
+  await expect(column(page)).not.toHaveAttribute("data-expanded");
+  await expect(viewport(page)).toBeFocused();
+
+  // From a recording's player, put away among the pages: its page's Play takes focus.
+  await page.addInitScript(() => {
+    Object.defineProperty(HTMLMediaElement.prototype, "muted", {
+      get: () => true,
+      set: () => undefined,
+      configurable: true,
+    });
+  });
+  await page.goto(`/?scene=document&content=${VIDEO}`);
+  const play = page.locator(".clover-template-document-live-play");
+  await expect(play).toBeVisible();
+  const sheet = (await sheets(page).first().boundingBox())!;
+  await page.mouse.click(
+    sheet.x + sheet.width * 0.25,
+    sheet.y + sheet.height * 0.75,
+  );
+  await full(page);
+  const seek = page
+    .locator(".clover-template-document-live .clover-canvas-transport")
+    .getByRole("slider")
+    .first();
+  await seek.focus();
+  await page.keyboard.press("Escape");
+  if ((await column(page).getAttribute("data-expanded")) !== null)
+    await page.keyboard.press("Escape");
+  await expect(column(page)).not.toHaveAttribute("data-expanded");
+  await expect(play).toBeFocused();
+});
+
+// Audit of 2026-11-25: a choice of page layout closed the full viewer (WCAG 3.2.2).
+test("a page layout chosen in the full viewer keeps it open", async ({
+  page,
+}) => {
+  await open(page, BOOK);
+  await viewport(page).focus();
+  await page.keyboard.press("+");
+  await full(page);
+  const layout = page
+    .locator(".clover-template-page-layout-button")
+    .filter({ visible: true })
+    .first();
+  await layout.click();
+  const radios = page.locator(".clover-template-page-layout-menu input");
+  const checked = () =>
+    radios.evaluateAll((all) =>
+      all.findIndex((radio) => (radio as HTMLInputElement).checked),
+    );
+  const before = await checked();
+  await radios.nth(before).focus();
+  await page.keyboard.press("ArrowDown");
+  await expect.poll(checked).not.toBe(before);
+  await page.waitForTimeout(300);
+  await expect(column(page)).toHaveAttribute("data-expanded");
+});
+
+// Audit of 2026-11-25: the page's place said its labels in Clover's language.
+test("a step among the pages says each label in its own language", async ({
+  page,
+}) => {
+  await open(page, "https://fixtures.test/0025-newspaper-article-index.json");
+  await viewport(page).focus();
+  await page.keyboard.press("ArrowDown");
+  const said = page.locator(
+    ".clover-template-document-column > [role='status']",
+  );
+  await expect(said).toHaveText(/^Seite 2\., Item 2 of \d+$/);
+  await expect(said).not.toHaveAttribute("lang");
+  await expect(said.locator("span").first()).toHaveAttribute("lang", "de");
+});
+
+// Audit of 2026-11-25: on a phone the menu opened off the screen's edge (WCAG 1.4.10).
+test("on a phone, the page layout's menu opens over the thumbnails, whole", async ({
+  page,
+}) => {
+  await serveIIIF(page);
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto(`/?scene=document&content=${BOOK}`);
+  await page.getByRole("button", { name: /^Show items/ }).click();
+  const layout = page
+    .locator(
+      ".clover-template-document-spine .clover-template-page-layout-button",
+    )
+    .first();
+  await layout.click();
+  const menu = page.locator(".clover-template-page-layout-menu");
+  await expect(menu).toBeVisible();
+  const box = (await menu.boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(320);
+});
+
+// Audit of 2026-11-25: the search field went from under focus as the toolbar narrowed.
+test("the toolbar's search keeps focus as the toolbar narrows past its width", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "a phone's own width");
+  await open(
+    page,
+    "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
+  );
+  const field = page.locator(".clover-template-document-search input");
+  await expect(field).toBeVisible();
+  await field.focus();
+  await page.setViewportSize({ width: 700, height: 760 });
+  await page.waitForTimeout(300);
+  await expect(field).toBeFocused();
+});
+
+// Audit of 2026-11-25: a step from a moving page to a picture drew the full viewer's
+// controls in their other place, and focus on Next fell to the page (WCAG 2.4.3).
+test("Next in the full viewer keeps focus as its controls move, a moving page to a picture", async ({
+  page,
+}) => {
+  await open(page, "https://fixtures.test/0688-stereogram-timeline.json");
+  await thumbnails(page).nth(1).click();
+  await settled(page, 1);
+  const sheet = (await sheets(page).nth(1).boundingBox())!;
+  await page.mouse.click(
+    sheet.x + sheet.width * 0.25,
+    sheet.y + sheet.height * 0.75,
+  );
+  await full(page);
+  const next = page
+    .locator(".clover-template-document-view")
+    .getByRole("button", { name: "Next" });
+  await next.focus();
+  await page.keyboard.press("Enter");
+  await expect.poll(() => selected(page)).toBe(2);
+  await expect(
+    page
+      .locator(".clover-template-document-view")
+      .getByRole("button", { name: "Next" }),
+  ).toBeFocused();
+});

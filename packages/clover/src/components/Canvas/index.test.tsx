@@ -1773,6 +1773,8 @@ describe("Canvas", () => {
         await waitFor(() =>
           expect(status.textContent).toBe("I. 54. Jahrgang Berliner Tageblatt"),
         );
+        // In the language its runs are in, not the page's (WCAG 3.1.2).
+        expect(status.querySelector("span")).toHaveAttribute("lang", "de");
         const writeText = vi.fn().mockResolvedValue(undefined);
         Object.defineProperty(navigator, "clipboard", {
           value: { writeText },

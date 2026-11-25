@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   type Forwarded,
@@ -62,12 +68,25 @@ export default function StandaloneItems({
       : (iiifContent as { id?: string })?.id;
   const latest = useRef({ iiifContent, request });
   latest.current = { iiifContent, request };
+  // What it draws, for the focus in it; and the page's own ref, as given.
+  const own = useRef<HTMLElement | null>(null);
+  const ref = useCallback(
+    (node: HTMLElement | null) => {
+      own.current = node;
+      if (typeof forwardedRef === "function") forwardedRef(node);
+      else if (forwardedRef) forwardedRef.current = node;
+    },
+    [forwardedRef],
+  );
   /*
    * Another content: the last one's items go in this very render, before the next is
-   * asked for (Mat, 2026-11-06), and the choice starts again at the first.
+   * asked for (Mat, 2026-11-06), and the choice starts again at the first. Focus among
+   * them goes with them, and comes back to the next ones (`refocus`, below).
    */
+  const refocus = useRef(false);
   const [loadingFor, setLoadingFor] = useState(key);
   if (loadingFor !== key) {
+    refocus.current = Boolean(own.current?.contains(document.activeElement));
     setLoadingFor(key);
     setResource(null);
     setSelected(0);
@@ -91,6 +110,22 @@ export default function StandaloneItems({
     () => itemsOf(provided ? (provided as never) : resource),
     [provided, resource],
   );
+  /*
+   * The next content's items drawn, with focus among the last ones as they went and on
+   * the page since, nowhere of the reader's own: their tab stop takes it, the first item,
+   * else the pager's first control (Mat, 2026-11-06: the flush keeps focus; WCAG 2.4.3).
+   */
+  useEffect(() => {
+    const element = own.current;
+    if (!refocus.current || !items.length || !element) return;
+    refocus.current = false;
+    const { activeElement, body } = element.ownerDocument;
+    if (activeElement && activeElement !== body) return;
+    (
+      element.querySelector<HTMLElement>('[data-track-index="0"]') ??
+      element.querySelector<HTMLElement>("button")
+    )?.focus();
+  }, [items]);
   if (!items.length) return null;
 
   const isViews = !provided && resource?.type === "Manifest";
@@ -104,7 +139,7 @@ export default function StandaloneItems({
     return (
       <Pager
         {...rest}
-        forwardedRef={forwardedRef}
+        forwardedRef={ref}
         steps={stepsOf(items, selected, direction, (item, event) => {
           onSelect?.(item, event);
           setSelected(items.indexOf(item));
@@ -119,7 +154,7 @@ export default function StandaloneItems({
   return (
     <ItemsView
       {...rest}
-      forwardedRef={forwardedRef}
+      forwardedRef={ref}
       items={items}
       selected={mode === "id" ? selected : -1}
       navigation={mode}

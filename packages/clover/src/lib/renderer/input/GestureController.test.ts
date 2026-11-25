@@ -254,12 +254,32 @@ describe("GestureController", () => {
       touch(element, "pointerdown", 50, 1);
       touch(element, "pointerdown", 100, 2);
       const move = new Event("touchmove", { cancelable: true });
-      Object.defineProperty(move, "targetTouches", { value: [{}, {}] });
+      Object.defineProperty(move, "touches", {
+        value: [{ target: element }, { target: element }],
+      });
       element.dispatchEvent(move);
       expect(move.defaultPrevented).toBe(true);
+      // Each on a line of the view's text, a run of its own: still two on the view.
+      const [first, second] = ["Line one", "Line two"].map((words) => {
+        const run = document.createElement("span");
+        run.textContent = words;
+        element.append(run);
+        return run;
+      });
+      const onText = new Event("touchmove", {
+        bubbles: true,
+        cancelable: true,
+      });
+      Object.defineProperty(onText, "touches", {
+        value: [{ target: first }, { target: second }],
+      });
+      first.dispatchEvent(onText);
+      expect(onText.defaultPrevented).toBe(true);
       // A finger elsewhere on the screen is not a second one on the view.
       const lone = new Event("touchmove", { cancelable: true });
-      Object.defineProperty(lone, "targetTouches", { value: [{}] });
+      Object.defineProperty(lone, "touches", {
+        value: [{ target: element }, { target: document.body }],
+      });
       element.dispatchEvent(lone);
       expect(lone.defaultPrevented).toBe(false);
       touch(element, "pointermove", 150, 2);

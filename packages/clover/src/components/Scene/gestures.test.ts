@@ -92,7 +92,9 @@ describe("the Scene's gestures", () => {
     pointer(element, "pointerdown", 50, { id: 1 });
     pointer(element, "pointerdown", 100, { id: 2 });
     const move = new Event("touchmove", { cancelable: true });
-    Object.defineProperty(move, "targetTouches", { value: [{}, {}] });
+    Object.defineProperty(move, "touches", {
+      value: [{ target: element }, { target: element }],
+    });
     element.dispatchEvent(move);
     expect(move.defaultPrevented).toBe(true);
     pointer(element, "pointermove", 150, { id: 2 });

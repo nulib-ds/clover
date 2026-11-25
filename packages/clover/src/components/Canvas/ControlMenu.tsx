@@ -116,13 +116,20 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
     };
     /*
      * Focus moving on into the viewport closes it: open, it lies over the viewport, and a
-     * hotspot Tab reaches under it would be hidden (WCAG 2.4.11). Focus stays where it
+     * hotspot Tab reaches under it would be hidden (WCAG 2.4.11). So does focus moving
+     * into a map filling the Body (`PlaceBox`'s `data-swapped`), the view while it does,
+     * whose Collapse map and Close lie under the annotations menu. Focus stays where it
      * went. Among the controls it stays open, so Escape there closes one thing at a time
      * (DESIGN.md §0: the tray, then the menu).
      */
     const onFocusIn = (event: FocusEvent) => {
       const target = event.target as Element | null;
-      if (!target?.closest(".clover-canvas-viewport")) return;
+      if (
+        !target?.closest(
+          ".clover-canvas-viewport, .clover-canvas-place[data-swapped]",
+        )
+      )
+        return;
       if (ref.current?.contains(target)) return;
       onClose(false);
     };

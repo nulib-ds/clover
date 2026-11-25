@@ -123,13 +123,18 @@ export function readTextUnits(
   return units;
 }
 
+/** A piece of a selection: one unit's text it covers, and that unit's language. */
+export interface SelectedPiece {
+  text: string;
+  lang?: string;
+}
+
 /**
- * What a selection over the text copies, as plain text: each unit's text it covers (part
- * of one where it starts or ends inside it), strung together with a space, no line
- * breaks (Mat, 2026-11-16: "do not worry about retaining formatting"). Null where it
- * covers none.
+ * What a selection over the text covers, piece by piece: each unit's text it covers
+ * (part of one where it starts or ends inside it), in order, with that unit's language,
+ * so what shows it marks each (WCAG 3.1.2). Empty where it covers none.
  */
-export function selectedText(
+export function selectedPieces(
   range: Pick<
     Range,
     | "intersectsNode"
@@ -139,9 +144,8 @@ export function selectedText(
     | "endOffset"
   >,
   elements: { element: HTMLElement; unit: TextUnit }[],
-): string | null {
-  let out = "";
-  let any = false;
+): SelectedPiece[] {
+  const pieces: SelectedPiece[] = [];
   for (const { element, unit } of elements) {
     if (!range.intersectsNode(element)) continue;
     const node = element.firstChild;
@@ -153,9 +157,20 @@ export function selectedText(
     if (range.endContainer === node) end = range.endOffset;
     else if (range.endContainer === element && range.endOffset === 0) end = 0;
     const piece = text.slice(start, end);
-    if (!piece) continue;
-    out += (any ? " " : "") + piece;
-    any = true;
+    if (piece) pieces.push({ text: piece, lang: unit.lang });
   }
-  return any ? out : null;
+  return pieces;
+}
+
+/**
+ * What a selection over the text copies, as plain text: its pieces (`selectedPieces`)
+ * strung together with a space, no line breaks (Mat, 2026-11-16: "do not worry about
+ * retaining formatting"). Null where it covers none.
+ */
+export function selectedText(
+  range: Parameters<typeof selectedPieces>[0],
+  elements: { element: HTMLElement; unit: TextUnit }[],
+): string | null {
+  const pieces = selectedPieces(range, elements);
+  return pieces.length ? pieces.map((piece) => piece.text).join(" ") : null;
 }

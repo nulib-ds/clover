@@ -443,6 +443,29 @@ describe("Items standalone", () => {
     );
   });
 
+  /*
+   * Another content flushes the last one's items (Mat, 2026-11-06); focus among them comes
+   * back to the next ones, never left on the page (WCAG 2.4.3).
+   */
+  it("keeps focus among its items as another content replaces them", async () => {
+    const fetch = vi.fn(
+      async (url: string) =>
+        new Response(JSON.stringify(url.includes("rtl") ? rtlJson : bookJson)),
+    );
+    const { rerender } = render(
+      <Clover.Items iiifContent={bookJson.id} request={{ fetch }} />,
+    );
+    const first = (await screen.findAllByRole("option"))[0];
+    act(() => first.focus());
+    expect(first).toHaveFocus();
+    rerender(<Clover.Items iiifContent={rtlJson.id} request={{ fetch }} />);
+    await waitFor(() =>
+      expect(document.activeElement).toHaveAttribute("data-track-index", "0"),
+    );
+    expect(document.activeElement).not.toBe(first);
+    expect(screen.getAllByRole("option")[0]).toHaveFocus();
+  });
+
   // Clover's own strings in a language written right to left, as a page may give it one.
   it("writes Clover's strings right to left in a language written so", async () => {
     void initCloverI18n({

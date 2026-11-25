@@ -186,6 +186,8 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
   // Its Canvases named where the view shows several, each a group within its own.
   const grouped = groups.length > 1;
   const titleId = `${id}-title`;
+  // What an entry that opens the map says it does, before it is chosen (WCAG 3.2.2).
+  const onMapId = `${id}-on-map`;
   let number = 0;
   return (
     <ControlMenu
@@ -201,6 +203,13 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
        * its one toggle at the end of the title's row; the title alone names the group of
        * them all, as the toggle names itself.
        */}
+      <span
+        hidden
+        id={onMapId}
+        {...languageProps(langOf("annotationsShowPlace"))}
+      >
+        {t("annotationsShowPlace")}
+      </span>
       <fieldset
         className="clover-canvas-menu-group clover-annotations-set"
         aria-labelledby={titleId}
@@ -229,6 +238,7 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
                   <PlaceItem
                     key={listed.key}
                     name={id}
+                    onMap={onMapId}
                     place={listed}
                     request={request}
                     Content={placesModule.PlaceContent}
@@ -239,6 +249,7 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
                 <AnnotationItem
                   key={annotation.id}
                   name={id}
+                  onMap={onMapId}
                   annotation={annotation}
                   canvas={group.canvas}
                   number={(number += 1)}
@@ -321,6 +332,7 @@ function useEntry(annotation: ListedAnnotation): EntryOf {
 /** One annotation: a radio's label, holding the entry the Annotations section shows. */
 const AnnotationItem = memo(function AnnotationItem({
   name,
+  onMap,
   annotation,
   canvas,
   number,
@@ -330,6 +342,8 @@ const AnnotationItem = memo(function AnnotationItem({
   actions,
 }: {
   name: string;
+  /** The id of the words saying a choice opens the map, for one whose body is a place. */
+  onMap: string;
   annotation: ListedAnnotation;
   canvas?: CanvasLike;
   /** Its place in the menu, which names it where it says nothing. */
@@ -371,6 +385,8 @@ const AnnotationItem = memo(function AnnotationItem({
         type="radio"
         name={name}
         checked={checked}
+        // One whose body is a place says, before it is chosen, that it opens the map.
+        aria-describedby={placed ? onMap : undefined}
         // A key's move only goes to it; a press (below) plays (3.2.2).
         onChange={() => {
           if (!placed) select(annotation, pointer.current);
@@ -418,12 +434,15 @@ const AnnotationItem = memo(function AnnotationItem({
 /** One georeferenced image: a radio's label, showing it on the map over the Body. */
 const PlaceItem = memo(function PlaceItem({
   name,
+  onMap,
   place,
   request,
   Content,
   actions,
 }: {
   name: string;
+  /** The id of the words saying a choice opens the map. */
+  onMap: string;
   place: Place;
   request?: CloverRequest;
   Content: typeof import("../Annotations/Places").PlaceContent;
@@ -447,8 +466,9 @@ const PlaceItem = memo(function PlaceItem({
       <input
         type="radio"
         name={name}
-        // Never checked: shown, it fills the Body, and the menu closes.
+        // Never checked: shown, it fills the Body, and the menu closes, as it says.
         checked={false}
+        aria-describedby={onMap}
         onChange={press}
         onKeyDown={(event) => {
           pointer.current = false;

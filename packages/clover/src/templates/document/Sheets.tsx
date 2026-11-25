@@ -138,6 +138,11 @@ export function Sheets({
   const column = useRef<HTMLDivElement>(null);
   const sheetsBox = useRef<HTMLDivElement>(null);
   const live = useRef<HTMLDivElement>(null);
+  // The page's own stop: a page that plays, its Play; else its Canvas.
+  const pageStop = () =>
+    live.current?.querySelector<HTMLElement>(
+      ".clover-template-document-live-play",
+    ) ?? live.current?.querySelector<HTMLElement>(".clover-canvas-viewport");
 
   /* A spread's pages side by side, as the Canvas lays them: the book's way around. */
   const reversed =
@@ -354,27 +359,26 @@ export function Sheets({
    * of the same name.
    */
   const stepped = useRef(false);
-  const [said, setSaid] = useState("");
+  // What it says: the page's labels, each in its own language, then its place.
+  const [said, setSaid] = useState<{
+    labels: { text: string; lang?: string }[];
+    place: string;
+  } | null>(null);
   useEffect(() => {
     if (!stepped.current) return;
     stepped.current = false;
     const labels = (sheets[position]?.canvases ?? [])
-      .map((canvas) => Clover.localize(canvas?.label as never, language).text)
-      .filter(Boolean)
-      .join(", ");
+      .map((canvas) => Clover.localize(canvas?.label as never, language))
+      .filter((label) => Boolean(label.text));
     const place = t("canvasPosition", {
       index: position + 1,
       total: navigation.total,
     });
-    setSaid(labels ? `${labels}, ${place}` : place);
+    setSaid({ labels, place });
     let frames = 60;
     let frame = 0;
     const land = () => {
-      const layer = live.current;
-      const stop =
-        layer?.querySelector<HTMLElement>(
-          ".clover-template-document-live-play",
-        ) ?? layer?.querySelector<HTMLElement>(".clover-canvas-viewport");
+      const stop = pageStop();
       if (stop && getComputedStyle(stop).visibility !== "hidden") {
         if (document.activeElement !== stop)
           stop.focus({ preventScroll: true });
@@ -540,6 +544,12 @@ export function Sheets({
     () => sheets.map((sheet) => sheet.key).join("\n"),
     [sheets],
   );
+  // The document's Canvases, by id: new sheets of the same ones are a new page layout.
+  const shownCanvases = useRef<string | null>(null);
+  const canvasKeys = useMemo(
+    () => sequence.canvases.map((canvas) => canvas?.id).join("\n"),
+    [sequence.canvases],
+  );
   /*
    * A new current view. Made so here, by the reader's scroll or a press on its sheet, it
    * stays where it is; chosen elsewhere (the thumbnails, the pager, a key, a link, a new
@@ -547,10 +557,16 @@ export function Sheets({
    */
   useLayout(() => {
     const fresh = shownSheets.current !== sheetKeys;
+    const newDocument = shownCanvases.current !== canvasKeys;
     shownSheets.current = sheetKeys;
+    shownCanvases.current = canvasKeys;
     zoom(false);
-    // A new document opens among its sheets; another view, in the full viewer, there.
-    if (fresh && open.current) askExpanded.current?.(false);
+    /*
+     * A new document opens among its sheets; another view, in the full viewer, there, and
+     * so do the same pages laid out anew (the page layout's menu), which keeps the
+     * current Canvas in view: a choice there never closes the full viewer (WCAG 3.2.2).
+     */
+    if (newDocument && open.current) askExpanded.current?.(false);
     else if (open.current) {
       followed.current = null;
       resting.current = false;
@@ -567,7 +583,7 @@ export function Sheets({
     bring(position, fresh);
     // `bring`, `reveal` and `zoom` read only refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [position, sheetKeys]);
+  }, [position, sheetKeys, canvasKeys]);
 
   /* The reader's scroll: where it is going, and where it comes to rest. */
   useEffect(() => {
@@ -962,9 +978,18 @@ export function Sheets({
       onKeyDown={(event) => {
         // A sheet at a time, as a reader's PageUp and PageDown turn a page.
         if (event.defaultPrevented || event.altKey || event.ctrlKey) return;
-        // Escape closes the full viewer, once nothing inside has taken it.
-        if (event.key === "Escape" && open.current) onExpandedChange?.(false);
-        else if (event.key === "PageDown" && navigation.hasNext)
+        /*
+         * Escape closes the full viewer, once nothing inside has taken it, focus going to
+         * the page's own stop, as Back to pages sends it (`ViewControls`): the full
+         * viewer's own controls go as it closes (zoom, turn, the map), and among the pages
+         * a recording's player is put away (WCAG 2.4.3).
+         */
+        if (event.key === "Escape" && open.current) {
+          onExpandedChange?.(false);
+          requestAnimationFrame(() =>
+            pageStop()?.focus({ preventScroll: true }),
+          );
+        } else if (event.key === "PageDown" && navigation.hasNext)
           navigation.next();
         else if (event.key === "PageUp" && navigation.hasPrevious)
           navigation.previous();
@@ -972,12 +997,15 @@ export function Sheets({
         event.preventDefault();
       }}
     >
-      <p
-        role="status"
-        style={Clover.visuallyHidden}
-        lang={langOf("canvasPosition")}
-      >
-        {said}
+      {/* Each label in the resource's language, the place in Clover's (WCAG 3.1.2). */}
+      <p role="status" style={Clover.visuallyHidden}>
+        {said?.labels.map((label, index) => (
+          <React.Fragment key={index}>
+            <span lang={label.lang}>{label.text}</span>
+            {", "}
+          </React.Fragment>
+        ))}
+        {said && <span lang={langOf("canvasPosition")}>{said.place}</span>}
       </p>
       <div
         ref={sheetsBox}

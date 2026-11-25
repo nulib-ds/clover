@@ -38,8 +38,14 @@
   display: none !important;
 }
 
+/*
+ * Out of the tab order too: MapLibre builds its canvas and zoom buttons, each focusable,
+ * before it has drawn, and a press of Tab would land on them unseen (WCAG 2.4.7). Ready,
+ * they show at once and the drawing fades in, as `visibility` takes no transition.
+ */
 .clover-geomap[data-status="loading"] .clover-geomap-canvas {
   opacity: 0;
+  visibility: hidden;
 }
 
 /*
@@ -339,6 +345,44 @@
 }
 
 /*
+ * Focused there, the fill is the one at rest, and MapLibre's sheet takes the browser's
+ * ring away: the ring a pressed option takes when focused, round it, in the page's ground
+ * and the controls' fill, which holds over any map (WCAG 2.4.7, 1.4.11). The credits' ⓘ
+ * too. A pressed option's own, which keeps its inner ring, is more specific.
+ */
+:where([data-high-contrast])
+  .clover-geomap
+  :is(
+    .maplibregl-ctrl-group :is(button, a),
+    .maplibregl-ctrl-attrib-button
+  ):focus-visible {
+  box-shadow:
+    0 0 0 2px var(--clover-color-secondary, #fff),
+    0 0 0 4px var(--clover-color-primary, #1a1d1e) !important;
+}
+
+/*
+ * Zoom in at the greatest zoom, Zoom out at the least: kept enabled, so focus on it stays
+ * (`MapView`, DESIGN.md §0), and drawn as the Canvas's view controls are at an end
+ * (`Button.css`): its glyph dimmed, no accent under the pointer, no pointing hand, its
+ * focus drawn as ever. `aria-disabled`, MapLibre's own, tells assistive technology.
+ */
+.clover-geomap .maplibregl-ctrl-group button[aria-disabled="true"] {
+  cursor: default;
+}
+
+.clover-geomap .maplibregl-ctrl-group button[aria-disabled="true"] svg {
+  opacity: 0.5;
+}
+
+.clover-geomap
+  .maplibregl-ctrl-group
+  button[aria-disabled="true"]:hover:not(:focus-visible) {
+  background-color: var(--clover-color-control, #1a1d1e) !important;
+  outline: none !important;
+}
+
+/*
  * The link to Allmaps Viewer (`allmaps`, `MapView.tsx`; Mat, 2026-11-12: its logo "within
  * a map. never on white"): a control as the map's buttons are, round, on the controls'
  * fill, at the map's lower corner at its start, Allmaps' mark in the glyph's color, so
@@ -584,10 +628,14 @@
   }
 
   /*
-   * MapLibre's sheet takes the zoom buttons' outline away; forced colors drop the fill
-   * that marks focus, so the ring is drawn here (WCAG 2.4.7).
+   * MapLibre's sheet takes the zoom buttons' outline away, and the credits' ⓘ's; forced
+   * colors drop the fill that marks focus, so the ring is drawn here (WCAG 2.4.7).
    */
-  .clover-geomap .maplibregl-ctrl-group :is(button, a):focus-visible {
+  .clover-geomap
+    :is(
+      .maplibregl-ctrl-group :is(button, a),
+      .maplibregl-ctrl-attrib-button
+    ):focus-visible {
     outline: 3px solid Highlight !important;
     outline-offset: 2px;
   }

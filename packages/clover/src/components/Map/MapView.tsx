@@ -617,6 +617,11 @@ export function MapView({
           new maplibre.NavigationControl({ showCompass: false }),
           "top-right",
         );
+        container.current
+          ?.querySelectorAll<HTMLButtonElement>(
+            ".maplibregl-ctrl-zoom-in, .maplibregl-ctrl-zoom-out",
+          )
+          .forEach(keepEnabled);
         /*
          * A map of places keeps north up: a two-finger twist or Shift+arrows would turn
          * it with no control or single pointer to turn it back (WCAG 2.5.1). The arrows
@@ -1931,6 +1936,22 @@ function frame(
 
 /** How long a map is waited on to settle before it is shown anyway, in ms. */
 const DRAWN_BY = 4000;
+
+/**
+ * Zoom in or Zoom out, never `disabled`: MapLibre disables Zoom in at the greatest zoom
+ * and Zoom out at the least, and a focused control made disabled drops focus to the page
+ * (WCAG 2.4.3, DESIGN.md §0). Its `aria-disabled`, which MapLibre sets beside it, says
+ * it is at an end (`Map.css` draws it so), and a press there does nothing. Its own
+ * `disabled`, so MapLibre's setting it does nothing, before any frame can see it.
+ */
+function keepEnabled(button: HTMLButtonElement) {
+  button.disabled = false;
+  Object.defineProperty(button, "disabled", {
+    configurable: true,
+    get: () => false,
+    set: () => undefined,
+  });
+}
 
 const reducedMotion = () =>
   typeof window !== "undefined" &&

@@ -1,7 +1,12 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { type TextUnit, selectedText } from "../textUnits";
+import {
+  type SelectedPiece,
+  type TextUnit,
+  selectedPieces,
+  selectedText,
+} from "../textUnits";
 import { languageProps } from "../../../i18n/direction";
 import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
 import type { CanvasRenderer } from "../../../lib/renderer";
@@ -53,7 +58,9 @@ export function TextLayer({
   units: TextUnit[];
 }) {
   const { t, langOf } = useCloverTranslation();
+  // What the popover shows: the selection's text, and its pieces, each in its language.
   const [shown, setShown] = useState("");
+  const [pieces, setPieces] = useState<SelectedPiece[]>([]);
   const [copied, setCopied] = useState(false);
   const popover = useRef<HTMLDivElement>(null);
   const words = useRef<HTMLParagraphElement>(null);
@@ -183,13 +190,17 @@ export function TextLayer({
     // The popover: shown once a selection over the text holds still, no button down.
     let held = false;
     let settle = 0;
+    const say = (said: SelectedPiece[]) => {
+      setPieces(said);
+      setShown(said.map((piece) => piece.text).join(" "));
+    };
     const show = () => {
       const range = rangeOver(layer);
-      setShown((range && selectedText(range, elements)) || "");
+      say(range ? selectedPieces(range, elements) : []);
     };
     const onSelection = () => {
       clearTimeout(settle);
-      if (!rangeOver(layer)) return setShown("");
+      if (!rangeOver(layer)) return say([]);
       if (!held) settle = window.setTimeout(show, SETTLE_MS);
     };
     const onDown = (event: PointerEvent) => {
@@ -197,6 +208,7 @@ export function TextLayer({
       held = true;
       clearTimeout(settle);
     };
+    // Let go, or taken by the browser (a finger's scroll, a long press's own selection).
     const onUp = () => {
       if (!held) return;
       held = false;
@@ -213,6 +225,7 @@ export function TextLayer({
     document.addEventListener("copy", onCopy);
     document.addEventListener("selectionchange", onSelection);
     document.addEventListener("pointerup", onUp);
+    document.addEventListener("pointercancel", onUp);
     host.addEventListener("pointerdown", onDown);
     host.addEventListener("keydown", onKeyDown);
     figure?.addEventListener("keydown", onEscape);
@@ -223,6 +236,7 @@ export function TextLayer({
       document.removeEventListener("copy", onCopy);
       document.removeEventListener("selectionchange", onSelection);
       document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
       host.removeEventListener("pointerdown", onDown);
       host.removeEventListener("keydown", onKeyDown);
       figure?.removeEventListener("keydown", onEscape);
@@ -230,6 +244,7 @@ export function TextLayer({
       layer.remove();
       layerRef.current = null;
       setShown("");
+      setPieces([]);
     };
   }, [renderer, units, host]);
 
@@ -241,12 +256,14 @@ export function TextLayer({
   useLayoutEffect(() => {
     setCopied(false);
     const box = popover.current;
-    if (!shown || !box) return;
+    // A tab stop only while it shows and scrolls: put away, it is none (WCAG 2.4.7).
     const scroller = words.current;
     if (scroller) {
-      if (scroller.scrollHeight > scroller.clientHeight) scroller.tabIndex = 0;
+      if (shown && scroller.scrollHeight > scroller.clientHeight)
+        scroller.tabIndex = 0;
       else scroller.removeAttribute("tabindex");
     }
+    if (!shown || !box) return;
     let frame = 0;
     const place = () => {
       const range = rangeOver(layerRef.current);
@@ -323,7 +340,13 @@ export function TextLayer({
         role="status"
         style={{ margin: 0 }}
       >
-        {shown}
+        {/* Each run of one language marked with it, a space between (WCAG 3.1.2). */}
+        {byLanguage(pieces).map(({ text, lang }, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && " "}
+            <span {...languageProps(lang)}>{text}</span>
+          </React.Fragment>
+        ))}
       </p>
       {shown && (
         <div className="clover-canvas-text-copy-actions">
@@ -355,4 +378,15 @@ export function TextLayer({
     </div>,
     overlaysOf(renderer).container,
   );
+}
+
+/** Pieces side by side in one language as one, a space between, in order. */
+function byLanguage(pieces: SelectedPiece[]): SelectedPiece[] {
+  const runs: SelectedPiece[] = [];
+  for (const piece of pieces) {
+    const last = runs[runs.length - 1];
+    if (last && last.lang === piece.lang) last.text += ` ${piece.text}`;
+    else runs.push({ ...piece });
+  }
+  return runs;
 }

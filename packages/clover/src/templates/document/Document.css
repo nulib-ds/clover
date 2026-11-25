@@ -1940,6 +1940,16 @@ button.clover-template-document-live-play:focus-visible {
 }
 
 /*
+ * There, the page layout's menu opens over the thumbnails, toward their start: toward the
+ * page, past the spine, it would run off a phone's edge, its words cut (WCAG 1.4.10).
+ */
+.clover-template-document-panes[data-narrow]
+  > .clover-template-document-spine
+  .clover-template-page-layout-menu {
+  inset-inline: auto calc(100% + var(--clover-space-xs));
+}
+
+/*
  * The thumbnails' toggle and the page layout's control, one over the other: their Tips
  * beside them, toward the page, as a split handle's is (`ui/Tip.css`), so neither covers
  * the other. (Four classes: over the lead's and the spine's own placing.)

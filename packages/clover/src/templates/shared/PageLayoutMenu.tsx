@@ -116,7 +116,7 @@ export function PageLayoutMenu({ className }: { className?: string }) {
         .filter(Boolean)
         .join(" ")}
       onKeyDown={(event) => {
-        if (event.key !== "Escape" || !open) return;
+        if (event.key !== "Escape" || event.defaultPrevented || !open) return;
         // One Escape closes one thing: the menu, not the drawer or full viewer around it.
         event.preventDefault();
         event.stopPropagation();

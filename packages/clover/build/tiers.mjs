@@ -212,6 +212,27 @@ export const BARS = ["clover-split-handle"];
 const BAR_RULE = `:where(${BARS.map((name) => `.${name}`).join(",")}){background-color:currentColor}`;
 
 /**
+ * Focus that only the look draws, where the browser's own ring cannot show (WCAG 2.4.7):
+ * the viewport's, which fills a box that clips what lies outside it (a recording's player
+ * over it draws it again), and an entry's in Annotations, whose keyboard button is out of
+ * sight. Base.css draws each in the page's own colors, a dark edge and a light band
+ * inside it, so one keeps 3:1 over any picture (1.4.11, C40), and in forced colors, where
+ * no shadow is drawn, an outline. A page's look draws its own.
+ */
+export const FOCUSED_VIEWS = [
+  ".clover-canvas-viewport:focus-visible",
+  ".clover-canvas[data-player]:has(>.clover-canvas-viewport:focus-visible)>.clover-canvas-media",
+];
+export const FOCUSED_ENTRIES = [
+  ".clover-annotations-entry:has(>:is(button.clover-annotations-show,input):focus-visible)",
+];
+
+const FOCUS_RULE =
+  `:where(${FOCUSED_VIEWS.join(",")})::after{box-shadow:inset 0 0 0 2px CanvasText,inset 0 0 0 4px Canvas}` +
+  `:where(${FOCUSED_ENTRIES.join(",")}){outline:2px solid CanvasText;outline-offset:1px}` +
+  `@media (forced-colors:active){:where(${FOCUSED_VIEWS[0]}){outline:3px solid CanvasText;outline-offset:-3px}}`;
+
+/**
  * Base.css says it is in the page, for the sheets that load with their parts' code (a
  * recording's, a Scene's, a map's, a vertical slider's, the Panel's sections',
  * `ui/adoptSheet.ts`): it holds their structure already, and the page brings its own
@@ -533,7 +554,8 @@ export function tiersOf(css, { scale, scripts } = {}) {
         ),
       ) +
       SURFACE_RULE +
-      BAR_RULE,
+      BAR_RULE +
+      FOCUS_RULE,
     spacing: printCss(
       project(nodes, (property) => tier(property) === "spacing"),
     ),
