@@ -65,6 +65,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   elements a `<clover-viewer>` 130,800 B, a Canvas 94,750 B, a Gallery 134,150 B, labels
   37,950 B, a composed page 108,250 B and a layout 126,000 B, each 50 to 450 B over its
   old budget.
+- **A Scene with no rotate controls turns under one finger.** With `controls={false}`,
+  or `rotation: false` in its `controls`, two fingers were a touch screen's one way to
+  turn it, and an iPhone has no full screen to give one finger back (WCAG 2.5.1;
+  `ACCESSIBILITY.md` N43). Such a Scene now takes one finger's drag whatever
+  `options.gestures.cooperative` says, as before cooperative gestures, so a page's
+  scroll stops at it. Beside its rotate controls, the default, nothing changes.
 
 ### Fixed
 
