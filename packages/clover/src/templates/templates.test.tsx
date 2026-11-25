@@ -1934,6 +1934,50 @@ describe("templates", () => {
     ).not.toBeInTheDocument();
   });
 
+  // Audit of 2026-11-25: past h6 the title took the Root's id, and the column lost its name.
+  it("Document: past h6 its title is no heading, and names the Viewer and its pages", async () => {
+    render(<Templates.Document iiifContent={bookJson} headingLevel={7} />);
+    expect(
+      await screen.findByRole("group", { name: "Simple Manifest - Book" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Simple Manifest - Book" }),
+    ).toHaveClass("clover-template-document-column");
+  });
+
+  /*
+   * Audit of 2026-11-25: the toolbar's group of sections was marked in Clover's interface
+   * language, and with it a page's own name for a section (WCAG 3.1.2).
+   */
+  it("Document: a section's own name takes the page's language, never Clover's interface language", async () => {
+    await initCloverI18n().chooseInterfaceLanguage("fr");
+    render(
+      <Templates.Document
+        iiifContent={tocJson}
+        panelLabels={{ contents: "Chapters" }}
+      />,
+    );
+    const toolbar = await waitFor(() => {
+      const found = document.querySelector<HTMLElement>(
+        ".clover-template-document-toolbar",
+      );
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    const chapters = await within(toolbar).findByRole("button", {
+      name: "Chapters",
+    });
+    // The page's own: nothing between it and the page marks another language.
+    expect(chapters.closest("[lang]")).toBe(document.documentElement);
+    // The group is still named in Clover's interface language, by a hidden name in it.
+    const group = chapters.closest<HTMLElement>("[role='group']")!;
+    expect(group).not.toHaveAttribute("lang");
+    const name = document.getElementById(
+      group.getAttribute("aria-labelledby")!,
+    )!;
+    expect(name).toHaveAttribute("lang", "fr");
+  });
+
   it("Gallery: past h6 its title is no heading, and names the Viewer", async () => {
     render(<Templates.Gallery iiifContent={bookJson} headingLevel={7} />);
     expect(

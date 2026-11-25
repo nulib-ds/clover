@@ -280,6 +280,11 @@ function DocumentLayout({
    */
   const sidebarLang = langOf("templateSidebar");
   const id = Clover.useUniqueId().replace(/:/g, "");
+  /*
+   * The title's id, which names the pages' column: past h6, the one the Viewer's group is
+   * named by too (`Clover.titled`), so both name it.
+   */
+  const titleId = title.title.id ?? `${id}-title`;
   const navigation = Clover.useNavigation();
   const panes = useRef<HTMLElement>(null);
   /*
@@ -668,6 +673,39 @@ function DocumentLayout({
   const viewCanvases = useViewCanvases();
   // What the active page plays, if anything: its toggle is then Play.
   const media = mediaOf(viewCanvases);
+  /*
+   * A step in the full viewer from a picture to a recording, or back, draws its controls
+   * in the other place (before the page, or at its foot: `viewControls`, below), each a
+   * new element: focus on one goes to its twin there (WCAG 2.4.3). Which had it is read as
+   * the render begins, while it is still where it was.
+   */
+  const playing = Boolean(media);
+  const wasPlaying = useRef(playing);
+  // Which of them had focus, by its place among them: none, -1.
+  const viewFocus = useRef(-1);
+  if (wasPlaying.current !== playing && typeof document !== "undefined") {
+    const active = document.activeElement as HTMLElement | null;
+    const view = active?.closest(".clover-template-document-view");
+    viewFocus.current = view
+      ? Array.from(view.querySelectorAll("button")).indexOf(
+          active as HTMLButtonElement,
+        )
+      : -1;
+  }
+  useIsomorphicLayoutEffect(() => {
+    if (wasPlaying.current === playing) return;
+    wasPlaying.current = playing;
+    const at = viewFocus.current;
+    viewFocus.current = -1;
+    if (at >= 0)
+      followFocus(
+        () =>
+          panes.current?.querySelectorAll<HTMLElement>(
+            ".clover-template-document-view button",
+          )[at],
+      );
+    // `followFocus` is made each render: the check above keeps it to a change.
+  }, [playing, followFocus]);
   const full = expanded;
   /*
    * Unless the page sets `defaultAnnotationsShown`, the full viewer shows the annotations
@@ -811,10 +849,10 @@ function DocumentLayout({
       >
         <div className="clover-template-document-heading">
           <Clover.Label
-            id={`${id}-title`}
             as={title.as}
             className="clover-template-document-title clover-template-title clover-title"
             {...title.title}
+            id={titleId}
           />
         </div>
         {/*
@@ -967,7 +1005,7 @@ function DocumentLayout({
             expanded={full}
             onExpandedChange={setExpanded}
             onHandle={setHandle}
-            labelledBy={`${id}-title`}
+            labelledBy={titleId}
           >
             {mapControl}
           </Sheets>
