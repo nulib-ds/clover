@@ -1838,7 +1838,9 @@ button.clover-template-document-live-play:focus-visible {
  * among the sheets, which would open it as the full viewer (Mat, 2026-11-11: "attempt to
  * scroll the scrolling section with a drag"); two fingers' pinch is the Canvas's, and
  * opens it. Zoomed into a sheet, the Canvas takes every drag. A Scene takes every drag
- * always, as in Default: a finger's drag turns it (Mat, 2026-10-31).
+ * always (Mat, 2026-10-31): among the pages it shows no rotate controls, so one finger
+ * turns it (`SceneView`'s `cooperative`; WCAG 2.5.1), as a Scene with no rotate controls
+ * does anywhere.
  */
 .clover-template-document-column:not([data-zoomed], [data-expanded])
   :not(.clover-scene)

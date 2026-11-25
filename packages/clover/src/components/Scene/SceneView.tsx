@@ -123,7 +123,9 @@ export interface SceneProps {
        * The page keeps its own gestures, as an embedded Google map does: one finger's drag
        * scrolls the page, and a hint says to use two. A mouse's drag still turns the models.
        * In full screen, the wheel and a finger's drag are the view's. Default true; false, a
-       * finger's drag turns.
+       * finger's drag turns. Where the Scene shows no rotate controls
+       * (`controls={false}`, or `rotation: false`), a finger's drag turns it whatever this
+       * says, as nothing else turns it for a single pointer (WCAG 2.5.1).
        */
       cooperative?: boolean;
       /** A plain wheel zooms too, not only one with Ctrl or ⌘ held. Default false. */
@@ -499,7 +501,14 @@ function SceneBody({
     [zoom, reset],
   );
   const [hint, showHint] = useGestureHint();
-  const cooperative = options?.gestures?.cooperative ?? true;
+  /*
+   * Cooperative only beside its rotate pad: with no rotate control, two fingers would be
+   * a touch screen's one way to turn it, and an iPhone has no full screen to take one
+   * finger's drag (WCAG 2.5.1). One finger turns it then, as before cooperative gestures,
+   * a page's scroll stopping at it.
+   */
+  const cooperative =
+    (options?.gestures?.cooperative ?? true) && Boolean(config?.rotation);
   const scrollToZoom = options?.gestures?.scrollToZoom ?? false;
   useEffect(() => {
     const host = hostRef.current;

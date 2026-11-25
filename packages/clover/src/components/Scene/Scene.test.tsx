@@ -348,6 +348,37 @@ describe("Body, for a Scene", () => {
     );
   });
 
+  /*
+   * N43 (audit of 2026-11-25): with no rotate control, two fingers were a touch screen's
+   * one way to turn it (WCAG 2.5.1). One finger turns it then, whatever `cooperative` says.
+   */
+  it.each([
+    ["no controls", false],
+    ["no rotate controls", { rotation: false }],
+  ])("takes one finger's drag with %s", async (_, controls) => {
+    render(
+      <Clover.Scene
+        scene={scene as never}
+        controls={controls as never}
+        options={{ gestures: { cooperative: true } }}
+      />,
+    );
+    const view = await screen.findByTestId("clover-scene-viewport");
+    await waitFor(() => expect(engine.draw).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(view.hasAttribute("data-cooperative")).toBe(false),
+    );
+  });
+
+  it("keeps one finger's drag the page's beside its rotate controls", async () => {
+    render(<Clover.Scene scene={scene as never} />);
+    const view = await screen.findByTestId("clover-scene-viewport");
+    await waitFor(() => expect(engine.draw).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(view.hasAttribute("data-cooperative")).toBe(true),
+    );
+  });
+
   it("lets a renderer of the host's draw it instead, by its format", async () => {
     function Mine() {
       return <div data-testid="mine" />;
