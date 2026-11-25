@@ -92,6 +92,29 @@ test("with base.css alone, a control's name shows on focus and hides at rest (WC
   ).not.toBe("rgba(0, 0, 0, 0)");
 });
 
+// Audit of 2026-11-25: the viewport's ring is the look's, and the browser's own is clipped.
+test("with base.css alone, the focused viewport is ringed in the page's own colors (WCAG 2.4.7)", async ({
+  page,
+}) => {
+  await open(page, "css=base");
+  const viewport = page.locator(".clover-canvas-viewport");
+  // By the keyboard, through the Canvas's controls, so it is `:focus-visible`.
+  await page.locator("button.clover-canvas-button").first().focus();
+  for (let press = 0; press < 12; press++) {
+    if (
+      await viewport.evaluate((element) => element === document.activeElement)
+    )
+      break;
+    await page.keyboard.press("Tab");
+  }
+  await expect(viewport).toBeFocused();
+  expect(
+    await viewport.evaluate(
+      (element) => getComputedStyle(element, "::after").boxShadow,
+    ),
+  ).toMatch(/inset.*inset/);
+});
+
 test("base.css then spacing.css space the Viewer as styles.css does", async ({
   page,
 }) => {

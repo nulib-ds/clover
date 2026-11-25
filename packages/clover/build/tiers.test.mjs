@@ -14,6 +14,8 @@ import { fileURLToPath } from "node:url";
 import { SHEETS, rulesOf } from "./clover-sheets.mjs";
 import {
   BARS,
+  FOCUSED_ENTRIES,
+  FOCUSED_VIEWS,
   MARK,
   SEE_THROUGH,
   SURFACES,
@@ -157,12 +159,30 @@ test("base.css holds the structure of styles.css, and of the rest only what is s
     [`:where(${BARS.map((name) => `.${name}`).join(",")}){background-color:currentColor}`],
     "base.css paints each bar a press drags in the text's own color",
   );
+  // Focus only the look draws, drawn by base.css in the page's own colors (WCAG 2.4.7).
+  const focused = base.filter(
+    ({ rule }) =>
+      rule.prelude.startsWith(`:where(${FOCUSED_VIEWS[0]}`) ||
+      rule.prelude.startsWith(`:where(${FOCUSED_ENTRIES[0]}`),
+  );
+  assert.deepEqual(
+    focused.map(key),
+    [
+      `:where(${FOCUSED_VIEWS.join(",")})::after{box-shadow:inset 0 0 0 2px CanvasText,inset 0 0 0 4px Canvas}`,
+      `:where(${FOCUSED_ENTRIES.join(",")}){outline:2px solid CanvasText}`,
+      `:where(${FOCUSED_ENTRIES.join(",")}){outline-offset:1px}`,
+      `@media (forced-colors:active)|:where(${FOCUSED_VIEWS[0]}){outline:3px solid CanvasText}`,
+      `@media (forced-colors:active)|:where(${FOCUSED_VIEWS[0]}){outline-offset:-3px}`,
+    ],
+    "base.css rings the viewport and an Annotations entry, which only the look draws",
+  );
   const own = base
     .filter(
       (each) =>
         !marked.includes(each) &&
         !surfaces.includes(each) &&
-        !bars.includes(each),
+        !bars.includes(each) &&
+        !focused.includes(each),
     )
     .filter(({ property }) => !property.startsWith("--"));
   assert.deepEqual(
