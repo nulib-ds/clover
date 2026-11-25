@@ -364,6 +364,113 @@ describe("templates", () => {
     ).toBeInTheDocument();
   });
 
+  /*
+   * N47 and N16 (audit of 2026-11-25): what a failure takes away (the view, a Panel with
+   * nothing left to show) took focus with it to the page. Focus goes to what the Body
+   * says failed instead.
+   */
+  it.each([
+    ["the view", ".clover-canvas-viewport"],
+    ["the Panel", ".clover-template-panel button"],
+  ])(
+    "Default: focus on %s as a member fails to load goes to the Body's alert",
+    async (_, where) => {
+      const { shelf, fetch } = shelfOfTwo();
+      const failing = vi.fn(async (url: string) =>
+        url === "https://example.org/letter"
+          ? new Response("nope", { status: 500 })
+          : fetch(url),
+      );
+      const { container } = render(
+        <Templates.Default
+          iiifContent={shelf}
+          request={{ fetch: failing }}
+          defaultPanelOpen
+        />,
+      );
+      const members = await screen.findByRole("navigation", {
+        name: "Collection",
+      });
+      const held = await waitFor(() => {
+        const found = container.querySelector<HTMLElement>(where);
+        expect(found).not.toBeNull();
+        return found!;
+      });
+      act(() => held.focus());
+      expect(held).toHaveFocus();
+      // A press that leaves focus where it is, as a pointer's on another control may.
+      fireEvent.click(within(members).getByRole("button", { name: "Next" }));
+      const alert = await screen.findByRole("alert");
+      await waitFor(() => expect(alert).toHaveFocus());
+      expect(alert).not.toHaveAttribute("tabindex", "0");
+    },
+  );
+
+  // N16: a panel whose only section the next view lacks goes, and focus with it went too.
+  it("Default: focus in a panel that goes with the view goes to the Body's view", async () => {
+    const transcribed = {
+      ...bookJson,
+      items: bookJson.items.map((canvas, index) =>
+        index === 0
+          ? {
+              ...canvas,
+              rendering: [
+                {
+                  id: "https://example.org/page-1.txt",
+                  type: "Text",
+                  format: "text/plain",
+                  label: { en: ["Transcript"] },
+                },
+              ],
+            }
+          : canvas,
+      ),
+    };
+    const fetch = vi.fn(async () => new Response("The first page."));
+    const { container } = render(
+      <Templates.Default
+        iiifContent={transcribed}
+        request={{ fetch }}
+        panelSections={["transcript"]}
+        defaultPanelOpen
+      />,
+    );
+    const held = await waitFor(() => {
+      const found = container.querySelector<HTMLElement>(
+        ".clover-template-panel button",
+      );
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    act(() => held.focus());
+    // The next view, by a press that leaves focus where it is.
+    fireEvent.click((await screen.findAllByRole("option"))[1]);
+    await waitFor(() =>
+      expect(container.querySelector(".clover-template-panel")).toBeNull(),
+    );
+    await waitFor(() =>
+      expect(container.querySelector(".clover-canvas-viewport")).toHaveFocus(),
+    );
+  });
+
+  // N46 (audit of 2026-11-25): Document said a failure twice, under its toolbar and in its Body.
+  it("Document: what failed to load said once, in its pages' column", async () => {
+    const fetch = vi.fn(async () => new Response("nope", { status: 500 }));
+    const { container } = render(
+      <Templates.Document
+        iiifContent="https://example.org/broken.json"
+        request={{ fetch }}
+      />,
+    );
+    const alert = await screen.findByRole("alert");
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
+    expect(alert).toHaveTextContent("Error loading resource.");
+    expect(alert.closest(".clover-template-document-column")).not.toBeNull();
+    expect(
+      container.querySelector(".clover-template-document-sheets"),
+    ).toHaveAttribute("data-empty");
+  });
+
   it("Default: opened on a Collection, its title over the Manifest's and its members stepped in the header", async () => {
     const { shelf, fetch } = shelfOfTwo();
     render(<Templates.Default iiifContent={shelf} request={{ fetch }} />);

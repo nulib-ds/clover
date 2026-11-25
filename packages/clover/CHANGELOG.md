@@ -100,6 +100,19 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     a `<clover-viewer>` 130,900 B, in Document 149,950 B and in Gallery 134,300 B, a
     Canvas 94,800 B, a composed page 108,300 B, a layout 126,050 B and the Viewer's own
     entry 108,350 B, each 50 to 250 B over its old budget.
+- **A resource that fails to load is said once, and focus goes to it** (WCAG 4.1.3,
+  2.4.3; `ACCESSIBILITY.md` N16, N45 to N47). The Body's alert loads with the Body: a
+  chunk of its own, fetched only as loading failed, failed too where the network had
+  gone, and the error took the Root with it. As the failure comes, focus on what goes
+  with it (the view, a hotspot, a Panel with nothing left to show) goes to the alert,
+  which takes focus that way alone, never as a tab stop. A Panel whose last section goes
+  with the view hands focus in it, or on its toggle, to the Body's view. Document says a
+  failure once, in its pages' column, which its Body then fills, where its `Status` said
+  it again under the toolbar. Budgets raised to the next 50 B over what is measured: the
+  Default template 81,850 B gzip and to first view 97,350 B, Document 84,550 B and to
+  first view 104,150 B, `base.css` 16,700 B, and as elements a `<clover-viewer>`
+  131,500 B, in Document 150,650 B and in Gallery 134,900 B, a composed page 108,800 B,
+  a layout 126,500 B and the Viewer's own entry 108,750 B.
 
 ### Security
 
