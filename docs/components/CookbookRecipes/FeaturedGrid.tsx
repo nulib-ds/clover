@@ -38,7 +38,7 @@ const FeaturedGrid: React.FC<FeaturedGridProps> = ({ onView, onPreload }) => {
                 loading="lazy"
                 decoding="async"
               />
-              <span className={styles.title} dir="auto">
+              <span className={styles.title} dir="auto" lang={featured.lang}>
                 {featured.title}
               </span>
             </button>

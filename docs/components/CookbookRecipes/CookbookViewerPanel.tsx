@@ -51,6 +51,7 @@ const CookbookViewerPanel: React.FC<CookbookViewerPanelProps> = ({
 }) => {
   const open = resource !== undefined;
   const backButton = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLElement>(null);
 
   /*
    * Keep the last resource mounted until the panel has slid out, so the Viewer does not
@@ -75,6 +76,26 @@ const CookbookViewerPanel: React.FC<CookbookViewerPanelProps> = ({
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    /*
+     * Modal while open (ACCESSIBILITY.md D10): everything else on the page inert, the
+     * siblings of the panel and of each element around it up to the body's, so Tab and a
+     * screen reader stay in the panel over it (WCAG 2.4.3), and come back as it closes.
+     */
+    const made: Element[] = [];
+    for (
+      let node: Element | null = panel.current;
+      node?.parentElement;
+      node = node.parentElement
+    ) {
+      for (const sibling of Array.from(node.parentElement.children)) {
+        if (sibling === node || sibling.hasAttribute("inert")) continue;
+        if (sibling instanceof HTMLScriptElement) continue;
+        sibling.setAttribute("inert", "");
+        made.push(sibling);
+      }
+      if (node.parentElement === document.body) break;
+    }
+
     const onKeyDown = (event: KeyboardEvent) => {
       /*
        * Escape belongs to a text field it is pressed in, and to the Viewer where it
@@ -91,6 +112,7 @@ const CookbookViewerPanel: React.FC<CookbookViewerPanelProps> = ({
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
+      made.forEach((element) => element.removeAttribute("inert"));
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
       opener?.focus();
@@ -101,8 +123,11 @@ const CookbookViewerPanel: React.FC<CookbookViewerPanelProps> = ({
 
   return (
     <aside
+      ref={panel}
       className={styles.panel}
       data-open={open}
+      role={open ? "dialog" : undefined}
+      aria-modal={open || undefined}
       aria-hidden={!open}
       aria-label={title ? `Viewer: ${title}` : "Viewer"}
       {...inertWhen(!open)}
