@@ -1052,25 +1052,32 @@
  * As tall as the button beside it (Mat, 2026-10-22): the call to action's padding and one
  * line of the same size of type (`cta-solid`, `tokens.css`).
  */
+/*
+ * At least that tall, and taller only where the command wraps: on the narrowest phones it
+ * breaks after "install" rather than running out of sight, where the keyboard could not
+ * reach it (WCAG 1.4.10, 2.1.1).
+ */
 .install {
   align-items: center;
   background: var(--code-background);
-  block-size: calc(2 * 0.625rem + 1lh);
   border-radius: var(--radius-4);
+  box-sizing: border-box;
   color: var(--code-text);
   display: flex;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   gap: 1rem;
+  min-block-size: calc(2 * 0.625rem + 1lh);
   padding: 0 0.618rem 0 1.618rem;
 }
 
+/* The call to action's padding is the command's own, so one line is exactly that tall. */
 .installCode {
   flex: 1;
   margin: 0;
   min-width: 0;
-  overflow-x: auto;
-  padding: 0;
+  padding: 0.625rem 0;
+  white-space: pre-wrap;
 }
 
 /*
