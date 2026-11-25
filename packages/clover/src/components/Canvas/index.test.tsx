@@ -603,7 +603,7 @@ describe("Canvas", () => {
     const find = await screen.findByRole("button", {
       name: /^Find on the map: /,
     });
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
     act(() => find.focus());
     fireEvent.click(find);
     await loaded();
@@ -622,7 +622,7 @@ describe("Canvas", () => {
     expect(box).toHaveAccessibleName("Map");
     // Focus stays on what was pressed, now pressed.
     expect(find).toHaveFocus();
-    expect(find).toHaveAttribute("aria-pressed", "true");
+    expect(find).toHaveAttribute("aria-current", "true");
 
     // Collapsed, it stays, in its box over the Canvas, which comes back.
     fireEvent.click(within(box).getByRole("button", { name: "Collapse map" }));
@@ -633,7 +633,7 @@ describe("Canvas", () => {
     fireEvent.click(within(box).getByRole("button", { name: "Close" }));
     await waitFor(() => expect(asked()).toBeUndefined());
     expect(find).toHaveFocus();
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
   });
 
   // nulib-ds/clover#440: the menu over the Body lists the view's georeferenced images,
