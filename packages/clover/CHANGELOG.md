@@ -129,6 +129,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   first view 104,150 B, `base.css` 16,700 B, and as elements a `<clover-viewer>`
   131,500 B, in Document 150,650 B and in Gallery 134,900 B, a composed page 108,800 B,
   a layout 126,500 B and the Viewer's own entry 108,750 B.
+- **A language chosen in About keeps focus on its choice** (WCAG 2.4.3, 3.2.2;
+  `ACCESSIBILITY.md` N49). The choice changes Clover's interface language, and so the
+  length of About's title ("About" to "Informazioni"), which folded the codes into their
+  menu, or drew them out of it, under focus, focus falling to the page. The row now
+  holds its form while focus is in it, the title wrapping meanwhile, and is measured
+  again once focus leaves (Mat, 2026-11-05's "as soon as lang codes intersect" waits
+  only for that).
 
 ### Security
 
