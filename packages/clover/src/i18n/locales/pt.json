@@ -46,6 +46,7 @@
   "templatePageLayoutAuto": "Automático",
   "templatePageLayoutSingle": "Página única",
   "templatePageLayoutTwo": "Duas páginas",
+  "templatePageKeys": "Use as setas para cima e para baixo para ir para a página anterior ou seguinte, Home e End para a primeira ou a última, e Enter para abrir a página.",
   "templateBack": "Voltar",
   "templateBackTo": "Voltar a {{label}}",
   "collectionLabel": "Coleção",

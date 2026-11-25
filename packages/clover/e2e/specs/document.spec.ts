@@ -818,10 +818,20 @@ test("among the pages, Up and Down step from page to page, Home and End to the f
   await page.keyboard.press("Home");
   await expect.poll(() => selected(page)).toBe(0);
   await settled(page, 0);
+  // Its keys said as they are among the pages, not the camera's (N44, 2026-11-25).
+  await expect(viewport(page)).toHaveAttribute(
+    "aria-keyshortcuts",
+    "ArrowUp ArrowDown Home End PageUp PageDown Enter",
+  );
+  await expect(viewport(page)).toHaveAccessibleDescription(
+    /previous or next page.*Enter to open the page/,
+  );
   // Enter opens the page in view as the full viewer, focus kept on its Canvas.
   await page.keyboard.press("Enter");
   await expect(column(page)).toHaveAttribute("data-expanded");
   await expect(viewport(page)).toBeFocused();
+  // There, the camera's keys.
+  await expect(viewport(page)).toHaveAccessibleDescription(/arrow keys to pan/);
 });
 
 // Audit of 2026-11-25: Escape from one of the full viewer's own controls dropped focus.

@@ -46,6 +46,7 @@
   "templatePageLayoutAuto": "自動",
   "templatePageLayoutSingle": "単一ページ",
   "templatePageLayoutTwo": "見開きページ",
+  "templatePageKeys": "上下の矢印キーで前後のページへ、Home と End で最初と最後のページへ移動し、Enter でページを開きます。",
   "templateBack": "戻る",
   "templateBackTo": "{{label}} に戻る",
   "collectionLabel": "コレクション",

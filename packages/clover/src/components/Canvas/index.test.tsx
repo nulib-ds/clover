@@ -960,6 +960,31 @@ describe("Canvas", () => {
     );
   });
 
+  // N44 (2026-11-25): a layout that takes the viewport's keys says its own.
+  it("says a layout's own keys in place of the camera's, in their language", () => {
+    render(
+      <Canvas
+        src="https://example.org/a.jpg"
+        label="A letter"
+        viewportKeys={{
+          shortcuts: "ArrowUp ArrowDown Enter",
+          description: "Flèches pour les pages.",
+          lang: "fr",
+        }}
+      />,
+    );
+    const viewport = screen.getByRole("img", { name: "A letter" });
+    expect(viewport).toHaveAttribute(
+      "aria-keyshortcuts",
+      "ArrowUp ArrowDown Enter",
+    );
+    expect(viewport).toHaveAccessibleDescription("Flèches pour les pages.");
+    expect(screen.getByText("Flèches pour les pages.")).toHaveAttribute(
+      "lang",
+      "fr",
+    );
+  });
+
   it("makes its controls' ids as Clover makes every id, so two copies of Clover on a page never share one (WCAG 4.1.2)", () => {
     // An element's prefix, as each of the elements' hosts gives it.
     render(
