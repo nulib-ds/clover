@@ -116,7 +116,16 @@ export function holdTwoFingers(
   cooperating: () => boolean,
 ): () => void {
   const move = (event: TouchEvent) => {
-    if (!cooperating() || event.targetTouches.length < 2) return;
+    /*
+     * Every finger on the view, whatever in it each came down on: `targetTouches` counts
+     * only those on the event's own target, and the Canvas's text is a run of its own per
+     * line (`Canvas/text/TextLayer`), so two fingers on two lines would each count one,
+     * and the page would scroll under a pinch (WCAG 2.5.1).
+     */
+    const fingers = Array.from(event.touches).filter((touch) =>
+      element.contains(touch.target as Node | null),
+    ).length;
+    if (!cooperating() || fingers < 2) return;
     if (isInteractive(event.target, element)) return;
     if (event.cancelable) event.preventDefault();
   };
