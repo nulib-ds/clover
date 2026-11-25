@@ -901,8 +901,11 @@ function DocumentLayout({
           />
         )}
       </header>
-      {/* The Body shows the loading; announced here, nothing moves. */}
-      <Clover.Status loading={false} />
+      {/*
+       * The Body shows the loading, announced here, so nothing moves; and a failure, in
+       * the column, which it then fills, said once (as Default leaves it to its Body).
+       */}
+      <Clover.Status loading={false} error={false} />
       <Clover.Split
         ref={panes}
         className="clover-template-document-panes clover-template-panes"

@@ -1028,6 +1028,15 @@ button.clover-template-document-sidebar-toggle svg:dir(rtl) {
 }
 
 /*
+ * With no sheets, the column's height, so the live Body over them has room for what it
+ * says: what failed to load, in its middle (`Body`), never cramped into the sheets' gap.
+ */
+.clover-template-document-sheets[data-empty] {
+  box-sizing: border-box;
+  min-height: 100%;
+}
+
+/*
  * A sheet, a Body entry for its view (`Sheets`): its pictures side by side at one
  * height, fitted whole with the gap at their sides, as the Canvas fits them at home.
  * At most as tall as the column less the gap above it, the space under it and the

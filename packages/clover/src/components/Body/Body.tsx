@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useEffect, useMemo, useRef } from "react";
 
+import { BodyAlert } from "./BodyAlert";
 import { type BodyRenderer, paintingBodies, pickRenderer } from "./renderers";
 import ConnectedCanvas from "../Canvas/Connected";
 import type { CloverCanvasProps } from "../Canvas/Canvas.types";
@@ -20,10 +21,6 @@ const ConnectedTimeline = lazy(() => import("../Timeline/Connected"));
 /** Each Root's Bodies in sight, by its `body` channel, the last told as its box. */
 const boxesOf = new WeakMap<object, HTMLElement[]>();
 const ConnectedScene = lazy(() => import("../Scene/Connected"));
-/** What the Root could not load, said in the Body: loaded only where loading fails. */
-const BodyAlert = lazy(() =>
-  import("./BodyAlert").then((module) => ({ default: module.BodyAlert })),
-);
 
 export type BodyProps = Omit<
   CloverCanvasProps,
@@ -76,14 +73,47 @@ export function Body({
     canvases.find(({ type }) => type === "Scene" || type === "Timeline")
       ?.type ?? "Canvas";
   const busy = useCloverSelector((state) => state.status === "loading");
-  const failed = useCloverSelector((state) =>
-    state.status === "error" && !state.manifest ? state.error : null,
-  );
   /*
    * Its box, told to its Root (`clover.body`): what lies over its view goes in it, in the
    * box its renderer draws in (an `Inset` whose `container` is `"body"`).
    */
   const box = useRef<HTMLDivElement>(null);
+  const failed = useCloverSelector((state) =>
+    state.status === "error" && !state.manifest ? state.error : null,
+  );
+  /*
+   * What the Root could not load, said in the Body, its code always there: loaded only
+   * as loading fails, it would fail too where the network has gone, the very failure it
+   * says, and take the Root with it (WCAG 4.1.3). As it comes, focus anywhere in the Root
+   * on what goes with the failure (the view, a hotspot, a Panel with nothing left to show)
+   * goes to it, so it is never left on the page (2.4.3). Where focus was is read as the
+   * render that brings it begins, while all of that is still there.
+   */
+  const failing = Boolean(failed);
+  const wasFailing = useRef(failing);
+  const refocus = useRef(false);
+  if (wasFailing.current !== failing) {
+    wasFailing.current = failing;
+    refocus.current =
+      failing &&
+      Boolean(
+        box.current
+          ?.closest(".clover-root")
+          ?.contains(box.current.ownerDocument.activeElement),
+      );
+  }
+  useEffect(() => {
+    if (!refocus.current) return;
+    refocus.current = false;
+    const own = box.current;
+    const { activeElement, body } = own?.ownerDocument ?? document;
+    // Focus the reader put somewhere of their own meanwhile stays there.
+    if (activeElement && activeElement !== body && activeElement.isConnected)
+      return;
+    own
+      ?.querySelector<HTMLElement>(".clover-body-alert")
+      ?.focus({ preventScroll: true });
+  }, [failed]);
   useEffect(() => {
     const own = box.current;
     if (!own) return;
@@ -112,9 +142,7 @@ export function Body({
     >
       {failed ? (
         <CanvasPending>
-          <Suspense fallback={null}>
-            <BodyAlert error={failed} />
-          </Suspense>
+          <BodyAlert error={failed} focusable />
         </CanvasPending>
       ) : Renderer ? (
         <Renderer canvases={canvases} bodies={bodies}>

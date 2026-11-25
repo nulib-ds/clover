@@ -1011,6 +1011,8 @@ export function Sheets({
         ref={sheetsBox}
         className="clover-template-document-sheets"
         data-single={sheets.length < 2 || undefined}
+        // None yet, or none at all (a resource that failed): the live Body fills the column.
+        data-empty={sheets.length === 0 || undefined}
       >
         {sheets.map((sheet, index) => (
           /*
