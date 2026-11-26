@@ -100,6 +100,8 @@ function DownloadButton() {
             triggerId={button}
             onClose={close}
             className="clover-about-download-menu"
+            // All of it in sight in a narrow panel, as the language menu beside it.
+            inside
           >
             <DownloadGroups inPopover />
           </ControlMenu>
