@@ -41,6 +41,63 @@ const choice = p4(choiceJson);
 const choiceAv = p4(choiceAvJson);
 const missingImage = p4(missingImageJson);
 
+/*
+ * No test here reaches the network. An image service's info.json is answered from the
+ * fixture that paints with it (`OFFLINE`), at its image's size in 512 px tiles, as IIIF's
+ * reference server answers, and any other address is refused: the Choice menu's pictures
+ * waited on that server, and one slow answer failed main's run (2026-11-26). A test that
+ * answers for itself passes its own `request.fetch`.
+ */
+const OFFLINE = [bookJson, choiceJson, evanston()];
+const imageSizes = new Map<string, { width: number; height: number }>();
+const findImages = (node: unknown): void => {
+  if (!node || typeof node !== "object") return;
+  if (Array.isArray(node)) return node.forEach(findImages);
+  const json = node as Record<string, any>;
+  if (json.type === "Image" && json.width > 0 && json.height > 0)
+    for (const service of [json.service ?? []].flat())
+      imageSizes.set(
+        String(
+          typeof service === "string"
+            ? service
+            : (service.id ?? service["@id"]),
+        ).replace(/\/$/, ""),
+        { width: json.width, height: json.height },
+      );
+  Object.values(json).forEach(findImages);
+};
+OFFLINE.forEach(findImages);
+const answerOffline = async (input: RequestInfo | URL) => {
+  const url =
+    typeof input === "string"
+      ? input
+      : input instanceof URL
+        ? input.href
+        : input.url;
+  const id = url.replace(/\/info\.json$/, "");
+  const size = imageSizes.get(id);
+  if (!size)
+    throw new TypeError(
+      `${url}: no test here reaches the network. Answer it with the test's own \`request.fetch\`, or add its fixture to \`OFFLINE\`.`,
+    );
+  return new Response(
+    JSON.stringify({
+      "@context": "http://iiif.io/api/image/3/context.json",
+      id,
+      type: "ImageService3",
+      protocol: "http://iiif.io/api/image",
+      profile: "level1",
+      ...size,
+      tiles: [{ width: 512, height: 512, scaleFactors: [1, 2, 4] }],
+    }),
+  );
+};
+beforeEach(() => {
+  clearInfoCache();
+  vi.stubGlobal("fetch", answerOffline);
+});
+afterEach(() => vi.unstubAllGlobals());
+
 const listeners: Record<string, (detail?: unknown) => void> = {};
 let renderer: Record<string, any>;
 // Which controls the renderer says would do nothing (`viewLimits`).
@@ -2415,7 +2472,7 @@ describe("Canvas", () => {
         ).toHaveLength(0),
       );
 
-    it("offers a choice control only when the Canvas has a Choice", () => {
+    it("offers a choice control only when the Canvas has a Choice", async () => {
       const { rerender } = render(
         <Canvas canvases={book.items.slice(0, 1) as any} />,
       );
@@ -2424,6 +2481,8 @@ describe("Canvas", () => {
       const control = screen.getByRole("button", { name: "Views" });
       expect(control).toHaveAttribute("data-button", "choice");
       expect(control).toHaveAttribute("aria-expanded", "false");
+      // Its menu, asked for as the control shows, arrives.
+      await loaded();
     });
 
     it("starts a recording's Choice on a format the browser plays, the rest it cannot play disabled (Cookbook 0434)", async () => {
