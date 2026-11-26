@@ -1,3 +1,4 @@
+import type { AnnotationSet } from "./annotation-sets";
 import { parseAnnotationTarget } from "./annotations";
 import { GEOREFERENCED_CONTENT, isGeoreferencing } from "./geo-detect";
 import { bodiesOf, isPainting } from "./painting";
@@ -294,26 +295,68 @@ export function navPlaceOf(
         resource: canvas,
       });
     }
-    for (const annotation of annotationsOf(canvas)) {
-      if (isGeoreferencing(annotation)) continue;
-      const canvasId =
-        parseAnnotationTarget(asArray(annotation.target)[0] as never).id ||
-        canvas.id;
-      const owner = {
-        label: annotation.label ?? canvas.label,
-        canvasId,
-        ...(typeof annotation.id === "string"
-          ? { annotationId: annotation.id }
-          : {}),
-      };
-      if (annotation.navPlace) add(annotation.navPlace, owner);
-      for (const body of bodiesOf(annotation)) {
-        if (body?.type === "Feature" || body?.type === "FeatureCollection") {
-          add(body, owner);
-        }
-      }
-    }
+    for (const annotation of annotationsOf(canvas))
+      features.push(...annotationPlaces(annotation, canvas, language));
   }
+  const result: MapFeatureCollection = features.length
+    ? { type: "FeatureCollection", features }
+    : NO_FEATURES;
+  byKey.set(key, result);
+  return result;
+}
+
+/**
+ * One annotation's places (its `navPlace`, or a GeoJSON body as Cookbook 0139 has), each
+ * naming the annotation and the Canvas it targets, else the Canvas it is read from. None
+ * for a georeference, which a map lays as an overlay.
+ */
+export function annotationPlaces(
+  annotation: Json,
+  canvas: Json = {},
+  language?: string,
+): MapFeature[] {
+  if (isGeoreferencing(annotation)) return [];
+  const owner = {
+    label: annotation.label ?? canvas.label,
+    canvasId:
+      parseAnnotationTarget(asArray(annotation.target)[0] as never).id ||
+      canvas.id,
+    ...(typeof annotation.id === "string"
+      ? { annotationId: annotation.id }
+      : {}),
+  };
+  return [
+    annotation.navPlace,
+    ...bodiesOf(annotation).filter(
+      (body) => body?.type === "Feature" || body?.type === "FeatureCollection",
+    ),
+  ].flatMap((geo) =>
+    geo ? featuresOf(geo).map((f) => flatten(f, owner, language)) : [],
+  );
+}
+
+const addedPlaces = new WeakMap<object, Map<string, MapFeatureCollection>>();
+
+/**
+ * The places of the annotations a Root holds beside its Manifest's own (its
+ * `addedSets`: the host's `annotations`, the content's, a content state's), as
+ * `navPlaceOf` reads the Manifest's, so a map of the Root shows them too. Memoized on
+ * the sets.
+ */
+export function addedPlacesOf(
+  sets: readonly AnnotationSet[],
+  language?: string,
+): MapFeatureCollection {
+  const key = language ?? "";
+  let byKey = addedPlaces.get(sets);
+  if (!byKey) addedPlaces.set(sets, (byKey = new Map()));
+  const cached = byKey.get(key);
+  if (cached) return cached;
+  const features = sets.flatMap((set) =>
+    set.entries.flatMap((entry) =>
+      annotationPlaces(entry.annotation, { id: entry.canvasId }, language),
+    ),
+  );
   const result: MapFeatureCollection = features.length
     ? { type: "FeatureCollection", features }
     : NO_FEATURES;

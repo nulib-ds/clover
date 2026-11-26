@@ -132,8 +132,12 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
       place: (key) => {
         const latest = handlers.current;
         latest.onClose(true);
-        if (latest.root) latest.root.clover.place.emit(key);
-        else latest.onPlace?.();
+        if (latest.root) {
+          // The one pressed is the one chosen: an annotation picked before is let go,
+          // after, so the box that showed its place stays, for this one (`PlaceBox`).
+          latest.root.clover.place.emit(key);
+          latest.root.clover.selectAnnotation(null);
+        } else latest.onPlace?.();
       },
     }),
     [],

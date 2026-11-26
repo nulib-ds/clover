@@ -370,6 +370,17 @@ export function createClover({
   let layerSets: AnnotationSet[] = [];
   let hostSets: AnnotationSet[] = [];
   let stateSets: AnnotationSet[] = [];
+  /*
+   * The host's georeferences (`georeferencing` annotations among its `annotations`), laid
+   * on their Canvases in each Manifest shown, as the content's are, and the module that
+   * lays them, read only once there are some.
+   */
+  let hostGeoreferences: Record<string, unknown>[] = [];
+  let georeferencer: typeof import("./georeference-content") | null = null;
+  const withHostGeoreferences = (manifest: Manifest) =>
+    georeferencer
+      ? georeferencer.laySideloaded(manifest, hostGeoreferences)
+      : manifest;
   /**
    * The annotation a content state targets (a search's result, by its `id`), held while
    * a search is to answer: where the answer has it, it is the search's; where it has not,
@@ -482,7 +493,9 @@ export function createClover({
     pick?: string | null,
   ) => {
     declared = (manifest as { behavior?: unknown }).behavior;
-    manifest = withLayout(manifest, store.get().pageLayout, declared);
+    manifest = withHostGeoreferences(
+      withLayout(manifest, store.get().pageLayout, declared),
+    );
     const { canvases } = selectSequence(manifest);
     const has = (id?: string | null) =>
       Boolean(id) && canvases.some((canvas) => canvas.id === id);
@@ -936,23 +949,41 @@ export function createClover({
     },
     async loadAnnotations(input) {
       annotating?.abort();
+      // The host's sets and georeferences shown, the Manifest laid again where either has some.
+      const show = (
+        sets: AnnotationSet[],
+        georeferences: typeof hostGeoreferences,
+      ) => {
+        const relay = georeferences.length > 0 || hostGeoreferences.length > 0;
+        hostSets = sets;
+        hostGeoreferences = georeferences;
+        store.set((state) => ({
+          addedSets: added(),
+          ...(relay && state.manifest
+            ? { manifest: withHostGeoreferences(state.manifest) }
+            : {}),
+        }));
+      };
       if (!input) {
-        hostSets = [];
-        store.set({ addedSets: added() });
+        show([], []);
         return;
       }
       const controller = new AbortController();
       annotating = controller;
       try {
         // Read only for a Root given annotations of the host's own, as few are.
-        const { loadAnnotationSets } = await import("./annotation-collection");
-        const sets = await loadAnnotationSets(input, {
+        const { georeferencesIn, loadAnnotationPages, setsOf } = await import(
+          "./annotation-collection"
+        );
+        const pages = await loadAnnotationPages(input, {
           request,
           signal: controller.signal,
         });
+        const georeferences = georeferencesIn(pages);
+        if (georeferences.length)
+          georeferencer ??= await import("./georeference-content");
         if (controller.signal.aborted) return;
-        hostSets = sets;
-        store.set({ addedSets: added() });
+        show(setsOf(pages), georeferences);
       } catch {
         // Annotations that will not load leave the Manifest's own in place.
       }

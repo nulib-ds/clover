@@ -192,6 +192,21 @@
 }
 
 /*
+ * The page's picture over the map where the map's box is over the Canvas: at the row's
+ * end, past the map's zoom row, so the two trade places in one spot (Mat, 2026-11-26:
+ * "make sure insets are the same place for both image inset and map inset"; `Inset.css`).
+ */
+.clover-canvas-place[data-swapped]
+  > .clover-geomap
+  > :first-child
+  > .clover-inset {
+  right: var(
+    --clover-canvas-controls-end,
+    var(--clover-canvas-controls-inset, var(--clover-inset))
+  );
+}
+
+/*
  * The box in sight in it, as what it holds inherits it (hiding the Canvas, never every
  * child of it by a rule that every element on the page would be tested against: 45ms a
  * move through a book of a thousand pages, 2026-11-15). Until its map has come in,

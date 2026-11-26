@@ -201,7 +201,10 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
     const ask = (place: Place) => {
       // On another Canvas: there first, so the map follows the view to it.
       if (!shownIds.includes(place.canvasId)) clover.goTo(place.canvasId);
+      // The one pressed is the one chosen: an annotation picked before is let go, after,
+      // so the box that showed its place stays, for this one (`Canvas/PlaceBox`).
       clover.place.emit(place.key);
+      clover.selectAnnotation(null);
     };
     const renderPlace = (place: Place) =>
       placesModule && (

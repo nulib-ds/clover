@@ -22,6 +22,8 @@ import {
   type Georeference,
   type MapFeature,
   type MapFeatureCollection,
+  addedPlacesOf,
+  annotationPlaces,
   boundsOf,
   cornersOf,
   georeferencedContentAddress,
@@ -194,6 +196,7 @@ export const useMapPutAway = () => useContext(MapPutAway);
 
 export function GivenMap({
   navPlace,
+  annotations,
   georeferences,
   read,
   owner,
@@ -206,6 +209,13 @@ export function GivenMap({
     /** A region of its own; false inside a box that names it (`Canvas/PlaceBox`). */
     landmark?: boolean;
     language?: string;
+    /**
+     * Annotations whose places (a GeoJSON body, Cookbook 0139) it shows with `navPlace`'s,
+     * each naming its annotation, so the one `picked` is marked (`Canvas/PlaceBox`).
+     */
+    annotations?: readonly unknown[];
+    /** The annotation picked, by id, whose place is marked as chosen. */
+    picked?: ViewProps["picked"];
     /** Overlays already read, with their Canvases (`Canvas/PlaceBox`), over `georeferences`. */
     read?: Georeference[];
     /** The Canvases in view, where it lays more than theirs: outlined, and followed. */
@@ -230,20 +240,28 @@ export function GivenMap({
       null,
     ),
   );
+  const placed = useGiven(annotations, (value) =>
+    ((value as Record<string, unknown>[] | undefined) ?? []).flatMap(
+      (annotation) => annotationPlaces(annotation, undefined, rest.language),
+    ),
+  );
   // Each place given its owner's picture, where it names none of its own.
   const features = useMemo(() => {
+    const all = placed.length
+      ? { ...given, features: [...given.features, ...placed] }
+      : given;
     const picture = pictureOf(owner);
-    if (!picture) return given;
+    if (!picture) return all;
     const thumbnail = JSON.stringify(picture);
     return {
-      ...given,
-      features: given.features.map((feature) =>
+      ...all,
+      features: all.features.map((feature) =>
         feature.properties.thumbnail
           ? feature
           : { ...feature, properties: { ...feature.properties, thumbnail } },
       ),
     };
-  }, [given, owner]);
+  }, [given, placed, owner]);
   const overlays = useGiven(georeferences, (value) =>
     ((value as unknown[]) ?? [])
       .map((annotation) => readGeoreference(annotation as never))
@@ -358,6 +376,12 @@ interface ViewProps
    */
   focus?: { key: string; n: number } | null;
   /**
+   * It frames the view: every place and image of the Canvases in view (`current`), an item
+   * asked for (`focus`) chosen among them rather than framed alone (`Canvas/PlaceBox`).
+   * Where the view has none, it frames the item asked for, else all it has.
+   */
+  framesView?: boolean;
+  /**
    * It is ready (has drawn the view it frames) or has failed, and as it goes, not:
    * `Canvas/PlaceBox`, whose Canvas keeps its controls until the map has come in.
    */
@@ -381,6 +405,7 @@ export function MapView({
   onHighlight,
   reframe,
   focus = null,
+  framesView = false,
   onReady,
   onLetGo,
   animationDuration = 0.6,
@@ -507,7 +532,7 @@ export function MapView({
    */
   const start = useRef<() => Record<string, unknown> | null>(() => null);
   start.current = () => {
-    const key = focus ? focus.key : null;
+    const key = focus && !viewBounds() ? focus.key : null;
     const image =
       key && key.startsWith("overlay-")
         ? overlays.find((item) => `overlay-${item.id}` === key)
@@ -517,7 +542,8 @@ export function MapView({
       ? boundsOf([], [image])
       : place
         ? boundsOf([place])
-        : boundsOf(features.features, overlay ? overlays : []);
+        : (viewBounds() ??
+          boundsOf(features.features, overlay ? overlays : []));
     if (!bounds) return null;
     const [[west, south], [east, north]] = bounds;
     if (west === east && south === north)
@@ -529,6 +555,23 @@ export function MapView({
         : (zoom ?? (overlay && overlays.length ? OVERLAY_ZOOM : undefined));
     return { bounds, fitBoundsOptions: { padding: 32, maxZoom: most ?? 12 } };
   };
+  /*
+   * What the view's Canvases show, where the map frames the view (`framesView`): their
+   * places and images, else nothing to frame.
+   */
+  // The view it frames, by its Canvases, which it frames again as they change.
+  const viewing = framesView && current ? current.join(" ") : "";
+  const viewBounds = () =>
+    framesView
+      ? boundsOf(
+          features.features.filter(({ properties }) =>
+            (current || []).includes(
+              properties.canvasId || properties.manifestId || "",
+            ),
+          ),
+          overlay ? overlays : [],
+        )
+      : null;
   // Names a place in a popup at a point, once MapLibre is up.
   const name = useRef<((feature: MapFeature, at: unknown) => void) | null>(
     null,
@@ -1041,6 +1084,19 @@ export function MapView({
    * from its image's fit, lies on the image's edge, where the two stacked.
    */
   const imaged = overlay ? overlays.map((item) => item.canvasId) : [];
+  /*
+   * Something on it chosen (asked for, or chosen in its list) or picked (the annotation a
+   * place or an image is): that alone is marked, the view's other places and images shown
+   * at rest beside it (Mat, 2026-11-26: "whichever annotation is clicked should appear
+   * active. the other relative canvas annotations should be inactive but in view").
+   */
+  const singled =
+    !!chosenKey ||
+    (!!picked &&
+      (overlays.some((item) => item.id === picked) ||
+        features.features.some(
+          (feature) => feature.properties.annotationId === picked,
+        )));
   const marked = useRef<number[]>([]);
   // Plain checks, as `?.` and `??` cost bytes here.
   const markKey = [
@@ -1049,6 +1105,7 @@ export function MapView({
     rowPlace,
     current && current.join(),
     imaged.join(" "),
+    singled,
   ].join("\n");
   useEffect(() => {
     if (!map || !map.setFeatureState) return;
@@ -1062,6 +1119,7 @@ export function MapView({
         pointed:
           (!!annotationId && annotationId === highlighted) || id === rowPlace,
         current:
+          !singled &&
           !annotationId &&
           !!where &&
           !!current &&
@@ -1214,10 +1272,10 @@ export function MapView({
       (overlay ? overlays : []).filter(
         (item) =>
           item.id === chosen ||
-          (item.canvasId && current?.includes(item.canvasId)) ||
+          (!singled && item.canvasId && current?.includes(item.canvasId)) ||
           item.id === picked,
       ),
-    [overlay, overlays, chosen, current, picked],
+    [overlay, overlays, chosen, current, picked, singled],
   );
   useEffect(() => {
     if (!map) return;
@@ -1274,7 +1332,8 @@ export function MapView({
   // member) eases to it (Mat, 2026-11-08).
   useEffect(() => {
     if (!map) return;
-    const bounds = boundsOf(features.features, overlay ? overlays : []);
+    const bounds =
+      viewBounds() ?? boundsOf(features.features, overlay ? overlays : []);
     if (!bounds) return;
     // Images laid over the map are framed whole; places alone, no closer than 12.
     const most =
@@ -1288,7 +1347,7 @@ export function MapView({
     frame(map, bounds, zoom ?? POINT_ZOOM, most, again ? glide : 0);
     // Its glide is read as it frames.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, features, overlays, overlay, zoom]);
+  }, [map, features, overlays, overlay, zoom, viewing]);
 
   /*
    * Asked to frame again (the place box's swap, as its map fills the Body and goes back):
@@ -1321,6 +1380,22 @@ export function MapView({
     }
     return {};
   };
+  /*
+   * An annotation picked beside the map, not the one chosen on it, is the one marked: what
+   * was chosen on it is let go (Mat, 2026-11-26).
+   */
+  useEffect(() => {
+    if (!picked || !chosenKey) return;
+    const { place, overlay: image } = keyed(chosenKey);
+    if (
+      (image && image.id === picked) ||
+      (place && place.properties.annotationId === picked)
+    )
+      return;
+    setChosenKey(null);
+    // As another is picked: what was chosen is read as it is then.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picked]);
   const onCanvas = (id: string | undefined) =>
     Boolean(id && current?.includes(id));
   const firstCurrent = () => {
@@ -1567,21 +1642,22 @@ export function MapView({
     const image = focus.key.startsWith("overlay-")
       ? overlays.find((item) => `overlay-${item.id}` === focus.key)
       : undefined;
-    if (image) return show(image);
     const { place } = keyed(focus.key);
-    if (!place) return;
+    const view = viewBounds();
+    if (image && !view) return show(image);
+    if (!image && !place) return;
     setChosenKey(focus.key);
-    const bounds = boundsOf([place]);
-    if (!bounds) return;
+    const bounds = view ?? boundsOf([place!]);
     // At once for its first view; after, gliding there, as an image is (`show`).
-    frame(
-      map,
-      bounds,
-      Math.max(map.getZoom(), zoom ?? POINT_ZOOM),
-      zoom,
-      settled ? glide : 0,
-    );
-    markPlace.current?.(place);
+    if (bounds)
+      frame(
+        map,
+        bounds,
+        Math.max(map.getZoom(), zoom ?? POINT_ZOOM),
+        view ? (zoom ?? OVERLAY_ZOOM) : zoom,
+        settled ? glide : 0,
+      );
+    if (place) markPlace.current?.(place);
     // Each time it is asked, once the map is up; the rest is read as it is then.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, focus?.n]);
@@ -2402,9 +2478,24 @@ export function useRootMap(
   onSelect?: MapProps["onSelect"],
 ) {
   const context = useOptionalClover()!;
-  const features = useOptionalCloverSelector(
+  const own = useOptionalCloverSelector(
     (state) => navPlaceOf(state.manifest, state.collection, context.language),
     navPlaceOf(null),
+  );
+  // With the places of the annotations held beside the Manifest's (the host's, the content's).
+  const added = useOptionalCloverSelector(
+    (state) => addedPlacesOf(state.addedSets, context.language),
+    navPlaceOf(null),
+  );
+  const features = useMemo(
+    () =>
+      added.features.length
+        ? {
+            type: "FeatureCollection" as const,
+            features: [...own.features, ...added.features],
+          }
+        : own,
+    [own, added],
   );
   const all = useOptionalCloverSelector(
     (state) => georeferencesOf(state.manifest),
