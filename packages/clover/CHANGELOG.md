@@ -140,6 +140,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   50 B over what is measured: the Canvas's initial JS 44,650 B gzip, a composed page of
   elements 109,000 B, a layout of elements 126,700 B and a `<clover-viewer>` in Document
   150,850 B.
+- **A language chosen in About keeps focus on its choice** (WCAG 2.4.3, 3.2.2;
+  `ACCESSIBILITY.md` N49). The choice changes Clover's interface language, and so the
+  length of About's title ("About" to "Informazioni"), which folded the codes into their
+  menu, or drew them out of it, under focus, focus falling to the page. The row now
+  holds its form while focus is in it, the title wrapping meanwhile, and is measured
+  again once focus leaves (Mat, 2026-11-05's "as soon as lang codes intersect" waits
+  only for that).
 
 ### Security
 
