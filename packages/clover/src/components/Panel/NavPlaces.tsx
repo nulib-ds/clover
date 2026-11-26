@@ -74,7 +74,8 @@ export default function NavPlaces() {
           <button
             type="button"
             className="clover-about-open clover-about-place"
-            aria-pressed={asked === key}
+            // The place the map shows, as a row marks the current one; a press asks again.
+            aria-current={asked === key ? "true" : undefined}
             onClick={() => clover.place.emit(key)}
           >
             {/* What it does, for assistive technology; the name for all. */}

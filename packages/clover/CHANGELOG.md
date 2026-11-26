@@ -129,6 +129,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   first view 104,150 B, `base.css` 16,700 B, and as elements a `<clover-viewer>`
   131,500 B, in Document 150,650 B and in Gallery 134,900 B, a composed page 108,800 B,
   a layout 126,500 B and the Viewer's own entry 108,750 B.
+- **A hide toggle over pages some of which are hidden reads as mixed, and "Find on the
+  map" says which place the map shows** (WCAG 4.1.2; `ACCESSIBILITY.md` N48, N50). The
+  annotations menu's one toggle, and the Annotations list's, read as shown while one of
+  their pages was hidden elsewhere; each is now neither checked nor not, a native
+  checkbox's `indeterminate`, its eye struck halfway, and a press hides them all.
+  About's and Annotations' "Find on the map" buttons carried `aria-pressed`, which a
+  second press never undid: the place the map shows is now `aria-current="true"`, as a
+  row marks the current one, and a press asks for it again. Budgets raised to the next
+  50 B over what is measured: the Canvas's initial JS 44,650 B gzip, a composed page of
+  elements 109,000 B, a layout of elements 126,700 B and a `<clover-viewer>` in Document
+  150,850 B.
 
 ### Security
 
