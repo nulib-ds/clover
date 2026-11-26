@@ -19,7 +19,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   of the Canvases in view, the one pressed chosen and the others shown beside it; Expand
   map still fills the Body with it. A place picked and an image pressed take turns in the
   one box, its map kept, so only what is chosen changes; the one pressed lets go of an
-  annotation picked before.
+  annotation picked before. A place picked while a map fills the Body brings back the
+  Canvas it is on, with the map in its box and the place still chosen.
 - **The Canvas's Map control comes after its annotations control, at the end of the
   row,** over the box it opens; it came before. While the map fills the Body, its Image
   control takes that place and the annotations control stays just before it, and the
