@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.12.4] - 2026-11-26
+
 ### Changed
 
 - **A click on a Canvas's text zooms, as a click anywhere on the picture does.** Over
