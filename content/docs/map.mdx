@@ -157,14 +157,14 @@ annotation. Set `overlayOpacity` to see the streets underneath the map too. The 
 cross-origin requests (CORS), since the image is painted onto the map.
 
 In the [Canvas](/docs/canvas), a georeferenced Canvas gets a Map control even without a
-[navPlace](https://iiif.io/api/extension/navplace/). It opens the map in a small box under
-the Canvas's controls, the image laid over it. A press on the box, or its Expand map, puts
-the map in the Canvas's place, and the page's picture, in a box where the map's was,
-puts it back; that box's Close puts the picture away, as the map's Image control
-does. Either way, the map keeps what it shows, fitted to its new size. Back in its box, it
-lets go of the place it named and of an annotation picked on it. While the map fills the
-Body, the Canvas's annotations control stays at the end of its row, and its menu opens
-over the map. Picking an annotation that targets the Canvas, there or in
+[navPlace](https://iiif.io/api/extension/navplace/), at the end of the Canvas's controls.
+It opens the map in a small box under them, the image laid over it. A press on the box,
+or its Expand map, puts the map in the Canvas's place, and the page's picture, in a box
+where the map's was, puts it back; that box's Close puts the picture away, as the map's
+Image control, where the Map control was, does. Either way, the map keeps what it shows,
+fitted to its new size. Back in its box, it lets go of the place it named and of an
+annotation picked on it. While the map fills the Body, the Canvas's annotations control
+stays where it is, just before Image, and its menu opens over the map. Picking an annotation that targets the Canvas, there or in
 [Annotations](/docs/annotations), closes the map and brings the Canvas back, framed on
 it. The Map control shows over a Canvas's placeholder too, with its
 annotations, and opens the box without opening the image.

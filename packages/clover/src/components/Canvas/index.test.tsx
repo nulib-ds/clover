@@ -936,6 +936,21 @@ describe("Canvas", () => {
       expect(box.querySelector(".clover-geomap")).toBe(map);
       expect(sheet).toHaveAttribute("aria-pressed", "true");
       expect(figure()).not.toHaveAttribute("data-place");
+
+      // Over the map filling the Body, the place picked beside it: the Canvas back, with
+      // its box, the pick kept (Mat, 2026-11-26: "the inset for map should render").
+      fireEvent.click(within(box).getByRole("button", { name: "Expand map" }));
+      await waitFor(() =>
+        expect(figure()).toHaveAttribute("data-place", "swapped"),
+      );
+      const lake = screen.getByRole("button", {
+        name: "Find on the image: Lake Michigan",
+      });
+      fireEvent.click(lake);
+      await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
+      await waitFor(() => expect(box.id).toMatch(/^place-of-/));
+      expect(box).toBeInTheDocument();
+      expect(lake).toHaveAttribute("aria-pressed", "true");
     });
 
     it("over its Map control's map, and in the Annotations section, as in the menu", async () => {

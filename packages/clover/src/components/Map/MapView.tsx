@@ -2478,6 +2478,8 @@ export function useRootMap(
   onSelect?: MapProps["onSelect"],
 ) {
   const context = useOptionalClover()!;
+  // The annotation picked on the map itself, which it lets go as it is put back in its box.
+  const pickedOnMap = useRef<string | null>(null);
   const own = useOptionalCloverSelector(
     (state) => navPlaceOf(state.manifest, state.collection, context.language),
     navPlaceOf(null),
@@ -2589,8 +2591,13 @@ export function useRootMap(
     highlighted,
     onHighlight: (feature: MapFeature | null) =>
       context.clover.highlight.emit(feature?.properties.annotationId ?? null),
-    // Put back in its box: an annotation picked or pointed at on it, a place's or a
-    // georeferenced image's, let go, as the place it named is.
+    /*
+     * Put back in its box: an annotation picked on it (a place's) or a georeferenced
+     * image's, and one pointed at on it, let go, as the place it named is. Never one picked
+     * beside it, whose pick put it back (Mat, 2026-11-26: "clicking mount fuji here toggles
+     * off the map which is fine … but the inset for map should render"), now that the
+     * places of the annotations beside it are on it too.
+     */
     onLetGo: () => {
       const ours = (id: string | null) =>
         !!id &&
@@ -2598,8 +2605,14 @@ export function useRootMap(
           features.features.some(
             (feature) => feature.properties.annotationId === id,
           ));
-      if (ours(context.clover.store.get().annotationId))
+      const picked = context.clover.store.get().annotationId;
+      if (
+        picked &&
+        (picked === pickedOnMap.current ||
+          all.some((item) => item.id === picked))
+      )
         context.clover.selectAnnotation(null);
+      pickedOnMap.current = null;
       if (ours(context.clover.highlight.get()))
         context.clover.highlight.emit(null);
     },
@@ -2624,7 +2637,10 @@ export function useRootMap(
         void context.clover.goToManifest(member);
         return;
       }
-      if (annotationId) context.clover.selectAnnotation(annotationId);
+      if (annotationId) {
+        pickedOnMap.current = annotationId;
+        context.clover.selectAnnotation(annotationId);
+      }
       const selected =
         annotationId !== undefined &&
         context.clover.store.get().annotationId === annotationId;
