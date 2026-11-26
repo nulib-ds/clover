@@ -157,6 +157,43 @@ function laidOn(
   return { manifest: { ...manifest, items } as Manifest, first };
 }
 
+/** The page the host's georeferences are laid on, by its id's start. */
+const SIDELOADED = "clover:annotations";
+
+/**
+ * The Manifest with the host's georeferences (the Root's `annotations`, given beside a
+ * Manifest) laid on their Canvases, as the content's are (`laidOn`), in place of those it
+ * laid before, so the Map, the Panel's map and the Canvas's place box warp them as they
+ * would the Manifest's own. Given none, it takes those it laid away. The Manifest is
+ * never mutated, and comes back as given where there is nothing to change.
+ */
+export function laySideloaded(
+  manifest: Manifest,
+  annotations: Json[],
+): Manifest {
+  const isLaid = (page: unknown) =>
+    String((page as Json)?.id ?? "").startsWith(`${SIDELOADED}#`);
+  const canvases = asArray((manifest as Json).items) as Json[];
+  const holds = (canvas: Json) =>
+    (asArray(canvas.annotations) as Json[]).some(isLaid);
+  const bare = canvases.some(holds)
+    ? ({
+        ...manifest,
+        items: canvases.map((canvas) => {
+          if (!holds(canvas)) return canvas;
+          const { annotations: pages, ...rest } = canvas;
+          const kept = (asArray(pages) as Json[]).filter(
+            (page) => !isLaid(page),
+          );
+          return kept.length ? { ...rest, annotations: kept } : rest;
+        }),
+      } as Manifest)
+    : manifest;
+  return annotations.length
+    ? laidOn(bare, annotations.map(placeOf), SIDELOADED).manifest
+    : bare;
+}
+
 /** A label as a language map: a plain string (as some georeferencers write) in `none`. */
 const languageMap = (label: unknown): Json | undefined =>
   typeof label === "string"

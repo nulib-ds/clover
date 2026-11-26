@@ -11,6 +11,48 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **A georeferenced image or a place pressed in Annotations opens the map in its box over
+  the Canvas,** which stays in view, rather than filling the Body. Where a map fills the
+  Body already, it shows there. Either way it frames every place and georeferenced image
+  of the Canvases in view, the one pressed chosen and the others shown beside it; Expand
+  map still fills the Body with it. A place picked and an image pressed take turns in the
+  one box, its map kept, so only what is chosen changes; the one pressed lets go of an
+  annotation picked before. A place picked while a map fills the Body brings back the
+  Canvas it is on, with the map in its box and the place still chosen.
+- **The Canvas's Map control comes after its annotations control, at the end of the
+  row,** over the box it opens; it came before. While the map fills the Body, its Image
+  control takes that place and the annotations control stays just before it, and the
+  page's picture sits where the map's box was over the Canvas. Budgets raised to the
+  next 50 B over what is measured (`build/size-budget.json`), for this, the change above
+  and the fixes below: the Default template 82,400 B and to first view 97,950 B, the
+  Document template 85,200 B and to first view 104,800 B, the Gallery 33,500 B and to
+  first view 54,600 B, the Map to first view 49,500 B and before MapLibre 26,450 B, the
+  Viewer's own entry 109,300 B, `styles.css` 12,750 B, the core styles 8,400 B,
+  `base.css` 16,750 B and `spacing.css` 4,150 B, and as elements a `<clover-viewer>`
+  132,050 B, a Canvas 95,450 B, a Document 151,250 B, a Gallery 135,450 B, labels
+  38,100 B, a composed page 109,350 B and a layout 127,050 B, each 50 to 500 B over its
+  old budget.
+
+### Fixed
+
+- **Georeference annotations given through `annotations` beside a Manifest are laid on
+  their Canvases.** A `Root`'s or the Viewer's `annotations` (an attribute on
+  `<clover-viewer>` and `<clover-root>`) dropped them; now each lies on the Canvas it
+  targets, as if the Manifest held it, so the Canvas's map control, its place box, the
+  Panel's Annotations and the Map show it, and it goes again as `annotations` changes.
+- **Every map shows the places of annotations given beside the Manifest.** A GeoJSON
+  place an added annotation names (Cookbook 0139), the host's `annotations` or the
+  content's, was on its own pick's map alone. The map a georeferenced image opens from
+  Annotations and the Canvas's map control's box show it too, and a picked place's box
+  shows the georeferenced images in view, so each shows the other. A place picked, from
+  the Annotations section or the Canvas's annotations menu, is marked chosen on every
+  map that shows it, its box's too.
+- **About's language and Download menus stay inside a narrow Panel,** moved along their
+  row as they open rather than cut at its edge (WCAG 1.4.10), and the language button's
+  glyph stands `xs` clear of its code, as in a row of codes.
+
 ## [4.12.4] - 2026-11-26
 
 ### Changed

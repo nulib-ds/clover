@@ -421,23 +421,6 @@ const Controls: React.FC<CanvasControlsProps> = ({
    * controls are Canvas's alone, so they are not replaceable through `controlButtons`.
    */
   const own = [
-    showPlace && {
-      id: `place-${instance}`,
-      view: false,
-      node: (
-        <Button
-          key="place"
-          id={`place-${instance}`}
-          label={t("mapLabel")}
-          lang={langOf("mapLabel")}
-          onClick={onPlaceToggle}
-          expanded={placeOpen}
-          controls={placeId}
-        >
-          <Place />
-        </Button>
-      ),
-    },
     showChapters && {
       id: chaptersId,
       view: false,
@@ -459,6 +442,23 @@ const Controls: React.FC<CanvasControlsProps> = ({
       id: annotationsId,
       view: false,
       node: annotationsButton(),
+    },
+    showPlace && {
+      id: `place-${instance}`,
+      view: false,
+      node: (
+        <Button
+          key="place"
+          id={`place-${instance}`}
+          label={t("mapLabel")}
+          lang={langOf("mapLabel")}
+          onClick={onPlaceToggle}
+          expanded={placeOpen}
+          controls={placeId}
+        >
+          <Place />
+        </Button>
+      ),
     },
     showInformation && {
       id: `information-${instance}`,
@@ -492,11 +492,14 @@ const Controls: React.FC<CanvasControlsProps> = ({
   );
   /*
    * The view's first, full screen last, then a placeholder's toggle: what waits behind
-   * More, which stands where they do; then Choice and the Canvas's own, the place,
-   * annotations and the `i`, at the row's end, in sight whether or not the view's fit
-   * beside them (Mat, 2026-11-01: "make it now so order from right to left is: `i`,
-   * annotations, map, then the viewer controls"; the Canvas's own led the row for a
-   * while that day, and stood after the view's before it).
+   * More, which stands where they do; then Choice and the Canvas's own, annotations, the
+   * place and the `i`, at the row's end, in sight whether or not the view's fit beside
+   * them. The place's control right of annotations, over the box it opens, as the map's
+   * Image control is over the page's picture when the map fills the Body (Mat, 2026-11-26:
+   * "let's keep map/image icon to the right (where annotations icon is)"; 2026-11-01, "make
+   * it now so order from right to left is: `i`, annotations, map, then the viewer
+   * controls"; the Canvas's own led the row for a while that day, and stood after the
+   * view's before it).
    */
   const toggle = own.filter((item) => item.id === `placeholder-${instance}`);
   const lead = [...view.filter((item) => item.view), ...toggle];

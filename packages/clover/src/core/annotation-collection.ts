@@ -1,4 +1,5 @@
 import { type AnnotationSet, pageLabel, readPage } from "./annotation-sets";
+import { isGeoreferencing } from "./geo-detect";
 import type { LanguageMapLike } from "./value";
 import { upgradePage } from "./pages";
 import { type CloverRequest, fetchJson } from "./request";
@@ -95,6 +96,15 @@ export function setsOf(pages: LoadedPage[]): AnnotationSet[] {
   }
   return sets;
 }
+
+/**
+ * The Georeference Extension annotations among the pages, as published: maps to lay on
+ * what they target (`georeference-content.ts`), never sets to list.
+ */
+export const georeferencesIn = (pages: LoadedPage[]): Json[] =>
+  pages
+    .flatMap(({ raw }) => asArray(raw.items) as Json[])
+    .filter(isGeoreferencing);
 
 export async function loadAnnotationSets(
   input: AnnotationsInput,

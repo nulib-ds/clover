@@ -1,11 +1,13 @@
 import { createClover } from "./clover";
 import {
+  addedPlacesOf,
   canvasGeoreferences,
   cornersOf,
   georeferencedContentAddress,
   georeferencesOf,
 } from "./geo";
 import { isGeoreferencedContent } from "./geo-detect";
+import { laySideloaded } from "./georeference-content";
 import annotation from "../fixtures/mocks/sanborn/annotation.json";
 import collection from "../fixtures/mocks/sanborn/annotation-collection.json";
 import page from "../fixtures/mocks/sanborn/annotation-page.json";
@@ -260,5 +262,100 @@ describe("an AnnotationCollection of georeferences as the content", () => {
         expect(overlay.transformation).toBe("helmert");
         expect(cornersOf(overlay)).not.toBeNull();
       }
+  });
+});
+
+/*
+ * Georeferences given beside a Manifest (the Root's `annotations`), as a host sideloads
+ * them: laid on their Canvases as the content's are, so every map warps them, and taken
+ * away as the host's annotations change. A GeoJSON place among them is the Root's too.
+ */
+describe("a georeference given beside a Manifest", () => {
+  const HOST = "https://example.org/host/annotations";
+  const PLACE = `${HOST}/place`;
+  /** The sheet's georeference on its Canvas, as a host writes one for the whole Canvas. */
+  const onCanvas = {
+    ...annotation,
+    id: `${HOST}/sheet`,
+    target: {
+      type: "SpecificResource",
+      source: {
+        id: CANVAS,
+        type: "Canvas",
+        partOf: [{ id: MANIFEST, type: "Manifest" }],
+      },
+      selector: annotation.target.selector,
+    },
+  };
+  const sideloaded = {
+    id: HOST,
+    type: "AnnotationPage",
+    items: [
+      onCanvas,
+      {
+        id: PLACE,
+        type: "Annotation",
+        motivation: "tagging",
+        body: {
+          type: "Feature",
+          properties: { label: { en: ["Fountain Square"] } },
+          geometry: { type: "Point", coordinates: [-87.6812, 42.0464] },
+        },
+        target: `${CANVAS}#xywh=10,20,30,40`,
+      },
+    ],
+  };
+
+  test("is laid on its Canvas, every map's, and taken away with the annotations", async () => {
+    const clover = createClover({ request: { fetch: mockFetch({}) } });
+    await clover.load(volume() as Json);
+    await clover.loadAnnotations(sideloaded);
+    let { manifest, addedSets } = clover.store.get();
+    let [canvas] = (manifest as Json).items;
+    expect(laid(canvas)).toHaveLength(1);
+    const [overlay] = canvasGeoreferences(canvas);
+    expect(overlay).toMatchObject({ id: onCanvas.id, canvasId: CANVAS });
+    expect(cornersOf(overlay)).not.toBeNull();
+    // Laid as the Manifest's own would be: not the content, whose maps lay every sheet.
+    expect(isGeoreferencedContent(manifest)).toBe(false);
+    // Its place is the Root's, naming its annotation and Canvas; the georeference is not.
+    expect(addedPlacesOf(addedSets).features).toEqual([
+      expect.objectContaining({
+        geometry: { type: "Point", coordinates: [-87.6812, 42.0464] },
+        properties: expect.objectContaining({
+          title: "Fountain Square",
+          annotationId: PLACE,
+          canvasId: CANVAS,
+        }),
+      }),
+    ]);
+
+    // Given again, the one laid before gives way: never two.
+    await clover.loadAnnotations({ ...sideloaded });
+    [canvas] = (clover.store.get().manifest as Json).items;
+    expect(laid(canvas)).toHaveLength(1);
+
+    await clover.loadAnnotations(null);
+    ({ manifest, addedSets } = clover.store.get());
+    [canvas] = (manifest as Json).items;
+    expect(laid(canvas)).toEqual([]);
+    expect(georeferencesOf(manifest)).toEqual([]);
+    expect(addedPlacesOf(addedSets).features).toEqual([]);
+  });
+
+  test("is laid on a Manifest that opens after it", async () => {
+    const clover = createClover({ request: { fetch: mockFetch({}) } });
+    await clover.loadAnnotations(sideloaded);
+    await clover.load(volume() as Json);
+    expect(georeferencesOf(clover.store.get().manifest)).toHaveLength(1);
+  });
+
+  test("leaves a Manifest it has nothing for as it is", async () => {
+    const clover = createClover({ request: { fetch: mockFetch({}) } });
+    await clover.load(volume("https://example.org/elsewhere/canvas") as Json);
+    const before = clover.store.get().manifest;
+    await clover.loadAnnotations(sideloaded);
+    expect(georeferencesOf(clover.store.get().manifest)).toEqual([]);
+    expect(laySideloaded(before!, [])).toBe(before);
   });
 });

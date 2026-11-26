@@ -86,6 +86,9 @@ export default function LanguageMenu({
           triggerId={button}
           onClose={close}
           className="clover-languages-menu"
+          // All of it in sight in a narrow panel, never cut at its edge (WCAG 1.4.10; Mat,
+          // 2026-11-26: "language popver is hidden when extending beyond panel").
+          inside
         >
           <fieldset>
             <legend {...languageProps(nameLang)}>{name}</legend>

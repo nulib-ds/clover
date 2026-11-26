@@ -115,6 +115,14 @@ const NO_MODEL: AnnotationModel = {
 };
 // Few Canvases are animations: their clock and bar load when one is shown.
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
+/** A place's features: a GeoJSON `FeatureCollection`'s, or a `Feature` alone. */
+const featuresIn = (place: any): any[] =>
+  place?.type === "FeatureCollection"
+    ? (place.features ?? [])
+    : place?.type === "Feature"
+      ? [place]
+      : [];
+
 /** No place, while the next Manifest loads: the box's map kept, with nothing on it. */
 const NO_PLACES = {
   feature: { type: "FeatureCollection", features: [] },
@@ -413,23 +421,27 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * The picked annotation's place, where its body is a GeoJSON `Feature` (Cookbook 0139):
    * shown on a map in a box, as the information is, while it is picked.
    */
-  const pickedPlace = useMemo(() => {
-    const picked = allAnnotations?.find(
-      (each) => each.annotation.id === model.selected,
-    )?.annotation as Record<string, any> | undefined;
+  const placeOfPick = (id: string | null | undefined) => {
+    const picked = allAnnotations?.find((each) => each.annotation.id === id)
+      ?.annotation as Record<string, any> | undefined;
     const body = (
       Array.isArray(picked?.body) ? picked?.body : [picked?.body]
     ).find((each: any) => each?.type === "Feature");
     return picked && body
       ? {
           id: String(picked.id),
-          feature: body as Record<string, unknown>,
           name: (body.properties?.label ?? picked.label) as
             | LanguageMapLike
             | undefined,
         }
       : null;
-  }, [allAnnotations, model.selected]);
+  };
+  const pickedPlace = useMemo(
+    () => placeOfPick(model.selected),
+    // What it reads, by what changes it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allAnnotations, model.selected],
+  );
   // Its box open while it is picked, until closed; open again as it is picked again.
   const pickKey = pickedPlace ? `${pickedPlace.id}:${props.refind ?? 0}` : null;
   const [closedPick, setClosedPick] = useState<string | null>(null);
@@ -445,13 +457,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       .map((canvas) => (canvas as { navPlace?: any }).navPlace)
       .filter(Boolean);
     const source = own.length ? own : props.navPlace ? [props.navPlace] : [];
-    const features = source.flatMap((place: any) =>
-      place?.type === "FeatureCollection"
-        ? (place.features ?? [])
-        : place?.type === "Feature"
-          ? [place]
-          : [],
-    );
+    const features = source.flatMap(featuresIn);
     const georeferenced = (canvases ?? []).filter(isGeoreferenced);
     if (!features.length && !georeferenced.length) return null;
     const named =
@@ -462,6 +468,14 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       name: (named ?? props.label) as LanguageMapLike | undefined,
     };
   }, [canvases, props.navPlace, props.label]);
+  /*
+   * The view's annotations, whose places (a GeoJSON body, Cookbook 0139) every place box
+   * shows with its own, the one picked marked as chosen, wherever it was picked.
+   */
+  const viewAnnotations = useMemo(
+    () => allAnnotations?.map(({ annotation }) => annotation),
+    [allAnnotations],
+  );
   const placeId = `place-box-${instance}`;
   const [placeOpen, setPlaceOpen] = useState(false);
   const [placeShown, setPlaceShown] = useState(false);
@@ -482,22 +496,27 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    */
   const [swappedBox, setSwappedBox] = useState<string | null>(null);
   /*
-   * A place asked for from Annotations (Mat, 2026-11-13: "clicking the georef or navplace
-   * annotation opens the map over the body as expanded"): the Root's map, filling the Body
-   * as each ask comes, before it paints, until Collapse map (`PlaceBox`). Not where its map
-   * control is off (`controls.map: false`): the layout around it shows the map then, as
-   * Document shows it over its pages.
+   * A place asked for from Annotations: the Root's map, framed on all the view's places
+   * and images with the one asked for chosen. In its box over the Canvas, where the Canvas
+   * is shown (Mat, 2026-11-26: "if the person is looking at the image, the inset should
+   * open"); filling the Body, as each ask comes, before it paints, where a map fills it
+   * already ("if the map is open already, it should frame the view"; 2026-11-13: "opens the
+   * map over the body as expanded"). Not where its map control is off (`controls.map:
+   * false`): the layout around it shows the map then, as Document shows it over its pages.
    */
   const asked = controlsConfig && controlsConfig.map ? props.askedPlace : null;
   const askedId = `place-asked-${instance}`;
   useIsomorphicLayoutEffect(() => {
-    if (asked) setSwappedBox(askedId);
+    if (asked) setSwappedBox((swapped) => (swapped ? askedId : null));
     // Each ask, as it comes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [asked?.n]);
+  const pickId = `place-of-${instance}`;
+  // The one box for both (below): the ask's, else the pick's.
+  const placedId = asked ? askedId : pickId;
   const placeSwapped =
     (swappedBox === placeId && placeOpen) ||
-    (swappedBox === `place-of-${instance}` && pickOpen) ||
+    (swappedBox === pickId && pickOpen) ||
     (swappedBox === askedId && Boolean(asked));
   const swapPlace = (box: string) =>
     setSwappedBox((swapped) => (swapped === box ? null : box));
@@ -515,6 +534,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const closeAsked = () => {
     setSwappedBox(null);
     props.onAskedPlaceClose?.();
+  };
+  const closePick = () => {
+    setSwappedBox(null);
+    setClosedPick(pickKey);
   };
   /*
    * An annotation picked while a map fills the Body brings the Canvas back, framed on it
@@ -536,7 +559,11 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   useEffect(() => {
     if (lastPicking.current === picking) return;
     lastPicking.current = picking;
-    if (picking) bringBack();
+    if (!picking) return;
+    bringBack();
+    // A place picked takes the place of one asked for, in the one box: the one picked alone
+    // chosen (Mat, 2026-11-26: "whichever annotation is clicked should appear active").
+    if (asked && placeOfPick(props.selectedAnnotation)) closeAsked();
     // Each pick as it comes, with the render that made it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [picking]);
@@ -1559,23 +1586,31 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
           />
         )}
         {loading && <Loading overlay />}
-        {pickedPlace && (
+        {/*
+         * A place asked for from Annotations, else the picked annotation's place: one box,
+         * so its map stays as one gives way to the other, only what is chosen changing (Mat,
+         * 2026-11-26). Inside a Root, the Root's map (`asked`, null for a pick).
+         */}
+        {(asked || pickedPlace) && (
           <Suspense fallback={null}>
             <PlaceBox
               cooperative={options?.gestures?.cooperative}
-              id={`place-of-${instance}`}
-              open={pickOpen}
-              swapped={placeSwapped && swappedBox === `place-of-${instance}`}
-              onSwap={() => swapPlace(`place-of-${instance}`)}
-              onClose={() => {
-                setSwappedBox(null);
-                setClosedPick(pickKey);
-              }}
-              // Once it has gone, the Canvas back in sight.
-              returnFocus={pickedPlace.id}
-              feature={pickedPlace.feature}
+              id={placedId}
+              open={asked ? true : pickOpen}
+              swapped={placeSwapped && swappedBox === placedId}
+              onSwap={() => swapPlace(placedId)}
+              onClose={asked ? closeAsked : closePick}
+              // A pick's, once it has gone, the Canvas back in sight.
+              returnFocus={asked ? undefined : pickedPlace!.id}
+              // Its place among the view's, with the view's georeferenced images under them.
+              feature={null}
+              annotations={viewAnnotations}
+              picked={model.selected}
+              canvases={places?.canvases}
               owner={canvases?.[0]}
-              name={pickedPlace.name}
+              name={asked ? undefined : pickedPlace!.name}
+              asked={asked ?? null}
+              onReady={setAskedReady}
               language={language}
             />
           </Suspense>
@@ -1591,26 +1626,11 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
               onClose={closePlace}
               returnFocus={`place-${instance}`}
               feature={shownPlaces.feature}
+              annotations={viewAnnotations}
+              picked={model.selected}
               canvases={shownPlaces.canvases}
               owner={canvases?.[0]}
               name={shownPlaces.name}
-              language={language}
-            />
-          </Suspense>
-        )}
-        {asked && (
-          <Suspense fallback={null}>
-            <PlaceBox
-              cooperative={options?.gestures?.cooperative}
-              id={askedId}
-              open
-              swapped={placeSwapped && swappedBox === askedId}
-              onSwap={() => swapPlace(askedId)}
-              onClose={closeAsked}
-              feature={null}
-              owner={canvases?.[0]}
-              asked={asked}
-              onReady={setAskedReady}
               language={language}
             />
           </Suspense>

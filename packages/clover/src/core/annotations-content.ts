@@ -1,6 +1,9 @@
-import { loadAnnotationPages, setsOf } from "./annotation-collection";
+import {
+  georeferencesIn,
+  loadAnnotationPages,
+  setsOf,
+} from "./annotation-collection";
 import { manifestOfAnnotation } from "./annotation-sets";
-import { isGeoreferencing } from "./geo-detect";
 import {
   CloverContentError,
   type LoadContentOptions,
@@ -8,7 +11,6 @@ import {
   loadContent,
   loadManifest,
 } from "./load";
-import { asArray } from "../lib/asArray";
 
 /**
  * Annotations as the content: an AnnotationPage (and the pages its `next` leads to) or
@@ -35,9 +37,7 @@ export async function annotationsContent(
   const pages = await loadAnnotationPages(json, options);
   const annotationSets = setsOf(pages).map((set) => ({ ...set, content }));
 
-  const georeferences = pages
-    .flatMap(({ raw }) => asArray(raw.items) as Record<string, any>[])
-    .filter(isGeoreferencing);
+  const georeferences = georeferencesIn(pages);
   if (georeferences.length) {
     const { georeferenceContent } = await import("./georeference-content");
     const loaded = await georeferenceContent(

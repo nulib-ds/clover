@@ -16,6 +16,7 @@ import evanston1899 from "../fixtures/mocks/sanborn/evanston/1899.json";
 import { p4 } from "../fixtures/presentation4";
 import {
   affineTransform,
+  annotationPlaces,
   boundsOf,
   canvasGeoreferences,
   canvasHasMapData,
@@ -155,6 +156,17 @@ describe("navPlaceOf", () => {
     expect(features[0].properties.annotationId).toBe(
       annotationJson.items[0].annotations[0].items[0].id,
     );
+  });
+
+  it("reads one annotation's places alone, naming it, as a Canvas's place box does", () => {
+    const tagged = annotationJson.items[0].annotations[0].items[0];
+    const [place] = annotationPlaces(tagged);
+    expect(place.properties.annotationId).toBe(tagged.id);
+    expect(place.properties.canvasId).toBe(annotationJson.items[0].id);
+    // A georeference is an image the map lays, never a place.
+    expect(
+      annotationPlaces({ ...tagged, motivation: "georeferencing" }),
+    ).toEqual([]);
   });
 
   it("is memoized on the Manifest, and shared when empty", () => {

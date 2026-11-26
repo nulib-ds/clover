@@ -6,7 +6,10 @@ import { Thumbnail } from "../Primitives/Primitives";
 import { canvasGeoreferences } from "../../core/geo";
 import { isGeoreferencedContent } from "../../core/geo-detect";
 import { selectSequence } from "../../core/selectors";
-import { useOptionalCloverSelector } from "../../react/context";
+import {
+  useOptionalClover,
+  useOptionalCloverSelector,
+} from "../../react/context";
 import Button from "../../ui/Button";
 import { Inset } from "../../ui/Inset";
 import { focusSoon } from "../../ui/focusSoon";
@@ -32,10 +35,12 @@ import { visuallyHidden } from "../../ui/visuallyHidden";
  * were. Its name, out of sight, names the box. Closed by its Close, by Escape, or as
  * another popup opens. Loaded with MapLibre only as it first opens.
  *
- * Asked for from Annotations (`asked`: a georeferenced image or a place pressed there, Mat,
- * 2026-11-13: "clicking the georef or navplace annotation opens the map over the body as
- * expanded"), it shows the Root's map, as the Panel's Map section did: every place the
- * Root has and its overlays, framed on the one asked for.
+ * Asked for from Annotations (`asked`: a georeferenced image or a place pressed there), or
+ * for a place picked, inside a Root (`asked` null), it shows the Root's map, as the Panel's
+ * Map section did: every place the Root has and its overlays, framed on the view's, the one
+ * asked for or picked chosen. One box for both, so the map stays as one gives way to the
+ * other, only what is chosen changing (Mat, 2026-11-26: "rerendering when toggling
+ * annotations even though the map does not change beyond an active/inactive toggle").
  */
 export default function PlaceBox({
   id,
@@ -44,6 +49,8 @@ export default function PlaceBox({
   swapped = false,
   onSwap,
   feature,
+  annotations,
+  picked,
   name,
   canvases,
   owner,
@@ -70,6 +77,13 @@ export default function PlaceBox({
   onSwap: () => void;
   /** Its place: a GeoJSON `Feature`, `FeatureCollection` or geometry. */
   feature: unknown;
+  /**
+   * The annotations in view, whose places (a GeoJSON body, Cookbook 0139) it shows with
+   * its own, each naming its annotation.
+   */
+  annotations?: readonly unknown[];
+  /** The annotation picked, by id: its place is marked as chosen. */
+  picked?: string | null;
   /** What it is called: a place's `label`, else what holds it. */
   name?: LanguageMapLike;
   /** The Canvases in view, whose georeferenced images it overlays. */
@@ -81,14 +95,16 @@ export default function PlaceBox({
   owner?: unknown;
   language?: string;
   /**
-   * A place asked for from Annotations, keyed as a map's list keys it: the Root's map in
-   * place of `feature` and `canvases`, framed on it each time `n` changes.
+   * A place asked for from Annotations, keyed as a map's list keys it: inside a Root, the
+   * Root's map in place of `feature` and `canvases`, chosen each time `n` changes. Null,
+   * inside a Root, the Root's map with nothing asked for: the annotation picked is chosen.
    */
   asked?: { key: string; n: number } | null;
   /** Its map ready, and as it goes not: the Canvas keeps its controls until then. */
   onReady?: (ready: boolean) => void;
 }) {
   const { t, langOf } = useCloverTranslation();
+  const rooted = Boolean(useOptionalClover());
   /*
    * Inside a Root given georeference annotations as its content, every sheet, the ones in
    * view outlined, as the Root's own map lays them (`isGeoreferencedContent`); else the
@@ -212,7 +228,7 @@ export default function PlaceBox({
       }}
     >
       {/* The map first, so it stays the one map as it and the Canvas trade places. */}
-      {asked ? (
+      {asked !== undefined && rooted ? (
         <RootPlaceMap
           focus={asked}
           reframe={swapped}
@@ -224,6 +240,8 @@ export default function PlaceBox({
       ) : (
         <GivenMap
           navPlace={feature}
+          annotations={annotations}
+          picked={picked}
           read={overlays}
           current={current}
           owner={owner}
@@ -292,9 +310,9 @@ function PageClose({ id }: { id: string }) {
 }
 
 /**
- * The Root's map in the box, for a place asked for from Annotations: its places and its
- * overlays as the Panel's Map section showed them, listing nothing (Annotations does),
- * framed on the one asked for.
+ * The Root's map in the box, for a place asked for from Annotations or picked: its places
+ * and its overlays as the Panel's Map section showed them, listing nothing (Annotations
+ * does), framed on the view's, the one asked for or picked chosen.
  */
 function RootPlaceMap({
   focus,
@@ -303,7 +321,7 @@ function RootPlaceMap({
   onReady,
   children,
 }: {
-  focus: { key: string; n: number };
+  focus: { key: string; n: number } | null;
   reframe: boolean;
   cooperative?: boolean;
   onReady?: (ready: boolean) => void;
@@ -315,6 +333,8 @@ function RootPlaceMap({
     <MapView
       {...root}
       focus={focus}
+      // The one asked for, or picked, chosen; the view's others in sight beside it.
+      framesView
       reframe={reframe}
       navigable={reframe}
       cooperative={cooperative}
