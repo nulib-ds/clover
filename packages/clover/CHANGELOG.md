@@ -71,16 +71,20 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   of the Canvases in view, the one pressed chosen and the others shown beside it; Expand
   map still fills the Body with it. A place picked and an image pressed take turns in the
   one box, its map kept, so only what is chosen changes; the one pressed lets go of an
-  annotation picked before. Expanded, the page's picture sits where the map's box was
-  over the Canvas, at the row's end. Budgets raised to the next 50 B over what is
-  measured (`build/size-budget.json`), for this and the fixes below: the Canvas's initial
-  JS 44,650 B and to first view 51,850 B, the Default template 82,350 B and to first view
-  97,750 B, the Document template 85,000 B and to first view 104,600 B, the Gallery
-  33,450 B and to first view 54,500 B, the Map to first view 49,400 B and before
-  MapLibre 26,350 B, the Viewer's own entry 109,150 B, and as elements a
-  `<clover-viewer>` 131,950 B, a Canvas 95,300 B, a Document 151,050 B, a Gallery
-  135,350 B, labels 38,050 B, a composed page 109,200 B and a layout 126,900 B, each 50
-  to 450 B over its old budget.
+  annotation picked before.
+- **The Canvas's Map control comes after its annotations control, at the end of the
+  row,** over the box it opens; it came before. While the map fills the Body, its Image
+  control takes that place and the annotations control stays just before it, and the
+  page's picture sits where the map's box was over the Canvas. Budgets raised to the
+  next 50 B over what is measured (`build/size-budget.json`), for this, the change above
+  and the fixes below: the Canvas's initial JS 44,700 B and to first view 51,850 B, the
+  Default template 82,350 B and to first view 97,800 B, the Document template 85,000 B
+  and to first view 104,600 B, the Gallery 33,450 B and to first view 54,500 B, the Map
+  to first view 49,500 B and before MapLibre 26,350 B, the Viewer's own entry 109,200 B,
+  `styles.css` 12,750 B, the core styles 8,400 B, `base.css` 16,750 B and `spacing.css`
+  4,150 B, and as elements a `<clover-viewer>` 131,950 B, a Canvas 95,300 B, a Document
+  151,100 B, a Gallery 135,350 B, labels 38,050 B, a composed page 109,250 B and a
+  layout 126,950 B, each 50 to 550 B over its old budget.
 
 ### Fixed
 
@@ -96,6 +100,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   shows the georeferenced images in view, so each shows the other. A place picked, from
   the Annotations section or the Canvas's annotations menu, is marked chosen on every
   map that shows it, its box's too.
+- **About's language and Download menus stay inside a narrow Panel,** moved along their
+  row as they open rather than cut at its edge (WCAG 1.4.10), and the language button's
+  glyph stands `xs` clear of its code, as in a row of codes.
 - **Rendered on the server with React 18, the Canvas and the Document template no longer
   warn that `useLayoutEffect` does nothing there.** They measure as every other part
   does: as an effect on the server, and before paint in the browser.
