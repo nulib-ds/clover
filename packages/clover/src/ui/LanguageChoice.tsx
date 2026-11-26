@@ -57,6 +57,12 @@ function naturalEnd(label: HTMLElement, rtl: boolean): number {
  * would reach the box drawn with the row in it, less the room the box keeps at its start;
  * drawn out again once they would not. The box's width with the row in it is taken each
  * time the row draws, so the answer is the same folded or not, and never flickers.
+ *
+ * Never while focus is in it (Mat, 2026-11-25): the other form is another element, and a
+ * choice there changes the interface language, and so the label's length ("About" to
+ * "Informazioni"), which would fold or unfold the row under focus and drop it to the page
+ * (WCAG 2.4.3, 3.2.2). The label wraps meanwhile, as the heading keeps the row's room
+ * clear; measured again once focus leaves.
  */
 function useFolded(
   fit: ((place: HTMLElement) => LanguageRowFit | null | undefined) | undefined,
@@ -73,7 +79,8 @@ function useFolded(
   const [shownWas, setShownWas] = useState(shown);
   if (shownWas !== shown) {
     setShownWas(shown);
-    setFolded(false);
+    if (!element?.contains(element.ownerDocument.activeElement))
+      setFolded(false);
   }
   useLayoutEffect(() => {
     const found = element && fit?.(element);
@@ -81,6 +88,7 @@ function useFolded(
     if (!element || !found) return;
     const { label, box } = found;
     const check = () => {
+      if (element.contains(element.ownerDocument.activeElement)) return;
       const rtl = getComputedStyle(box).direction === "rtl";
       const rect = box.getBoundingClientRect();
       if (!folded) width.current = rect.width;
@@ -92,11 +100,23 @@ function useFolded(
       if (crosses !== folded) setFolded(crosses);
     };
     check();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(check);
-    observer.observe(label);
-    if (label.parentElement) observer.observe(label.parentElement);
-    return () => observer.disconnect();
+    // Focus gone from it: measured once it has gone, wherever it went.
+    let frame = 0;
+    const left = (event: FocusEvent) => {
+      if (element.contains(event.relatedTarget as Node | null)) return;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(check);
+    };
+    element.addEventListener("focusout", left);
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(check);
+    observer?.observe(label);
+    if (label.parentElement) observer?.observe(label.parentElement);
+    return () => {
+      cancelAnimationFrame(frame);
+      element.removeEventListener("focusout", left);
+      observer?.disconnect();
+    };
   }, [fit, folded, count, element]);
   return { place, folded: measured ? folded : count > ROW_MOST };
 }

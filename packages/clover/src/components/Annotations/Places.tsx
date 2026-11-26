@@ -181,7 +181,8 @@ export function PlaceEntry({
       <button
         type="button"
         className="clover-annotations-show"
-        aria-pressed={asked}
+        // The place the map shows, as a row marks the current one; a press asks again.
+        aria-current={asked ? "true" : undefined}
         aria-label={
           oneLanguage ? `${show.text}: ${place.name.text}` : undefined
         }
