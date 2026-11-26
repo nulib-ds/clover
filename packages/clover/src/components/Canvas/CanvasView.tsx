@@ -282,6 +282,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     onEnded,
     chapters,
     highlightedChapter,
+    viewportKeys: layoutKeys,
     onChapterHighlight,
     placeholder = true,
     ahead,
@@ -947,13 +948,29 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * cannot carry a language, so the role keeps its own name where Clover's interface strings are
    * not in the page's language (WCAG 3.1.2).
    */
+  const said = ({ description, keys }: typeof CAMERA_KEYS) => ({
+    keys,
+    text: t(description),
+    lang: root.langOf(description),
+  });
   const viewportKeys = showPlaceholder
     ? []
     : [
-        ...(navigable ? [CAMERA_KEYS] : []),
-        ...(media ? [MEDIA_KEYS] : []),
-        ...(hasAnnotations ? [ANNOTATION_KEYS] : []),
-        ...(model.hasText ? [TEXT_KEYS] : []),
+        // A layout's own keys in place of the camera's (`viewportKeys`).
+        ...(layoutKeys
+          ? [
+              {
+                keys: layoutKeys.shortcuts,
+                text: layoutKeys.description,
+                lang: layoutKeys.lang,
+              },
+            ]
+          : navigable
+            ? [said(CAMERA_KEYS)]
+            : []),
+        ...(media ? [said(MEDIA_KEYS)] : []),
+        ...(hasAnnotations ? [said(ANNOTATION_KEYS)] : []),
+        ...(model.hasText ? [said(TEXT_KEYS)] : []),
       ];
   const keysId = `keys-${instance}`;
   const roleDescription =
@@ -1425,12 +1442,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         {viewportName.node}
         {viewportKeys.length > 0 && (
           <span id={keysId} style={visuallyHidden}>
-            {viewportKeys.map(({ description }, index) => (
-              <React.Fragment key={description}>
+            {viewportKeys.map(({ text, lang }, index) => (
+              <React.Fragment key={index}>
                 {index > 0 && " "}
-                <span {...languageProps(root.langOf(description))}>
-                  {t(description)}
-                </span>
+                <span {...languageProps(lang)}>{text}</span>
               </React.Fragment>
             ))}
           </span>

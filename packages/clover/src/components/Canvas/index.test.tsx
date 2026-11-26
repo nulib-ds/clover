@@ -608,7 +608,7 @@ describe("Canvas", () => {
     const find = await screen.findByRole("button", {
       name: /^Find on the map: /,
     });
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
     act(() => find.focus());
     fireEvent.click(find);
     await loaded();
@@ -626,7 +626,7 @@ describe("Canvas", () => {
     expect(box).toHaveAccessibleName("Map");
     // Focus stays on what was pressed, now pressed.
     expect(find).toHaveFocus();
-    expect(find).toHaveAttribute("aria-pressed", "true");
+    expect(find).toHaveAttribute("aria-current", "true");
 
     // Expanded, it fills the Body; pressed again, it keeps it.
     fireEvent.click(within(box).getByRole("button", { name: "Expand map" }));
@@ -648,7 +648,7 @@ describe("Canvas", () => {
     fireEvent.click(within(box).getByRole("button", { name: "Close" }));
     await waitFor(() => expect(asked()).toBeUndefined());
     expect(find).toHaveFocus();
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
   });
 
   // nulib-ds/clover#440: the menu over the Body lists the view's georeferenced images,
@@ -916,7 +916,7 @@ describe("Canvas", () => {
         return found!;
       });
       const box = asked()!;
-      expect(sheet).toHaveAttribute("aria-pressed", "true");
+      expect(sheet).toHaveAttribute("aria-current", "true");
 
       // The place picked: the same box and map, the image let go.
       fireEvent.click(
@@ -928,13 +928,13 @@ describe("Canvas", () => {
       expect(box).toBeInTheDocument();
       expect(box.querySelector(".clover-geomap")).toBe(map);
       expect(asked()).toBeUndefined();
-      expect(sheet).toHaveAttribute("aria-pressed", "false");
+      expect(sheet).not.toHaveAttribute("aria-current");
 
       // The image pressed again: still the same, the place let go.
       fireEvent.click(sheet);
       await waitFor(() => expect(box.id).toMatch(/^place-asked-/));
       expect(box.querySelector(".clover-geomap")).toBe(map);
-      expect(sheet).toHaveAttribute("aria-pressed", "true");
+      expect(sheet).toHaveAttribute("aria-current", "true");
       expect(figure()).not.toHaveAttribute("data-place");
 
       // Over the map filling the Body, the place picked beside it: the Canvas back, with
@@ -1063,6 +1063,31 @@ describe("Canvas", () => {
     );
     expect(viewport).toHaveAccessibleDescription(
       "Use the arrow keys to pan, with Shift for larger steps, plus and minus to zoom, 0 to reset the view, and R or Shift+R to rotate.",
+    );
+  });
+
+  // N44 (2026-11-25): a layout that takes the viewport's keys says its own.
+  it("says a layout's own keys in place of the camera's, in their language", () => {
+    render(
+      <Canvas
+        src="https://example.org/a.jpg"
+        label="A letter"
+        viewportKeys={{
+          shortcuts: "ArrowUp ArrowDown Enter",
+          description: "Flèches pour les pages.",
+          lang: "fr",
+        }}
+      />,
+    );
+    const viewport = screen.getByRole("img", { name: "A letter" });
+    expect(viewport).toHaveAttribute(
+      "aria-keyshortcuts",
+      "ArrowUp ArrowDown Enter",
+    );
+    expect(viewport).toHaveAccessibleDescription("Flèches pour les pages.");
+    expect(screen.getByText("Flèches pour les pages.")).toHaveAttribute(
+      "lang",
+      "fr",
     );
   });
 

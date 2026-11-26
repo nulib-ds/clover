@@ -13,6 +13,49 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **A georeferenced image or a place pressed in Annotations opens the map in its box over
+  the Canvas,** which stays in view, rather than filling the Body. Where a map fills the
+  Body already, it shows there. Either way it frames every place and georeferenced image
+  of the Canvases in view, the one pressed chosen and the others shown beside it; Expand
+  map still fills the Body with it. A place picked and an image pressed take turns in the
+  one box, its map kept, so only what is chosen changes; the one pressed lets go of an
+  annotation picked before.
+- **The Canvas's Map control comes after its annotations control, at the end of the
+  row,** over the box it opens; it came before. While the map fills the Body, its Image
+  control takes that place and the annotations control stays just before it, and the
+  page's picture sits where the map's box was over the Canvas. Budgets raised to the
+  next 50 B over what is measured (`build/size-budget.json`), for this, the change above
+  and the fixes below: the Default template 82,400 B and to first view 97,950 B, the
+  Document template 85,200 B and to first view 104,800 B, the Gallery 33,500 B and to
+  first view 54,600 B, the Map to first view 49,500 B and before MapLibre 26,450 B, the
+  Viewer's own entry 109,300 B, `styles.css` 12,750 B, the core styles 8,400 B,
+  `base.css` 16,750 B and `spacing.css` 4,150 B, and as elements a `<clover-viewer>`
+  132,050 B, a Canvas 95,450 B, a Document 151,250 B, a Gallery 135,450 B, labels
+  38,100 B, a composed page 109,350 B and a layout 127,050 B, each 50 to 500 B over its
+  old budget.
+
+### Fixed
+
+- **Georeference annotations given through `annotations` beside a Manifest are laid on
+  their Canvases.** A `Root`'s or the Viewer's `annotations` (an attribute on
+  `<clover-viewer>` and `<clover-root>`) dropped them; now each lies on the Canvas it
+  targets, as if the Manifest held it, so the Canvas's map control, its place box, the
+  Panel's Annotations and the Map show it, and it goes again as `annotations` changes.
+- **Every map shows the places of annotations given beside the Manifest.** A GeoJSON
+  place an added annotation names (Cookbook 0139), the host's `annotations` or the
+  content's, was on its own pick's map alone. The map a georeferenced image opens from
+  Annotations and the Canvas's map control's box show it too, and a picked place's box
+  shows the georeferenced images in view, so each shows the other. A place picked, from
+  the Annotations section or the Canvas's annotations menu, is marked chosen on every
+  map that shows it, its box's too.
+- **About's language and Download menus stay inside a narrow Panel,** moved along their
+  row as they open rather than cut at its edge (WCAG 1.4.10), and the language button's
+  glyph stands `xs` clear of its code, as in a row of codes.
+
+## [4.12.4] - 2026-11-26
+
+### Changed
+
 - **A click on a Canvas's text zooms, as a click anywhere on the picture does.** Over
   its text (`supplementing` annotations on regions, as OCR is), a mouse's or a hovering
   pen's press only selected, so zoomed into a column of text a pointer could neither
@@ -65,44 +108,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   elements a `<clover-viewer>` 130,800 B, a Canvas 94,750 B, a Gallery 134,150 B, labels
   37,950 B, a composed page 108,250 B and a layout 126,000 B, each 50 to 450 B over its
   old budget.
-- **A georeferenced image or a place pressed in Annotations opens the map in its box over
-  the Canvas,** which stays in view, rather than filling the Body. Where a map fills the
-  Body already, it shows there. Either way it frames every place and georeferenced image
-  of the Canvases in view, the one pressed chosen and the others shown beside it; Expand
-  map still fills the Body with it. A place picked and an image pressed take turns in the
-  one box, its map kept, so only what is chosen changes; the one pressed lets go of an
-  annotation picked before.
-- **The Canvas's Map control comes after its annotations control, at the end of the
-  row,** over the box it opens; it came before. While the map fills the Body, its Image
-  control takes that place and the annotations control stays just before it, and the
-  page's picture sits where the map's box was over the Canvas. Budgets raised to the
-  next 50 B over what is measured (`build/size-budget.json`), for this, the change above
-  and the fixes below: the Canvas's initial JS 44,700 B and to first view 51,850 B, the
-  Default template 82,350 B and to first view 97,800 B, the Document template 85,000 B
-  and to first view 104,600 B, the Gallery 33,450 B and to first view 54,500 B, the Map
-  to first view 49,500 B and before MapLibre 26,350 B, the Viewer's own entry 109,200 B,
-  `styles.css` 12,750 B, the core styles 8,400 B, `base.css` 16,750 B and `spacing.css`
-  4,150 B, and as elements a `<clover-viewer>` 131,950 B, a Canvas 95,300 B, a Document
-  151,100 B, a Gallery 135,350 B, labels 38,050 B, a composed page 109,250 B and a
-  layout 126,950 B, each 50 to 550 B over its old budget.
+- **A Scene with no rotate controls turns under one finger.** With `controls={false}`,
+  or `rotation: false` in its `controls`, two fingers were a touch screen's one way to
+  turn it, and an iPhone has no full screen to give one finger back (WCAG 2.5.1;
+  `ACCESSIBILITY.md` N43). Such a Scene now takes one finger's drag whatever
+  `options.gestures.cooperative` says, as before cooperative gestures, so a page's
+  scroll stops at it. Beside its rotate controls, the default, nothing changes. The
+  Default template's budget to first view goes to 97,700 B gzip, 8 B over its old one,
+  which the change does not reach (the chunks' names differ).
 
 ### Fixed
 
-- **Georeference annotations given through `annotations` beside a Manifest are laid on
-  their Canvases.** A `Root`'s or the Viewer's `annotations` (an attribute on
-  `<clover-viewer>` and `<clover-root>`) dropped them; now each lies on the Canvas it
-  targets, as if the Manifest held it, so the Canvas's map control, its place box, the
-  Panel's Annotations and the Map show it, and it goes again as `annotations` changes.
-- **Every map shows the places of annotations given beside the Manifest.** A GeoJSON
-  place an added annotation names (Cookbook 0139), the host's `annotations` or the
-  content's, was on its own pick's map alone. The map a georeferenced image opens from
-  Annotations and the Canvas's map control's box show it too, and a picked place's box
-  shows the georeferenced images in view, so each shows the other. A place picked, from
-  the Annotations section or the Canvas's annotations menu, is marked chosen on every
-  map that shows it, its box's too.
-- **About's language and Download menus stay inside a narrow Panel,** moved along their
-  row as they open rather than cut at its edge (WCAG 1.4.10), and the language button's
-  glyph stands `xs` clear of its code, as in a row of codes.
 - **Rendered on the server with React 18, the Canvas and the Document template no longer
   warn that `useLayoutEffect` does nothing there.** They measure as every other part
   does: as an effect on the server, and before paint in the browser.
@@ -164,6 +180,42 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   first view 104,150 B, `base.css` 16,700 B, and as elements a `<clover-viewer>`
   131,500 B, in Document 150,650 B and in Gallery 134,900 B, a composed page 108,800 B,
   a layout 126,500 B and the Viewer's own entry 108,750 B.
+- **A hide toggle over pages some of which are hidden reads as mixed, and "Find on the
+  map" says which place the map shows** (WCAG 4.1.2; `ACCESSIBILITY.md` N48, N50). The
+  annotations menu's one toggle, and the Annotations list's, read as shown while one of
+  their pages was hidden elsewhere; each is now neither checked nor not, a native
+  checkbox's `indeterminate`, its eye struck halfway, and a press hides them all.
+  About's and Annotations' "Find on the map" buttons carried `aria-pressed`, which a
+  second press never undid: the place the map shows is now `aria-current="true"`, as a
+  row marks the current one, and a press asks for it again. Budgets raised to the next
+  50 B over what is measured: the Canvas's initial JS 44,650 B gzip, a composed page of
+  elements 109,000 B, a layout of elements 126,700 B and a `<clover-viewer>` in Document
+  150,850 B.
+- **A language chosen in About keeps focus on its choice** (WCAG 2.4.3, 3.2.2;
+  `ACCESSIBILITY.md` N49). The choice changes Clover's interface language, and so the
+  length of About's title ("About" to "Informazioni"), which folded the codes into their
+  menu, or drew them out of it, under focus, focus falling to the page. The row now
+  holds its form while focus is in it, the title wrapping meanwhile, and is measured
+  again once focus leaves (Mat, 2026-11-05's "as soon as lang codes intersect" waits
+  only for that).
+- **Among Document's pages, the page's Canvas says the keys it answers to** (WCAG 4.1.2;
+  `ACCESSIBILITY.md` N44). The column steps by Up and Down, Home and End, PageUp and
+  PageDown, and opens the page with Enter, while the viewport described the camera's
+  keys (the arrows to pan, R to rotate), which do nothing there. Its description and
+  `aria-keyshortcuts` now say the column's, in a new string in every locale
+  (`templatePageKeys`), and the camera's again in the full viewer. For it, `Canvas` and
+  `Body` take `viewportKeys` (`{ shortcuts, description, lang? }`): the keys a layout
+  around them takes while the viewport has focus, in place of the camera's. Budgets
+  raised to the next 50 B over what is measured, as English's new string comes with
+  every part: the Canvas's initial JS 44,750 B gzip, the Scene's initial JS 20,300 B,
+  the Default template 82,200 B, the Document template 84,950 B, the Gallery template
+  33,350 B, the Default template to first view 97,650 B, the Document template to first
+  view 104,550 B, the Gallery template to first view 54,400 B, the Canvas to first view
+  51,900 B, a Scene to first view 30,700 B, a Map to first view 49,000 B, the Map's
+  initial JS 26,100 B, a `<clover-viewer>` 131,850 B, labels alone as elements 38,000 B,
+  a composed page of elements 109,100 B, a layout of elements 126,800 B, a
+  `<clover-canvas>` alone 95,100 B, a `<clover-viewer>` in Document 151,050 B, a
+  `<clover-viewer>` in Gallery 135,250 B and the Viewer's own entry 109,050 B.
 
 ### Security
 

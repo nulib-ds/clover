@@ -574,6 +574,7 @@ const AnnotationSheets = forwardRef<
             {hideable && (
               <HideToggle
                 hidden={hidden}
+                mixed={setIds.some((setId) => hiddenSets.includes(setId))}
                 onChange={(hide) => onVisible(setIds, !hide)}
               />
             )}

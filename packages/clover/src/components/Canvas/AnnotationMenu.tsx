@@ -225,6 +225,7 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
           {onPageVisibilityChange && pageIds.length > 0 && (
             <HideToggle
               hidden={pageIds.every((page) => hiddenPages.includes(page))}
+              mixed={pageIds.some((page) => hiddenPages.includes(page))}
               onChange={(hide) => onPageVisibilityChange(pageIds, !hide)}
             />
           )}

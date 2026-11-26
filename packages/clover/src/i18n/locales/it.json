@@ -46,6 +46,7 @@
   "templatePageLayoutAuto": "Automatico",
   "templatePageLayoutSingle": "Pagina singola",
   "templatePageLayoutTwo": "Due pagine",
+  "templatePageKeys": "Usa i tasti freccia su e giù per la pagina precedente o successiva, Inizio e Fine per la prima o l’ultima, e Invio per aprire la pagina.",
   "templateBack": "Indietro",
   "templateBackTo": "Torna a {{label}}",
   "collectionLabel": "Collezione",

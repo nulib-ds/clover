@@ -216,7 +216,7 @@ test("in the Viewer, a place pressed in About fills the Body with the map, and g
   const map = (await box.locator(".clover-geomap").boundingBox())!;
   expect(map.width).toBeGreaterThan(body.width * 0.9);
   await expect(find).toBeFocused();
-  await expect(find).toHaveAttribute("aria-pressed", "true");
+  await expect(find).toHaveAttribute("aria-current", "true");
   // Framed and marked, its name in About beside it: no popup over the place.
   await expect(box.locator(".clover-geomap-popup")).toHaveCount(0);
   // About's places and the map over the Body: no serious or critical violations.
@@ -276,7 +276,7 @@ test("in the Viewer, a place pressed in About fills the Body with the map, and g
   await box.getByRole("button", { name: "Close" }).click();
   await expect(box).toHaveCount(0);
   await expect(find).toBeFocused();
-  await expect(find).toHaveAttribute("aria-pressed", "false");
+  await expect(find).not.toHaveAttribute("aria-current");
 });
 
 // Mat, 2026-11-13: on a phone the panel lies over the Body, so it goes, and focus with it,
@@ -359,7 +359,7 @@ test("in Document, a place pressed in About shows the map over the pages, and gi
   expect(map.height).toBeGreaterThan(column.height * 0.95);
   await expect(page.locator(".clover-template-document-aside")).toBeVisible();
   await expect(find).toBeFocused();
-  await expect(find).toHaveAttribute("aria-pressed", "true");
+  await expect(find).toHaveAttribute("aria-current", "true");
   // Its zoom row at its top end, where the full viewer has the Canvas's controls (Mat,
   // 2026-11-14: "put map controls in top right. like we do for canvas controls."), and no
   // Close of its own: the page's picture in a box under it, which trades the two ("remove
@@ -424,7 +424,7 @@ test("in Document, a place pressed in About shows the map over the pages, and gi
   await over.getByRole("button", { name: "Close" }).click();
   await expect(over).toHaveCount(0);
   await expect(find).toBeFocused();
-  await expect(find).toHaveAttribute("aria-pressed", "false");
+  await expect(find).not.toHaveAttribute("aria-current");
 
   // Asked again, then another Canvas chosen: the map follows it to its place, which About
   // names, pressed (Mat, 2026-11-13: "toggling canvases in expanded map mode doesn't
@@ -436,7 +436,7 @@ test("in Document, a place pressed in About shows the map over the pages, and gi
     page.getByRole("button", {
       name: "Find on the map: Current Location of Painting",
     }),
-  ).toHaveAttribute("aria-pressed", "true");
+  ).toHaveAttribute("aria-current", "true");
   await expect(over).toHaveCount(1);
 });
 
