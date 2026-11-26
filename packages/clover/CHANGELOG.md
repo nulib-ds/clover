@@ -147,6 +147,24 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   holds its form while focus is in it, the title wrapping meanwhile, and is measured
   again once focus leaves (Mat, 2026-11-05's "as soon as lang codes intersect" waits
   only for that).
+- **Among Document's pages, the page's Canvas says the keys it answers to** (WCAG 4.1.2;
+  `ACCESSIBILITY.md` N44). The column steps by Up and Down, Home and End, PageUp and
+  PageDown, and opens the page with Enter, while the viewport described the camera's
+  keys (the arrows to pan, R to rotate), which do nothing there. Its description and
+  `aria-keyshortcuts` now say the column's, in a new string in every locale
+  (`templatePageKeys`), and the camera's again in the full viewer. For it, `Canvas` and
+  `Body` take `viewportKeys` (`{ shortcuts, description, lang? }`): the keys a layout
+  around them takes while the viewport has focus, in place of the camera's. Budgets
+  raised to the next 50 B over what is measured, as English's new string comes with
+  every part: the Canvas's initial JS 44,750 B gzip, the Scene's initial JS 20,300 B,
+  the Default template 82,200 B, the Document template 84,950 B, the Gallery template
+  33,350 B, the Default template to first view 97,650 B, the Document template to first
+  view 104,550 B, the Gallery template to first view 54,400 B, the Canvas to first view
+  51,900 B, a Scene to first view 30,700 B, a Map to first view 49,000 B, the Map's
+  initial JS 26,100 B, a `<clover-viewer>` 131,850 B, labels alone as elements 38,000 B,
+  a composed page of elements 109,100 B, a layout of elements 126,800 B, a
+  `<clover-canvas>` alone 95,100 B, a `<clover-viewer>` in Document 151,050 B, a
+  `<clover-viewer>` in Gallery 135,250 B and the Viewer's own entry 109,050 B.
 
 ### Security
 

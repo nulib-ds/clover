@@ -46,6 +46,7 @@
   "templatePageLayoutAuto": "Automático",
   "templatePageLayoutSingle": "Una página",
   "templatePageLayoutTwo": "Dos páginas",
+  "templatePageKeys": "Use las flechas arriba y abajo para ir a la página anterior o siguiente, Inicio y Fin para la primera o la última, e Intro para abrir la página.",
   "templateBack": "Volver",
   "templateBackTo": "Volver a {{label}}",
   "collectionLabel": "Colección",

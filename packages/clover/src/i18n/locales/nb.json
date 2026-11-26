@@ -46,6 +46,7 @@
   "templatePageLayoutAuto": "Automatisk",
   "templatePageLayoutSingle": "Én side",
   "templatePageLayoutTwo": "To sider",
+  "templatePageKeys": "Bruk pil opp og ned for forrige eller neste side, Home og End for første eller siste, og Enter for å åpne siden.",
   "templateBack": "Tilbake",
   "templateBackTo": "Tilbake til {{label}}",
   "collectionLabel": "Samling",
