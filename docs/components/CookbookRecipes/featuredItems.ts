@@ -1,5 +1,7 @@
 export interface FeaturedItem {
   title: string;
+  /** The title's language, where it is not the page's English (WCAG 3.1.2). */
+  lang?: string;
   /** The IIIF manifest the Viewer opens. */
   resource: string;
   thumbnail: string;
@@ -7,8 +9,9 @@ export interface FeaturedItem {
 
 const works = "https://api.dc.library.northwestern.edu/api/v2/works";
 
-const item = (id: string, title: string): FeaturedItem => ({
+const item = (id: string, title: string, lang?: string): FeaturedItem => ({
   title,
+  lang,
   resource: `${works}/${id}?as=iiif`,
   thumbnail: `${works}/${id}/thumbnail`,
 });
@@ -33,7 +36,7 @@ export const featuredItems: FeaturedItem[] = [
     "Map of Sunbury, Pennsylvania by Amelia D. Hegins",
   ),
   item("f2adabc0-497f-4284-b969-5829971fa2a2", "Bicycles"),
-  item("0b035114-09b8-47b0-9ada-eb3c47711c0f", "مجموع فوائد"),
+  item("0b035114-09b8-47b0-9ada-eb3c47711c0f", "مجموع فوائد", "ar"),
   item("84aec8c1-42e8-4e2c-a6b2-1c7e3790217f", "Joseph - Nez Percé"),
   item(
     "29832c6d-b5db-4e44-be81-54062fada10e",

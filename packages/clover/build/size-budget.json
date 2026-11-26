@@ -1,5 +1,5 @@
 {
-  "canvasInitialGzip": 44600,
+  "canvasInitialGzip": 44650,
   "timelineInitialGzip": 28900,
   "sceneInitialGzip": 20200,
   "sceneOnDemandGzip": 160000,
@@ -26,10 +26,10 @@
   "webComponentsGzip": 131700,
   "labelPageGzip": 37950,
   "elementsEntryGzip": 6550,
-  "composedPageGzip": 108950,
-  "layoutPageGzip": 126650,
+  "composedPageGzip": 109000,
+  "layoutPageGzip": 126700,
   "canvasElementGzip": 95000,
-  "documentElementGzip": 150800,
+  "documentElementGzip": 150850,
   "galleryElementGzip": 135100,
   "viewerEntryGzip": 108950
 }

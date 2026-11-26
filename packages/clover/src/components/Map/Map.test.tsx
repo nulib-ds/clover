@@ -2278,7 +2278,7 @@ describe("the Map tab", () => {
     const place = await within(term.parentElement!).findByRole("button", {
       name: "Find on the map: Current Location of the Laocoön Bronze",
     });
-    expect(place).toHaveAttribute("aria-pressed", "false");
+    expect(place).not.toHaveAttribute("aria-current");
     // Its coordinates under it, latitude then longitude, read left to right.
     const at = place.nextElementSibling!;
     expect(at).toHaveClass("clover-about-place-at");
@@ -2286,7 +2286,7 @@ describe("the Map tab", () => {
       "34.0776, -118.4746",
     );
     fireEvent.click(place);
-    expect(place).toHaveAttribute("aria-pressed", "true");
+    expect(place).toHaveAttribute("aria-current", "true");
     expect(maps).toHaveLength(0);
     gone();
 
@@ -2452,7 +2452,7 @@ describe("Document's map", () => {
       ),
     );
     expect(find).toHaveFocus();
-    expect(find).toHaveAttribute("aria-pressed", "true");
+    expect(find).toHaveAttribute("aria-current", "true");
 
     // Traded: the map in a box over the pages, the same map, focus on its Expand map.
     swap.focus();
@@ -2481,7 +2481,7 @@ describe("Document's map", () => {
       ).toBeNull(),
     );
     await waitFor(() => expect(find).toHaveFocus());
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
   });
 
   // Mat, 2026-11-16: the outline options on the map over the pages, never in its box; and

@@ -192,6 +192,58 @@ describe("AnnotationMenu, as the Annotations section lists", () => {
     },
   });
 
+  /*
+   * N48 (audit of 2026-11-25): its one toggle read as shown with one of its pages hidden
+   * elsewhere (the Panel's Annotations). It reads as mixed, and a press hides them all.
+   */
+  it("reads its one toggle as mixed while some of its pages are hidden, a press hiding all", () => {
+    const changed = vi.fn();
+    const onPage = (
+      id: string,
+      target: string,
+      value: string,
+      page: string,
+    ) => ({
+      ...textual(id, target, value),
+      pageId: page,
+    });
+    render(
+      <>
+        <button id="annotations-trigger" type="button">
+          Annotations
+        </button>
+        <AnnotationMenu
+          id="annotations"
+          triggerId="annotations-trigger"
+          label="Annotations"
+          annotations={
+            [
+              onPage("then", left.id, "Then", "https://example.org/a"),
+              onPage("now", right.id, "Now", "https://example.org/b"),
+            ] as any
+          }
+          canvases={[left, right]}
+          hiddenPages={["https://example.org/b"]}
+          onPageVisibilityChange={changed}
+          selected={null}
+          onSelect={() => {}}
+          onActivate={() => {}}
+          onClose={() => {}}
+        />
+      </>,
+    );
+    const hide = screen.getByRole("checkbox", {
+      name: "Hide annotations",
+    }) as HTMLInputElement;
+    expect(hide.indeterminate).toBe(true);
+    expect(hide).not.toBeChecked();
+    fireEvent.click(hide);
+    expect(changed).toHaveBeenCalledWith(
+      ["https://example.org/a", "https://example.org/b"],
+      false,
+    );
+  });
+
   it("groups by the Canvas each is on, under its label, with its picture and words", () => {
     render(
       <>

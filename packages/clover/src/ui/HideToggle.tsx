@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { useUniqueId } from "./useUniqueId";
 
 import { Tip } from "./Tip";
@@ -12,13 +12,20 @@ import { languageProps } from "../i18n/direction";
  * page's label (`of`), so no two read alike beside several pages (WCAG 2.4.6, 2.5.3);
  * "Hide annotations" for a page without one. As small as a transcript's language codes,
  * and as large a target (WCAG 2.5.8). Styles are `ui/HideToggle.css`.
+ *
+ * Over several pages some of which are hidden, `mixed`: neither checked nor not, as a
+ * native checkbox's `indeterminate` says to assistive technology (WCAG 4.1.2), its eye
+ * struck halfway; a press hides them all, as it does from unchecked.
  */
 export function HideToggle({
   hidden,
+  mixed = false,
   onChange,
   of,
 }: {
   hidden: boolean;
+  /** Some of what it hides is hidden, and some not. */
+  mixed?: boolean;
   onChange: (hidden: boolean) => void;
   /** The id of what holds the label of the page it hides, where the page has one. */
   of?: string;
@@ -26,9 +33,15 @@ export function HideToggle({
   const { t, langOf } = useCloverTranslation();
   const id = useUniqueId();
   const key = of ? "annotationsHideTip" : "annotationsHide";
+  // A property alone, never an attribute: set as it draws, and again after a press.
+  const box = useRef<HTMLInputElement>(null);
+  useLayoutEffect(() => {
+    if (box.current) box.current.indeterminate = mixed && !hidden;
+  });
   return (
     <label className="clover-hide">
       <input
+        ref={box}
         type="checkbox"
         checked={hidden}
         aria-labelledby={of ? `${id} ${of}` : id}
@@ -51,7 +64,11 @@ export function HideToggle({
       >
         <path d="M32 256s80-144 224-144 224 144 224 144-80 144-224 144S32 256 32 256z" />
         <circle cx={256} cy={256} r={68} />
-        {hidden && <path d="M80 80l352 352" />}
+        {hidden ? (
+          <path d="M80 80l352 352" />
+        ) : (
+          mixed && <path d="M80 80l176 176" />
+        )}
       </svg>
       <span id={id} hidden {...languageProps(langOf(key))}>
         {t(key)}

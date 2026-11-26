@@ -72,7 +72,7 @@ const CustomManifest = ({
   return (
     <div className={`${styles.customManifest} ${className ?? ""}`}>
       <form onSubmit={handleSubmit} noValidate>
-        {/* The placeholder is the only text naming the field on screen, so the name repeats it. */}
+        {/* Its name in sight, the placeholder's words, which go as soon as anything is typed. */}
         <label htmlFor={id} className={styles.label}>
           {placeholder}
         </label>
