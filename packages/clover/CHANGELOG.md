@@ -65,9 +65,37 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   elements a `<clover-viewer>` 130,800 B, a Canvas 94,750 B, a Gallery 134,150 B, labels
   37,950 B, a composed page 108,250 B and a layout 126,000 B, each 50 to 450 B over its
   old budget.
+- **A georeferenced image or a place pressed in Annotations opens the map in its box over
+  the Canvas,** which stays in view, rather than filling the Body. Where a map fills the
+  Body already, it shows there. Either way it frames every place and georeferenced image
+  of the Canvases in view, the one pressed chosen and the others shown beside it; Expand
+  map still fills the Body with it. A place picked and an image pressed take turns in the
+  one box, its map kept, so only what is chosen changes; the one pressed lets go of an
+  annotation picked before. Expanded, the page's picture sits where the map's box was
+  over the Canvas, at the row's end. Budgets raised to the next 50 B over what is
+  measured (`build/size-budget.json`), for this and the fixes below: the Canvas's initial
+  JS 44,650 B and to first view 51,850 B, the Default template 82,350 B and to first view
+  97,750 B, the Document template 85,000 B and to first view 104,600 B, the Gallery
+  33,450 B and to first view 54,500 B, the Map to first view 49,400 B and before
+  MapLibre 26,350 B, the Viewer's own entry 109,150 B, and as elements a
+  `<clover-viewer>` 131,950 B, a Canvas 95,300 B, a Document 151,050 B, a Gallery
+  135,350 B, labels 38,050 B, a composed page 109,200 B and a layout 126,900 B, each 50
+  to 450 B over its old budget.
 
 ### Fixed
 
+- **Georeference annotations given through `annotations` beside a Manifest are laid on
+  their Canvases.** A `Root`'s or the Viewer's `annotations` (an attribute on
+  `<clover-viewer>` and `<clover-root>`) dropped them; now each lies on the Canvas it
+  targets, as if the Manifest held it, so the Canvas's map control, its place box, the
+  Panel's Annotations and the Map show it, and it goes again as `annotations` changes.
+- **Every map shows the places of annotations given beside the Manifest.** A GeoJSON
+  place an added annotation names (Cookbook 0139), the host's `annotations` or the
+  content's, was on its own pick's map alone. The map a georeferenced image opens from
+  Annotations and the Canvas's map control's box show it too, and a picked place's box
+  shows the georeferenced images in view, so each shows the other. A place picked, from
+  the Annotations section or the Canvas's annotations menu, is marked chosen on every
+  map that shows it, its box's too.
 - **Rendered on the server with React 18, the Canvas and the Document template no longer
   warn that `useLayoutEffect` does nothing there.** They measure as every other part
   does: as an effect on the server, and before paint in the browser.

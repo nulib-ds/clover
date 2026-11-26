@@ -159,8 +159,8 @@ cross-origin requests (CORS), since the image is painted onto the map.
 In the [Canvas](/docs/canvas), a georeferenced Canvas gets a Map control even without a
 [navPlace](https://iiif.io/api/extension/navplace/). It opens the map in a small box under
 the Canvas's controls, the image laid over it. A press on the box, or its Expand map, puts
-the map in the Canvas's place, and the page's picture, in a box under the map's zoom
-buttons, puts it back; that box's Close puts the picture away, as the map's Image control
+the map in the Canvas's place, and the page's picture, in a box where the map's was,
+puts it back; that box's Close puts the picture away, as the map's Image control
 does. Either way, the map keeps what it shows, fitted to its new size. Back in its box, it
 lets go of the place it named and of an annotation picked on it. While the map fills the
 Body, the Canvas's annotations control stays at the end of its row, and its menu opens
@@ -358,6 +358,10 @@ Inside a `Root`, the map shows the georeferenced images of the Canvases in view,
 choosing a place opens its Canvas. When an annotation tags a place on part of a Canvas,
 such as a map printed on a page (Cookbook 0139), choosing the place selects that
 annotation, and the Canvas zooms to its region.
+
+Annotations given to the Root's `annotations` beside the Manifest count too. Their places
+show on every map with the Manifest's own, and a georeference among them is laid on the
+Canvas it targets, as if the Manifest held it.
 
 ```jsx
 import * as Clover from "@nulib/clover";
