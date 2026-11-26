@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.12.5] - 2026-11-26
+
 ### Changed
 
 - **A georeferenced image or a place pressed in Annotations opens the map in its box over
