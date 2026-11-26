@@ -481,11 +481,98 @@ describe("GestureController", () => {
       expect(
         (target.panBy as ReturnType<typeof vi.fn>).mock.calls.length > 0,
       ).toBe(pans);
-      // A double click there selects a word, never zooms.
-      run.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+      // A drag selects: no click, so nothing zooms.
       if (!pans) expect(target.zoomBy).not.toHaveBeenCalled();
     },
   );
+
+  /*
+   * N42 (audit of 2026-11-25): over a column of text a mouse could neither pan nor zoom,
+   * a press there only selecting. A press that does not move is a click, as anywhere on
+   * the picture; a drag still selects.
+   */
+  describe("a mouse on the picture's text", () => {
+    const text = (options = DEFAULT_GESTURES) => {
+      const { element, target } = setup(options);
+      const layer = document.createElement("div");
+      layer.dataset.cloverCanvasText = "";
+      const run = document.createElement("span");
+      run.textContent = "Berliner Tageblatt";
+      layer.appendChild(run);
+      element.appendChild(layer);
+      const press = (
+        type: string,
+        x: number,
+        timeStamp: number,
+        init: MouseEventInit = {},
+      ) => {
+        const event = Object.assign(
+          new MouseEvent(type, {
+            clientX: x,
+            clientY: 10,
+            button: 0,
+            bubbles: true,
+            cancelable: true,
+            ...init,
+          }),
+          { pointerId: 1, pointerType: "mouse" },
+        );
+        Object.defineProperty(event, "timeStamp", { value: timeStamp });
+        (type === "pointerdown" || type === "mousedown"
+          ? run
+          : element
+        ).dispatchEvent(event);
+        return event;
+      };
+      const zooms = () =>
+        (target.zoomBy as ReturnType<typeof vi.fn>).mock.calls.map(
+          ([factor]) => factor,
+        );
+      return { element, target, run, press, zooms };
+    };
+    afterEach(() => document.getSelection()?.removeAllRanges());
+
+    it("zooms in on a click, and out with Shift, as on the picture", () => {
+      const { press, zooms } = text();
+      press("pointerdown", 10, 0);
+      press("pointerup", 10, 60);
+      press("pointerdown", 10, 500, { shiftKey: true });
+      press("pointerup", 10, 560, { shiftKey: true });
+      const [inward, outward] = zooms();
+      expect(inward).toBeGreaterThan(1);
+      expect(outward).toBeLessThan(1);
+    });
+
+    it("lets a selection go on the first click, zooming nothing", () => {
+      const { press, run, zooms } = text();
+      document.getSelection()?.selectAllChildren(run);
+      press("pointerdown", 10, 0);
+      press("pointerup", 10, 60);
+      expect(zooms()).toEqual([]);
+    });
+
+    it("takes no word on a double click, its second press a click", () => {
+      const { press } = text();
+      expect(press("mousedown", 10, 0, { detail: 1 }).defaultPrevented).toBe(
+        false,
+      );
+      expect(press("mousedown", 10, 100, { detail: 2 }).defaultPrevented).toBe(
+        true,
+      );
+    });
+
+    it("zooms on a double click where a click does not", () => {
+      const { run, press, zooms } = text({
+        ...DEFAULT_GESTURES,
+        clickToZoom: false,
+        dblClickToZoom: true,
+      });
+      press("pointerdown", 10, 0);
+      press("pointerup", 10, 60);
+      run.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+      expect(zooms()).toHaveLength(1);
+    });
+  });
 
   it("holds the camera still when not navigable, reporting only taps", () => {
     const { element, target } = setup({
