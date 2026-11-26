@@ -46,6 +46,7 @@
   "templatePageLayoutAuto": "Automatic",
   "templatePageLayoutSingle": "Single page",
   "templatePageLayoutTwo": "Two pages",
+  "templatePageKeys": "Use the up and down arrow keys for the previous or next page, Home and End for the first or last, and Enter to open the page.",
   "templateBack": "Back",
   "templateBackTo": "Back to {{label}}",
   "collectionLabel": "Collection",

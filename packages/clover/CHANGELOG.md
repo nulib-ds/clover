@@ -70,7 +70,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   turn it, and an iPhone has no full screen to give one finger back (WCAG 2.5.1;
   `ACCESSIBILITY.md` N43). Such a Scene now takes one finger's drag whatever
   `options.gestures.cooperative` says, as before cooperative gestures, so a page's
-  scroll stops at it. Beside its rotate controls, the default, nothing changes.
+  scroll stops at it. Beside its rotate controls, the default, nothing changes. The
+  Default template's budget to first view goes to 97,700 B gzip, 8 B over its old one,
+  which the change does not reach (the chunks' names differ).
 
 ### Fixed
 
@@ -135,6 +137,42 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   first view 104,150 B, `base.css` 16,700 B, and as elements a `<clover-viewer>`
   131,500 B, in Document 150,650 B and in Gallery 134,900 B, a composed page 108,800 B,
   a layout 126,500 B and the Viewer's own entry 108,750 B.
+- **A hide toggle over pages some of which are hidden reads as mixed, and "Find on the
+  map" says which place the map shows** (WCAG 4.1.2; `ACCESSIBILITY.md` N48, N50). The
+  annotations menu's one toggle, and the Annotations list's, read as shown while one of
+  their pages was hidden elsewhere; each is now neither checked nor not, a native
+  checkbox's `indeterminate`, its eye struck halfway, and a press hides them all.
+  About's and Annotations' "Find on the map" buttons carried `aria-pressed`, which a
+  second press never undid: the place the map shows is now `aria-current="true"`, as a
+  row marks the current one, and a press asks for it again. Budgets raised to the next
+  50 B over what is measured: the Canvas's initial JS 44,650 B gzip, a composed page of
+  elements 109,000 B, a layout of elements 126,700 B and a `<clover-viewer>` in Document
+  150,850 B.
+- **A language chosen in About keeps focus on its choice** (WCAG 2.4.3, 3.2.2;
+  `ACCESSIBILITY.md` N49). The choice changes Clover's interface language, and so the
+  length of About's title ("About" to "Informazioni"), which folded the codes into their
+  menu, or drew them out of it, under focus, focus falling to the page. The row now
+  holds its form while focus is in it, the title wrapping meanwhile, and is measured
+  again once focus leaves (Mat, 2026-11-05's "as soon as lang codes intersect" waits
+  only for that).
+- **Among Document's pages, the page's Canvas says the keys it answers to** (WCAG 4.1.2;
+  `ACCESSIBILITY.md` N44). The column steps by Up and Down, Home and End, PageUp and
+  PageDown, and opens the page with Enter, while the viewport described the camera's
+  keys (the arrows to pan, R to rotate), which do nothing there. Its description and
+  `aria-keyshortcuts` now say the column's, in a new string in every locale
+  (`templatePageKeys`), and the camera's again in the full viewer. For it, `Canvas` and
+  `Body` take `viewportKeys` (`{ shortcuts, description, lang? }`): the keys a layout
+  around them takes while the viewport has focus, in place of the camera's. Budgets
+  raised to the next 50 B over what is measured, as English's new string comes with
+  every part: the Canvas's initial JS 44,750 B gzip, the Scene's initial JS 20,300 B,
+  the Default template 82,200 B, the Document template 84,950 B, the Gallery template
+  33,350 B, the Default template to first view 97,650 B, the Document template to first
+  view 104,550 B, the Gallery template to first view 54,400 B, the Canvas to first view
+  51,900 B, a Scene to first view 30,700 B, a Map to first view 49,000 B, the Map's
+  initial JS 26,100 B, a `<clover-viewer>` 131,850 B, labels alone as elements 38,000 B,
+  a composed page of elements 109,100 B, a layout of elements 126,800 B, a
+  `<clover-canvas>` alone 95,100 B, a `<clover-viewer>` in Document 151,050 B, a
+  `<clover-viewer>` in Gallery 135,250 B and the Viewer's own entry 109,050 B.
 
 ### Security
 

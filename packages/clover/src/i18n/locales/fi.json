@@ -46,6 +46,7 @@
   "templatePageLayoutAuto": "Automaattinen",
   "templatePageLayoutSingle": "Yksi sivu",
   "templatePageLayoutTwo": "Kaksi sivua",
+  "templatePageKeys": "Siirry edelliselle tai seuraavalle sivulle ylä- ja alanuolella, ensimmäiselle tai viimeiselle Home- ja End-näppäimillä, ja avaa sivu Enter-näppäimellä.",
   "templateBack": "Takaisin",
   "templateBackTo": "Takaisin: {{label}}",
   "collectionLabel": "Kokoelma",
