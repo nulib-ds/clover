@@ -2669,7 +2669,12 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   absent: `hasCamera` (`Canvas/surface.ts`) tells the renderer from a Timeline's surface
   by `"overlays" in surface`). Their order in the host holds: the canvas, then the DOM
   layer, then the hotspots'. A new layer joins in that order, and loads with what needs
-  it.
+  it. Annotations always draw over paintings (Mat, 2026-11-26: "annotations/outlines
+  should always draw over paintings"): every painting is drawn in the canvas or the DOM
+  layer, both before the hotspots', and a layer that stacks what it holds (the DOM
+  layer's items, by paint order) is a stacking context of its own,
+  `isolation: isolate`, so no depth inside it rises over the layers after it (a
+  CORS-less image's tiles had hidden the hotspots; `CanvasRenderer.test.ts` holds it).
 - **WebGL contexts are rationed** (Mat, 2026-10-19: Chrome's face-in-a-box showed on the
   Canvas page). Browsers cap a page's contexts (about 16, 8 on Android) and kill the
   oldest past it, and Chrome paints a killed one with that picture. So a renderer takes a

@@ -11,6 +11,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **Annotation outlines show over images served without CORS.** Such an image is drawn
+  as elements, one a tile, and every tile past the first rose over the annotations, so a
+  picked annotation's outline, its Tip, the dimming around it, a search result's box and
+  a focused hotspot's ring were hidden wherever one of those tiles lay under them (WCAG
+  2.4.11). The tiles now stack inside their own layer, `.clover-canvas-dom-layer`
+  (`isolation: isolate`), under every annotation. Nothing to change on your side.
+
 ## [4.12.5] - 2026-11-26
 
 ### Changed

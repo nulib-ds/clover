@@ -5,6 +5,7 @@ import { clearInfoCache } from "./sources/imageService";
 import { resetRefusals } from "./sources/refusals";
 import { resetHosts, timeLoad } from "./sources/hostTiles";
 import { loadImage } from "./io/decode";
+import { overlaysOf } from "./overlays/OverlayLayer";
 import { createFakeGl, type FakeGl } from "./testing/fakeGl";
 
 vi.mock("./io/decode", () => ({
@@ -534,6 +535,34 @@ describe("CanvasRenderer", () => {
     const item = el.querySelector(".clover-canvas-dom-item") as HTMLElement;
     expect(item.style.transform).toMatch(/^matrix\(/);
     expect(item.querySelector("img")).not.toBeNull();
+    renderer.dispose();
+  });
+
+  it("keeps every painting under the annotations, whichever layer comes first", async () => {
+    // Annotations always draw over paintings (Mat, 2026-11-26): the surface and the DOM
+    // layer, which hold every painting, before the hotspots' layer, and the DOM layer's
+    // tiles, stacked by paint order, kept inside it.
+    const el = host();
+    const renderer = new CanvasRenderer(el, { animationTime: 0 });
+    const hotspot = document.createElement("button");
+    overlaysOf(renderer).add(hotspot, { x: 0, y: 0, width: 10, height: 10 });
+    mockedLoad.mockResolvedValue(element(1000, 500, true));
+    await renderer.setImages([
+      { id: "a", url: "a.jpg" },
+      { id: "b", url: "b.jpg" },
+    ]);
+    await vi.waitFor(() =>
+      expect(el.querySelectorAll(".clover-canvas-dom-item")).toHaveLength(2),
+    );
+
+    const layers = [...el.children].map((child) => child.className);
+    expect(layers).toEqual([
+      "clover-canvas-surface",
+      "clover-canvas-dom-layer",
+      "clover-canvas-overlays",
+    ]);
+    const dom = el.querySelector(".clover-canvas-dom-layer") as HTMLElement;
+    expect(dom.getAttribute("style")).toContain("isolation: isolate");
     renderer.dispose();
   });
 
