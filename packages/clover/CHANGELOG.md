@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.12.6] - 2026-11-26
+
 ### Fixed
 
 - **Annotation outlines show over images served without CORS.** Such an image is drawn
