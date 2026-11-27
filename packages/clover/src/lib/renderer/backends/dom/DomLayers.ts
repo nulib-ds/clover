@@ -35,11 +35,18 @@ export class DomLayers {
   constructor(parent: HTMLElement) {
     const container = document.createElement("div");
     container.className = "clover-canvas-dom-layer";
-    // Geometry inline: the layer works without the stylesheet (see CanvasRenderer).
+    /*
+     * Geometry inline: the layer works without the stylesheet (see CanvasRenderer). Its
+     * own stacking layer, so its items' depths (paint order, `sync`) stay inside it:
+     * without one, every item past the first rose over the hotspots' layer after it and
+     * hid a picked annotation's outline, its Tip and a focused hotspot's ring (WCAG
+     * 2.4.11), wherever an image served without CORS drew more than one tile.
+     */
     Object.assign(container.style, {
       position: "absolute",
       inset: "0",
       overflow: "hidden",
+      isolation: "isolate",
       pointerEvents: "none",
     });
     parent.appendChild(container);

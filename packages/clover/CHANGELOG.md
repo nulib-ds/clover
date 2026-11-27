@@ -52,6 +52,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Annotation outlines show over images served without CORS.** Such an image is drawn
+  as elements, one a tile, and every tile past the first rose over the annotations, so a
+  picked annotation's outline, its Tip, the dimming around it, a search result's box and
+  a focused hotspot's ring were hidden wherever one of those tiles lay under them (WCAG
+  2.4.11). The tiles now stack inside their own layer, `.clover-canvas-dom-layer`
+  (`isolation: isolate`), under every annotation. Nothing to change on your side. For
+  it, budgets raised to the next 50 B over what is measured: the Document template to
+  84,350 B gzip, and the Default template to first view 97,000 B.
 - **Rendered on the server with React 18, the Canvas and the Document template no longer
   warn that `useLayoutEffect` does nothing there.** They measure as every other part
   does: as an effect on the server, and before paint in the browser.
