@@ -163,12 +163,14 @@
 }
 
 /*
- * Over the map, the annotations control stays where it is over the Canvas, at the row's
- * end, its menu over the map (Mat, 2026-11-19: "annotations toggle should come over to
- * the map view as well. keep it in same location as it is elsewhere"), the map's zoom row
- * ending a control before it.
+ * Over the map, the annotations control stays where it is over the Canvas, a control in
+ * from the row's end, its menu over the map (Mat, 2026-11-19: "annotations toggle should
+ * come over to the map view as well. keep it in same location as it is elsewhere"). The
+ * map's zoom row ends at the row's end, its Image control there, where the Canvas's Map
+ * control is, room for annotations kept before it (Mat, 2026-11-26: "let's keep map/image
+ * icon to the right (where annotations icon is)").
  */
-/* The row's last, past the Canvas's own kept out of sight beside it. */
+/* Past the Canvas's own kept out of sight beside it. */
 .clover-canvas[data-place="swapped"]
   > .clover-canvas-controls
   > [data-button="annotations"] {
@@ -180,14 +182,47 @@
   visibility: visible;
 }
 
+/* A control in from the end, where the map's Image control is. */
+.clover-canvas[data-place="swapped"]:has(
+    > .clover-canvas-place[data-swapped] .clover-geomap-held
+  )
+  > .clover-canvas-controls
+  > [data-button="annotations"] {
+  margin-inline-end: calc(var(--clover-control) + var(--clover-space-xs));
+}
+
 .clover-canvas[data-place="swapped"]:has(
     > .clover-canvas-controls > [data-button="annotations"]
   )
+  > .clover-canvas-place[data-swapped]
+  .clover-geomap-held {
+  margin-inline-start: calc(var(--clover-control) + var(--clover-space-xs));
+}
+
+/* With no Image control, the map's zoom row ends a control before annotations. */
+.clover-canvas[data-place="swapped"]:has(
+    > .clover-canvas-controls > [data-button="annotations"]
+  ):not(:has(> .clover-canvas-place[data-swapped] .clover-geomap-held))
   > .clover-canvas-place[data-swapped]
   > .clover-geomap {
   --clover-map-controls-right: calc(
     var(--clover-canvas-controls-end, var(--clover-canvas-controls-inset)) +
       var(--clover-control) + var(--clover-space-xs)
+  );
+}
+
+/*
+ * The page's picture over the map where the map's box is over the Canvas: at the row's
+ * end, past the map's zoom row, so the two trade places in one spot (Mat, 2026-11-26:
+ * "make sure insets are the same place for both image inset and map inset"; `Inset.css`).
+ */
+.clover-canvas-place[data-swapped]
+  > .clover-geomap
+  > :first-child
+  > .clover-inset {
+  right: var(
+    --clover-canvas-controls-end,
+    var(--clover-canvas-controls-inset, var(--clover-inset))
   );
 }
 

@@ -54,20 +54,21 @@ unless `options.gestures.scrollToZoom` is on.
 
 ### Resource and accessibility
 
-| Prop           | Type                     | Default                   | Description                                                                                                                                                                                |
-| -------------- | ------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `iiifContent`  | `string \| object`       | —                         | A Canvas to load and draw, or a Manifest's first: URL or JSON.                                                                                                                             |
-| `canvases`     | `object[]`               | The Root's view           | Canvases, drawn together; [`toPresentation4()`](/docs/composing/helpers#iiif-resources) upgrades older ones.                                                                               |
-| `body`         | `object \| object[]`     | —                         | IIIF painting bodies to draw; they win over `src`.                                                                                                                                         |
-| `src`          | `string \| string[]`     | —                         | Image URLs, or image services with `isTiledImage`.                                                                                                                                         |
-| `isTiledImage` | `boolean`                | `false`                   | Read each `src` as an image service: its base URI or `info.json`.                                                                                                                          |
-| `manifestId`   | `string`                 | —                         | The Canvases' Manifest: a new one clears the Canvas at once.                                                                                                                               |
-| `label`        | language map or `string` | The Canvas's label        | The viewport's accessible name.                                                                                                                                                            |
-| `partOf`       | language map or `string` | The Manifest's label      | Under the title of a lone recording of sound, which plays as a [player](/docs/timeline).                                                                                                   |
-| `language`     | `string`                 | The Root's, or the page's | The language to read labels, Choices and annotations in.                                                                                                                                   |
-| `highContrast` | `boolean`                | `false`                   | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast. |
-| `placeholder`  | `boolean`                | `true`                    | Open on the Canvas's `placeholderContainer`, where it has one.                                                                                                                             |
-| `navPlace`     | `object`                 | —                         | Where it is, the Manifest's `navPlace`, which its Map control shows where its Canvases have none. In a `Root`, the Root's Manifest's.                                                      |
+| Prop           | Type                                | Default                   | Description                                                                                                                                                                                                            |
+| -------------- | ----------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iiifContent`  | `string \| object`                  | —                         | A Canvas to load and draw, or a Manifest's first: URL or JSON.                                                                                                                                                         |
+| `canvases`     | `object[]`                          | The Root's view           | Canvases, drawn together; [`toPresentation4()`](/docs/composing/helpers#iiif-resources) upgrades older ones.                                                                                                           |
+| `body`         | `object \| object[]`                | —                         | IIIF painting bodies to draw; they win over `src`.                                                                                                                                                                     |
+| `src`          | `string \| string[]`                | —                         | Image URLs, or image services with `isTiledImage`.                                                                                                                                                                     |
+| `isTiledImage` | `boolean`                           | `false`                   | Read each `src` as an image service: its base URI or `info.json`.                                                                                                                                                      |
+| `manifestId`   | `string`                            | —                         | The Canvases' Manifest: a new one clears the Canvas at once.                                                                                                                                                           |
+| `label`        | language map or `string`            | The Canvas's label        | The viewport's accessible name.                                                                                                                                                                                        |
+| `partOf`       | language map or `string`            | The Manifest's label      | Under the title of a lone recording of sound, which plays as a [player](/docs/timeline).                                                                                                                               |
+| `language`     | `string`                            | The Root's, or the page's | The language to read labels, Choices and annotations in.                                                                                                                                                               |
+| `highContrast` | `boolean`                           | `false`                   | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast.                             |
+| `placeholder`  | `boolean`                           | `true`                    | Open on the Canvas's `placeholderContainer`, where it has one.                                                                                                                                                         |
+| `viewportKeys` | `{ shortcuts, description, lang? }` | The camera's              | Keys a layout around the Canvas takes while its viewport has focus, in place of the camera's: `shortcuts` as `aria-keyshortcuts` spells them, `description` in words, in `lang`. Document's pages step by Up and Down. |
+| `navPlace`     | `object`                            | —                         | Where it is, the Manifest's `navPlace`, which its Map control shows where its Canvases have none. In a `Root`, the Root's Manifest's.                                                                                  |
 
 ### View and rendering
 
@@ -704,8 +705,10 @@ the page.
 
 Where a Canvas has `supplementing` annotations on regions of its image, as OCR does,
 their text lies over the image to select and copy, as in a PDF. A mouse or a pen dragged
-from a word selects; a drag that starts off the text pans. A finger still pans, and a
-press and hold selects. Control+A or Command+A on the focused Canvas selects all of it.
+from a word selects; a drag that starts off the text pans. A click on the text zooms as
+a click anywhere on the image does, Shift with it zooming out, and the first click over a
+selection lets it go. A finger still pans, and a press and hold selects. Control+A or
+Command+A on the focused Canvas selects all of it.
 
 Held still, a selection shows what it copies, with Copy and Close: each annotation's
 value as plain text, one space between them. Close or Escape lets the selection go. Where

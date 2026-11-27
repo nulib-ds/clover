@@ -161,3 +161,35 @@ a.view {
   line-height: 1.4;
   margin-top: 0.125rem;
 }
+
+/*
+ * On a phone (ACCESSIBILITY.md D11): the actions stacked in a narrower column, so the
+ * recipe's own column keeps room for its title, and a long title or slug wraps rather
+ * than running under the actions, under text spacing too (WCAG 1.4.10, 1.4.12).
+ */
+.title,
+.slug,
+.note {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 40rem) {
+  .coverage th:nth-child(3) {
+    width: 6.5rem;
+  }
+
+  .coverage th,
+  .coverage td {
+    padding-inline: 0.5rem;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .view {
+    padding-inline: 0.5rem;
+    text-align: center;
+  }
+}

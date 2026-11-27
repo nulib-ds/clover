@@ -842,6 +842,15 @@ export function Sheets({
   const livePlays = mediaOf(sheets[position]?.canvases ?? []);
   const t = Clover.useT();
   const langOf = Clover.useLangOf();
+  // The keys the column takes for the page's viewport among the pages, said in its words.
+  const pageKeys = useMemo(
+    () => ({
+      shortcuts: "ArrowUp ArrowDown Home End PageUp PageDown Enter",
+      description: t("templatePageKeys"),
+      lang: langOf("templatePageKeys"),
+    }),
+    [t, langOf],
+  );
 
   const playOn = (here: boolean) => {
     const layer = live.current;
@@ -1011,6 +1020,8 @@ export function Sheets({
         ref={sheetsBox}
         className="clover-template-document-sheets"
         data-single={sheets.length < 2 || undefined}
+        // None yet, or none at all (a resource that failed): the live Body fills the column.
+        data-empty={sheets.length === 0 || undefined}
       >
         {sheets.map((sheet, index) => (
           /*
@@ -1117,6 +1128,12 @@ export function Sheets({
             }
             placeholder={false}
             options={canvasOptions}
+            /*
+             * Among the pages the column takes the viewport's arrows, Home, End and Enter
+             * (`onKeyDownCapture`, above): its description says so, in place of the camera's
+             * keys, which only the full viewer answers to (WCAG 4.1.2).
+             */
+            viewportKeys={expanded ? undefined : pageKeys}
             onReady={ready}
           >
             {children}

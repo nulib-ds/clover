@@ -343,6 +343,14 @@ export interface CloverCanvasProps {
    * straight away, as a host does when a link or content state points into it.
    */
   placeholder?: boolean;
+  /**
+   * The keys a layout around the Canvas takes while its viewport has focus, in place of
+   * the camera's (the arrows, plus and minus, 0 and R), as Document's pages step by Up
+   * and Down: `shortcuts` as `aria-keyshortcuts` spells them, `description` in words,
+   * which the viewport's description gives, in `lang` where it is not the page's (WCAG
+   * 4.1.2, 3.1.2). A recording's, a picked annotation's and the text's keys stay.
+   */
+  viewportKeys?: { shortcuts: string; description: string; lang?: string };
   /** Rendered after the controls in the cluster: a host's own controls. */
   children?: ReactNode;
 }

@@ -1138,11 +1138,11 @@ describe("Annotations, with georeferenced images", () => {
     ).getByRole("button", {
       name: "Find on the map: Evanston, Illinois | 1920 | sanborn01857_004 p24",
     });
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
     fireEvent.click(find);
     expect(clover.store.get().canvasId).toBe(sheet(24));
     expect(clover.place.get()).toBe(`overlay-${sheet(24)}/georeferences/1`);
-    expect(find).toHaveAttribute("aria-pressed", "true");
+    expect(find).toHaveAttribute("aria-current", "true");
     expect(find.closest("li")).toHaveAttribute("data-selected", "true");
     // Its sheet is the Canvas in view now.
     expect(screen.getByRole("region", { name: "Sheet 24" })).toHaveAttribute(

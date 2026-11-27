@@ -41,6 +41,63 @@ const choice = p4(choiceJson);
 const choiceAv = p4(choiceAvJson);
 const missingImage = p4(missingImageJson);
 
+/*
+ * No test here reaches the network. An image service's info.json is answered from the
+ * fixture that paints with it (`OFFLINE`), at its image's size in 512 px tiles, as IIIF's
+ * reference server answers, and any other address is refused: the Choice menu's pictures
+ * waited on that server, and one slow answer failed main's run (2026-11-26). A test that
+ * answers for itself passes its own `request.fetch`.
+ */
+const OFFLINE = [bookJson, choiceJson, evanston()];
+const imageSizes = new Map<string, { width: number; height: number }>();
+const findImages = (node: unknown): void => {
+  if (!node || typeof node !== "object") return;
+  if (Array.isArray(node)) return node.forEach(findImages);
+  const json = node as Record<string, any>;
+  if (json.type === "Image" && json.width > 0 && json.height > 0)
+    for (const service of [json.service ?? []].flat())
+      imageSizes.set(
+        String(
+          typeof service === "string"
+            ? service
+            : (service.id ?? service["@id"]),
+        ).replace(/\/$/, ""),
+        { width: json.width, height: json.height },
+      );
+  Object.values(json).forEach(findImages);
+};
+OFFLINE.forEach(findImages);
+const answerOffline = async (input: RequestInfo | URL) => {
+  const url =
+    typeof input === "string"
+      ? input
+      : input instanceof URL
+        ? input.href
+        : input.url;
+  const id = url.replace(/\/info\.json$/, "");
+  const size = imageSizes.get(id);
+  if (!size)
+    throw new TypeError(
+      `${url}: no test here reaches the network. Answer it with the test's own \`request.fetch\`, or add its fixture to \`OFFLINE\`.`,
+    );
+  return new Response(
+    JSON.stringify({
+      "@context": "http://iiif.io/api/image/3/context.json",
+      id,
+      type: "ImageService3",
+      protocol: "http://iiif.io/api/image",
+      profile: "level1",
+      ...size,
+      tiles: [{ width: 512, height: 512, scaleFactors: [1, 2, 4] }],
+    }),
+  );
+};
+beforeEach(() => {
+  clearInfoCache();
+  vi.stubGlobal("fetch", answerOffline);
+});
+afterEach(() => vi.unstubAllGlobals());
+
 const listeners: Record<string, (detail?: unknown) => void> = {};
 let renderer: Record<string, any>;
 // Which controls the renderer says would do nothing (`viewLimits`).
@@ -584,8 +641,13 @@ describe("Canvas", () => {
     expect(control).toHaveAttribute("aria-expanded", "true");
   });
 
-  // Mat, 2026-11-13: a georeferenced image pressed in Annotations opens the map expanded.
-  it("fills the Body with the Root's map for a place pressed in Annotations, and gives it back", async () => {
+  /*
+   * A georeferenced image pressed in Annotations opens the Root's map in its box over the
+   * Canvas, or, where a map fills the Body already, there (Mat, 2026-11-26: "if the person
+   * is looking at the image, the inset should open. if the map is open already, it should
+   * frame the view"; 2026-11-13 opened it expanded).
+   */
+  it("opens the Root's map over the Canvas for a place pressed in Annotations, filling the Body where a map does", async () => {
     render(
       <Root iiifContent={evanston() as never}>
         <Canvas />
@@ -603,26 +665,36 @@ describe("Canvas", () => {
     const find = await screen.findByRole("button", {
       name: /^Find on the map: /,
     });
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
     act(() => find.focus());
     fireEvent.click(find);
     await loaded();
     const figure = screen.getByTestId("clover-canvas");
-    await waitFor(() =>
-      expect(figure).toHaveAttribute("data-place", "swapped"),
-    );
     const asked = () =>
       screen
         .queryAllByTestId("clover-canvas-place")
         .find((box) => box.id.startsWith("place-asked-"));
-    // Its box loads with MapLibre's map, as it first opens.
+    // Its box loads with MapLibre's map, as it first opens, over the Canvas, which stays.
     await waitFor(() => expect(asked()).toBeDefined());
     const box = asked()!;
-    expect(box).toHaveAttribute("data-swapped", "true");
+    expect(box).toHaveClass("clover-inset");
+    expect(box).not.toHaveAttribute("data-swapped");
+    expect(figure).not.toHaveAttribute("data-place");
     expect(box).toHaveAccessibleName("Map");
     // Focus stays on what was pressed, now pressed.
     expect(find).toHaveFocus();
-    expect(find).toHaveAttribute("aria-pressed", "true");
+    expect(find).toHaveAttribute("aria-current", "true");
+
+    // Expanded, it fills the Body; pressed again, it keeps it.
+    fireEvent.click(within(box).getByRole("button", { name: "Expand map" }));
+    await waitFor(() =>
+      expect(figure).toHaveAttribute("data-place", "swapped"),
+    );
+    fireEvent.click(find);
+    await waitFor(() =>
+      expect(asked()).toHaveAttribute("data-swapped", "true"),
+    );
+    expect(figure).toHaveAttribute("data-place", "swapped");
 
     // Collapsed, it stays, in its box over the Canvas, which comes back.
     fireEvent.click(within(box).getByRole("button", { name: "Collapse map" }));
@@ -633,12 +705,12 @@ describe("Canvas", () => {
     fireEvent.click(within(box).getByRole("button", { name: "Close" }));
     await waitFor(() => expect(asked()).toBeUndefined());
     expect(find).toHaveFocus();
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
   });
 
   // nulib-ds/clover#440: the menu over the Body lists the view's georeferenced images,
   // each pictured with the map's pin as the Annotations section lists it.
-  it("lists a georeferenced image in the Canvas's annotations menu, filling the Body with the map from it", async () => {
+  it("lists a georeferenced image in the Canvas's annotations menu, opening the map from it", async () => {
     render(
       <Root iiifContent={evanston() as never}>
         <Canvas />
@@ -676,8 +748,8 @@ describe("Canvas", () => {
     expect(screen.getByTestId("clover-canvas")).not.toHaveAttribute(
       "data-place",
     );
-    // Pressed: the map fills the Body, and the menu closes, focus on its control,
-    // which stays while the map shows (WCAG 2.4.3).
+    // Pressed: the map opens in its box over the Canvas, and the menu closes, focus on its
+    // control, which stays while the map shows (WCAG 2.4.3).
     fireEvent.pointerDown(sheet);
     fireEvent.click(radio);
     const control = screen.getByRole("button", { name: "Annotations" });
@@ -685,6 +757,18 @@ describe("Canvas", () => {
     expect(screen.queryByTestId("clover-canvas-annotation-menu")).toBeNull();
     await loaded();
     const figure = screen.getByTestId("clover-canvas");
+    const box = await waitFor(() => {
+      const found = screen
+        .queryAllByTestId("clover-canvas-place")
+        .find((each) => each.id.startsWith("place-asked-"));
+      expect(found).toBeDefined();
+      return found!;
+    });
+    expect(figure).not.toHaveAttribute("data-place");
+    // Expanded, it fills the Body.
+    fireEvent.click(
+      await within(box).findByRole("button", { name: "Expand map" }),
+    );
     await waitFor(() =>
       expect(figure).toHaveAttribute("data-place", "swapped"),
     );
@@ -746,7 +830,7 @@ describe("Canvas", () => {
       fireEvent.click(menuControl());
       return screen.findByTestId("clover-canvas-annotation-menu");
     };
-    // A georeferenced image pressed in the menu: the Root's map fills the Body.
+    // A georeferenced image pressed in the menu, its map then expanded: it fills the Body.
     const showSheet = async () => {
       const sheet = await waitFor(() => {
         const found = menu().querySelector<HTMLElement>(
@@ -758,10 +842,13 @@ describe("Canvas", () => {
       fireEvent.pointerDown(sheet);
       fireEvent.click(within(sheet).getByRole("radio"));
       await loaded();
+      await waitFor(() => expect(asked()).toBeDefined());
+      fireEvent.click(
+        await within(asked()!).findByRole("button", { name: "Expand map" }),
+      );
       await waitFor(() =>
         expect(figure()).toHaveAttribute("data-place", "swapped"),
       );
-      await waitFor(() => expect(asked()).toBeDefined());
     };
     const campus = () =>
       within(menu()).getByRole("radio", { name: "Northwestern University" });
@@ -801,12 +888,14 @@ describe("Canvas", () => {
       expect(campus()).toBeChecked();
       expect(campus()).toHaveFocus();
 
-      // Picked already, and picked again over the map: back again.
+      // The georeferenced image pressed lets go of it, the one pressed alone chosen (Mat,
+      // 2026-11-26: "whichever annotation is clicked should appear active"); picked again
+      // over the map: back again.
       fireEvent.keyDown(campus(), { key: "Escape" });
       await openMenu();
       await showSheet();
       await openMenu();
-      expect(campus()).toBeChecked();
+      expect(campus()).not.toBeChecked();
       press(campus());
       await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
       expect(asked()).toBeUndefined();
@@ -852,6 +941,75 @@ describe("Canvas", () => {
       expect(menuControl()).toHaveFocus();
     });
 
+    /*
+     * Mat, 2026-11-26: toggling between a georeferenced image pressed and a place picked
+     * keeps the one box and its map, only what is chosen changing ("rerendering when
+     * toggling annotations even though the map does not change beyond an active/inactive
+     * toggle"); the one pressed or picked alone is active.
+     */
+    it("keeps one box and its map as a place picked and an image pressed take turns", async () => {
+      render(
+        <Root iiifContent={described() as never}>
+          <Canvas />
+          <Annotations />
+        </Root>,
+      );
+      await waitFor(
+        () =>
+          expect(
+            screen.getByTestId("clover-canvas-viewport"),
+          ).toBeInTheDocument(),
+        { timeout: 3000 },
+      );
+      await open();
+      const sheet = await screen.findByRole("button", {
+        name: /^Find on the map: /,
+      });
+      fireEvent.click(sheet);
+      await loaded();
+      const map = await waitFor(() => {
+        const found = asked()?.querySelector(".clover-geomap");
+        expect(found).toBeTruthy();
+        return found!;
+      });
+      const box = asked()!;
+      expect(sheet).toHaveAttribute("aria-current", "true");
+
+      // The place picked: the same box and map, the image let go.
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "Find on the image: Lake Michigan",
+        }),
+      );
+      await waitFor(() => expect(box.id).toMatch(/^place-of-/));
+      expect(box).toBeInTheDocument();
+      expect(box.querySelector(".clover-geomap")).toBe(map);
+      expect(asked()).toBeUndefined();
+      expect(sheet).not.toHaveAttribute("aria-current");
+
+      // The image pressed again: still the same, the place let go.
+      fireEvent.click(sheet);
+      await waitFor(() => expect(box.id).toMatch(/^place-asked-/));
+      expect(box.querySelector(".clover-geomap")).toBe(map);
+      expect(sheet).toHaveAttribute("aria-current", "true");
+      expect(figure()).not.toHaveAttribute("data-place");
+
+      // Over the map filling the Body, the place picked beside it: the Canvas back, with
+      // its box, the pick kept (Mat, 2026-11-26: "the inset for map should render").
+      fireEvent.click(within(box).getByRole("button", { name: "Expand map" }));
+      await waitFor(() =>
+        expect(figure()).toHaveAttribute("data-place", "swapped"),
+      );
+      const lake = screen.getByRole("button", {
+        name: "Find on the image: Lake Michigan",
+      });
+      fireEvent.click(lake);
+      await waitFor(() => expect(figure()).not.toHaveAttribute("data-place"));
+      await waitFor(() => expect(box.id).toMatch(/^place-of-/));
+      expect(box).toBeInTheDocument();
+      expect(lake).toHaveAttribute("aria-pressed", "true");
+    });
+
     it("over its Map control's map, and in the Annotations section, as in the menu", async () => {
       render(
         <Root iiifContent={described() as never}>
@@ -885,10 +1043,15 @@ describe("Canvas", () => {
       expect(box).not.toBeInTheDocument();
       expect(map).toHaveAttribute("aria-expanded", "false");
 
-      // From the section, a place found on the map, then the annotation on the image.
+      // From the section, a place found on the map, its map expanded, then the annotation
+      // on the image.
       const find = screen.getByRole("button", { name: /^Find on the map: / });
       fireEvent.click(find);
       await loaded();
+      await waitFor(() => expect(asked()).toBeDefined());
+      fireEvent.click(
+        await within(asked()!).findByRole("button", { name: "Expand map" }),
+      );
       await waitFor(() =>
         expect(figure()).toHaveAttribute("data-place", "swapped"),
       );
@@ -957,6 +1120,31 @@ describe("Canvas", () => {
     );
     expect(viewport).toHaveAccessibleDescription(
       "Use the arrow keys to pan, with Shift for larger steps, plus and minus to zoom, 0 to reset the view, and R or Shift+R to rotate.",
+    );
+  });
+
+  // N44 (2026-11-25): a layout that takes the viewport's keys says its own.
+  it("says a layout's own keys in place of the camera's, in their language", () => {
+    render(
+      <Canvas
+        src="https://example.org/a.jpg"
+        label="A letter"
+        viewportKeys={{
+          shortcuts: "ArrowUp ArrowDown Enter",
+          description: "Flèches pour les pages.",
+          lang: "fr",
+        }}
+      />,
+    );
+    const viewport = screen.getByRole("img", { name: "A letter" });
+    expect(viewport).toHaveAttribute(
+      "aria-keyshortcuts",
+      "ArrowUp ArrowDown Enter",
+    );
+    expect(viewport).toHaveAccessibleDescription("Flèches pour les pages.");
+    expect(screen.getByText("Flèches pour les pages.")).toHaveAttribute(
+      "lang",
+      "fr",
     );
   });
 
@@ -2284,7 +2472,7 @@ describe("Canvas", () => {
         ).toHaveLength(0),
       );
 
-    it("offers a choice control only when the Canvas has a Choice", () => {
+    it("offers a choice control only when the Canvas has a Choice", async () => {
       const { rerender } = render(
         <Canvas canvases={book.items.slice(0, 1) as any} />,
       );
@@ -2293,6 +2481,8 @@ describe("Canvas", () => {
       const control = screen.getByRole("button", { name: "Views" });
       expect(control).toHaveAttribute("data-button", "choice");
       expect(control).toHaveAttribute("aria-expanded", "false");
+      // Its menu, asked for as the control shows, arrives.
+      await loaded();
     });
 
     it("starts a recording's Choice on a format the browser plays, the rest it cannot play disabled (Cookbook 0434)", async () => {

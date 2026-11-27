@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 
 import { initCloverI18n } from "../../i18n";
@@ -303,6 +310,68 @@ describe("About's language toggle", () => {
         .getAllByRole("radio")
         .map((radio) => radio.closest("label")?.textContent),
     ).toEqual(["English", "français"]);
+  });
+
+  /*
+   * N49 (audit of 2026-11-25): a choice changes the interface language, so About's title
+   * and its length ("About", "Informazioni"), which folded the row under focus, focus
+   * falling to the page (WCAG 2.4.3). It holds its form while focus is in it.
+   */
+  it("holds its form while focus is in it, folding once focus leaves", async () => {
+    visitor("en");
+    initCloverI18n({ languages: ["it"] });
+    const fired: Array<() => void> = [];
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(callback: (entries: unknown[], observer: unknown) => void) {
+          fired.push(() => callback([], this));
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    // The title's words end at 300px once they are longer than "About"; the heading's
+    // controls start at 250px.
+    const box = (left: number, right: number) =>
+      ({
+        left,
+        right,
+        width: right - left,
+        top: 0,
+        bottom: 20,
+        height: 20,
+        x: left,
+        y: 0,
+      }) as DOMRect;
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: Element) {
+        if (this.classList.contains("clover-sections-label"))
+          return box(10, (this.textContent ?? "").length > 6 ? 300 : 100);
+        if (this.classList.contains("clover-sections-actions"))
+          return box(250, 400);
+        return box(0, 0);
+      },
+    );
+    draw(french);
+    const group = await toggle();
+    const italian = within(group).getAllByRole("radio").at(-1)!;
+    act(() => italian.focus());
+    fireEvent.click(italian);
+    await act(async () => {
+      await cloverI18n.ready();
+      fired.forEach((fire) => fire());
+    });
+    // Its title in Italian now, longer, but the row as it was, focus still on it.
+    expect(document.querySelector(".clover-languages-folded")).toBeNull();
+    expect(italian).toHaveFocus();
+    // Focus gone, it folds.
+    act(() => italian.blur());
+    await waitFor(() =>
+      expect(document.querySelector(".clover-languages-folded")).not.toBeNull(),
+    );
+    vi.unstubAllGlobals();
   });
 
   it("draws its codes where the title has room", async () => {

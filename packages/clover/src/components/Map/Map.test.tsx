@@ -2034,6 +2034,75 @@ describe("Map", () => {
   });
 
   /*
+   * Mat, 2026-11-26: "whichever annotation is clicked should appear active. the other
+   * relative canvas annotations should be inactive but in view": the view's image is
+   * outlined at rest, and an annotation's place picked is marked alone.
+   */
+  it("marks the place picked alone, the view's image at rest beside it", async () => {
+    const manifest = JSON.parse(JSON.stringify(evanston())) as any;
+    const [canvas] = manifest.items;
+    const PLACE = "https://example.org/evanston/notes/lake";
+    canvas.annotations.push({
+      id: "https://example.org/evanston/notes",
+      type: "AnnotationPage",
+      items: [
+        {
+          id: PLACE,
+          type: "Annotation",
+          motivation: "tagging",
+          body: {
+            type: "Feature",
+            properties: { label: { en: ["Lake Michigan"] } },
+            geometry: { type: "Point", coordinates: [-87.66, 42.05] },
+          },
+          target: `${canvas.id}#xywh=10,20,30,40`,
+        },
+      ],
+    });
+    let root: any;
+    const Spy = () => {
+      root = Clover.useClover("test");
+      return null;
+    };
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <Spy />
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    const outline = () =>
+      map.sources["geomap-overlay-outline"]?.setData.mock.calls.at(-1)?.[0] ??
+      map.sources["geomap-overlay-outline"]?.data;
+    // At rest, the view's image outlined.
+    await waitFor(() => expect(outline()?.features).toHaveLength(1), {
+      timeout: 4000,
+    });
+    const place = await waitFor(() => {
+      const index = placeData(map)?.features.findIndex(
+        (feature: any) => feature.properties.annotationId === PLACE,
+      );
+      expect(index).toBeGreaterThanOrEqual(0);
+      return index;
+    });
+    const state = () =>
+      map.setFeatureState.mock.calls
+        .filter(([target]: any[]) => target.id === place)
+        .at(-1)?.[1];
+    // Picked: its place alone marked, the image at rest.
+    act(() => root.clover.selectAnnotation(PLACE));
+    await waitFor(() =>
+      expect(state()).toMatchObject({ chosen: true, current: false }),
+    );
+    await waitFor(() => expect(outline().features).toEqual([]));
+    // Let go: the view's image outlined again.
+    act(() => root.clover.selectAnnotation(null));
+    await waitFor(() => expect(outline().features).toHaveLength(1));
+    expect(state()).toMatchObject({ chosen: false });
+  });
+
+  /*
    * Mat, 2026-11-16: "for georeferenced images. show the full image. draw the line. but
    * then partially obscure the part outside the line, make it semi transparent."
    */
@@ -2278,7 +2347,7 @@ describe("the Map tab", () => {
     const place = await within(term.parentElement!).findByRole("button", {
       name: "Find on the map: Current Location of the Laocoön Bronze",
     });
-    expect(place).toHaveAttribute("aria-pressed", "false");
+    expect(place).not.toHaveAttribute("aria-current");
     // Its coordinates under it, latitude then longitude, read left to right.
     const at = place.nextElementSibling!;
     expect(at).toHaveClass("clover-about-place-at");
@@ -2286,7 +2355,7 @@ describe("the Map tab", () => {
       "34.0776, -118.4746",
     );
     fireEvent.click(place);
-    expect(place).toHaveAttribute("aria-pressed", "true");
+    expect(place).toHaveAttribute("aria-current", "true");
     expect(maps).toHaveLength(0);
     gone();
 
@@ -2452,7 +2521,7 @@ describe("Document's map", () => {
       ),
     );
     expect(find).toHaveFocus();
-    expect(find).toHaveAttribute("aria-pressed", "true");
+    expect(find).toHaveAttribute("aria-current", "true");
 
     // Traded: the map in a box over the pages, the same map, focus on its Expand map.
     swap.focus();
@@ -2481,7 +2550,7 @@ describe("Document's map", () => {
       ).toBeNull(),
     );
     await waitFor(() => expect(find).toHaveFocus());
-    expect(find).toHaveAttribute("aria-pressed", "false");
+    expect(find).not.toHaveAttribute("aria-current");
   });
 
   // Mat, 2026-11-16: the outline options on the map over the pages, never in its box; and

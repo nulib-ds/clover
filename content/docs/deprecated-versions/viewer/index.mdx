@@ -266,7 +266,7 @@ The Viewer can also be implemented in Vanilla Javascript by use of a web compone
 
 ### React (prefetched Manifest)
 
-In some use cases, applications may wish to prefetch a IIIF Manifest or Collection and pass it as a JSON object to the `Viewer` component. This can be done by passing the JSON object directly to the `iiifContent` prop.
+In some use cases, applications may wish to prefetch a IIIF Manifest or Collection and pass it as a JSON object to the `Viewer` component. This can be done by passing the JSON object directly to the `iiifContent` prop, as the [prefetched content example](/docs/deprecated-versions/viewer/prefetched) does.
 
 ```jsx
 const prefetchedManifestJson = {
@@ -751,7 +751,7 @@ You can use the `contentStateCallback` prop to receive the current content state
 
 ### IIIF Content Search
 
-To display IIIF Content Search in the information panel, add a supported Content Search service to the Manifest and leave `options.informationPanel.renderContentSearch` enabled.
+To display IIIF Content Search in the information panel, add a supported Content Search service to the Manifest and leave `options.informationPanel.renderContentSearch` enabled. See it searching a newspaper in the [Content Search example](/docs/deprecated-versions/viewer/contentsearch).
 
 ```json
 {

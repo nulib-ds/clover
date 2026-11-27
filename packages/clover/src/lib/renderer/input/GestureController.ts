@@ -111,9 +111,19 @@ interface Sample {
   t: number;
 }
 
-/** Whether a press landed on the picture's text, which is selected, not dragged. */
+/** Whether a press landed on the picture's text, which a drag selects. */
 const onText = (event: Event) =>
   Boolean((event.target as Element).closest("[data-clover-canvas-text]"));
+
+/** Whether some of the picture's text is selected, in `element`. */
+const textSelected = (element: Element) => {
+  const selection = element.ownerDocument.getSelection?.();
+  return Boolean(
+    selection &&
+      !selection.isCollapsed &&
+      element.contains(selection.anchorNode),
+  );
+};
 
 /**
  * Pointer, wheel and keyboard input on the Body, turned into camera intents.
@@ -145,6 +155,18 @@ export class GestureController {
     distance: number;
     left?: Point;
   } | null = null;
+  /**
+   * A mouse's or a hovering pen's press on the picture's text, never captured, so a drag
+   * from it selects as the page's text does: if it lifts as a click, it is one.
+   */
+  private textPress: {
+    id: number;
+    x: number;
+    y: number;
+    t: number;
+    /** A selection there already, which the click only lets go of. */
+    selected: boolean;
+  } | null = null;
   private releaseTwoFingers: () => void;
 
   constructor(
@@ -157,6 +179,7 @@ export class GestureController {
     element.addEventListener("pointerup", this.onPointerUp);
     element.addEventListener("pointercancel", this.onPointerUp);
     element.addEventListener("dblclick", this.onDoubleClick);
+    element.addEventListener("mousedown", this.onMouseDown);
     element.addEventListener("wheel", this.onWheel, { passive: false });
     element.addEventListener("keydown", this.onKeyDown);
     this.releaseTwoFingers = holdTwoFingers(element, () => this.cooperating());
@@ -197,6 +220,7 @@ export class GestureController {
     el.removeEventListener("pointerup", this.onPointerUp);
     el.removeEventListener("pointercancel", this.onPointerUp);
     el.removeEventListener("dblclick", this.onDoubleClick);
+    el.removeEventListener("mousedown", this.onMouseDown);
     el.removeEventListener("wheel", this.onWheel);
     el.removeEventListener("keydown", this.onKeyDown);
     this.releaseTwoFingers();
@@ -214,10 +238,23 @@ export class GestureController {
     // Controls and overlays inside the Body handle their own clicks.
     if (isInteractive(event.target, this.element)) return;
     /*
-     * A mouse or a hovering pen on the picture's text (`Canvas/TextLayer.tsx`) selects it,
-     * as in a PDF; a finger still pans over it, as a press and hold selects it there.
+     * A mouse or a hovering pen on the picture's text (`Canvas/TextLayer.tsx`) drags to
+     * select it, as in a PDF, and clicks as anywhere on the picture: zooming in, Shift
+     * out, so a pointer alone can zoom over a column of text and back out (WCAG 2.5.1;
+     * Mat, 2026-11-25). Not captured, so the selection runs on past the press. A finger
+     * still pans over it, as a press and hold selects it there.
      */
-    if (!isDirect(event.pointerType, this.penHovers) && onText(event)) return;
+    this.textPress = null;
+    if (!isDirect(event.pointerType, this.penHovers) && onText(event)) {
+      this.textPress = {
+        id: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        t: event.timeStamp,
+        selected: textSelected(this.element),
+      };
+      return;
+    }
 
     this.element.setPointerCapture?.(event.pointerId);
     const p = this.local(event);
@@ -247,6 +284,13 @@ export class GestureController {
 
   private onPointerMove = (event: PointerEvent) => {
     if (isHovering(event)) this.penHovers = true;
+    // A press on the text that moves is a selection's drag, no click.
+    const press = this.textPress;
+    if (
+      press?.id === event.pointerId &&
+      Math.hypot(event.clientX - press.x, event.clientY - press.y) > TAP_SLOP
+    )
+      this.textPress = null;
     const previous = this.pointers.get(event.pointerId);
     if (!previous) return;
     const p = this.local(event);
@@ -304,6 +348,18 @@ export class GestureController {
   };
 
   private onPointerUp = (event: PointerEvent) => {
+    const press = this.textPress;
+    if (press?.id === event.pointerId) {
+      this.textPress = null;
+      // A click: the first, over a selection, only lets it go, as the page's text does.
+      if (
+        event.type === "pointerup" &&
+        event.timeStamp - press.t < TAP_MS &&
+        !press.selected
+      )
+        this.click(event, this.local(event));
+      return;
+    }
     if (!this.pointers.has(event.pointerId)) return;
     this.pointers.delete(event.pointerId);
     this.element.releasePointerCapture?.(event.pointerId);
@@ -380,12 +436,7 @@ export class GestureController {
         }
         return;
       }
-      if (this.options.clickToZoom && this.options.navigable) {
-        if (event.shiftKey) this.target.zoomBy(1 / CLICK_ZOOM, p, true);
-        else this.zoomIn(p);
-      } else {
-        this.target.tap(p);
-      }
+      this.click(event, p);
       return;
     }
 
@@ -411,14 +462,32 @@ export class GestureController {
     }
   };
 
+  /** A mouse's click, or a hovering pen's: zoom in, or out with Shift, else a tap. */
+  private click(event: PointerEvent, p: Point) {
+    if (this.options.clickToZoom && this.options.navigable) {
+      if (event.shiftKey) this.target.zoomBy(1 / CLICK_ZOOM, p, true);
+      else this.zoomIn(p);
+    } else {
+      this.target.tap(p);
+    }
+  }
+
+  /*
+   * A double or a triple click on the picture's text zooms as on the picture, never
+   * taking a word or a line, which would hide the second click's zoom behind a selection.
+   */
+  private onMouseDown = (event: MouseEvent) => {
+    if (event.detail > 1 && onText(event)) event.preventDefault();
+  };
+
   private onDoubleClick = (event: MouseEvent) => {
     if (!this.options.navigable) return;
     if (this.options.clickToZoom || !this.options.dblClickToZoom) return;
     // Double taps are handled on pointerup; this is the synthesized echo.
     if (isDirect(this.lastPointerType, this.penHovers)) return;
     if (isInteractive(event.target, this.element)) return;
-    // A double click on the picture's text selects a word, as a page's does.
-    if (onText(event)) return;
+    // A double click over a selection of the text lets it go, as a click does.
+    if (onText(event) && textSelected(this.element)) return;
     if (event.shiftKey)
       this.target.zoomBy(1 / CLICK_ZOOM, this.local(event), true);
     else this.zoomIn(this.local(event));

@@ -32,6 +32,10 @@ const GermanViewer: React.FC = () => {
         },
       },
     });
+    // English again as the page goes, so no other page speaks the demo's German (D60).
+    return () => {
+      initCloverI18n({ lng: "en", fallbackLng: ["en"] });
+    };
   }, []);
 
   return (

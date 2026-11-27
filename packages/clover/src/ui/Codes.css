@@ -193,9 +193,15 @@ button.clover-languages-button {
   cursor: pointer;
 }
 
+/*
+ * Its glyph `xs` clear of the code, the button's gap and this together, as the glyph
+ * stands clear of the first code in a row of them (Mat, 2026-11-26: "the gap between
+ * language svg and language code still appears too tight").
+ */
 button.clover-languages-button > svg:first-child {
   width: var(--clover-text-s);
   height: var(--clover-text-s);
+  margin-inline-end: var(--clover-space-2xs);
 }
 
 button.clover-languages-button:is(

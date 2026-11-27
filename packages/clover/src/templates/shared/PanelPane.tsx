@@ -188,6 +188,7 @@ export function PanelPane({
   // Its Collection section as the Panel's (`partOfCollection`).
   const offered = Clover.usePanelSections(panel.sections, panel);
   useAwayForPlaces(pane);
+  useHandBack(id, offered.length > 0, pane.pane);
   if (!offered.length) return null;
   // Between the panel and the main pane: after the panel on the start side.
   const bar = docked && (
@@ -236,4 +237,44 @@ export function PanelPane({
       {pane.scrim && <div className="clover-template-scrim" {...pane.scrim} />}
     </>
   );
+}
+
+/**
+ * Its last section gone (a view with none of those the page offers, or a resource that
+ * failed, which About is not offered for), the pane and its toggle go: focus in the pane,
+ * or on its toggle, goes to the Body's view, or to what the Body says failed, never to
+ * the page (WCAG 2.4.3). Where focus was is read as the render that takes them begins,
+ * while they are still there; focus put somewhere of the reader's own meanwhile stays.
+ */
+function useHandBack(
+  id: string,
+  shown: boolean,
+  pane: React.RefObject<HTMLElement | null>,
+) {
+  const was = useRef(shown);
+  const root = useRef<Element | null>(null);
+  if (was.current !== shown) {
+    was.current = shown;
+    const active =
+      typeof document === "undefined" ? null : document.activeElement;
+    root.current =
+      !shown &&
+      active &&
+      (pane.current?.contains(active) ||
+        active.closest(`[aria-controls~="${id}"]`))
+        ? active.closest(".clover-root")
+        : null;
+  }
+  useEffect(() => {
+    const within = root.current;
+    root.current = null;
+    if (!within) return;
+    const { activeElement, body } = within.ownerDocument;
+    if (activeElement && activeElement !== body && activeElement.isConnected)
+      return;
+    (
+      within.querySelector<HTMLElement>(".clover-body-alert[tabindex]") ??
+      within.querySelector<HTMLElement>(".clover-canvas-viewport")
+    )?.focus({ preventScroll: true });
+  }, [shown]);
 }

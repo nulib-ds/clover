@@ -1202,13 +1202,19 @@
   position: relative;
 }
 
-/* The part's name, whole: the line breaks between the name and what it reads, never inside it. */
+/*
+ * The part's name, whole: the line breaks between the name and what it reads, never
+ * inside it, unless the name alone is wider than its tile, as text spaced wider makes it
+ * (WCAG 1.4.12): it wraps then, where it was cut off by the page's edge. As a flex item
+ * it keeps its line whole wherever that line can hold it.
+ */
 .tileName {
   font-family: var(--font-mono);
   font-size: 0.875rem;
   font-weight: 500;
   margin: 0;
-  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .tileName a {

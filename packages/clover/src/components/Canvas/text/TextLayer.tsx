@@ -35,8 +35,9 @@ const rangeOver = (layer: HTMLElement | null) => {
  * is (Mat, 2026-11-16): its `supplementing` annotations on regions, and any with a text
  * granularity, each a run of text the size of its region, in reading order, unseen but
  * for the selection. A mouse or a pen drags across them to select (`GestureController`),
- * a double click takes a word, and Control or Command with A on the viewport takes all of
- * it, for the keyboard (WCAG 2.1.1); a copy writes each run's text, a space between.
+ * and clicks on them as on the picture, zooming (Mat, 2026-11-25; WCAG 2.5.1), and
+ * Control or Command with A on the viewport takes all of it, for the keyboard (WCAG
+ * 2.1.1); a copy writes each run's text, a space between.
  *
  * Hidden from assistive technology: thousands of runs, placed by their pixels, read as
  * noise beside the view's own name, and what they say a Transcript or a search reads in

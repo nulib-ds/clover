@@ -46,6 +46,7 @@
   "templatePageLayoutAuto": "自動",
   "templatePageLayoutSingle": "單頁",
   "templatePageLayoutTwo": "雙頁",
+  "templatePageKeys": "按上下方向鍵前往上一頁或下一頁，按 Home 和 End 前往第一頁或最後一頁，按 Enter 開啟該頁。",
   "templateBack": "返回",
   "templateBackTo": "返回{{label}}",
   "collectionLabel": "集合",
